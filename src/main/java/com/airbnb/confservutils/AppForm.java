@@ -1,0 +1,354 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.airbnb.confservutils;
+
+import Utils.ValuesEditor;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.awt.Dimension;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ *
+ * @author stepan_sydoruk
+ */
+public class AppForm extends javax.swing.JFrame {
+
+    StoredSettings ds = null;
+    private static final Logger logger = LogManager.getLogger();
+
+    public void runGui() throws FileNotFoundException, IOException {
+        loadConfig();
+        setVisible(true);
+    }
+
+    private void loadConfig() throws FileNotFoundException, IOException {
+        File f = new File(profile);
+//                Gson gson = new Gson();
+        if (f.exists()) {
+            Gson gson = new GsonBuilder()
+                    .enableComplexMapKeySerialization()
+                    .serializeNulls()
+                    .setDateFormat(DateFormat.LONG)
+                    .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                    .setPrettyPrinting()
+                    .create();
+
+            InputStreamReader reader = new InputStreamReader(new FileInputStream(f));
+            ds = gson.fromJson(reader, StoredSettings.class);
+            reader.close();
+        } else {
+            ds = new StoredSettings();
+        }
+        cbUser.removeAllItems();
+        for (String user : ds.getUsers()) {
+            cbUser.addItem(user);
+        }
+        if (cbUser.getItemCount() > 0) {
+            cbUser.setSelectedIndex(0);
+        }
+
+    }
+
+    private ValuesEditor confServEditor;
+
+    private String profile;
+
+    /**
+     * Creates new form AppForm
+     */
+    public AppForm() {
+        initComponents();
+
+        pfPassword.setMaximumSize(new Dimension((int) Math.ceil(pfPassword.getMaximumSize().getWidth()),
+                (int) Math.ceil(pfPassword.getMinimumSize().getHeight())));
+
+        cbUser.setEditable(true);
+
+        cbUser.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                userEdited(e);
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                formClosing(e);
+            }
+
+        });
+
+        Utils.ScreenInfo.CenterWindow(this);
+
+    }
+
+    private int selectedIndex = -1;
+
+    private void userEdited(ActionEvent e) {
+        int index = cbUser.getSelectedIndex();
+        if (index >= 0) {
+            selectedIndex = index;
+        } else if ("comboBoxEdited".equals(e.getActionCommand())) {
+            DefaultComboBoxModel model = (DefaultComboBoxModel) cbUser.getModel();
+            Object newValue = model.getSelectedItem();
+            if (selectedIndex >= 0) {
+                model.removeElementAt(selectedIndex);
+            }
+            model.addElement(newValue);
+            cbUser.setSelectedItem(newValue);
+            selectedIndex = model.getIndexOf(newValue);
+            ds.updateUsers(model);
+        }
+
+    }
+
+    private void formClosing(WindowEvent e) {
+        saveConfig();
+    }
+
+    public void saveConfig() {
+
+        Gson gson = new GsonBuilder()
+                .enableComplexMapKeySerialization()
+                .serializeNulls()
+                .setDateFormat(DateFormat.LONG)
+                .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                .setPrettyPrinting()
+                .setVersion(1.0)
+                .create();
+
+        try {
+            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(profile));
+            gson.toJson(ds, writer);
+
+            writer.close();
+        } catch (FileNotFoundException ex) {
+            logger.log(org.apache.logging.log4j.Level.FATAL, ex);
+        } catch (IOException ex) {
+            logger.log(org.apache.logging.log4j.Level.FATAL, ex);
+        }
+
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jpConfServ = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jComboBox1 = new javax.swing.JComboBox<>();
+        btEditConfgServ = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        cbUser = new javax.swing.JComboBox<>();
+        jPanel7 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        pfPassword = new javax.swing.JPasswordField();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel8 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        btConnect = new javax.swing.JButton();
+        btDisconnect = new javax.swing.JButton();
+        jpOutput = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Query ConfigServer");
+        getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.PAGE_AXIS));
+
+        jpConfServ.setBorder(javax.swing.BorderFactory.createTitledBorder("Config Server"));
+        jpConfServ.setLayout(new javax.swing.BoxLayout(jpConfServ, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel4.add(jComboBox1);
+
+        btEditConfgServ.setText("...");
+        btEditConfgServ.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btEditConfgServActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btEditConfgServ);
+
+        jPanel1.add(jPanel4);
+
+        jPanel5.setLayout(new javax.swing.BoxLayout(jPanel5, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel6.setLayout(new javax.swing.BoxLayout(jPanel6, javax.swing.BoxLayout.LINE_AXIS));
+
+        jLabel1.setText("CME user");
+        jPanel6.add(jLabel1);
+
+        cbUser.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel6.add(cbUser);
+
+        jPanel5.add(jPanel6);
+
+        jPanel7.setLayout(new javax.swing.BoxLayout(jPanel7, javax.swing.BoxLayout.LINE_AXIS));
+
+        jLabel2.setText("Password");
+        jPanel7.add(jLabel2);
+
+        pfPassword.setText("jPasswordField1");
+        jPanel7.add(pfPassword);
+
+        jPanel5.add(jPanel7);
+
+        jPanel1.add(jPanel5);
+
+        jpConfServ.add(jPanel1);
+
+        jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
+
+        jPanel8.setMaximumSize(new java.awt.Dimension(32767, 1));
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 836, Short.MAX_VALUE)
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1, Short.MAX_VALUE)
+        );
+
+        jPanel2.add(jPanel8);
+
+        jPanel3.setLayout(new javax.swing.BoxLayout(jPanel3, javax.swing.BoxLayout.LINE_AXIS));
+
+        btConnect.setText("Connect");
+        jPanel3.add(btConnect);
+
+        btDisconnect.setText("Disconnect");
+        jPanel3.add(btDisconnect);
+
+        jPanel2.add(jPanel3);
+
+        jpConfServ.add(jPanel2);
+
+        getContentPane().add(jpConfServ);
+
+        jpOutput.setBorder(javax.swing.BorderFactory.createTitledBorder("Output window"));
+        jpOutput.setLayout(new java.awt.BorderLayout());
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jpOutput.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        getContentPane().add(jpOutput);
+
+        jMenu1.setText("File");
+
+        jMenuItem1.setText("jMenuItem1");
+        jMenu1.add(jMenuItem1);
+
+        jMenuItem2.setText("jMenuItem2");
+        jMenu1.add(jMenuItem2);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Edit");
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void btEditConfgServActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEditConfgServActionPerformed
+
+        if (confServEditor == null) {
+            confServEditor = new ValuesEditor((Window) this.getRootPane().getParent(), "Config Server profiles",
+                    "Select %d profiles");
+
+        }
+        ArrayList<Object[]> values = new ArrayList<>();
+//        for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
+//            values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
+//        }
+        confServEditor.setData(new Object[]{"Profile", "CS host", "CS port", "CME application"},
+                values
+        );
+        if (confServEditor.doShow()) {
+            ds.loadConfServs(confServEditor.getData());
+        }
+      }//GEN-LAST:event_btEditConfgServActionPerformed
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btConnect;
+    private javax.swing.JButton btDisconnect;
+    private javax.swing.JButton btEditConfgServ;
+    private javax.swing.JComboBox<String> cbUser;
+    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JPanel jpConfServ;
+    private javax.swing.JPanel jpOutput;
+    private javax.swing.JPasswordField pfPassword;
+    // End of variables declaration//GEN-END:variables
+
+    public void setProfile(String sGUIProfile) {
+        this.profile = sGUIProfile;
+    }
+}
