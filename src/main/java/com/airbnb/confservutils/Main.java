@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import java.net.UnknownHostException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -23,13 +24,18 @@ import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFact
 import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.ReverseMap;
+import org.xbill.DNS.SimpleResolver;
+import org.xbill.DNS.TextParseException;
 
 /**
  *
  * @author stepan_sydoruk
  */
 public class Main {
-
+    
     private static Options options;
     private static Option optConfigProfile;
     private static Option optHelp;
@@ -39,11 +45,12 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) throws ParseException, UnknownHostException {
+        
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "WikiTeX");
-
+        
         options = new Options();
-
+        
         optConfigProfile = Option.builder("f")
                 .hasArg(true)
                 .required(false)
@@ -52,7 +59,7 @@ public class Main {
                 .longOpt("gui-profile")
                 .build();
         options.addOption(optConfigProfile);
-
+        
         optHelp = Option.builder("h")
                 .hasArg(false)
                 .required(false)
@@ -60,7 +67,7 @@ public class Main {
                 .longOpt("help")
                 .build();
         options.addOption(optHelp);
-
+        
         optLoaderLog = Option.builder()
                 .hasArg(true)
                 .required(false)
@@ -68,26 +75,29 @@ public class Main {
                 .longOpt("log-file")
                 .build();
         options.addOption(optLoaderLog);
-
+        
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
-
+        
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             logger.error(e);
             showHelpExit(e.getMessage(), options);
         }
-
+        
         if (cmd.hasOption(optHelp.getLongOpt())) {
             showHelpExit(options);
         }
-
+        
         String sLoaderLog = (String) cmd.getParsedOptionValue(optLoaderLog.getLongOpt());
         initLogger(sLoaderLog);
-
+        
         String sGUIProfile = (String) cmd.getParsedOptionValue(optConfigProfile.getLongOpt());
+        
 
+
+        
         if (sGUIProfile != null && !sGUIProfile.isEmpty()) {
             try {
                 AppForm frm = new AppForm();
@@ -100,31 +110,31 @@ public class Main {
             showHelpExit("No config file specified", options);
         }
     }
-
+    
     static void exitHelp(String string) {
         showHelpExit(string, options);
     }
-
+    
     private static void showHelpExit(String msg, Options options) {
         if (msg != null && !msg.isEmpty()) {
             logger.error(msg);
         }
         showHelpExit(options);
     }
-
+    
     private static void showHelpExit(Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("utility-name", options);
-
+        
         System.exit(0);
     }
-
+    
     private static void initLogger(String sLoaderLog1) {
         if (sLoaderLog1 == null || sLoaderLog1.isEmpty()) {
             sLoaderLog1 = "./applog";
         } else {
             System.setProperty("logPath", sLoaderLog1);
-
+            
         }
         System.setProperty("log4j2.saveDirectory", "true");
         String s = System.getProperty("log4j.configurationFile");
@@ -132,20 +142,20 @@ public class Main {
             s = System.getProperty("program.name") + ".xml";
             logger = LogManager.getLogger();
         } else {
-
+            
             ConfigurationBuilder<BuiltConfiguration> builder
                     = ConfigurationBuilderFactory.newConfigurationBuilder();
-
+            
             builder.addProperty("LogFileName", sLoaderLog1);
-
+            
             AppenderComponentBuilder console
                     = builder.newAppender("stdout", "Console");
-
+            
             ComponentBuilder triggeringPolicies = builder.newComponent("Policies")
                     .addComponent(builder.newComponent("OnStartupTriggeringPolicy"))
                     .addComponent(builder.newComponent("SizeBasedTriggeringPolicy")
                             .addAttribute("size", "20M"));
-
+            
             AppenderComponentBuilder rollingFile
                     = builder.newAppender("rolling", "RollingFile");
             rollingFile.addAttribute("fileName", "${LogFileName}.log");
@@ -161,10 +171,10 @@ public class Main {
             LayoutComponentBuilder standard
                     = builder.newLayout("PatternLayout");
             standard.addAttribute("pattern", "%d %5.5p %30.30C [%t] %m%n");
-
+            
             console.add(standard);
             rollingFile.add(standard);
-
+            
             builder.add(console);
             builder.add(rollingFile);
 //        Appender appe = MyCustomAppenderImpl.createAppender("appe1", null, null, null);
@@ -176,14 +186,14 @@ public class Main {
             rootLogger.add(builder.newAppenderRef("stdout"));
             rootLogger.add(builder.newAppenderRef("rolling"));
             builder.add(rootLogger);
-
+            
             Configurator.initialize(builder.build());
 //            System.out.println(builder.toXmlConfiguration());
             logger = LogManager.getLogger();
         }
         logger.info("log initialized");
     }
-
+    
     static Logger logger;
-
+    
 }

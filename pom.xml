@@ -10,6 +10,7 @@
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>configurationprotocol</artifactId>
             <version>853.2.9</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -40,6 +41,31 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.genesyslab.platform</groupId>
+            <artifactId>commons</artifactId>
+            <version>853.2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.genesyslab.platform</groupId>
+            <artifactId>comappblock</artifactId>
+            <version>853.2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>dnsjava</groupId>
+            <artifactId>dnsjava</artifactId>
+            <version>2.1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
         </dependency>
     </dependencies>
     <properties>

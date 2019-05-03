@@ -6,9 +6,26 @@
 package com.airbnb.confservutils;
 
 import Utils.ValuesEditor;
+import static com.airbnb.confservutils.Main.logger;
+import com.genesyslab.platform.applicationblocks.com.ConfigException;
+import com.genesyslab.platform.applicationblocks.com.ICfgObject;
+import com.genesyslab.platform.applicationblocks.com.ICfgQuery;
+import com.genesyslab.platform.applicationblocks.com.IConfService;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
+import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jidesoft.dialog.ButtonPanel;
+import com.jidesoft.dialog.StandardDialog;
+import static com.jidesoft.dialog.StandardDialog.RESULT_AFFIRMED;
+import static com.jidesoft.dialog.StandardDialog.RESULT_CANCELLED;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -22,12 +39,35 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.logging.Level;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.table.TableColumnModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.jasypt.util.text.StrongTextEncryptor;
+import org.xbill.DNS.Address;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.PTRRecord;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.ReverseMap;
+import org.xbill.DNS.TextParseException;
 
 /**
  *
@@ -61,6 +101,8 @@ public class AppForm extends javax.swing.JFrame {
         } else {
             ds = new StoredSettings();
         }
+
+//<editor-fold defaultstate="collapsed" desc="load users">
         cbUser.removeAllItems();
         for (String user : ds.getUsers()) {
             cbUser.addItem(user);
@@ -68,6 +110,26 @@ public class AppForm extends javax.swing.JFrame {
         if (cbUser.getItemCount() > 0) {
             cbUser.setSelectedIndex(0);
         }
+//</editor-fold>
+        loadConfigServers();
+        pfPassword.setText(getPassword());
+        if (cbConfigServer.getItemCount() > 0) {
+            cbConfigServer.setSelectedIndex(0);
+        }
+
+    }
+
+    private void loadConfigServers() {
+//<editor-fold defaultstate="collapsed" desc="load configservers">
+        cbConfigServer.removeAllItems();
+        DefaultComboBoxModel mod = (DefaultComboBoxModel) cbConfigServer.getModel();
+        for (StoredSettings.ConfServer cs : ds.getConfigServers()) {
+            mod.addElement(cs);
+        }
+        if (mod.getSize() > 0) {
+            cbConfigServer.setSelectedIndex(0);
+        }
+//</editor-fold>
 
     }
 
@@ -104,7 +166,12 @@ public class AppForm extends javax.swing.JFrame {
 
         Utils.ScreenInfo.CenterWindow(this);
 
+        textEncryptor = new StrongTextEncryptor();
+        textEncryptor.setPassword(ConfigConnection.class.getName());
+
     }
+
+    StrongTextEncryptor textEncryptor;
 
     private int selectedIndex = -1;
 
@@ -131,6 +198,9 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     public void saveConfig() {
+        ds.setPassword(textEncryptor.encrypt(new String(pfPassword.getPassword())));
+        int selectedIndex1 = cbConfigServer.getSelectedIndex();
+        ds.setLastUsedConfigServer(cbConfigServer.getSelectedIndex());
 
         Gson gson = new GsonBuilder()
                 .enableComplexMapKeySerialization()
@@ -163,10 +233,11 @@ public class AppForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jButton1 = new javax.swing.JButton();
         jpConfServ = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cbConfigServer = new javax.swing.JComboBox<>();
         btEditConfgServ = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
@@ -177,17 +248,21 @@ public class AppForm extends javax.swing.JFrame {
         pfPassword = new javax.swing.JPasswordField();
         jPanel2 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
+        jButton2 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        btConnect = new javax.swing.JButton();
         btDisconnect = new javax.swing.JButton();
+        btConnect = new javax.swing.JButton();
+        btClearOutput = new javax.swing.JButton();
         jpOutput = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        taOutput = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
+        miObjByDBID = new javax.swing.JMenuItem();
+        miAppByIP = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
+
+        jButton1.setText("jButton1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Query ConfigServer");
@@ -201,8 +276,8 @@ public class AppForm extends javax.swing.JFrame {
 
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel4.add(jComboBox1);
+        cbConfigServer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel4.add(cbConfigServer);
 
         btEditConfgServ.setText("...");
         btEditConfgServ.addActionListener(new java.awt.event.ActionListener() {
@@ -232,6 +307,11 @@ public class AppForm extends javax.swing.JFrame {
         jPanel7.add(jLabel2);
 
         pfPassword.setText("jPasswordField1");
+        pfPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pfPasswordActionPerformed(evt);
+            }
+        });
         jPanel7.add(pfPassword);
 
         jPanel5.add(jPanel7);
@@ -244,26 +324,52 @@ public class AppForm extends javax.swing.JFrame {
 
         jPanel8.setMaximumSize(new java.awt.Dimension(32767, 1));
 
+        jButton2.setText("jButton2");
+
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 836, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                .addContainerGap(901, Short.MAX_VALUE)
+                .addComponent(jButton2)
+                .addGap(43, 43, 43))
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1, Short.MAX_VALUE)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel2.add(jPanel8);
 
         jPanel3.setLayout(new javax.swing.BoxLayout(jPanel3, javax.swing.BoxLayout.LINE_AXIS));
 
+        btDisconnect.setText("Disconnect");
+        btDisconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btDisconnectActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btDisconnect);
+
         btConnect.setText("Connect");
+        btConnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btConnectActionPerformed(evt);
+            }
+        });
         jPanel3.add(btConnect);
 
-        btDisconnect.setText("Disconnect");
-        jPanel3.add(btDisconnect);
+        btClearOutput.setText("Clear output");
+        btClearOutput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btClearOutputActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btClearOutput);
 
         jPanel2.add(jPanel3);
 
@@ -274,21 +380,31 @@ public class AppForm extends javax.swing.JFrame {
         jpOutput.setBorder(javax.swing.BorderFactory.createTitledBorder("Output window"));
         jpOutput.setLayout(new java.awt.BorderLayout());
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        taOutput.setColumns(20);
+        taOutput.setRows(5);
+        jScrollPane1.setViewportView(taOutput);
 
         jpOutput.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(jpOutput);
 
-        jMenu1.setText("File");
+        jMenu1.setText("ConfigRequest");
 
-        jMenuItem1.setText("jMenuItem1");
-        jMenu1.add(jMenuItem1);
+        miObjByDBID.setText("Object by DBID");
+        miObjByDBID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miObjByDBIDActionPerformed(evt);
+            }
+        });
+        jMenu1.add(miObjByDBID);
 
-        jMenuItem2.setText("jMenuItem2");
-        jMenu1.add(jMenuItem2);
+        miAppByIP.setText("application by IP");
+        miAppByIP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miAppByIPActionPerformed(evt);
+            }
+        });
+        jMenu1.add(miAppByIP);
 
         jMenuBar1.add(jMenu1);
 
@@ -308,31 +424,191 @@ public class AppForm extends javax.swing.JFrame {
 
         }
         ArrayList<Object[]> values = new ArrayList<>();
+        for (StoredSettings.ConfServer configServer : ds.getConfigServers()) {
+            Object[] v = new Object[4];
+            v[0] = configServer.getProfile();
+            v[1] = configServer.getHost();
+            v[2] = configServer.getPort();
+            v[3] = configServer.getApp();
+            values.add(v);
+        }
 //        for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
 //            values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
 //        }
         confServEditor.setData(new Object[]{"Profile", "CS host", "CS port", "CME application"},
                 values
         );
-        if (confServEditor.doShow()) {
-            ds.loadConfServs(confServEditor.getData());
-        }
+        confServEditor.doShow();
+        ds.loadConfServs(confServEditor.getData());
+        loadConfigServers();
+
       }//GEN-LAST:event_btEditConfgServActionPerformed
+
+    private void btConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConnectActionPerformed
+        connectToConfigServer();
+    }//GEN-LAST:event_btConnectActionPerformed
+
+    private void pfPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pfPasswordActionPerformed
+        System.out.println(pfPassword.getPassword());
+    }//GEN-LAST:event_pfPasswordActionPerformed
+
+
+    private void btDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btDisconnectActionPerformed
+
+    }//GEN-LAST:event_btDisconnectActionPerformed
+
+    RequestDialog appByDBID = null;
+
+    private void miObjByDBIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miObjByDBIDActionPerformed
+        if (appByDBID == null) {
+            appByDBID = new RequestDialog(new AppByDBID());
+        }
+        if (appByDBID.doShow()) {
+            if (service != null || connectToConfigServer()) {
+                AppByDBID pn = (AppByDBID) appByDBID.getContentPanel();
+                try {
+                    CfgObjectType t = pn.getSelectedItem();
+                    int dbid = pn.getValue();
+                    ICfgObject retrieveObject = service.retrieveObject(t, dbid);
+                    requestOutput(retrieveObject.toString());
+                } catch (ConfigException ex) {
+                    showException("Error", ex);
+                }
+            }
+            logger.info("affirm");
+        }
+    }//GEN-LAST:event_miObjByDBIDActionPerformed
+
+    RequestDialog appByIP = null;
+
+    private void miAppByIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAppByIPActionPerformed
+        if (appByIP == null) {
+            appByIP = new RequestDialog(new AppByIP());
+        }
+        if (appByIP.doShow()) {
+            logger.info("affirm");
+            StringBuilder buf = new StringBuilder();
+
+            AppByIP pn1 = (AppByIP) appByIP.getContentPanel();
+            String ip1 = pn1.getText();
+
+            try {
+                Lookup l = new Lookup(ReverseMap.fromAddress(ip1), org.xbill.DNS.Type.PTR);
+                Record[] hostNames = l.run();
+                if (hostNames == null) {
+                    buf.append("IP [" + ip1 + "] not resolved\n");
+                } else {
+                    if ((service != null || connectToConfigServer())) {
+                        CfgHostQuery hq = new CfgHostQuery(service);
+                        CfgApplicationQuery aq = new CfgApplicationQuery(service);
+                        buf.append("resolved IP[" + ip1 + "] to ");
+                        for (Record hostName : hostNames) {
+                            PTRRecord r = (PTRRecord) hostName;
+                            buf.append(r.getTarget().toString(true)).append("\n");
+                            String mask = r.getTarget().getLabelString(0) + "*";
+                            hq.setName(mask);
+                            Collection<CfgHost> hostsFound = hq.execute();
+                            if (hostsFound != null) {
+                                for (CfgHost cfgHost : hostsFound) {
+                                    buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:").append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
+                                    aq.setHostDbid(cfgHost.getDBID());
+                                    Collection<CfgApplication> appsFound = aq.execute();
+                                    buf.append("\tapplications on the host:\n");
+                                    if (appsFound == null) {
+                                        buf.append("**** no apps found!!! ");
+                                    } else {
+                                        for (CfgApplication cfgApplication : appsFound) {
+                                            buf.append("\t\t\"").append(cfgApplication.getName()).append("\"").append(" (type:").append(cfgApplication.getType()).append(", DBID:").append(cfgApplication.getDBID()).append(")\n");
+                                        }
+                                    }
+//                                try {
+//                                    l = new Lookup(cfgHost.getName());
+//                                    Record[] run = l.run();
+//                                    if (run == null) {
+//                                        logger.info("Not resolved name [" + cfgHost.getName() + "]");
+//                                    } else {
+//                                        buf.append("resolved [" + cfgHost.getName() + "]: ");
+//                                        for (Record record : run) {
+//                                            buf.append(" ").append(record.getName().toString(false));
+//
+//                                        }
+//                                        buf.append("\n");
+//                                    }
+//                                } catch (TextParseException ex) {
+//                                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                                }
+//                            InetAddress[] allByName = Address.getAllByName(cfgHost.getName());
+//                            cfgHost.getName();
+                                }
+                            } else {
+                                buf.append("host ").append(r.getTarget().toString(true)).append(" search mask:[").append(mask).append("] not found in CME!\n");
+                            }
+
+//                            r.getTarget().getLabelString(0);
+                        }
+
+//                        hq.setName("esv1*");
+//                        Collection<CfgHost> execute = hq.execute();
+//                        for (CfgHost cfgHost : execute) {
+//                            try {
+//                                l = new Lookup(cfgHost.getName());
+//                                Record[] run = l.run();
+//                                if (run == null) {
+//                                    logger.info("Not resolved name [" + cfgHost.getName() + "]");
+//                                } else {
+//                                    buf.append("resolved [" + cfgHost.getName() + "]: ");
+//                                    for (Record record : run) {
+//                                        buf.append(" ").append(record.getName().toString(false));
+//
+//                                    }
+//                                    buf.append("\n");
+//                                }
+//                            } catch (TextParseException ex) {
+//                                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+////                            InetAddress[] allByName = Address.getAllByName(cfgHost.getName());
+////                            cfgHost.getName();
+//                        }
+//                        logger.info(execute);
+//                        CfgApplicationQuery q = new CfgApplicationQuery(service);
+////                    ICfgObject retrieveObject = service.retrieveObject(t, dbid);
+////                    requestOutput(retrieveObject.toString());
+//                } catch (ConfigException ex) {
+//                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+                    }
+                }
+            } catch (UnknownHostException ex) {
+                buf.append(ex.getMessage() + "\n");
+                java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            } catch (ConfigException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            requestOutput(buf.toString());
+        }
+    }//GEN-LAST:event_miAppByIPActionPerformed
+
+    private void btClearOutputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btClearOutputActionPerformed
+        taOutput.setText("");
+    }//GEN-LAST:event_btClearOutputActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btClearOutput;
     private javax.swing.JButton btConnect;
     private javax.swing.JButton btDisconnect;
     private javax.swing.JButton btEditConfgServ;
+    private javax.swing.JComboBox<String> cbConfigServer;
     private javax.swing.JComboBox<String> cbUser;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -342,13 +618,185 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JPanel jpConfServ;
     private javax.swing.JPanel jpOutput;
+    private javax.swing.JMenuItem miAppByIP;
+    private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JPasswordField pfPassword;
+    private javax.swing.JTextArea taOutput;
     // End of variables declaration//GEN-END:variables
 
     public void setProfile(String sGUIProfile) {
         this.profile = sGUIProfile;
     }
+
+    private boolean connectToConfigServer() {
+
+        requestOutput("connecting...\n", false);
+
+        try {
+            /*
+            String configServerHost = "10.61.6.55";
+//        String configServerHost="esv1-c-ppe-46.ivr.airbnb.biz";
+            int configServerPort = 2025;
+            String configServerUser = "stepan.sydoruk@ext.airbnb.com.admin";
+            String configServerPass = "CCbljher72~pAOk6NiP";
+
+            String tempAppName = "AppName4Test"; // Uniq name for temp app to be created,
+            // changed and deleted.
+            String tempAgentName = "AgentName4Test"; // Uniq name for temp agent to be created,
+            // changed and deleted.
+
+            logger.info("ComJavaQuickStart started execution.");
+
+            String someAppName = "default";
+//        if (someAppName == null || someAppName.equals("")) {
+//            someAppName = "default";
+//        }
+//        configServerHost = properties.getString("ConfServerHost");
+//        configServerPort = Integer.parseInt(properties.getString("ConfServerPort"));
+//        configServerUser = properties.getString("ConfServerUser");
+//        configServerPass = properties.getString("ConfServerPassword");
+             */
+            StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
+            String user = (String) cbUser.getSelectedItem();
+            if (confServ != null && user != null) {
+
+                service = ConfigConnection.initializeConfigService(
+                        confServ.getApp(), confServ.getHost(), confServ.getPortInt(),
+                        user, new String(pfPassword.getPassword())
+                );
+            }
+            if (service != null) {
+                requestOutput("connected to ConfigServer\n", false);
+                return true;
+            }
+        } catch (ConfigException | InterruptedException | ProtocolException ex) {
+            service = null;
+            showException("Cannot connect to ConfigServer", ex);
+
+        }
+        return false;
+    }
+
+    IConfService service = null;
+
+    private String getPassword() {
+        return textEncryptor.decrypt(ds.getPassword());
+    }
+
+    private void requestOutput(String toString, boolean printBlock) {
+        if (printBlock) {
+            taOutput.append("------------------------------------\n");
+        }
+        taOutput.append(toString);
+        taOutput.setCaretPosition(taOutput.getDocument().getLength());
+        logger.debug(toString);
+    }
+
+    private void requestOutput(String toString) {
+        requestOutput(toString, true);
+
+    }
+
+    private void showException(String cannot_connect_to_ConfigServer, Exception ex) {
+        logger.error(cannot_connect_to_ConfigServer, ex);
+        StringBuilder buf = new StringBuilder();
+        buf.append("!!!Exception!!! = ").append(cannot_connect_to_ConfigServer).append("\n");
+        for (StackTraceElement stackTraceElement : ex.getStackTrace()) {
+            buf.append("\t").append(stackTraceElement.toString()).append("\n");
+        }
+        requestOutput(buf.toString(), false);
+    }
+
+    class RequestDialog extends StandardDialog {
+
+        private JPanel contentPanel;
+
+        public JPanel getContentPanel() {
+            return contentPanel;
+        }
+
+        private RequestDialog(JPanel contentPanel) {
+            super();
+            this.contentPanel = contentPanel;
+            setTitle("Enter request parameters");
+        }
+
+        @Override
+        public JComponent createBannerPanel() {
+            return null;
+        }
+
+        @Override
+        public JComponent createContentPanel() {
+            JPanel content = new JPanel();
+            content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
+            content.add(contentPanel);
+
+            return content;
+        }
+
+        @Override
+        public ButtonPanel createButtonPanel() {
+            ButtonPanel buttonPanel = new ButtonPanel();
+            JButton cancelButton = new JButton();
+            buttonPanel.addButton(cancelButton);
+
+            cancelButton.setAction(new AbstractAction() {
+                public void actionPerformed(ActionEvent e) {
+                    setDialogResult(RESULT_CANCELLED);
+                    setVisible(false);
+                    dispose();
+                }
+            });
+            cancelButton.setText("Close");
+
+            JButton jbOK = new JButton("OK");
+            buttonPanel.addButton(jbOK);
+
+//            listPane.add(jbFilter);
+            jbOK.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setDialogResult(RESULT_AFFIRMED);
+                    dispose();
+                }
+            });
+
+            String act = "OK";
+
+            setDefaultCancelAction(cancelButton.getAction());
+            setDefaultAction(jbOK.getAction());
+            getRootPane().setDefaultButton(jbOK);
+
+            buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            buttonPanel.setSizeConstraint(ButtonPanel.NO_LESS_THAN); // since the checkbox is quite wide, we don't want all of them have the same size.
+            return buttonPanel;
+        }
+
+        public boolean doShow() {
+
+//            setModal(true);
+            pack();
+
+//            ScreenInfo.CenterWindow(this);
+            setLocationRelativeTo(getParent());
+//            setVisible(true);
+            setAlwaysOnTop(true);
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    toFront();
+
+                }
+            });
+//            setVisible(false);
+            setVisible(true);
+
+            return getDialogResult() == StandardDialog.RESULT_AFFIRMED;
+
+        }
+    }
+
 }
