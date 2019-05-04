@@ -17,6 +17,7 @@ import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
+import com.genesyslab.platform.commons.protocol.ChannelState;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.google.gson.FieldNamingPolicy;
@@ -168,6 +169,7 @@ public class AppForm extends javax.swing.JFrame {
 
         textEncryptor = new StrongTextEncryptor();
         textEncryptor.setPassword(ConfigConnection.class.getName());
+        connectionStatusChanged();
 
     }
 
@@ -260,7 +262,7 @@ public class AppForm extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         miObjByDBID = new javax.swing.JMenuItem();
         miAppByIP = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        jMenu3 = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
 
@@ -408,8 +410,22 @@ public class AppForm extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
-        jMenu2.setText("Edit");
-        jMenuBar1.add(jMenu2);
+        jMenu3.setText("Exit");
+        jMenu3.addMenuListener(new javax.swing.event.MenuListener() {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                jMenu3MenuSelected(evt);
+            }
+            public void menuDeselected(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            }
+        });
+        jMenu3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenu3ActionPerformed(evt);
+            }
+        });
+        jMenuBar1.add(jMenu3);
 
         setJMenuBar(jMenuBar1);
 
@@ -446,6 +462,7 @@ public class AppForm extends javax.swing.JFrame {
 
     private void btConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConnectActionPerformed
         connectToConfigServer();
+        connectionStatusChanged();
     }//GEN-LAST:event_btConnectActionPerformed
 
     private void pfPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pfPasswordActionPerformed
@@ -454,14 +471,24 @@ public class AppForm extends javax.swing.JFrame {
 
 
     private void btDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btDisconnectActionPerformed
-
+        try {
+            ConfigConnection.uninitializeConfigService(service);
+            service = null;
+        } catch (ProtocolException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalStateException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        connectionStatusChanged();
     }//GEN-LAST:event_btDisconnectActionPerformed
 
     RequestDialog appByDBID = null;
 
     private void miObjByDBIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miObjByDBIDActionPerformed
         if (appByDBID == null) {
-            appByDBID = new RequestDialog(new AppByDBID());
+            appByDBID = new RequestDialog(this, new AppByDBID());
         }
         if (appByDBID.doShow()) {
             if (service != null || connectToConfigServer()) {
@@ -470,7 +497,11 @@ public class AppForm extends javax.swing.JFrame {
                     CfgObjectType t = pn.getSelectedItem();
                     int dbid = pn.getValue();
                     ICfgObject retrieveObject = service.retrieveObject(t, dbid);
-                    requestOutput(retrieveObject.toString());
+                    if (retrieveObject != null) {
+                        requestOutput(retrieveObject.toString());
+                    } else {
+                        requestOutput("Not found object DBID:" + dbid + " type:" + t);
+                    }
                 } catch (ConfigException ex) {
                     showException("Error", ex);
                 }
@@ -483,7 +514,7 @@ public class AppForm extends javax.swing.JFrame {
 
     private void miAppByIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAppByIPActionPerformed
         if (appByIP == null) {
-            appByIP = new RequestDialog(new AppByIP());
+            appByIP = new RequestDialog(this, new AppByIP());
         }
         if (appByIP.doShow()) {
             logger.info("affirm");
@@ -594,6 +625,16 @@ public class AppForm extends javax.swing.JFrame {
         taOutput.setText("");
     }//GEN-LAST:event_btClearOutputActionPerformed
 
+    private void jMenu3MenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_jMenu3MenuSelected
+//    logger.info("exit pressed");        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_jMenu3MenuSelected
+
+    private void jMenu3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu3ActionPerformed
+        // TODO add your handling code here:
+        logger.info("jMenu3ActionPerformed pressed " + evt.getActionCommand());
+    }//GEN-LAST:event_jMenu3ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btClearOutput;
@@ -607,7 +648,7 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -631,6 +672,7 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private boolean connectToConfigServer() {
+        boolean ret = false;
 
         requestOutput("connecting...\n", false);
 
@@ -669,14 +711,15 @@ public class AppForm extends javax.swing.JFrame {
             }
             if (service != null) {
                 requestOutput("connected to ConfigServer\n", false);
-                return true;
+                ret = true;
             }
         } catch (ConfigException | InterruptedException | ProtocolException ex) {
             service = null;
             showException("Cannot connect to ConfigServer", ex);
 
         }
-        return false;
+        connectionStatusChanged();
+        return ret;
     }
 
     IConfService service = null;
@@ -709,6 +752,15 @@ public class AppForm extends javax.swing.JFrame {
         requestOutput(buf.toString(), false);
     }
 
+    private void connectionStatusChanged() {
+        boolean isConnected = (service != null && service.getProtocol().getState() != ChannelState.Closed);
+        btDisconnect.setEnabled(isConnected);
+        btConnect.setEnabled(!isConnected);
+        cbConfigServer.setEnabled(!isConnected);
+        cbUser.setEnabled(!isConnected);
+        pfPassword.setEnabled(!isConnected);
+    }
+
     class RequestDialog extends StandardDialog {
 
         private JPanel contentPanel;
@@ -717,8 +769,8 @@ public class AppForm extends javax.swing.JFrame {
             return contentPanel;
         }
 
-        private RequestDialog(JPanel contentPanel) {
-            super();
+        private RequestDialog(Window parent, JPanel contentPanel) {
+            super(parent);
             this.contentPanel = contentPanel;
             setTitle("Enter request parameters");
         }

@@ -20,6 +20,7 @@ public class AppByIP extends javax.swing.JPanel {
      */
     public AppByIP() {
         initComponents();
+        tfIPAddress.setColumns(30);
     }
 
     /**

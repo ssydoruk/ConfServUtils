@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import java.awt.Window;
 import java.net.UnknownHostException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
