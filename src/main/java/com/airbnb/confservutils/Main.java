@@ -140,7 +140,7 @@ public class Main {
         System.setProperty("log4j2.saveDirectory", "true");
         String s = System.getProperty("log4j.configurationFile");
         if (s != null && !s.isEmpty()) {
-            s = System.getProperty("program.name") + ".xml";
+//            s = System.getProperty("program.name") + ".xml";
             logger = LogManager.getLogger();
         } else {
             

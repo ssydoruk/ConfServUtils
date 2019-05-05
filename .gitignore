@@ -6,6 +6,9 @@
 *.jar
 
 *.zip
+*.swp
+mvnw
+mvnw.cmd
 
 *.tgz
 
@@ -28,4 +31,5 @@ ssh.log
 foundation.txt
 /nbproject/private/
 target/
+confServUtils/
 .DS_Store

@@ -78,4 +78,22 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>appassembler-maven-plugin</artifactId>
+        <version>1.10</version>
+        <configuration>
+	 <assembleDirectory>/Users/stepan_sydoruk/GCTI/lib/confServUtils</assembleDirectory>
+          <programs>
+            <program>
+              <mainClass>com.airbnb.confservutils.Main</mainClass>
+              <id>csUtils</id>
+            </program>
+          </programs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
