@@ -5,22 +5,19 @@
  */
 package com.airbnb.confservutils;
 
-import com.genesyslab.platform.configuration.protocol.types.CfgEnumType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import org.apache.logging.log4j.LogManager;
 
 /**
  *
  * @author stepan_sydoruk
  */
-public class AppByDBID extends javax.swing.JPanel {
+public class ObjByDBID extends javax.swing.JPanel {
 
     /**
      * Creates new form AppByDBID
      */
-    public AppByDBID() {
+    public ObjByDBID() {
         initComponents();
         cbObjectType.removeAllItems();
         DefaultComboBoxModel model = (DefaultComboBoxModel) cbObjectType.getModel();
@@ -68,7 +65,6 @@ public class AppByDBID extends javax.swing.JPanel {
         jLabel2.setText("Object type");
         jPanel2.add(jLabel2);
 
-        cbObjectType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jPanel2.add(cbObjectType);
 
         add(jPanel2);
