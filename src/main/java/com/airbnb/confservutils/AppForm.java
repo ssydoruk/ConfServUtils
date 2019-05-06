@@ -7,6 +7,8 @@ package com.airbnb.confservutils;
 
 import Utils.ValuesEditor;
 import static com.airbnb.confservutils.Main.logger;
+import com.genesyslab.platform.applicationblocks.com.CfgObject;
+import com.genesyslab.platform.applicationblocks.com.CfgQuery;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.ICfgQuery;
@@ -14,15 +16,20 @@ import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
+import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.protocol.ChannelState;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
+import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
+import com.genesyslab.platform.configuration.protocol.types.CfgSwitchType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -425,6 +432,11 @@ public class AppForm extends javax.swing.JFrame {
         jMenu1.add(miAppByOption);
 
         miObjectByAnnex.setText("Object by Annex option");
+        miObjectByAnnex.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miObjectByAnnexActionPerformed(evt);
+            }
+        });
         jMenu1.add(miObjectByAnnex);
 
         jMenuBar1.add(jMenu1);
@@ -669,19 +681,26 @@ public class AppForm extends javax.swing.JFrame {
                     if (t != null) {
                         q.setAppType(t);
                     }
-                    Collection<CfgApplication> apps = q.execute();
-                    if (apps != null) {
-                        findApps(apps, pn);
-                    } else {
-                        requestOutput("Not found any app");
-                    }
+                    findApps(
+                            q,
+                            new IKeyValueProperties() {
+                        @Override
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return ((CfgApplication) obj).getOptions();
+                        }
 
-//                    ICfgObject retrieveObject = service.retrieveObject(t, dbid);
-//                    if (retrieveObject != null) {
-//                        requestOutput(retrieveObject.toString());
-//                    } else {
-//                        requestOutput("Not found object DBID:" + dbid + " type:" + t);
-//                    }
+                        @Override
+                        public String getName(CfgObject obj) {
+                            return ((CfgApplication) obj).getName();
+                        }
+                    },
+                            pn.isRegex(),
+                            pn.isFullOutputSelected(),
+                            pn.isCaseSensitive(),
+                            pn.getSection(),
+                            pn.getOption(),
+                            pn.getValue());
+
                 } catch (ConfigException ex) {
                     showException("Error", ex);
                 } catch (InterruptedException ex) {
@@ -691,6 +710,94 @@ public class AppForm extends javax.swing.JFrame {
             logger.info("affirm");
         }
     }//GEN-LAST:event_miAppByOptionActionPerformed
+
+    RequestDialog objByAnnex;
+
+    private void miObjectByAnnexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miObjectByAnnexActionPerformed
+        if (objByAnnex == null) {
+            objByAnnex = new RequestDialog(this, new ObjByAnnex());
+        }
+        if (objByAnnex.doShow()) {
+            if (service != null || connectToConfigServer()) {
+                ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
+                try {
+
+                    CfgObjectType t = pn.getSelectedObjType();
+                    if (t != null) {
+                        if (t == CfgObjectType.CFGDN) {
+                            CfgDNQuery query = new CfgDNQuery(service);
+                            String n = pn.getName();
+                            if (n != null) {
+                                query.setDnNumber(n);
+                            }
+                            CfgDNType selectedObjSubType = (CfgDNType) pn.getSelectedObjSubType();
+                            if (selectedObjSubType != null) {
+                                query.setDnType(selectedObjSubType);
+                            }
+
+                            findApps(
+                                    query,
+                                    new IKeyValueProperties() {
+                                @Override
+                                public KeyValueCollection getProperties(CfgObject obj) {
+                                    return ((CfgDN) obj).getUserProperties();
+                                }
+
+                                @Override
+                                public String getName(CfgObject obj) {
+                                    return ((CfgDN) obj).getName();
+                                }
+                            },
+                                    pn.isRegex(),
+                                    pn.isFullOutputSelected(),
+                                    pn.isCaseSensitive(),
+                                    pn.getSection(),
+                                    pn.getOption(),
+                                    pn.getValue());
+
+                        }
+                        else if(t==CfgObjectType.CFGSwitch){
+                            CfgSwitchQuery query = new CfgSwitchQuery(service);
+                            String n = pn.getName();
+                            if (n != null) {
+                                query.setName(n);
+                            }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+                            findApps(
+                                    query,
+                                    new IKeyValueProperties() {
+                                @Override
+                                public KeyValueCollection getProperties(CfgObject obj) {
+                                    return ((CfgSwitch) obj).getUserProperties();
+                                }
+
+                                @Override
+                                public String getName(CfgObject obj) {
+                                    return ((CfgSwitch) obj).getName();
+                                }
+                            },
+                                    pn.isRegex(),
+                                    pn.isFullOutputSelected(),
+                                    pn.isCaseSensitive(),
+                                    pn.getSection(),
+                                    pn.getOption(),
+                                    pn.getValue());
+                            
+                        }
+                    }
+                } catch (ConfigException ex) {
+                    showException("Error", ex);
+                } catch (InterruptedException ex) {
+                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            logger.info("affirm");
+        }
+    }//GEN-LAST:event_miObjectByAnnexActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -825,7 +932,131 @@ public class AppForm extends javax.swing.JFrame {
         return ptSection.matcher(stringKey).find();
     }
 
-    private void findApps(Collection<CfgApplication> apps, AppByOptions pn) {
+    private void findApps(
+            CfgQuery q,
+            IKeyValueProperties props,
+            boolean isRegex,
+            boolean isFullOutputSelected,
+            boolean isCaseSensitive,
+            String section,
+            String option,
+            String val
+    ) throws ConfigException, InterruptedException {
+        StringBuilder buf = new StringBuilder();
+
+        requestOutput("");
+        buf.append("searching for sec"
+                + "[")
+                .append((section == null) ? "" : section)
+                .append("]"
+                        + " opt[").append((option == null) ? "" : option)
+                .append("]"
+                        + " val[").append((val == null) ? "" : val)
+                .append("] case").append((isCaseSensitive) ? "" : "in").append("sensitive ")
+                .append((isRegex) ? "regex" : "")
+                .append("\n");
+
+        requestOutput(buf.toString(), false);
+        Collection<CfgObject> apps = q.execute();
+        if (apps == null || apps.isEmpty()) {
+            requestOutput("no apps found\n", false);
+        } else {
+            logger.info("retrieved "+apps.size()+" total objects");
+            int flags = ((isRegex) ? Pattern.LITERAL : 0) | ((isRegex) ? Pattern.CASE_INSENSITIVE : 0);
+            Pattern ptSection = (section == null) ? null : Pattern.compile(section, flags);
+            Pattern ptOption = (option == null) ? null : Pattern.compile(option, flags);
+            Pattern ptVal = (val == null) ? null : Pattern.compile(val, flags);
+            KeyValueCollection kv = new KeyValueCollection();
+
+            buf.append("searching for sec"
+                    + "[")
+                    .append((section == null) ? "" : section)
+                    .append("]"
+                            + " opt[").append((option == null) ? "" : option)
+                    .append("]"
+                            + " val[").append((val == null) ? "" : val)
+                    .append("] case").append((isCaseSensitive) ? "" : "in").append("sensitive ")
+                    .append((isRegex) ? "regex" : "")
+                    .append("\n");
+
+            boolean checkForSectionOrOption = (option != null || section != null || val != null);
+            int cnt = 0;
+            for (CfgObject cfgApplication : apps) {
+                boolean shouldInclude = false;
+                if (checkForSectionOrOption) {
+                    KeyValueCollection options;
+                    options = props.getProperties(cfgApplication);
+                    kv.clear();
+                    if (options != null) {
+
+                        Enumeration<KeyValuePair> enumeration = options.getEnumeration();
+                        KeyValuePair el;
+
+                        while (enumeration.hasMoreElements()) {
+                            el = enumeration.nextElement();
+                            if (ptSection != null) {
+                                if (!matching(ptSection, el.getStringKey())) {
+                                    continue;
+                                }
+                            }
+                            if (ptVal == null && ptOption == null) {
+                                kv.addObject(el.getStringKey(), new KeyValueCollection());
+                            } else {
+                                KeyValueCollection sectionValues = (KeyValueCollection) el.getValue();
+                                Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
+                                KeyValuePair theOpt;
+                                KeyValueCollection addedValues = new KeyValueCollection();
+                                while (optVal.hasMoreElements()) {
+                                    theOpt = optVal.nextElement();
+                                    boolean isOptFound = false;
+                                    boolean isValFound = false;
+                                    if (ptOption != null) {
+                                        if (matching(ptOption, theOpt.getStringKey())) {
+                                            isOptFound = true;
+                                        }
+                                    }
+                                    if (ptVal != null) {
+                                        if (matching(ptVal, theOpt.getStringValue())) {
+                                            isValFound = true;
+                                        }
+                                    }
+                                    if (isOptFound || isValFound) {
+                                        addedValues.addPair(theOpt);
+
+                                    }
+                                }
+                                if (!addedValues.isEmpty()) {
+                                    kv.addObject(el.getStringKey(), addedValues);
+                                    shouldInclude = true;
+                                }
+                            }
+
+                        }
+                    }
+
+                } else {
+                    shouldInclude = true;
+                }
+                if (shouldInclude) {
+                    if (isFullOutputSelected) {
+                        buf.append(cfgApplication.toString()).append("\n");
+                    } else {
+                        buf.append(props.getName(cfgApplication)).append(", DBID: " + cfgApplication.getObjectDbid());
+                        if (checkForSectionOrOption) {
+                            buf.append("\t");
+                            buf.append(kv);
+                        }
+                        buf.append("\n");
+                    }
+                    cnt++;
+                }
+
+            }
+            requestOutput("retrieved " + cnt + " applications\n" + buf + "\n");
+        }
+    }
+
+    private void findObjByAnnex(Collection<CfgObject> apps, ObjByAnnex pn) {
         StringBuilder buf = new StringBuilder();
         boolean isRegex = pn.isRegex();
         boolean isCaseSensitive = pn.isCaseSensitive();
@@ -852,11 +1083,12 @@ public class AppForm extends javax.swing.JFrame {
 
         boolean checkForSectionOrOption = (option != null || section != null || val != null);
         int cnt = 0;
-        for (CfgApplication cfgApplication : apps) {
+        Iterable<CfgApplication> apps1 = null;
+        for (CfgApplication cfgApplication : apps1) {
             boolean shouldInclude = false;
             if (checkForSectionOrOption) {
                 KeyValueCollection options;
-                options = cfgApplication.getOptions();
+                options = cfgApplication.getFlexibleProperties();
                 kv.clear();
                 if (options != null) {
 
