@@ -5,21 +5,27 @@
  */
 package com.airbnb.confservutils;
 
+import static com.airbnb.confservutils.Main.logger;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgEnumType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
+import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -30,16 +36,9 @@ public class ObjByAnnex extends javax.swing.JPanel {
     /**
      * Creates new form AppByDBID
      */
-    private static final String anyType = "(Any type)";
-
     public ObjByAnnex() {
         initComponents();
-        cbObjectType.removeAllItems();
-        DefaultComboBoxModel model = (DefaultComboBoxModel) cbObjectType.getModel();
-        for (Object object : CfgObjectType.values()) {
-            model.addElement(object);
-        }
-        model.insertElementAt(anyType, 0);
+        Main.loadGenesysTypes(cbObjectType, CfgObjectType.values());
 
         cbObjectType.addItemListener(new ItemListener() {
             @Override
@@ -51,23 +50,29 @@ public class ObjByAnnex extends javax.swing.JPanel {
 
         });
 
-        model.setSelectedItem(anyType);
+        cbObjectType.getModel().setSelectedItem(Main.anyType);
         rbShortOutput.setSelected(true);
         cbCaseSensitive.setSelected(false);
 
     }
+    
+    private static final Logger logger=Main.getLogger();
 
     private void cbObjectTypeChanged(Object item) {
-        CfgObjectType t = (CfgObjectType) cfgObjType(item);
+        GEnum t = cfgObjType(item);
         if (t != null) {
-
             if (t == CfgObjectType.CFGDN) {
                 setSubtypeValues(CfgDNType.values());
                 return;
             } else if (t == CfgObjectType.CFGScript) {
                 setSubtypeValues(CfgScriptType.values());
                 return;
+            }else if (t == CfgObjectType.CFGTransaction) {
+                setSubtypeValues(CfgTransactionType.values());
+                return;
             }
+            else
+                logger.info("Not filling subtype for object "+t);
         }
         setSubtypeValues(null);
     }
@@ -89,12 +94,7 @@ public class ObjByAnnex extends javax.swing.JPanel {
      * @return application type if configured or null if all types
      */
     public CfgObjectType getSelectedObjType() {
-        Object ret = cbObjectType.getSelectedItem();
-        if (ret instanceof String) {
-            return null;
-        } else {
-            return (CfgObjectType) ret;
-        }
+        return (CfgObjectType) cfgObjType(cbObjectType.getSelectedItem());
     }
 
     /**
@@ -109,7 +109,7 @@ public class ObjByAnnex extends javax.swing.JPanel {
         if (o instanceof String) {
             return null;
         } else {
-            return (GEnum) o;
+            return ((CfgObjectTypeMenu) o).getType();
         }
     }
 
@@ -263,17 +263,8 @@ public class ObjByAnnex extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     private void setSubtypeValues(Collection values) {
-        cbObjectSubtype.removeAllItems();
-        cbObjectSubtype.setEnabled((values != null));
-        if (values != null) {
-            DefaultComboBoxModel model = (DefaultComboBoxModel) cbObjectSubtype.getModel();
-            for (Object object : values) {
-                model.addElement(object);
-            }
-            model.insertElementAt(anyType, 0);
-            cbObjectSubtype.setSelectedIndex(0);
-            cbObjectSubtype.setEnabled(true);
-        }
+        Main.loadGenesysTypes(cbObjectSubtype, values);
 
     }
+
 }

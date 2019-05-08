@@ -16,20 +16,26 @@ import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.protocol.ChannelState;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.commons.util.DeepHashMap;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgSwitchType;
+import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -37,6 +43,8 @@ import com.jidesoft.dialog.ButtonPanel;
 import com.jidesoft.dialog.StandardDialog;
 import static com.jidesoft.dialog.StandardDialog.RESULT_AFFIRMED;
 import static com.jidesoft.dialog.StandardDialog.RESULT_CANCELLED;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -50,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -57,7 +66,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
@@ -68,8 +79,11 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.table.TableColumnModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -156,6 +170,7 @@ public class AppForm extends javax.swing.JFrame {
      */
     public AppForm() {
         initComponents();
+        componentsEnabled = true;
 
         pfPassword.setMaximumSize(new Dimension((int) Math.ceil(pfPassword.getMaximumSize().getWidth()),
                 (int) Math.ceil(pfPassword.getMinimumSize().getHeight())));
@@ -522,133 +537,69 @@ public class AppForm extends javax.swing.JFrame {
             objByDBID = new RequestDialog(this, new ObjByDBID());
         }
         if (objByDBID.doShow()) {
-            if (service != null || connectToConfigServer()) {
-                ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
-                try {
-                    CfgObjectType t = pn.getSelectedItem();
-                    int dbid = pn.getValue();
-                    ICfgObject retrieveObject = service.retrieveObject(t, dbid);
-                    if (retrieveObject != null) {
-                        requestOutput(retrieveObject.toString());
-                    } else {
-                        requestOutput("Not found object DBID:" + dbid + " type:" + t);
+            try {
+//                enableComponents(this, false);
+                if (service != null || connectToConfigServer()) {
+                    ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
+                    try {
+                        CfgObjectType t = pn.getSelectedItem();
+                        int dbid = pn.getValue();
+                        ICfgObject retrieveObject = service.retrieveObject(t, dbid);
+                        if (retrieveObject != null) {
+                            requestOutput(retrieveObject.toString());
+                        } else {
+                            requestOutput("Not found object DBID:" + dbid + " type:" + t);
+                        }
+                    } catch (ConfigException ex) {
+                        showException("Error", ex);
                     }
-                } catch (ConfigException ex) {
-                    showException("Error", ex);
                 }
+            } finally {
+//                enableComponents(this, true);
             }
-            logger.info("affirm");
         }
     }//GEN-LAST:event_miObjByDBIDActionPerformed
 
     RequestDialog appByIP = null;
+
+    private boolean componentsEnabled;
+    private HashMap<Component, Boolean> savedEnabled = null;
+
+    public void enableComponentsRecource(Container container, boolean enable) {
+        Component[] components = container.getComponents();
+        for (Component component : components) {
+            savedEnabled.put(component, component.isEnabled());
+            component.setVisible(enable);
+            if (component instanceof Container) {
+                enableComponentsRecource((Container) component, enable);
+            }
+        }
+    }
+
+    public void enableComponents(Container container, boolean enable) {
+        if (enable != componentsEnabled) {
+            logger.info("enableComponents: " + enable);
+            if (savedEnabled != null) {
+                for (Map.Entry<Component, Boolean> entry : savedEnabled.entrySet()) {
+                    entry.getKey().setVisible(entry.getValue());
+                }
+                savedEnabled = null;
+            } else {
+                savedEnabled = new HashMap<>();
+                enableComponentsRecource(container, enable);
+            }
+            componentsEnabled = enable;
+//            container.invalidate();
+        }
+    }
+
 
     private void miAppByIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAppByIPActionPerformed
         if (appByIP == null) {
             appByIP = new RequestDialog(this, new AppByIP());
         }
         if (appByIP.doShow()) {
-            logger.info("affirm");
-            StringBuilder buf = new StringBuilder();
-
-            AppByIP pn1 = (AppByIP) appByIP.getContentPanel();
-            String ip1 = pn1.getText();
-
-            try {
-                Lookup l = new Lookup(ReverseMap.fromAddress(ip1), org.xbill.DNS.Type.PTR);
-                Record[] hostNames = l.run();
-                if (hostNames == null) {
-                    buf.append("IP [" + ip1 + "] not resolved\n");
-                } else {
-                    if ((service != null || connectToConfigServer())) {
-                        CfgHostQuery hq = new CfgHostQuery(service);
-                        CfgApplicationQuery aq = new CfgApplicationQuery(service);
-                        buf.append("resolved IP[" + ip1 + "] to ");
-                        for (Record hostName : hostNames) {
-                            PTRRecord r = (PTRRecord) hostName;
-                            buf.append(r.getTarget().toString(true)).append("\n");
-                            String mask = r.getTarget().getLabelString(0) + "*";
-                            hq.setName(mask);
-                            Collection<CfgHost> hostsFound = hq.execute();
-                            if (hostsFound != null) {
-                                for (CfgHost cfgHost : hostsFound) {
-                                    buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:").append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
-                                    aq.setHostDbid(cfgHost.getDBID());
-                                    Collection<CfgApplication> appsFound = aq.execute();
-                                    buf.append("\tapplications on the host:\n");
-                                    if (appsFound == null) {
-                                        buf.append("**** no apps found!!! ");
-                                    } else {
-                                        for (CfgApplication cfgApplication : appsFound) {
-                                            buf.append("\t\t\"").append(cfgApplication.getName()).append("\"").append(" (type:").append(cfgApplication.getType()).append(", DBID:").append(cfgApplication.getDBID()).append(")\n");
-                                        }
-                                    }
-//                                try {
-//                                    l = new Lookup(cfgHost.getName());
-//                                    Record[] run = l.run();
-//                                    if (run == null) {
-//                                        logger.info("Not resolved name [" + cfgHost.getName() + "]");
-//                                    } else {
-//                                        buf.append("resolved [" + cfgHost.getName() + "]: ");
-//                                        for (Record record : run) {
-//                                            buf.append(" ").append(record.getName().toString(false));
-//
-//                                        }
-//                                        buf.append("\n");
-//                                    }
-//                                } catch (TextParseException ex) {
-//                                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-//                                }
-//                            InetAddress[] allByName = Address.getAllByName(cfgHost.getName());
-//                            cfgHost.getName();
-                                }
-                            } else {
-                                buf.append("host ").append(r.getTarget().toString(true)).append(" search mask:[").append(mask).append("] not found in CME!\n");
-                            }
-
-//                            r.getTarget().getLabelString(0);
-                        }
-
-//                        hq.setName("esv1*");
-//                        Collection<CfgHost> execute = hq.execute();
-//                        for (CfgHost cfgHost : execute) {
-//                            try {
-//                                l = new Lookup(cfgHost.getName());
-//                                Record[] run = l.run();
-//                                if (run == null) {
-//                                    logger.info("Not resolved name [" + cfgHost.getName() + "]");
-//                                } else {
-//                                    buf.append("resolved [" + cfgHost.getName() + "]: ");
-//                                    for (Record record : run) {
-//                                        buf.append(" ").append(record.getName().toString(false));
-//
-//                                    }
-//                                    buf.append("\n");
-//                                }
-//                            } catch (TextParseException ex) {
-//                                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-//                            }
-////                            InetAddress[] allByName = Address.getAllByName(cfgHost.getName());
-////                            cfgHost.getName();
-//                        }
-//                        logger.info(execute);
-//                        CfgApplicationQuery q = new CfgApplicationQuery(service);
-////                    ICfgObject retrieveObject = service.retrieveObject(t, dbid);
-////                    requestOutput(retrieveObject.toString());
-//                } catch (ConfigException ex) {
-//                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-                    }
-                }
-            } catch (UnknownHostException ex) {
-                buf.append(ex.getMessage() + "\n");
-                java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            } catch (ConfigException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InterruptedException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            requestOutput(buf.toString());
+            runAppByIPActionPerformed(evt);
         }
     }//GEN-LAST:event_miAppByIPActionPerformed
 
@@ -703,8 +654,10 @@ public class AppForm extends javax.swing.JFrame {
 
                 } catch (ConfigException ex) {
                     showException("Error", ex);
+
                 } catch (InterruptedException ex) {
-                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                    java.util.logging.Logger.getLogger(AppForm.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             }
             logger.info("affirm");
@@ -717,85 +670,19 @@ public class AppForm extends javax.swing.JFrame {
         if (objByAnnex == null) {
             objByAnnex = new RequestDialog(this, new ObjByAnnex());
         }
+        JFrame f = this;
         if (objByAnnex.doShow()) {
-            if (service != null || connectToConfigServer()) {
-                ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
-                try {
-
-                    CfgObjectType t = pn.getSelectedObjType();
-                    if (t != null) {
-                        if (t == CfgObjectType.CFGDN) {
-                            CfgDNQuery query = new CfgDNQuery(service);
-                            String n = pn.getName();
-                            if (n != null) {
-                                query.setDnNumber(n);
-                            }
-                            CfgDNType selectedObjSubType = (CfgDNType) pn.getSelectedObjSubType();
-                            if (selectedObjSubType != null) {
-                                query.setDnType(selectedObjSubType);
-                            }
-
-                            findApps(
-                                    query,
-                                    new IKeyValueProperties() {
-                                @Override
-                                public KeyValueCollection getProperties(CfgObject obj) {
-                                    return ((CfgDN) obj).getUserProperties();
-                                }
-
-                                @Override
-                                public String getName(CfgObject obj) {
-                                    return ((CfgDN) obj).getName();
-                                }
-                            },
-                                    pn.isRegex(),
-                                    pn.isFullOutputSelected(),
-                                    pn.isCaseSensitive(),
-                                    pn.getSection(),
-                                    pn.getOption(),
-                                    pn.getValue());
-
-                        }
-                        else if(t==CfgObjectType.CFGSwitch){
-                            CfgSwitchQuery query = new CfgSwitchQuery(service);
-                            String n = pn.getName();
-                            if (n != null) {
-                                query.setName(n);
-                            }
-//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
-//                            if (selectedObjSubType != null) {
-//                                query.(selectedObjSubType);
-//                            }
-
-                            findApps(
-                                    query,
-                                    new IKeyValueProperties() {
-                                @Override
-                                public KeyValueCollection getProperties(CfgObject obj) {
-                                    return ((CfgSwitch) obj).getUserProperties();
-                                }
-
-                                @Override
-                                public String getName(CfgObject obj) {
-                                    return ((CfgSwitch) obj).getName();
-                                }
-                            },
-                                    pn.isRegex(),
-                                    pn.isFullOutputSelected(),
-                                    pn.isCaseSensitive(),
-                                    pn.getSection(),
-                                    pn.getOption(),
-                                    pn.getValue());
-                            
-                        }
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+//                        enableComponents(f, false);
+                        runObjectByAnnexActionPerformed(evt);
+                    } finally {
+//                        enableComponents(f, true);
                     }
-                } catch (ConfigException ex) {
-                    showException("Error", ex);
-                } catch (InterruptedException ex) {
-                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
-            logger.info("affirm");
+            });
         }
     }//GEN-LAST:event_miObjectByAnnexActionPerformed
 
@@ -961,7 +848,7 @@ public class AppForm extends javax.swing.JFrame {
         if (apps == null || apps.isEmpty()) {
             requestOutput("no apps found\n", false);
         } else {
-            logger.info("retrieved "+apps.size()+" total objects");
+            logger.info("retrieved " + apps.size() + " total objects");
             int flags = ((isRegex) ? Pattern.LITERAL : 0) | ((isRegex) ? Pattern.CASE_INSENSITIVE : 0);
             Pattern ptSection = (section == null) ? null : Pattern.compile(section, flags);
             Pattern ptOption = (option == null) ? null : Pattern.compile(option, flags);
@@ -1001,6 +888,7 @@ public class AppForm extends javax.swing.JFrame {
                             }
                             if (ptVal == null && ptOption == null) {
                                 kv.addObject(el.getStringKey(), new KeyValueCollection());
+                                shouldInclude = true;
                             } else {
                                 KeyValueCollection sectionValues = (KeyValueCollection) el.getValue();
                                 Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
@@ -1156,6 +1044,276 @@ public class AppForm extends javax.swing.JFrame {
 
         }
         requestOutput("retrieved " + cnt + " applications\n" + buf + "\n");
+
+    }
+
+    private void runAppByIPActionPerformed(ActionEvent evt) {
+        logger.info("affirm");
+        StringBuilder buf = new StringBuilder();
+
+        AppByIP pn1 = (AppByIP) appByIP.getContentPanel();
+        String ip1 = pn1.getText();
+
+        try {
+            try {
+//                enableComponents(this, false);
+                Lookup l = new Lookup(ReverseMap.fromAddress(ip1), org.xbill.DNS.Type.PTR);
+                Record[] hostNames = l.run();
+                if (hostNames == null) {
+                    buf.append("IP [" + ip1 + "] not resolved\n");
+                } else {
+                    if ((service != null || connectToConfigServer())) {
+                        CfgHostQuery hq = new CfgHostQuery(service);
+                        CfgApplicationQuery aq = new CfgApplicationQuery(service);
+                        buf.append("resolved IP[" + ip1 + "] to ");
+                        for (Record hostName : hostNames) {
+                            PTRRecord r = (PTRRecord) hostName;
+                            buf.append(r.getTarget().toString(true)).append("\n");
+                            String mask = r.getTarget().getLabelString(0) + "*";
+                            hq.setName(mask);
+                            Collection<CfgHost> hostsFound = hq.execute();
+                            if (hostsFound != null) {
+                                for (CfgHost cfgHost : hostsFound) {
+                                    buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:").append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
+                                    aq.setHostDbid(cfgHost.getDBID());
+                                    Collection<CfgApplication> appsFound = aq.execute();
+                                    buf.append("\tapplications on the host:\n");
+                                    if (appsFound == null) {
+                                        buf.append("**** no apps found!!! ");
+                                    } else {
+                                        for (CfgApplication cfgApplication : appsFound) {
+                                            buf.append("\t\t\"").append(cfgApplication.getName()).append("\"").append(" (type:").append(cfgApplication.getType()).append(", DBID:").append(cfgApplication.getDBID()).append(")\n");
+                                        }
+                                    }
+//                                try {
+//                                    l = new Lookup(cfgHost.getName());
+//                                    Record[] run = l.run();
+//                                    if (run == null) {
+//                                        logger.info("Not resolved name [" + cfgHost.getName() + "]");
+//                                    } else {
+//                                        buf.append("resolved [" + cfgHost.getName() + "]: ");
+//                                        for (Record record : run) {
+//                                            buf.append(" ").append(record.getName().toString(false));
+//
+//                                        }
+//                                        buf.append("\n");
+//                                    }
+//                                } catch (TextParseException ex) {
+//                                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                                }
+//                            InetAddress[] allByName = Address.getAllByName(cfgHost.getName());
+//                            cfgHost.getName();
+                                }
+                            } else {
+                                buf.append("host ").append(r.getTarget().toString(true)).append(" search mask:[").append(mask).append("] not found in CME!\n");
+                            }
+
+//                            r.getTarget().getLabelString(0);
+                        }
+
+//                        hq.setName("esv1*");
+//                        Collection<CfgHost> execute = hq.execute();
+//                        for (CfgHost cfgHost : execute) {
+//                            try {
+//                                l = new Lookup(cfgHost.getName());
+//                                Record[] run = l.run();
+//                                if (run == null) {
+//                                    logger.info("Not resolved name [" + cfgHost.getName() + "]");
+//                                } else {
+//                                    buf.append("resolved [" + cfgHost.getName() + "]: ");
+//                                    for (Record record : run) {
+//                                        buf.append(" ").append(record.getName().toString(false));
+//
+//                                    }
+//                                    buf.append("\n");
+//                                }
+//                            } catch (TextParseException ex) {
+//                                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+////                            InetAddress[] allByName = Address.getAllByName(cfgHost.getName());
+////                            cfgHost.getName();
+//                        }
+//                        logger.info(execute);
+//                        CfgApplicationQuery q = new CfgApplicationQuery(service);
+////                    ICfgObject retrieveObject = service.retrieveObject(t, dbid);
+////                    requestOutput(retrieveObject.toString());
+//                } catch (ConfigException ex) {
+//                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+                    }
+                }
+            } catch (UnknownHostException ex) {
+                buf.append(ex.getMessage() + "\n");
+                java.util.logging.Logger.getLogger(Main.class
+                        .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
+            } catch (ConfigException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class
+                        .getName()).log(Level.SEVERE, null, ex);
+
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+            requestOutput(buf.toString());
+        } finally {
+//            enableComponents(this, true);
+        }
+    }
+
+    private void runObjectByAnnexActionPerformed(ActionEvent evt) {
+        if (service != null || connectToConfigServer()) {
+            ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
+            try {
+
+                CfgObjectType t = pn.getSelectedObjType();
+                if (t != null) {
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
+                    if (t == CfgObjectType.CFGDN) {
+                        CfgDNQuery query = new CfgDNQuery(service);
+                        String n = pn.getName();
+                        if (n != null) {
+                            query.setDnNumber(n);
+                        }
+                        CfgDNType selectedObjSubType = (CfgDNType) pn.getSelectedObjSubType();
+                        if (selectedObjSubType != null) {
+                            query.setDnType(selectedObjSubType);
+                        }
+
+                        findApps(
+                                query,
+                                new IKeyValueProperties() {
+                            @Override
+                            public KeyValueCollection getProperties(CfgObject obj) {
+                                return ((CfgDN) obj).getUserProperties();
+                            }
+
+                            @Override
+                            public String getName(CfgObject obj) {
+                                return ((CfgDN) obj).getNumber();
+                            }
+                        },
+                                pn.isRegex(),
+                                pn.isFullOutputSelected(),
+                                pn.isCaseSensitive(),
+                                pn.getSection(),
+                                pn.getOption(),
+                                pn.getValue());
+//</editor-fold>
+
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
+                    } else if (t == CfgObjectType.CFGSwitch) {
+                        CfgSwitchQuery query = new CfgSwitchQuery(service);
+                        String n = pn.getName();
+                        if (n != null) {
+                            query.setName(n);
+                        }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+                        findApps(
+                                query,
+                                new IKeyValueProperties() {
+                            @Override
+                            public KeyValueCollection getProperties(CfgObject obj) {
+                                return ((CfgSwitch) obj).getUserProperties();
+                            }
+
+                            @Override
+                            public String getName(CfgObject obj) {
+                                return ((CfgSwitch) obj).getName();
+                            }
+                        },
+                                pn.isRegex(),
+                                pn.isFullOutputSelected(),
+                                pn.isCaseSensitive(),
+                                pn.getSection(),
+                                pn.getOption(),
+                                pn.getValue());
+//</editor-fold>
+
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
+                    } else if (t == CfgObjectType.CFGScript) {
+                        CfgScriptQuery query = new CfgScriptQuery(service);
+                        String n = pn.getName();
+                        if (n != null) {
+                            query.setName(n);
+                        }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+                        findApps(
+                                query,
+                                new IKeyValueProperties() {
+                            @Override
+                            public KeyValueCollection getProperties(CfgObject obj) {
+                                return ((CfgScript) obj).getUserProperties();
+                            }
+
+                            @Override
+                            public String getName(CfgObject obj) {
+                                return ((CfgScript) obj).getName();
+                            }
+                        },
+                                pn.isRegex(),
+                                pn.isFullOutputSelected(),
+                                pn.isCaseSensitive(),
+                                pn.getSection(),
+                                pn.getOption(),
+                                pn.getValue());
+//</editor-fold>
+
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
+                    } else if (t == CfgObjectType.CFGTransaction) {
+                        CfgTransactionQuery query = new CfgTransactionQuery(service);
+                        String n = pn.getName();
+                        if (n != null) {
+                            query.setName(n);
+                        }
+                        CfgTransactionType tt = (CfgTransactionType) pn.getSelectedObjSubType();
+                            if (tt != null) {
+                                query.setObjectType(tt);
+                            }
+
+                        findApps(
+                                query,
+                                new IKeyValueProperties() {
+                            @Override
+                            public KeyValueCollection getProperties(CfgObject obj) {
+                                return ((CfgTransaction) obj).getUserProperties();
+                            }
+
+                            @Override
+                            public String getName(CfgObject obj) {
+                                return ((CfgTransaction) obj).getName();
+                            }
+                        },
+                                pn.isRegex(),
+                                pn.isFullOutputSelected(),
+                                pn.isCaseSensitive(),
+                                pn.getSection(),
+                                pn.getOption(),
+                                pn.getValue());
+//</editor-fold>
+
+                    } else {
+                        logger.info("Searching for type " + t + " not implemented yet");
+                    }
+                }
+            } catch (ConfigException ex) {
+                showException("Error", ex);
+
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        logger.info("affirm");
+
     }
 
     class RequestDialog extends StandardDialog {

@@ -19,17 +19,18 @@ public class ObjByDBID extends javax.swing.JPanel {
      */
     public ObjByDBID() {
         initComponents();
-        cbObjectType.removeAllItems();
-        DefaultComboBoxModel model = (DefaultComboBoxModel) cbObjectType.getModel();
-        for (Object object : CfgObjectType.values()) {
-            model.addElement(object);
-        }
-        model.setSelectedItem(CfgObjectType.CFGApplication);
-        
+        Main.loadGenesysTypes(cbObjectType, CfgObjectType.values());
+        CfgObjectTypeMenu.setSelectedItem(cbObjectType, CfgObjectType.CFGApplication);
+
     }
 
     public CfgObjectType getSelectedItem() {
-        return (CfgObjectType)cbObjectType.getSelectedItem();
+        Object selectedItem = cbObjectType.getSelectedItem();
+        if (selectedItem instanceof CfgObjectTypeMenu) {
+            return (CfgObjectType) ((CfgObjectTypeMenu) selectedItem).getType();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -71,7 +72,7 @@ public class ObjByDBID extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     public int getValue() {
-        return ((Number)tfDBID.getValue()).intValue();
+        return ((Number) tfDBID.getValue()).intValue();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

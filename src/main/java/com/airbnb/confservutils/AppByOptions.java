@@ -22,17 +22,9 @@ public class AppByOptions extends javax.swing.JPanel {
     /**
      * Creates new form AppByDBID
      */
-    private static final String anyType = "(Any type)";
-
     public AppByOptions() {
         initComponents();
-        cbApplicationType.removeAllItems();
-        DefaultComboBoxModel model = (DefaultComboBoxModel) cbApplicationType.getModel();
-        for (Object object : CfgAppType.values()) {
-            model.addElement(object);
-        }
-        model.insertElementAt(anyType, 0);
-        model.setSelectedItem(anyType);
+        Main.loadGenesysTypes(cbApplicationType, CfgAppType.values());
         rbShortOutput.setSelected(true);
         cbCaseSensitive.setSelected(false);
 
@@ -56,10 +48,10 @@ public class AppByOptions extends javax.swing.JPanel {
      */
     public CfgAppType getSelectedAppType() {
         Object ret = cbApplicationType.getSelectedItem();
-        if (ret instanceof String) {
-            return null;
+        if (ret instanceof CfgObjectTypeMenu) {
+            return (CfgAppType) ((CfgObjectTypeMenu) ret).getType();
         } else {
-            return (CfgAppType) ret;
+            return null;
         }
     }
 
@@ -152,8 +144,8 @@ public class AppByOptions extends javax.swing.JPanel {
     public String getOption() {
         return StringUtils.stripToNull(tfOption.getText());
     }
-    
-        public String getValue() {
+
+    public String getValue() {
         return StringUtils.stripToNull(tfOptionValue.getText());
     }
 
