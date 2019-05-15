@@ -13,12 +13,14 @@ import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.ICfgQuery;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
@@ -70,6 +72,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -763,7 +766,7 @@ public class AppForm extends javax.swing.JFrame {
                 );
             }
             if (service != null) {
-                requestOutput("connected to ConfigServer\n", false);
+                requestOutput("connected to ConfigServer " + confServ, false);
                 ret = true;
             }
         } catch (ConfigException | InterruptedException | ProtocolException ex) {
@@ -787,6 +790,7 @@ public class AppForm extends javax.swing.JFrame {
             taOutput.append("------------------------------------\n");
         }
         taOutput.append(toString);
+        taOutput.append("\n");
         taOutput.setCaretPosition(taOutput.getDocument().getLength());
         logger.debug(toString);
     }
@@ -816,8 +820,16 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private boolean matching(Pattern ptSection, String stringKey) {
-        return ptSection.matcher(stringKey).find();
+        if (ptSection != null && stringKey != null) {
+            Matcher matcher = ptSection.matcher(stringKey);
+            if (matcher != null) {
+                return matcher.find();
+            }
+        }
+        return false;
     }
+
+    private HashMap<String, Collection<CfgObject>> prevQueries = new HashMap<>();
 
     private void findApps(
             CfgQuery q,
@@ -831,51 +843,35 @@ public class AppForm extends javax.swing.JFrame {
     ) throws ConfigException, InterruptedException {
         StringBuilder buf = new StringBuilder();
 
-        requestOutput("");
-        buf.append("searching for sec"
-                + "[")
-                .append((section == null) ? "" : section)
-                .append("]"
-                        + " opt[").append((option == null) ? "" : option)
-                .append("]"
-                        + " val[").append((val == null) ? "" : val)
-                .append("] case").append((isCaseSensitive) ? "" : "in").append("sensitive ")
-                .append((isRegex) ? "regex" : "")
-                .append("\n");
+        String qToString = q.toString();
 
-        requestOutput(buf.toString(), false);
-        Collection<CfgObject> apps = q.execute();
-        if (apps == null || apps.isEmpty()) {
-            requestOutput("no apps found\n", false);
+        Collection<CfgObject> cfgObjs = prevQueries.get(qToString);
+        logger.debug("prevCollection found? " + (cfgObjs != null) + " qString: " + qToString);
+        if (cfgObjs == null) {
+            cfgObjs = q.execute();
+            logger.debug("executing the request");
+            prevQueries.put(qToString, cfgObjs);
+        }
+
+        if (cfgObjs == null || cfgObjs.isEmpty()) {
+            requestOutput("no objects found\n", false);
         } else {
-            logger.info("retrieved " + apps.size() + " total objects");
-            int flags = ((isRegex) ? Pattern.LITERAL : 0) | ((isRegex) ? Pattern.CASE_INSENSITIVE : 0);
+            logger.info("retrieved " + cfgObjs.size() + " total objects");
+            int flags = ((isRegex) ? Pattern.LITERAL : 0) | ((isCaseSensitive) ? 0 : Pattern.CASE_INSENSITIVE);
             Pattern ptSection = (section == null) ? null : Pattern.compile(section, flags);
             Pattern ptOption = (option == null) ? null : Pattern.compile(option, flags);
             Pattern ptVal = (val == null) ? null : Pattern.compile(val, flags);
             KeyValueCollection kv = new KeyValueCollection();
 
-            buf.append("searching for sec"
-                    + "[")
-                    .append((section == null) ? "" : section)
-                    .append("]"
-                            + " opt[").append((option == null) ? "" : option)
-                    .append("]"
-                            + " val[").append((val == null) ? "" : val)
-                    .append("] case").append((isCaseSensitive) ? "" : "in").append("sensitive ")
-                    .append((isRegex) ? "regex" : "")
-                    .append("\n");
-
             boolean checkForSectionOrOption = (option != null || section != null || val != null);
             int cnt = 0;
-            for (CfgObject cfgApplication : apps) {
+            for (CfgObject cfgObj : cfgObjs) {
                 boolean shouldInclude = false;
                 if (checkForSectionOrOption) {
                     KeyValueCollection options;
-                    options = props.getProperties(cfgApplication);
+                    options = props.getProperties(cfgObj);
                     kv.clear();
                     if (options != null) {
-
                         Enumeration<KeyValuePair> enumeration = options.getEnumeration();
                         KeyValuePair el;
 
@@ -890,27 +886,38 @@ public class AppForm extends javax.swing.JFrame {
                                 kv.addObject(el.getStringKey(), new KeyValueCollection());
                                 shouldInclude = true;
                             } else {
-                                KeyValueCollection sectionValues = (KeyValueCollection) el.getValue();
-                                Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
-                                KeyValuePair theOpt;
                                 KeyValueCollection addedValues = new KeyValueCollection();
-                                while (optVal.hasMoreElements()) {
-                                    theOpt = optVal.nextElement();
-                                    boolean isOptFound = false;
-                                    boolean isValFound = false;
-                                    if (ptOption != null) {
-                                        if (matching(ptOption, theOpt.getStringKey())) {
-                                            isOptFound = true;
+                                Object value = el.getValue();
+                                if (value instanceof KeyValueCollection) {
+                                    KeyValueCollection sectionValues = (KeyValueCollection) value;
+                                    Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
+                                    KeyValuePair theOpt;
+                                    while (optVal.hasMoreElements()) {
+                                        theOpt = optVal.nextElement();
+                                        boolean isOptFound = false;
+                                        boolean isValFound = false;
+                                        if (ptOption != null) {
+                                            if (matching(ptOption, theOpt.getStringKey())) {
+                                                isOptFound = true;
+                                            }
                                         }
-                                    }
-                                    if (ptVal != null) {
-                                        if (matching(ptVal, theOpt.getStringValue())) {
-                                            isValFound = true;
+                                        if (ptVal != null) {
+                                            if (matching(ptVal, theOpt.getStringValue())) {
+                                                isValFound = true;
+                                            }
                                         }
-                                    }
-                                    if (isOptFound || isValFound) {
-                                        addedValues.addPair(theOpt);
+                                        if (isOptFound || isValFound) {
+                                            addedValues.addPair(theOpt);
 
+                                        }
+                                    }
+                                } else {
+                                    logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
+                                    if (ptVal != null) {
+                                        if (matching(ptVal, value.toString())) {
+                                            addedValues.addPair(el);
+
+                                        }
                                     }
                                 }
                                 if (!addedValues.isEmpty()) {
@@ -927,9 +934,9 @@ public class AppForm extends javax.swing.JFrame {
                 }
                 if (shouldInclude) {
                     if (isFullOutputSelected) {
-                        buf.append(cfgApplication.toString()).append("\n");
+                        buf.append(cfgObj.toString()).append("\n");
                     } else {
-                        buf.append(props.getName(cfgApplication)).append(", DBID: " + cfgApplication.getObjectDbid());
+                        buf.append(props.getName(cfgObj)).append(", DBID: " + cfgObj.getObjectDbid());
                         if (checkForSectionOrOption) {
                             buf.append("\t");
                             buf.append(kv);
@@ -940,7 +947,7 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
             }
-            requestOutput("retrieved " + cnt + " applications\n" + buf + "\n");
+            requestOutput("Search done, retrieved " + cnt + " objects\n" + buf + "\n");
         }
     }
 
@@ -1168,142 +1175,14 @@ public class AppForm extends javax.swing.JFrame {
 
                 CfgObjectType t = pn.getSelectedObjType();
                 if (t != null) {
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
-                    if (t == CfgObjectType.CFGDN) {
-                        CfgDNQuery query = new CfgDNQuery(service);
-                        String n = pn.getName();
-                        if (n != null) {
-                            query.setDnNumber(n);
-                        }
-                        CfgDNType selectedObjSubType = (CfgDNType) pn.getSelectedObjSubType();
-                        if (selectedObjSubType != null) {
-                            query.setDnType(selectedObjSubType);
-                        }
+                    doTheSearch(t, pn, true);
 
-                        findApps(
-                                query,
-                                new IKeyValueProperties() {
-                            @Override
-                            public KeyValueCollection getProperties(CfgObject obj) {
-                                return ((CfgDN) obj).getUserProperties();
-                            }
-
-                            @Override
-                            public String getName(CfgObject obj) {
-                                return ((CfgDN) obj).getNumber();
-                            }
-                        },
-                                pn.isRegex(),
-                                pn.isFullOutputSelected(),
-                                pn.isCaseSensitive(),
-                                pn.getSection(),
-                                pn.getOption(),
-                                pn.getValue());
-//</editor-fold>
-
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
-                    } else if (t == CfgObjectType.CFGSwitch) {
-                        CfgSwitchQuery query = new CfgSwitchQuery(service);
-                        String n = pn.getName();
-                        if (n != null) {
-                            query.setName(n);
-                        }
-//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
-//                            if (selectedObjSubType != null) {
-//                                query.(selectedObjSubType);
-//                            }
-
-                        findApps(
-                                query,
-                                new IKeyValueProperties() {
-                            @Override
-                            public KeyValueCollection getProperties(CfgObject obj) {
-                                return ((CfgSwitch) obj).getUserProperties();
-                            }
-
-                            @Override
-                            public String getName(CfgObject obj) {
-                                return ((CfgSwitch) obj).getName();
-                            }
-                        },
-                                pn.isRegex(),
-                                pn.isFullOutputSelected(),
-                                pn.isCaseSensitive(),
-                                pn.getSection(),
-                                pn.getOption(),
-                                pn.getValue());
-//</editor-fold>
-
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
-                    } else if (t == CfgObjectType.CFGScript) {
-                        CfgScriptQuery query = new CfgScriptQuery(service);
-                        String n = pn.getName();
-                        if (n != null) {
-                            query.setName(n);
-                        }
-//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
-//                            if (selectedObjSubType != null) {
-//                                query.(selectedObjSubType);
-//                            }
-
-                        findApps(
-                                query,
-                                new IKeyValueProperties() {
-                            @Override
-                            public KeyValueCollection getProperties(CfgObject obj) {
-                                return ((CfgScript) obj).getUserProperties();
-                            }
-
-                            @Override
-                            public String getName(CfgObject obj) {
-                                return ((CfgScript) obj).getName();
-                            }
-                        },
-                                pn.isRegex(),
-                                pn.isFullOutputSelected(),
-                                pn.isCaseSensitive(),
-                                pn.getSection(),
-                                pn.getOption(),
-                                pn.getValue());
-//</editor-fold>
-
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
-                    } else if (t == CfgObjectType.CFGTransaction) {
-                        CfgTransactionQuery query = new CfgTransactionQuery(service);
-                        String n = pn.getName();
-                        if (n != null) {
-                            query.setName(n);
-                        }
-                        CfgTransactionType tt = (CfgTransactionType) pn.getSelectedObjSubType();
-                            if (tt != null) {
-                                query.setObjectType(tt);
-                            }
-
-                        findApps(
-                                query,
-                                new IKeyValueProperties() {
-                            @Override
-                            public KeyValueCollection getProperties(CfgObject obj) {
-                                return ((CfgTransaction) obj).getUserProperties();
-                            }
-
-                            @Override
-                            public String getName(CfgObject obj) {
-                                return ((CfgTransaction) obj).getName();
-                            }
-                        },
-                                pn.isRegex(),
-                                pn.isFullOutputSelected(),
-                                pn.isCaseSensitive(),
-                                pn.getSection(),
-                                pn.getOption(),
-                                pn.getValue());
-//</editor-fold>
-
-                    } else {
-                        logger.info("Searching for type " + t + " not implemented yet");
+                } else {
+                    for (CfgObjectType value : CfgObjectType.values()) {
+                        doTheSearch(t, pn, false);
                     }
                 }
+
             } catch (ConfigException ex) {
                 showException("Error", ex);
 
@@ -1312,8 +1191,180 @@ public class AppForm extends javax.swing.JFrame {
                         .getName()).log(Level.SEVERE, null, ex);
             }
         }
-        logger.info("affirm");
 
+        logger.info(
+                "affirm");
+
+    }
+
+    private void doTheSearch(CfgObjectType t, ObjByAnnex pn, boolean warnNotFound) throws ConfigException, InterruptedException {
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
+        if (t == CfgObjectType.CFGDN) {
+            CfgDNQuery query = new CfgDNQuery(service);
+            String n = pn.getName();
+            if (n != null) {
+                query.setDnNumber(n);
+            }
+            CfgDNType selectedObjSubType = (CfgDNType) pn.getSelectedObjSubType();
+            if (selectedObjSubType != null) {
+                query.setDnType(selectedObjSubType);
+            }
+
+            findApps(
+                    query,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgDN) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgDN) obj).getNumber();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
+        } else if (t == CfgObjectType.CFGSwitch) {
+            CfgSwitchQuery query = new CfgSwitchQuery(service);
+            String n = pn.getName();
+            if (n != null) {
+                query.setName(n);
+            }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+            findApps(
+                    query,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgSwitch) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgSwitch) obj).getName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
+        } else if (t == CfgObjectType.CFGAgentGroup) {
+            CfgAgentGroupQuery query = new CfgAgentGroupQuery(service);
+            String n = pn.getName();
+            if (n != null) {
+                query.setName(n);
+            }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+            findApps(
+                    query,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgAgentGroup) obj).getGroupInfo().getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgAgentGroup) obj).getGroupInfo().getName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
+        } else if (t == CfgObjectType.CFGScript) {
+            CfgScriptQuery query = new CfgScriptQuery(service);
+            String n = pn.getName();
+            if (n != null) {
+                query.setName(n);
+            }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+            findApps(
+                    query,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgScript) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgScript) obj).getName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
+        } else if (t == CfgObjectType.CFGTransaction) {
+            CfgTransactionQuery query = new CfgTransactionQuery(service);
+            String n = pn.getName();
+            if (n != null) {
+                query.setName(n);
+            }
+            CfgTransactionType tt = (CfgTransactionType) pn.getSelectedObjSubType();
+            if (tt != null) {
+                query.setObjectType(tt);
+            }
+
+            findApps(
+                    query,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgTransaction) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgTransaction) obj).getName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+//</editor-fold>
+
+        } else {
+            if (warnNotFound) {
+                logger.info("Searching for type " + t + " not implemented yet");
+            }
+
+        }
     }
 
     class RequestDialog extends StandardDialog {

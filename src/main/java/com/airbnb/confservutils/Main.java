@@ -190,7 +190,7 @@ public class Main {
 //        builder.add(appe);
 
             RootLoggerComponentBuilder rootLogger
-                    = builder.newRootLogger(Level.INFO);
+                    = builder.newRootLogger(Level.DEBUG);
             rootLogger.add(builder.newAppenderRef("stdout"));
             rootLogger.add(builder.newAppenderRef("rolling"));
             builder.add(rootLogger);
