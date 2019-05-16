@@ -106,7 +106,7 @@ public class ObjByAnnex extends javax.swing.JPanel {
     }
 
     private GEnum cfgObjType(Object o) {
-        if (o instanceof String) {
+        if (o==null || o instanceof String) {
             return null;
         } else {
             return ((CfgObjectTypeMenu) o).getType();

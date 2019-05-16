@@ -6,16 +6,16 @@
 package com.airbnb.confservutils;
 
 import Utils.ValuesEditor;
-import static com.airbnb.confservutils.Main.logger;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.CfgQuery;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
-import com.genesyslab.platform.applicationblocks.com.ICfgQuery;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumerator;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumeratorValue;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
@@ -23,20 +23,18 @@ import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorValueQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
-import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
-import com.genesyslab.platform.commons.protocol.ChannelState;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.commons.util.DeepHashMap;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgSwitchType;
 import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -60,16 +58,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -77,28 +71,19 @@ import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.table.TableColumnModel;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jasypt.util.password.StrongPasswordEncryptor;
 import org.jasypt.util.text.StrongTextEncryptor;
-import org.xbill.DNS.Address;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.ReverseMap;
-import org.xbill.DNS.TextParseException;
 
 /**
  *
@@ -173,6 +158,7 @@ public class AppForm extends javax.swing.JFrame {
      */
     public AppForm() {
         initComponents();
+        configServerManager = new ConfigServerManager(this);
         componentsEnabled = true;
 
         pfPassword.setMaximumSize(new Dimension((int) Math.ceil(pfPassword.getMaximumSize().getWidth()),
@@ -203,6 +189,8 @@ public class AppForm extends javax.swing.JFrame {
         connectionStatusChanged();
 
     }
+
+    ConfigServerManager configServerManager;
 
     StrongTextEncryptor textEncryptor;
 
@@ -295,6 +283,7 @@ public class AppForm extends javax.swing.JFrame {
         miAppByIP = new javax.swing.JMenuItem();
         miAppByOption = new javax.swing.JMenuItem();
         miObjectByAnnex = new javax.swing.JMenuItem();
+        miBusinessAttribute = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -457,6 +446,14 @@ public class AppForm extends javax.swing.JFrame {
         });
         jMenu1.add(miObjectByAnnex);
 
+        miBusinessAttribute.setText("Business Attribute/Value");
+        miBusinessAttribute.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miBusinessAttributeActionPerformed(evt);
+            }
+        });
+        jMenu1.add(miBusinessAttribute);
+
         jMenuBar1.add(jMenu1);
 
         jMenu3.setText("Exit");
@@ -521,8 +518,7 @@ public class AppForm extends javax.swing.JFrame {
 
     private void btDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btDisconnectActionPerformed
         try {
-            ConfigConnection.uninitializeConfigService(service);
-            service = null;
+            configServerManager.disconnect();
         } catch (ProtocolException ex) {
             java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalStateException ex) {
@@ -542,12 +538,12 @@ public class AppForm extends javax.swing.JFrame {
         if (objByDBID.doShow()) {
             try {
 //                enableComponents(this, false);
-                if (service != null || connectToConfigServer()) {
+                if (connectToConfigServer()) {
                     ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
                     try {
                         CfgObjectType t = pn.getSelectedItem();
                         int dbid = pn.getValue();
-                        ICfgObject retrieveObject = service.retrieveObject(t, dbid);
+                        ICfgObject retrieveObject = configServerManager.retrieveObject(t, dbid);
                         if (retrieveObject != null) {
                             requestOutput(retrieveObject.toString());
                         } else {
@@ -627,16 +623,17 @@ public class AppForm extends javax.swing.JFrame {
             appByOption = new RequestDialog(this, new AppByOptions());
         }
         if (appByOption.doShow()) {
-            if (service != null || connectToConfigServer()) {
+            if (connectToConfigServer()) {
                 AppByOptions pn = (AppByOptions) appByOption.getContentPanel();
                 try {
                     CfgAppType t = pn.getSelectedAppType();
-                    CfgApplicationQuery q = new CfgApplicationQuery(service);
+                    CfgApplicationQuery q = new CfgApplicationQuery();
                     if (t != null) {
                         q.setAppType(t);
                     }
                     findApps(
                             q,
+                            CfgApplication.class,
                             new IKeyValueProperties() {
                         @Override
                         public KeyValueCollection getProperties(CfgObject obj) {
@@ -689,6 +686,106 @@ public class AppForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_miObjectByAnnexActionPerformed
 
+    RequestDialog bussAttr;
+
+    private void runBussAttrPerformed(ActionEvent evt) {
+        if (connectToConfigServer()) {
+            BussAttr pn = (BussAttr) bussAttr.getContentPanel();
+            try {
+
+                if (pn.iscbAttrSelected()) {
+                    CfgEnumeratorQuery query = new CfgEnumeratorQuery(configServerManager.getService());
+
+                    Collection<CfgEnumerator> execute = query.execute();
+                    execQuery(query, new ISearchNamedProperties() {
+                        @Override
+                        public String[] getNamedProperties(CfgObject obj) {
+                            CfgEnumerator o = (CfgEnumerator) obj;
+                            String[] ret = new String[3];
+                            ret[0] = o.getDescription();
+                            ret[1] = o.getDisplayName();
+                            ret[2] = o.getName();
+                            return ret;
+                        }
+
+                        @Override
+                        public String getName(CfgObject obj) {
+                            return ((CfgEnumerator) obj).getDisplayName();
+                        }
+
+                        @Override
+                        public String getShortPrint(CfgObject obj) {
+                            CfgEnumerator o = (CfgEnumerator) obj;
+                            return "Business Attribute [" + o.getDisplayName() + "] DBID: " + o.getDBID();
+                        }
+                    },
+                            pn);
+
+                }
+                if (pn.iscbAttrValueSelected()) {
+                    CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery(configServerManager.getService());
+
+                    execQuery(query, new ISearchNamedProperties() {
+                        @Override
+                        public String[] getNamedProperties(CfgObject obj) {
+                            CfgEnumeratorValue o = (CfgEnumeratorValue) obj;
+                            String[] ret = new String[3];
+                            ret[0] = o.getDescription();
+                            ret[1] = o.getDisplayName();
+                            ret[2] = o.getName();
+
+                            return ret;
+                        }
+
+                        @Override
+                        public String getName(CfgObject obj) {
+                            return ((CfgEnumeratorValue) obj).getDisplayName();
+                        }
+
+                        @Override
+                        public String getShortPrint(CfgObject obj) {
+                            CfgEnumeratorValue o = (CfgEnumeratorValue) obj;
+                            return "BI Value [" + o.getDisplayName() + "] DBID: " + o.getDBID();
+                        }
+                    },
+                            pn);
+
+                }
+
+            } catch (ConfigException ex) {
+                showException("Error", ex);
+
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class
+                        .getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        logger.info(
+                "affirm");
+    }
+
+    private void miBusinessAttributeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miBusinessAttributeActionPerformed
+        if (bussAttr == null) {
+            bussAttr = new RequestDialog(this, new BussAttr());
+        }
+        JFrame f = this;
+        if (bussAttr.doShow()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+//                        enableComponents(f, false);
+                        runBussAttrPerformed(evt);
+                    } finally {
+//                        enableComponents(f, true);
+                    }
+                }
+
+            });
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_miBusinessAttributeActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btClearOutput;
@@ -717,6 +814,7 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JPanel jpOutput;
     private javax.swing.JMenuItem miAppByIP;
     private javax.swing.JMenuItem miAppByOption;
+    private javax.swing.JMenuItem miBusinessAttribute;
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
     private javax.swing.JPasswordField pfPassword;
@@ -728,12 +826,7 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private boolean connectToConfigServer() {
-        boolean ret = false;
-
-        requestOutput("connecting...\n", false);
-
-        try {
-            /*
+        /*
             String configServerHost = "10.61.6.55";
 //        String configServerHost="esv1-c-ppe-46.ivr.airbnb.biz";
             int configServerPort = 2025;
@@ -755,36 +848,28 @@ public class AppForm extends javax.swing.JFrame {
 //        configServerPort = Integer.parseInt(properties.getString("ConfServerPort"));
 //        configServerUser = properties.getString("ConfServerUser");
 //        configServerPass = properties.getString("ConfServerPassword");
-             */
+         */
+        if (configServerManager.isConnected()) {
+            return true;
+        } else {
+            IConfService ret = null;
             StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
             String user = (String) cbUser.getSelectedItem();
             if (confServ != null && user != null) {
+                ret = configServerManager.connect(confServ,
+                        user, new String(pfPassword.getPassword()));
 
-                service = ConfigConnection.initializeConfigService(
-                        confServ.getApp(), confServ.getHost(), confServ.getPortInt(),
-                        user, new String(pfPassword.getPassword())
-                );
             }
-            if (service != null) {
-                requestOutput("connected to ConfigServer " + confServ, false);
-                ret = true;
-            }
-        } catch (ConfigException | InterruptedException | ProtocolException ex) {
-            service = null;
-            showException("Cannot connect to ConfigServer", ex);
-
+            connectionStatusChanged();
+            return configServerManager.isConnected();
         }
-        connectionStatusChanged();
-        return ret;
     }
-
-    IConfService service = null;
 
     private String getPassword() {
         return textEncryptor.decrypt(ds.getPassword());
     }
 
-    private void requestOutput(String toString, boolean printBlock) {
+    public void requestOutput(String toString, boolean printBlock) {
         logger.info(toString);
         if (printBlock) {
             taOutput.append("------------------------------------\n");
@@ -795,12 +880,12 @@ public class AppForm extends javax.swing.JFrame {
         logger.debug(toString);
     }
 
-    private void requestOutput(String toString) {
+    public void requestOutput(String toString) {
         requestOutput(toString, true);
 
     }
 
-    private void showException(String cannot_connect_to_ConfigServer, Exception ex) {
+    public void showException(String cannot_connect_to_ConfigServer, Exception ex) {
         logger.error(cannot_connect_to_ConfigServer, ex);
         StringBuilder buf = new StringBuilder();
         buf.append("!!!Exception!!! = ").append(cannot_connect_to_ConfigServer).append("\n");
@@ -811,7 +896,7 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private void connectionStatusChanged() {
-        boolean isConnected = (service != null && service.getProtocol().getState() != ChannelState.Closed);
+        boolean isConnected = configServerManager.isConnected();
         btDisconnect.setEnabled(isConnected);
         btConnect.setEnabled(!isConnected);
         cbConfigServer.setEnabled(!isConnected);
@@ -829,10 +914,9 @@ public class AppForm extends javax.swing.JFrame {
         return false;
     }
 
-    private HashMap<String, Collection<CfgObject>> prevQueries = new HashMap<>();
-
-    private void findApps(
+    private <T extends CfgObject> void findApps(
             CfgQuery q,
+            Class< T> cls,
             IKeyValueProperties props,
             boolean isRegex,
             boolean isFullOutputSelected,
@@ -843,15 +927,7 @@ public class AppForm extends javax.swing.JFrame {
     ) throws ConfigException, InterruptedException {
         StringBuilder buf = new StringBuilder();
 
-        String qToString = q.toString();
-
-        Collection<CfgObject> cfgObjs = prevQueries.get(qToString);
-        logger.debug("prevCollection found? " + (cfgObjs != null) + " qString: " + qToString);
-        if (cfgObjs == null) {
-            cfgObjs = q.execute();
-            logger.debug("executing the request");
-            prevQueries.put(qToString, cfgObjs);
-        }
+        Collection<T> cfgObjs = configServerManager.getResults(q, cls);
 
         if (cfgObjs == null || cfgObjs.isEmpty()) {
             requestOutput("no objects found\n", false);
@@ -936,7 +1012,7 @@ public class AppForm extends javax.swing.JFrame {
                     if (isFullOutputSelected) {
                         buf.append(cfgObj.toString()).append("\n");
                     } else {
-                        buf.append(props.getName(cfgObj)).append(", DBID: " + cfgObj.getObjectDbid());
+                        buf.append(props.getName(cfgObj)).append(", type:").append(cfgObj.getObjectType()).append(", DBID: " + cfgObj.getObjectDbid());
                         if (checkForSectionOrOption) {
                             buf.append("\t");
                             buf.append(kv);
@@ -1069,16 +1145,16 @@ public class AppForm extends javax.swing.JFrame {
                 if (hostNames == null) {
                     buf.append("IP [" + ip1 + "] not resolved\n");
                 } else {
-                    if ((service != null || connectToConfigServer())) {
-                        CfgHostQuery hq = new CfgHostQuery(service);
-                        CfgApplicationQuery aq = new CfgApplicationQuery(service);
+                    if ((connectToConfigServer())) {
+                        CfgHostQuery hq = new CfgHostQuery(configServerManager.getService());
+                        CfgApplicationQuery aq = new CfgApplicationQuery(configServerManager.getService());
                         buf.append("resolved IP[" + ip1 + "] to ");
                         for (Record hostName : hostNames) {
                             PTRRecord r = (PTRRecord) hostName;
                             buf.append(r.getTarget().toString(true)).append("\n");
                             String mask = r.getTarget().getLabelString(0) + "*";
                             hq.setName(mask);
-                            Collection<CfgHost> hostsFound = hq.execute();
+                            Collection<CfgHost> hostsFound = configServerManager.getResults(hq, CfgHost.class);
                             if (hostsFound != null) {
                                 for (CfgHost cfgHost : hostsFound) {
                                     buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:").append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
@@ -1169,7 +1245,7 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private void runObjectByAnnexActionPerformed(ActionEvent evt) {
-        if (service != null || connectToConfigServer()) {
+        if (connectToConfigServer()) {
             ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
             try {
 
@@ -1179,7 +1255,7 @@ public class AppForm extends javax.swing.JFrame {
 
                 } else {
                     for (CfgObjectType value : CfgObjectType.values()) {
-                        doTheSearch(t, pn, false);
+                        doTheSearch(value, pn, false);
                     }
                 }
 
@@ -1198,9 +1274,10 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private void doTheSearch(CfgObjectType t, ObjByAnnex pn, boolean warnNotFound) throws ConfigException, InterruptedException {
+        IConfService service = configServerManager.getService();
 //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
         if (t == CfgObjectType.CFGDN) {
-            CfgDNQuery query = new CfgDNQuery(service);
+            CfgDNQuery query = new CfgDNQuery();
             String n = pn.getName();
             if (n != null) {
                 query.setDnNumber(n);
@@ -1212,6 +1289,7 @@ public class AppForm extends javax.swing.JFrame {
 
             findApps(
                     query,
+                    CfgDN.class,
                     new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(CfgObject obj) {
@@ -1232,7 +1310,7 @@ public class AppForm extends javax.swing.JFrame {
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
         } else if (t == CfgObjectType.CFGSwitch) {
-            CfgSwitchQuery query = new CfgSwitchQuery(service);
+            CfgSwitchQuery query = new CfgSwitchQuery();
             String n = pn.getName();
             if (n != null) {
                 query.setName(n);
@@ -1244,6 +1322,7 @@ public class AppForm extends javax.swing.JFrame {
 
             findApps(
                     query,
+                    CfgSwitch.class,
                     new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(CfgObject obj) {
@@ -1264,7 +1343,7 @@ public class AppForm extends javax.swing.JFrame {
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
         } else if (t == CfgObjectType.CFGAgentGroup) {
-            CfgAgentGroupQuery query = new CfgAgentGroupQuery(service);
+            CfgAgentGroupQuery query = new CfgAgentGroupQuery();
             String n = pn.getName();
             if (n != null) {
                 query.setName(n);
@@ -1276,6 +1355,7 @@ public class AppForm extends javax.swing.JFrame {
 
             findApps(
                     query,
+                    CfgAgentGroup.class,
                     new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(CfgObject obj) {
@@ -1296,7 +1376,7 @@ public class AppForm extends javax.swing.JFrame {
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
         } else if (t == CfgObjectType.CFGScript) {
-            CfgScriptQuery query = new CfgScriptQuery(service);
+            CfgScriptQuery query = new CfgScriptQuery();
             String n = pn.getName();
             if (n != null) {
                 query.setName(n);
@@ -1308,6 +1388,7 @@ public class AppForm extends javax.swing.JFrame {
 
             findApps(
                     query,
+                    CfgScript.class,
                     new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(CfgObject obj) {
@@ -1328,7 +1409,7 @@ public class AppForm extends javax.swing.JFrame {
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
         } else if (t == CfgObjectType.CFGTransaction) {
-            CfgTransactionQuery query = new CfgTransactionQuery(service);
+            CfgTransactionQuery query = new CfgTransactionQuery();
             String n = pn.getName();
             if (n != null) {
                 query.setName(n);
@@ -1340,6 +1421,7 @@ public class AppForm extends javax.swing.JFrame {
 
             findApps(
                     query,
+                    CfgTransaction.class,
                     new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(CfgObject obj) {
@@ -1359,11 +1441,111 @@ public class AppForm extends javax.swing.JFrame {
                     pn.getValue());
 //</editor-fold>
 
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
+        } else if (t == CfgObjectType.CFGEnumerator) {
+            CfgEnumeratorQuery query = new CfgEnumeratorQuery();
+            String n = pn.getName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgEnumerator.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgEnumerator) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgEnumerator) obj).getName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+//</editor-fold>
+
+//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumeratorValue">
+        } else if (t == CfgObjectType.CFGEnumeratorValue) {
+            CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery();
+            String n = pn.getName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgEnumeratorValue.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgEnumeratorValue) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgEnumeratorValue) obj).getName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+//</editor-fold>
+
         } else {
             if (warnNotFound) {
                 logger.info("Searching for type " + t + " not implemented yet");
             }
 
+        }
+    }
+
+    private void execQuery(CfgQuery query,
+            ISearchNamedProperties objProperties,
+            BussAttr searchParams
+    ) throws ConfigException, InterruptedException {
+        Collection<CfgObject> cfgObjs = query.execute();
+        StringBuilder buf = new StringBuilder();
+
+        if (cfgObjs == null || cfgObjs.isEmpty()) {
+            requestOutput("no objects found\n", false);
+        } else {
+            logger.info("retrieved " + cfgObjs.size() + " total objects");
+            int flags = ((searchParams.isRegex()) ? Pattern.LITERAL : 0) | ((searchParams.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
+            String val = searchParams.getName();
+            Pattern ptVal = (val == null) ? null : Pattern.compile(val, flags);
+            int cnt = 0;
+            for (CfgObject cfgObj : cfgObjs) {
+                String[] namedProperties = objProperties.getNamedProperties(cfgObj);
+                boolean found = false;
+                for (String namedProperty : namedProperties) {
+                    if (matching(ptVal, namedProperty)) {
+                        found = true;
+                        cnt++;
+                        break;
+                    }
+                }
+                if (found) {
+                    if (searchParams.isFullOutputSelected()) {
+                        buf.append(cfgObj.toString());
+                    } else {
+                        buf.append(objProperties.getShortPrint(cfgObj));
+                    }
+                    buf.append("\n");
+                }
+            }
+            if (cnt > 0) {
+                requestOutput("Filtering done\n" + buf);
+            }
         }
     }
 
