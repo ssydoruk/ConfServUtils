@@ -12,20 +12,26 @@ import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumerator;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumeratorValue;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentLoginQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorValueQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgPersonQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
@@ -1275,7 +1281,7 @@ public class AppForm extends javax.swing.JFrame {
 
     private void doTheSearch(CfgObjectType t, ObjByAnnex pn, boolean warnNotFound) throws ConfigException, InterruptedException {
         IConfService service = configServerManager.getService();
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
         if (t == CfgObjectType.CFGDN) {
             CfgDNQuery query = new CfgDNQuery();
             String n = pn.getName();
@@ -1307,9 +1313,9 @@ public class AppForm extends javax.swing.JFrame {
                     pn.getSection(),
                     pn.getOption(),
                     pn.getValue());
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
-        } else if (t == CfgObjectType.CFGSwitch) {
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
+        else if (t == CfgObjectType.CFGSwitch) {
             CfgSwitchQuery query = new CfgSwitchQuery();
             String n = pn.getName();
             if (n != null) {
@@ -1340,9 +1346,108 @@ public class AppForm extends javax.swing.JFrame {
                     pn.getSection(),
                     pn.getOption(),
                     pn.getValue());
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
-        } else if (t == CfgObjectType.CFGAgentGroup) {
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
+        else if (t == CfgObjectType.CFGAgentLogin) {
+            CfgAgentLoginQuery query = new CfgAgentLoginQuery();
+            String n = pn.getName();
+            if (n != null) {
+                query.setLoginCode(n);
+            }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+            findApps(
+                    query,
+                    CfgAgentLogin.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgAgentLogin) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgAgentLogin) obj).getLoginCode();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlace">
+        else if (t == CfgObjectType.CFGPlace) {
+            CfgPlaceQuery query = new CfgPlaceQuery();
+            String n = pn.getName();
+            if (n != null) {
+                query.setName(n);
+            }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+            findApps(
+                    query,
+                    CfgPlace.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgPlace) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgPlace) obj).getName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPerson">
+        else if (t == CfgObjectType.CFGPerson) {
+            CfgPersonQuery query = new CfgPersonQuery();
+            String n = pn.getName();
+            if (n != null) {
+                query.setUserName(n);
+            }
+//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
+//                            if (selectedObjSubType != null) {
+//                                query.(selectedObjSubType);
+//                            }
+
+            findApps(
+                    query,
+                    CfgPerson.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgPerson) obj).getUserProperties();
+                }
+
+                @Override
+                public String getName(CfgObject obj) {
+                    return ((CfgPerson) obj).getUserName();
+                }
+            },
+                    pn.isRegex(),
+                    pn.isFullOutputSelected(),
+                    pn.isCaseSensitive(),
+                    pn.getSection(),
+                    pn.getOption(),
+                    pn.getValue());
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
+        else if (t == CfgObjectType.CFGAgentGroup) {
             CfgAgentGroupQuery query = new CfgAgentGroupQuery();
             String n = pn.getName();
             if (n != null) {
@@ -1373,9 +1478,9 @@ public class AppForm extends javax.swing.JFrame {
                     pn.getSection(),
                     pn.getOption(),
                     pn.getValue());
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
-        } else if (t == CfgObjectType.CFGScript) {
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
+        else if (t == CfgObjectType.CFGScript) {
             CfgScriptQuery query = new CfgScriptQuery();
             String n = pn.getName();
             if (n != null) {
@@ -1407,7 +1512,7 @@ public class AppForm extends javax.swing.JFrame {
                     pn.getOption(),
                     pn.getValue());
 //</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
         } else if (t == CfgObjectType.CFGTransaction) {
             CfgTransactionQuery query = new CfgTransactionQuery();
             String n = pn.getName();
@@ -1439,10 +1544,9 @@ public class AppForm extends javax.swing.JFrame {
                     pn.getSection(),
                     pn.getOption(),
                     pn.getValue());
-//</editor-fold>
-
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
-        } else if (t == CfgObjectType.CFGEnumerator) {
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
+        else if (t == CfgObjectType.CFGEnumerator) {
             CfgEnumeratorQuery query = new CfgEnumeratorQuery();
             String n = pn.getName();
             if (n != null) {
@@ -1469,10 +1573,9 @@ public class AppForm extends javax.swing.JFrame {
                     pn.getSection(),
                     pn.getOption(),
                     pn.getValue());
-//</editor-fold>
-
-//<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumeratorValue">
-        } else if (t == CfgObjectType.CFGEnumeratorValue) {
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumeratorValue">
+        else if (t == CfgObjectType.CFGEnumeratorValue) {
             CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery();
             String n = pn.getName();
             if (n != null) {
