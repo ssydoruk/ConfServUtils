@@ -21,8 +21,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import javax.swing.AbstractButton;
+import javax.swing.ButtonModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +35,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author stepan_sydoruk
  */
-public class ObjByAnnex extends javax.swing.JPanel {
+public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings {
 
     /**
      * Creates new form AppByDBID
@@ -54,9 +58,38 @@ public class ObjByAnnex extends javax.swing.JPanel {
         rbShortOutput.setSelected(true);
         cbCaseSensitive.setSelected(false);
 
+        jrbEverywhere.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+
+                AbstractButton aButton = (AbstractButton) e.getSource();
+                ButtonModel aModel = aButton.getModel();
+
+                jrbEverywhereSelected(aButton.getModel().isSelected());
+
+            }
+        });
+        jrbEverywhere.setSelected(true);
+
     }
-    
-    private static final Logger logger=Main.getLogger();
+
+    private void jrbEverywhereSelected(boolean isSelected) {
+        setVisible(false);
+        tfObjectName.setEnabled(!isSelected);
+        lbObjectName.setEnabled(!isSelected);
+        tfOption.setEnabled(!isSelected);
+        lbOption.setEnabled(!isSelected);
+        tfOptionValue.setEnabled(!isSelected);
+        lbOptionValue.setEnabled(!isSelected);
+        tfSection.setEnabled(!isSelected);
+        lbSection.setEnabled(!isSelected);
+
+        lbSearchString.setEnabled(isSelected);
+        tfSearchString.setEnabled(isSelected);
+        setVisible(true);
+    }
+
+    private static final Logger logger = Main.getLogger();
 
     private void cbObjectTypeChanged(Object item) {
         GEnum t = cfgObjType(item);
@@ -67,12 +100,12 @@ public class ObjByAnnex extends javax.swing.JPanel {
             } else if (t == CfgObjectType.CFGScript) {
                 setSubtypeValues(CfgScriptType.values());
                 return;
-            }else if (t == CfgObjectType.CFGTransaction) {
+            } else if (t == CfgObjectType.CFGTransaction) {
                 setSubtypeValues(CfgTransactionType.values());
                 return;
+            } else {
+                logger.info("Not filling subtype for object " + t);
             }
-            else
-                logger.info("Not filling subtype for object "+t);
         }
         setSubtypeValues(null);
     }
@@ -106,7 +139,7 @@ public class ObjByAnnex extends javax.swing.JPanel {
     }
 
     private GEnum cfgObjType(Object o) {
-        if (o==null || o instanceof String) {
+        if (o == null || o instanceof String) {
             return null;
         } else {
             return ((CfgObjectTypeMenu) o).getType();
@@ -123,17 +156,25 @@ public class ObjByAnnex extends javax.swing.JPanel {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        jPanel10 = new javax.swing.JPanel();
+        jPanel11 = new javax.swing.JPanel();
+        jrbEverywhere = new javax.swing.JRadioButton();
+        jrbOnlySelected = new javax.swing.JRadioButton();
+        jPanel12 = new javax.swing.JPanel();
+        jPanel13 = new javax.swing.JPanel();
+        lbSearchString = new javax.swing.JLabel();
+        tfSearchString = new javax.swing.JTextField();
         jPanel6 = new javax.swing.JPanel();
-        jLabel5 = new javax.swing.JLabel();
+        lbObjectName = new javax.swing.JLabel();
         tfObjectName = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
+        lbSection = new javax.swing.JLabel();
         tfSection = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        lbOption = new javax.swing.JLabel();
         tfOption = new javax.swing.JTextField();
         jPanel5 = new javax.swing.JPanel();
-        jLabel4 = new javax.swing.JLabel();
+        lbOptionValue = new javax.swing.JLabel();
         tfOptionValue = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -142,44 +183,75 @@ public class ObjByAnnex extends javax.swing.JPanel {
         jLabel6 = new javax.swing.JLabel();
         cbObjectSubtype = new javax.swing.JComboBox<>();
         jPanel4 = new javax.swing.JPanel();
-        rbFullOutput = new javax.swing.JRadioButton();
-        rbShortOutput = new javax.swing.JRadioButton();
+        jPanel8 = new javax.swing.JPanel();
         cbIsRegex = new javax.swing.JCheckBox();
         cbCaseSensitive = new javax.swing.JCheckBox();
+        jPanel9 = new javax.swing.JPanel();
+        rbFullOutput = new javax.swing.JRadioButton();
+        rbShortOutput = new javax.swing.JRadioButton();
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
+        jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder("Search range"));
+        jPanel10.setLayout(new javax.swing.BoxLayout(jPanel10, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel11.setLayout(new javax.swing.BoxLayout(jPanel11, javax.swing.BoxLayout.LINE_AXIS));
+
+        buttonGroup1.add(jrbEverywhere);
+        jrbEverywhere.setText("Everywhere");
+        jPanel11.add(jrbEverywhere);
+
+        buttonGroup1.add(jrbOnlySelected);
+        jrbOnlySelected.setText("Only below attributes");
+        jPanel11.add(jrbOnlySelected);
+
+        jPanel10.add(jPanel11);
+
+        jPanel12.setLayout(new javax.swing.BoxLayout(jPanel12, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel13.setLayout(new javax.swing.BoxLayout(jPanel13, javax.swing.BoxLayout.LINE_AXIS));
+
+        lbSearchString.setText("Search string");
+        jPanel13.add(lbSearchString);
+        jPanel13.add(tfSearchString);
+
+        jPanel12.add(jPanel13);
+
         jPanel6.setLayout(new javax.swing.BoxLayout(jPanel6, javax.swing.BoxLayout.LINE_AXIS));
 
-        jLabel5.setText("Object name");
-        jPanel6.add(jLabel5);
+        lbObjectName.setText("Object name");
+        jPanel6.add(lbObjectName);
         jPanel6.add(tfObjectName);
 
-        add(jPanel6);
+        jPanel12.add(jPanel6);
 
         jPanel3.setLayout(new javax.swing.BoxLayout(jPanel3, javax.swing.BoxLayout.LINE_AXIS));
 
-        jLabel3.setText("Section name");
-        jPanel3.add(jLabel3);
+        lbSection.setText("Section name");
+        jPanel3.add(lbSection);
         jPanel3.add(tfSection);
 
-        add(jPanel3);
+        jPanel12.add(jPanel3);
 
         jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
 
-        jLabel1.setText("Option name");
-        jPanel1.add(jLabel1);
+        lbOption.setText("Option name");
+        jPanel1.add(lbOption);
         jPanel1.add(tfOption);
 
-        add(jPanel1);
+        jPanel12.add(jPanel1);
 
         jPanel5.setLayout(new javax.swing.BoxLayout(jPanel5, javax.swing.BoxLayout.LINE_AXIS));
 
-        jLabel4.setText("Option Value");
-        jPanel5.add(jLabel4);
+        lbOptionValue.setText("Option Value");
+        jPanel5.add(lbOptionValue);
         jPanel5.add(tfOptionValue);
 
-        add(jPanel5);
+        jPanel12.add(jPanel5);
+
+        jPanel10.add(jPanel12);
+
+        add(jPanel10);
 
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -199,37 +271,53 @@ public class ObjByAnnex extends javax.swing.JPanel {
 
         add(jPanel7);
 
-        jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.PAGE_AXIS));
+        jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
+
+        jPanel8.setLayout(new javax.swing.BoxLayout(jPanel8, javax.swing.BoxLayout.PAGE_AXIS));
+
+        cbIsRegex.setText("Regular expression");
+        jPanel8.add(cbIsRegex);
+
+        cbCaseSensitive.setText("Case sensitive");
+        jPanel8.add(cbCaseSensitive);
+
+        jPanel4.add(jPanel8);
+
+        jPanel9.setLayout(new javax.swing.BoxLayout(jPanel9, javax.swing.BoxLayout.PAGE_AXIS));
 
         buttonGroup1.add(rbFullOutput);
         rbFullOutput.setText("Print full output");
-        jPanel4.add(rbFullOutput);
+        jPanel9.add(rbFullOutput);
 
         buttonGroup1.add(rbShortOutput);
         rbShortOutput.setText("Print abbreviated output");
-        jPanel4.add(rbShortOutput);
+        jPanel9.add(rbShortOutput);
 
-        cbIsRegex.setText("Regular expression");
-        jPanel4.add(cbIsRegex);
-
-        cbCaseSensitive.setText("Case sensitive");
-        jPanel4.add(cbCaseSensitive);
+        jPanel4.add(jPanel9);
 
         add(jPanel4);
     }// </editor-fold>//GEN-END:initComponents
 
+    @Override
     public String getSection() {
         return StringUtils.stripToNull(tfSection.getText());
     }
 
-    public String getName() {
-        return StringUtils.stripToNull(tfObjectName.getText());
+    @Override
+    public String getObjName() {
+        if (!isSearchAll()) {
+            return StringUtils.stripToNull(tfObjectName.getText());
+        } else {
+            return null;
+        }
     }
 
+    @Override
     public String getOption() {
         return StringUtils.stripToNull(tfOption.getText());
     }
 
+    @Override
     public String getValue() {
         return StringUtils.stripToNull(tfOptionValue.getText());
     }
@@ -241,29 +329,50 @@ public class ObjByAnnex extends javax.swing.JPanel {
     private javax.swing.JCheckBox cbIsRegex;
     private javax.swing.JComboBox<String> cbObjectSubtype;
     private javax.swing.JComboBox<String> cbObjectType;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JRadioButton jrbEverywhere;
+    private javax.swing.JRadioButton jrbOnlySelected;
+    private javax.swing.JLabel lbObjectName;
+    private javax.swing.JLabel lbOption;
+    private javax.swing.JLabel lbOptionValue;
+    private javax.swing.JLabel lbSearchString;
+    private javax.swing.JLabel lbSection;
     private javax.swing.JRadioButton rbFullOutput;
     private javax.swing.JRadioButton rbShortOutput;
     private javax.swing.JTextField tfObjectName;
     private javax.swing.JTextField tfOption;
     private javax.swing.JTextField tfOptionValue;
+    private javax.swing.JTextField tfSearchString;
     private javax.swing.JTextField tfSection;
     // End of variables declaration//GEN-END:variables
 
     private void setSubtypeValues(Collection values) {
         Main.loadGenesysTypes(cbObjectSubtype, values);
+
+    }
+
+    @Override
+    public boolean isSearchAll() {
+        return jrbEverywhere.isSelected();
+    }
+
+    @Override
+    public String getAllSearch() {
+        return StringUtils.stripToNull(tfSearchString.getText());
 
     }
 

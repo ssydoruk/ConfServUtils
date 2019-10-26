@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author stepan_sydoruk
  */
-public class AppByOptions extends javax.swing.JPanel {
+public class AppByOptions extends javax.swing.JPanel implements ISearchSettings {
 
     /**
      * Creates new form AppByDBID
@@ -25,16 +25,29 @@ public class AppByOptions extends javax.swing.JPanel {
 
     }
 
+    @Override
     public boolean isCaseSensitive() {
         return cbCaseSensitive.isSelected();
     }
 
+    @Override
     public boolean isRegex() {
         return cbIsRegex.isSelected();
     }
 
+    @Override
     public boolean isFullOutputSelected() {
         return rbFullOutput.isSelected();
+    }
+
+    @Override
+    public String getObjName() {
+        return null;
+    }
+
+    @Override
+    public String getAllSearch() {
+        return null;
     }
 
     /**
@@ -132,14 +145,17 @@ public class AppByOptions extends javax.swing.JPanel {
         add(jPanel4);
     }// </editor-fold>//GEN-END:initComponents
 
+    @Override
     public String getSection() {
         return StringUtils.stripToNull(tfSection.getText());
     }
 
+    @Override
     public String getOption() {
         return StringUtils.stripToNull(tfOption.getText());
     }
 
+    @Override
     public String getValue() {
         return StringUtils.stripToNull(tfOptionValue.getText());
     }
@@ -165,4 +181,10 @@ public class AppByOptions extends javax.swing.JPanel {
     private javax.swing.JTextField tfOptionValue;
     private javax.swing.JTextField tfSection;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public boolean isSearchAll() {
+        return false;
+    }
+
 }

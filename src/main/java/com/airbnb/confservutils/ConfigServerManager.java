@@ -118,9 +118,9 @@ public class ConfigServerManager {
         if (prevQueries.containsKey(qToString)) {
             cfgObjs = (Collection<T>) prevQueries.get(qToString);
         } else {
-            Main.logger.info("executing the request " + q);
+            Main.logger.debug("executing the request " + q);
             cfgObjs = service.retrieveMultipleObjects(cls, q);
-            Main.logger.info("received " + ((cfgObjs == null) ? 0 : cfgObjs.size()) + " objects");
+            Main.logger.debug("received " + ((cfgObjs == null) ? 0 : cfgObjs.size()) + " objects");
             prevQueries.put(qToString, cfgObjs);
         }
         return cfgObjs;
