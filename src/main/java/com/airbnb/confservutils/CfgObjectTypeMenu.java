@@ -6,10 +6,8 @@
 package com.airbnb.confservutils;
 
 import com.genesyslab.platform.commons.GEnum;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
-import org.apache.logging.log4j.LogManager;
 
 /**
  *

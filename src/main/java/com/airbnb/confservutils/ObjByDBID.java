@@ -6,7 +6,6 @@
 package com.airbnb.confservutils;
 
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import javax.swing.DefaultComboBoxModel;
 
 /**
  *
