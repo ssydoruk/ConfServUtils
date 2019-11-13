@@ -143,6 +143,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        buttonGroup2 = new javax.swing.ButtonGroup();
         jPanel10 = new javax.swing.JPanel();
         jPanel11 = new javax.swing.JPanel();
         jrbEverywhere = new javax.swing.JRadioButton();
@@ -184,11 +185,11 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings {
 
         jPanel11.setLayout(new javax.swing.BoxLayout(jPanel11, javax.swing.BoxLayout.LINE_AXIS));
 
-        buttonGroup1.add(jrbEverywhere);
+        buttonGroup2.add(jrbEverywhere);
         jrbEverywhere.setText("Everywhere");
         jPanel11.add(jrbEverywhere);
 
-        buttonGroup1.add(jrbOnlySelected);
+        buttonGroup2.add(jrbOnlySelected);
         jrbOnlySelected.setText("Only below attributes");
         jPanel11.add(jrbOnlySelected);
 
@@ -312,6 +313,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JCheckBox cbCaseSensitive;
     private javax.swing.JCheckBox cbIsRegex;
     private javax.swing.JComboBox<String> cbObjectSubtype;

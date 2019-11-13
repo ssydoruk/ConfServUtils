@@ -47,7 +47,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings 
 
     @Override
     public String getAllSearch() {
-        return null;
+        return tfSearchString.getText();
     }
 
     /**
@@ -73,6 +73,13 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings 
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
+        tpSpecifyParameters = new javax.swing.JTabbedPane();
+        jpEverywhere = new javax.swing.JPanel();
+        jPanel8 = new javax.swing.JPanel();
+        lbSearchString = new javax.swing.JLabel();
+        tfSearchString = new javax.swing.JTextField();
+        jPanel9 = new javax.swing.JPanel();
+        jpParams = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         tfSection = new javax.swing.JTextField();
@@ -93,29 +100,56 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings 
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
+        jpEverywhere.setLayout(new javax.swing.BoxLayout(jpEverywhere, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel8.setLayout(new javax.swing.BoxLayout(jPanel8, javax.swing.BoxLayout.LINE_AXIS));
+
+        lbSearchString.setText("Search string");
+        jPanel8.add(lbSearchString);
+
+        tfSearchString.setMaximumSize(new java.awt.Dimension(2147483647, 26));
+        jPanel8.add(tfSearchString);
+
+        jpEverywhere.add(jPanel8);
+        jpEverywhere.add(jPanel9);
+
+        tpSpecifyParameters.addTab("Everywhere", jpEverywhere);
+
+        jpParams.setLayout(new javax.swing.BoxLayout(jpParams, javax.swing.BoxLayout.PAGE_AXIS));
+
         jPanel3.setLayout(new javax.swing.BoxLayout(jPanel3, javax.swing.BoxLayout.LINE_AXIS));
 
         jLabel3.setText("Section name");
         jPanel3.add(jLabel3);
+
+        tfSection.setMaximumSize(new java.awt.Dimension(2147483647, 26));
         jPanel3.add(tfSection);
 
-        add(jPanel3);
+        jpParams.add(jPanel3);
 
         jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
 
         jLabel1.setText("Option name");
         jPanel1.add(jLabel1);
+
+        tfOption.setMaximumSize(new java.awt.Dimension(2147483647, 26));
         jPanel1.add(tfOption);
 
-        add(jPanel1);
+        jpParams.add(jPanel1);
 
         jPanel5.setLayout(new javax.swing.BoxLayout(jPanel5, javax.swing.BoxLayout.LINE_AXIS));
 
         jLabel4.setText("Option Value");
         jPanel5.add(jLabel4);
+
+        tfOptionValue.setMaximumSize(new java.awt.Dimension(2147483647, 26));
         jPanel5.add(tfOptionValue);
 
-        add(jPanel5);
+        jpParams.add(jPanel5);
+
+        tpSpecifyParameters.addTab("Specific attributes", jpParams);
+
+        add(tpSpecifyParameters);
 
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -175,16 +209,23 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings 
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JPanel jpEverywhere;
+    private javax.swing.JPanel jpParams;
+    private javax.swing.JLabel lbSearchString;
     private javax.swing.JRadioButton rbFullOutput;
     private javax.swing.JRadioButton rbShortOutput;
     private javax.swing.JTextField tfOption;
     private javax.swing.JTextField tfOptionValue;
+    private javax.swing.JTextField tfSearchString;
     private javax.swing.JTextField tfSection;
+    private javax.swing.JTabbedPane tpSpecifyParameters;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public boolean isSearchAll() {
-        return false;
+        return tpSpecifyParameters.getSelectedIndex()==0;
     }
 
 }
