@@ -956,6 +956,7 @@ public class AppForm extends javax.swing.JFrame {
                     KeyValueCollection options;
                     options = props.getProperties(cfgObj);
                     kv.clear();
+                    String sectionFound = null;
                     if (ptAll != null) { // if we got here and we are searching for all, it means name is already matched
                         if (matching(ptAll, props.getName(cfgObj))) {
                             shouldInclude = true;
@@ -970,11 +971,14 @@ public class AppForm extends javax.swing.JFrame {
 
                             if (ptAll != null) {
                                 if (matching(ptAll, el.getStringKey())) {
+                                    sectionFound = el.getStringKey();
                                     shouldInclude = true;
                                 }
                             } else if (ptSection != null) {
                                 if (!matching(ptSection, el.getStringKey())) {
                                     continue;
+                                } else {
+                                    sectionFound = el.getStringKey();
                                 }
                             }
 
@@ -1026,10 +1030,20 @@ public class AppForm extends javax.swing.JFrame {
                                         }
                                     }
                                 }
-                                if (!addedValues.isEmpty()) {
-                                    kv.addObject(el.getStringKey(), addedValues);
+                                if (!addedValues.isEmpty() || sectionFound != null) {
+                                    String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
+                                    KeyValueCollection list = kv.getList(sect);
+                                    if (list == null) {
+                                        list = new KeyValueCollection();
+                                        kv.addList(sect, list);
+                                    }
+                                    for (Object addedValue : addedValues.toArray()) {
+                                        list.add(addedValue);
+                                    }
+//                                    kv.addObject(el.getStringKey(), addedValues);
                                     shouldInclude = true;
                                 }
+
                             }
 
                         }
