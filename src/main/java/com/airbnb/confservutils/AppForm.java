@@ -83,6 +83,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jasypt.util.text.StrongTextEncryptor;
@@ -164,6 +165,7 @@ public class AppForm extends javax.swing.JFrame {
      */
     public AppForm() {
         initComponents();
+        btCancel.setVisible(false);
         configServerManager = new ConfigServerManager(this);
         componentsEnabled = true;
 
@@ -277,6 +279,7 @@ public class AppForm extends javax.swing.JFrame {
         jPanel8 = new javax.swing.JPanel();
         jButton2 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
+        btCancel = new javax.swing.JButton();
         btDisconnect = new javax.swing.JButton();
         btConnect = new javax.swing.JButton();
         btClearOutput = new javax.swing.JButton();
@@ -361,7 +364,7 @@ public class AppForm extends javax.swing.JFrame {
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
-                .addContainerGap(901, Short.MAX_VALUE)
+                .addContainerGap(815, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addGap(43, 43, 43))
         );
@@ -376,6 +379,14 @@ public class AppForm extends javax.swing.JFrame {
         jPanel2.add(jPanel8);
 
         jPanel3.setLayout(new javax.swing.BoxLayout(jPanel3, javax.swing.BoxLayout.LINE_AXIS));
+
+        btCancel.setText("Cancel");
+        btCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btCancelActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btCancel);
 
         btDisconnect.setText("Disconnect");
         btDisconnect.addActionListener(new java.awt.event.ActionListener() {
@@ -542,26 +553,29 @@ public class AppForm extends javax.swing.JFrame {
             objByDBID = new RequestDialog(this, new ObjByDBID());
         }
         if (objByDBID.doShow()) {
-            try {
+
 //                enableComponents(this, false);
-                if (connectToConfigServer()) {
-                    ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
-                    try {
-                        CfgObjectType t = pn.getSelectedItem();
-                        int dbid = pn.getValue();
-                        ICfgObject retrieveObject = configServerManager.retrieveObject(t, dbid);
-                        if (retrieveObject != null) {
-                            requestOutput(retrieveObject.toString());
-                        } else {
-                            requestOutput("Not found object DBID:" + dbid + " type:" + t);
+            runInThread(new IThreadedFun() {
+                @Override
+                public void fun() {
+                    if (connectToConfigServer()) {
+                        ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
+                        try {
+                            CfgObjectType t = pn.getSelectedItem();
+                            int dbid = pn.getValue();
+                            ICfgObject retrieveObject = configServerManager.retrieveObject(t, dbid);
+                            if (retrieveObject != null) {
+                                requestOutput(retrieveObject.toString());
+                            } else {
+                                requestOutput("Not found object DBID:" + dbid + " type:" + t);
+                            }
+                        } catch (ConfigException ex) {
+                            showException("Error", ex);
                         }
-                    } catch (ConfigException ex) {
-                        showException("Error", ex);
                     }
                 }
-            } finally {
-//                enableComponents(this, true);
-            }
+            });
+
         }
     }//GEN-LAST:event_miObjByDBIDActionPerformed
 
@@ -629,39 +643,8 @@ public class AppForm extends javax.swing.JFrame {
             appByOption = new RequestDialog(this, new AppByOptions());
         }
         if (appByOption.doShow()) {
-            if (connectToConfigServer()) {
-                AppByOptions pn = (AppByOptions) appByOption.getContentPanel();
-                try {
-                    CfgAppType t = pn.getSelectedAppType();
-                    CfgApplicationQuery q = new CfgApplicationQuery();
-                    if (t != null) {
-                        q.setAppType(t);
-                    }
-                    findApps(
-                            q,
-                            CfgApplication.class,
-                            new IKeyValueProperties() {
-                        @Override
-                        public KeyValueCollection getProperties(CfgObject obj) {
-                            return ((CfgApplication) obj).getOptions();
-                        }
+            appByOptionThread((AppByOptions) appByOption.getContentPanel());
 
-                        @Override
-                        public String getName(CfgObject obj) {
-                            return ((CfgApplication) obj).getName();
-                        }
-                    },
-                            pn);
-
-                } catch (ConfigException ex) {
-                    showException("Error", ex);
-
-                } catch (InterruptedException ex) {
-                    java.util.logging.Logger.getLogger(AppForm.class
-                            .getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            logger.info("affirm");
         }
     }//GEN-LAST:event_miAppByOptionActionPerformed
 
@@ -673,17 +656,8 @@ public class AppForm extends javax.swing.JFrame {
         }
         JFrame f = this;
         if (objByAnnex.doShow()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-//                        enableComponents(f, false);
-                        runObjectByAnnexActionPerformed(evt);
-                    } finally {
-//                        enableComponents(f, true);
-                    }
-                }
-            });
+            runObjByAnnexThread(evt);
+
         }
     }//GEN-LAST:event_miObjectByAnnexActionPerformed
 
@@ -772,23 +746,26 @@ public class AppForm extends javax.swing.JFrame {
         }
         JFrame f = this;
         if (bussAttr.doShow()) {
-            SwingUtilities.invokeLater(new Runnable() {
+            runInThread(new IThreadedFun() {
                 @Override
-                public void run() {
-                    try {
-//                        enableComponents(f, false);
-                        runBussAttrPerformed(evt);
-                    } finally {
-//                        enableComponents(f, true);
-                    }
-                }
+                public void fun() {
+                    runBussAttrPerformed(evt);
 
+                }
             });
+
         }        // TODO add your handling code here:
     }//GEN-LAST:event_miBusinessAttributeActionPerformed
 
+    private void btCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCancelActionPerformed
+        if (worker != null && !worker.isDone()) {
+            worker.cancel(true);
+        }
+    }//GEN-LAST:event_btCancelActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btCancel;
     private javax.swing.JButton btClearOutput;
     private javax.swing.JButton btConnect;
     private javax.swing.JButton btDisconnect;
@@ -878,6 +855,7 @@ public class AppForm extends javax.swing.JFrame {
         taOutput.append(toString);
         taOutput.append("\n");
         taOutput.setCaretPosition(taOutput.getDocument().getLength());
+
         logger.debug(toString);
     }
 
@@ -929,7 +907,7 @@ public class AppForm extends javax.swing.JFrame {
         if (cfgObjs == null || cfgObjs.isEmpty()) {
             requestOutput("no objects found\n", false);
         } else {
-            logger.debug("retrieved " + cfgObjs.size() + " total objects");
+            requestOutput("retrieved " + cfgObjs.size() + " total objects type " + cls.getSimpleName());
             int flags = ((ss.isRegex()) ? Pattern.LITERAL : 0) | ((ss.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
             Pattern ptAll = null;
             Pattern ptSection = null;
@@ -1067,7 +1045,7 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
             }
-            requestOutput("Search done, retrieved " + cnt + " objects\n" + buf + "\n");
+            requestOutput("Search done, located " + cnt + " objects -->\n" + buf + "<--\n");
         }
     }
 
@@ -1175,43 +1153,45 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private void runAppByIPActionPerformed(ActionEvent evt) {
-        logger.info("affirm");
-        StringBuilder buf = new StringBuilder();
+        runInThread(new IThreadedFun() {
+            @Override
+            public void fun() {
+                StringBuilder buf = new StringBuilder();
 
-        AppByIP pn1 = (AppByIP) appByIP.getContentPanel();
-        String ip1 = pn1.getText();
+                AppByIP pn1 = (AppByIP) appByIP.getContentPanel();
+                String ip1 = pn1.getText();
 
-        try {
-            try {
+                try {
+                    try {
 //                enableComponents(this, false);
-                Lookup l = new Lookup(ReverseMap.fromAddress(ip1), org.xbill.DNS.Type.PTR);
-                Record[] hostNames = l.run();
-                if (hostNames == null) {
-                    buf.append("IP [" + ip1 + "] not resolved\n");
-                } else {
-                    if ((connectToConfigServer())) {
-                        CfgHostQuery hq = new CfgHostQuery(configServerManager.getService());
-                        CfgApplicationQuery aq = new CfgApplicationQuery(configServerManager.getService());
-                        buf.append("resolved IP[" + ip1 + "] to ");
-                        for (Record hostName : hostNames) {
-                            PTRRecord r = (PTRRecord) hostName;
-                            buf.append(r.getTarget().toString(true)).append("\n");
-                            String mask = r.getTarget().getLabelString(0) + "*";
-                            hq.setName(mask);
-                            Collection<CfgHost> hostsFound = configServerManager.getResults(hq, CfgHost.class);
-                            if (hostsFound != null) {
-                                for (CfgHost cfgHost : hostsFound) {
-                                    buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:").append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
-                                    aq.setHostDbid(cfgHost.getDBID());
-                                    Collection<CfgApplication> appsFound = aq.execute();
-                                    buf.append("\tapplications on the host:\n");
-                                    if (appsFound == null) {
-                                        buf.append("**** no apps found!!! ");
-                                    } else {
-                                        for (CfgApplication cfgApplication : appsFound) {
-                                            buf.append("\t\t\"").append(cfgApplication.getName()).append("\"").append(" (type:").append(cfgApplication.getType()).append(", DBID:").append(cfgApplication.getDBID()).append(")\n");
-                                        }
-                                    }
+                        Lookup l = new Lookup(ReverseMap.fromAddress(ip1), org.xbill.DNS.Type.PTR);
+                        Record[] hostNames = l.run();
+                        if (hostNames == null) {
+                            buf.append("IP [" + ip1 + "] not resolved\n");
+                        } else {
+                            if ((connectToConfigServer())) {
+                                CfgHostQuery hq = new CfgHostQuery(configServerManager.getService());
+                                CfgApplicationQuery aq = new CfgApplicationQuery(configServerManager.getService());
+                                buf.append("resolved IP[" + ip1 + "] to ");
+                                for (Record hostName : hostNames) {
+                                    PTRRecord r = (PTRRecord) hostName;
+                                    buf.append(r.getTarget().toString(true)).append("\n");
+                                    String mask = r.getTarget().getLabelString(0) + "*";
+                                    hq.setName(mask);
+                                    Collection<CfgHost> hostsFound = configServerManager.getResults(hq, CfgHost.class);
+                                    if (hostsFound != null) {
+                                        for (CfgHost cfgHost : hostsFound) {
+                                            buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:").append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
+                                            aq.setHostDbid(cfgHost.getDBID());
+                                            Collection<CfgApplication> appsFound = aq.execute();
+                                            buf.append("\tapplications on the host:\n");
+                                            if (appsFound == null) {
+                                                buf.append("**** no apps found!!! ");
+                                            } else {
+                                                for (CfgApplication cfgApplication : appsFound) {
+                                                    buf.append("\t\t\"").append(cfgApplication.getName()).append("\"").append(" (type:").append(cfgApplication.getType()).append(", DBID:").append(cfgApplication.getDBID()).append(")\n");
+                                                }
+                                            }
 //                                try {
 //                                    l = new Lookup(cfgHost.getName());
 //                                    Record[] run = l.run();
@@ -1230,13 +1210,13 @@ public class AppForm extends javax.swing.JFrame {
 //                                }
 //                            InetAddress[] allByName = Address.getAllByName(cfgHost.getName());
 //                            cfgHost.getName();
-                                }
-                            } else {
-                                buf.append("host ").append(r.getTarget().toString(true)).append(" search mask:[").append(mask).append("] not found in CME!\n");
-                            }
+                                        }
+                                    } else {
+                                        buf.append("host ").append(r.getTarget().toString(true)).append(" search mask:[").append(mask).append("] not found in CME!\n");
+                                    }
 
 //                            r.getTarget().getLabelString(0);
-                        }
+                                }
 
 //                        hq.setName("esv1*");
 //                        Collection<CfgHost> execute = hq.execute();
@@ -1267,53 +1247,141 @@ public class AppForm extends javax.swing.JFrame {
 //                } catch (ConfigException ex) {
 //                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
 //                }
+                            }
+                        }
+                    } catch (UnknownHostException ex) {
+                        buf.append(ex.getMessage() + "\n");
+                        java.util.logging.Logger.getLogger(Main.class
+                                .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
+                    } catch (ConfigException ex) {
+                        java.util.logging.Logger.getLogger(AppForm.class
+                                .getName()).log(Level.SEVERE, null, ex);
+
+                    } catch (InterruptedException ex) {
+                        java.util.logging.Logger.getLogger(AppForm.class
+                                .getName()).log(Level.SEVERE, null, ex);
                     }
-                }
-            } catch (UnknownHostException ex) {
-                buf.append(ex.getMessage() + "\n");
-                java.util.logging.Logger.getLogger(Main.class
-                        .getName()).log(java.util.logging.Level.SEVERE, null, ex);
-
-            } catch (ConfigException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class
-                        .getName()).log(Level.SEVERE, null, ex);
-
-            } catch (InterruptedException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-            requestOutput(buf.toString());
-        } finally {
+                    requestOutput(buf.toString());
+                } finally {
 //            enableComponents(this, true);
-        }
+                }
+            }
+        });
+
     }
 
-    private void runObjectByAnnexActionPerformed(ActionEvent evt) {
-        if (connectToConfigServer()) {
-            ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
-            try {
+    private void appByOptionThread(AppByOptions par) {
+        runInThread(new IThreadedFun() {
+            @Override
+            public void fun() {
+                if (connectToConfigServer()) {
 
-                CfgObjectType t = pn.getSelectedObjType();
-                if (t != null) {
-                    doTheSearch(t, pn, true);
+                    AppByOptions pn = (AppByOptions) appByOption.getContentPanel();
+                    try {
+                        CfgAppType t = pn.getSelectedAppType();
+                        CfgApplicationQuery q = new CfgApplicationQuery();
+                        if (t != null) {
+                            q.setAppType(t);
+                        }
+                        findApps(
+                                q,
+                                CfgApplication.class,
+                                new IKeyValueProperties() {
+                            @Override
+                            public KeyValueCollection getProperties(CfgObject obj) {
+                                return ((CfgApplication) obj).getOptions();
+                            }
 
-                } else {
-                    for (CfgObjectType value : CfgObjectType.values()) {
-                        doTheSearch(value, pn, false);
+                            @Override
+                            public String getName(CfgObject obj) {
+                                return ((CfgApplication) obj).getName();
+                            }
+                        },
+                                pn);
+
+                    } catch (ConfigException ex) {
+                        showException("Error", ex);
+
+                    } catch (InterruptedException ex) {
+                        java.util.logging.Logger.getLogger(AppForm.class
+                                .getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-
-            } catch (ConfigException ex) {
-                showException("Error", ex);
-
-            } catch (InterruptedException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class
-                        .getName()).log(Level.SEVERE, null, ex);
             }
-        }
+        });
 
-        logger.info(
-                "affirm");
+    }
+
+    SwingWorker worker = null;
+
+    private void workStarted(boolean isStarted) {
+        btCancel.setVisible(isStarted);
+        btClearOutput.setVisible(!isStarted);
+        btDisconnect.setVisible(!isStarted);
+        btConnect.setVisible(!isStarted);
+        btEditConfgServ.setVisible(!isStarted);
+
+    }
+
+    private void runInThread(IThreadedFun fun) {
+        SwingWorker theWorker = new SwingWorker() {
+            private Exception ex = null;
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                worker = this;
+                workStarted(true);
+                try {
+                    fun.fun();
+                } catch (Exception e) {
+                    ex = e;
+                }
+                return null;
+            }
+
+            ;
+
+            @Override
+            protected void done() {
+                if (ex != null) {
+                    if (ex instanceof InterruptedException) {
+                        requestOutput("Interrupted", false);
+                    } else {
+                        requestOutput("Exception processing: " + ex.toString(), false);
+                    }
+                } else {
+                    requestOutput("All done", false);
+                }
+                workStarted(false);
+                worker = null;
+            }
+
+        };
+        theWorker.execute();
+    }
+
+    private void runObjByAnnexThread(ActionEvent evt) {
+        runInThread(new IThreadedFun() {
+            @Override
+            public void fun() throws ConfigException, InterruptedException {
+                if (connectToConfigServer()) {
+
+                    ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
+
+                    CfgObjectType t = pn.getSelectedObjType();
+                    if (t != null) {
+                        doTheSearch(t, pn, true);
+
+                    } else {
+                        for (CfgObjectType value : CfgObjectType.values()) {
+                            doTheSearch(value, pn, false);
+                        }
+                    }
+
+                }
+            }
+        });
 
     }
 
