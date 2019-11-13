@@ -520,6 +520,7 @@ public class AppForm extends javax.swing.JFrame {
         confServEditor.doShow();
         ds.loadConfServs(confServEditor.getData());
         loadConfigServers();
+        saveConfig();
 
       }//GEN-LAST:event_btEditConfgServActionPerformed
 
