@@ -937,9 +937,13 @@ public class AppForm extends javax.swing.JFrame {
                     kv.clear();
                     String sectionFound = null;
                     if (ptAll != null) { // if we got here and we are searching for all, it means name is already matched
-                        if (matching(ptAll, props.getName(cfgObj))) {
-                            shouldInclude = true;
+                        for (String string : props.getName(cfgObj)) {
+                            if (matching(ptAll, string)) {
+                                shouldInclude = true;
+                                break;
+                            }
                         }
+
                     }
                     if (options != null) {
                         Enumeration<KeyValuePair> enumeration = options.getEnumeration();
@@ -1295,8 +1299,11 @@ public class AppForm extends javax.swing.JFrame {
                             }
 
                             @Override
-                            public String getName(CfgObject obj) {
-                                return ((CfgApplication) obj).getName();
+                            public Collection<String> getName(CfgObject obj) {
+                                Collection<String> ret = new ArrayList<>();
+                                ret.add(((CfgApplication) obj).getName());
+                                return ret;
+
                             }
                         },
                                 pn);
@@ -1389,7 +1396,7 @@ public class AppForm extends javax.swing.JFrame {
     private void doTheSearch(CfgObjectType t, ObjByAnnex pn, boolean warnNotFound) throws ConfigException, InterruptedException {
         IConfService service = configServerManager.getService();
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
-        if (t == CfgObjectType.CFGDN && 1 == 0) {
+        if (t == CfgObjectType.CFGDN) {
             CfgDNQuery query = new CfgDNQuery();
             String n = pn.getObjName();
             if (n != null) {
@@ -1410,8 +1417,14 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgDN) obj).getNumber();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgDN) obj).getNumber());
+                    ret.add(((CfgDN) obj).getDNLoginID());
+                    ret.add(((CfgDN) obj).getName());
+                    ret.add(((CfgDN) obj).getOverride());
+
+                    return ret;
                 }
             },
                     pn);
@@ -1438,16 +1451,15 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgSwitch) obj).getName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgSwitch) obj).getName());
+                    return ret;
                 }
             },
                     pn);
         } //</editor-fold>
-
-        if (1 == 0) {
-            return;
-        } //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
         else if (t == CfgObjectType.CFGAgentLogin) {
             CfgAgentLoginQuery query = new CfgAgentLoginQuery();
             String n = pn.getObjName();
@@ -1469,14 +1481,16 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgAgentLogin) obj).getLoginCode();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgAgentLogin) obj).getLoginCode());
+                    return ret;
                 }
             },
                     pn);
         } //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlace">
-        else if (t == CfgObjectType.CFGPlace && 1 == 0) {
+        else if (t == CfgObjectType.CFGPlace) {
             CfgPlaceQuery query = new CfgPlaceQuery();
             String n = pn.getObjName();
             if (n != null) {
@@ -1497,14 +1511,16 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgPlace) obj).getName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgPlace) obj).getName());
+                    return ret;
                 }
             },
                     pn);
         } //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPerson">
-        else if (t == CfgObjectType.CFGPerson && 1 == 0) {
+        else if (t == CfgObjectType.CFGPerson) {
             CfgPersonQuery query = new CfgPersonQuery();
             String n = pn.getObjName();
             if (n != null) {
@@ -1525,8 +1541,18 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgPerson) obj).getUserName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgPerson) obj).getUserName());
+                    ret.add(((CfgPerson) obj).getEmailAddress());
+                    ret.add(((CfgPerson) obj).getEmployeeID());
+                    ret.add(((CfgPerson) obj).getExternalID());
+                    ret.add(((CfgPerson) obj).getFirstName());
+                    ret.add(((CfgPerson) obj).getLastName());
+                    ret.add(((CfgPerson) obj).getPassword());
+                    ret.add(((CfgPerson) obj).getUserName());
+
+                    return ret;
                 }
             },
                     pn);
@@ -1554,8 +1580,10 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgAgentGroup) obj).getGroupInfo().getName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgAgentGroup) obj).getGroupInfo().getName());
+                    return ret;
                 }
             },
                     pn);
@@ -1582,8 +1610,10 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgScript) obj).getName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgScript) obj).getName());
+                    return ret;
                 }
             },
                     pn);
@@ -1610,8 +1640,12 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgTransaction) obj).getName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTransaction) obj).getName());
+                    ret.add(((CfgTransaction) obj).getAlias());
+                    ret.add(((CfgTransaction) obj).getDescription());
+                    return ret;
                 }
             },
                     pn);
@@ -1634,8 +1668,12 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgEnumerator) obj).getName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgEnumerator) obj).getName());
+                    ret.add(((CfgEnumerator) obj).getDescription());
+                    ret.add(((CfgEnumerator) obj).getDisplayName());
+                    return ret;
                 }
             },
                     pn);
@@ -1658,8 +1696,12 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public String getName(CfgObject obj) {
-                    return ((CfgEnumeratorValue) obj).getName();
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgEnumeratorValue) obj).getName());
+                    ret.add(((CfgEnumeratorValue) obj).getDescription());
+                    ret.add(((CfgEnumeratorValue) obj).getDisplayName());
+                    return ret;
                 }
             },
                     pn);

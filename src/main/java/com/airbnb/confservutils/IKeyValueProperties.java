@@ -7,6 +7,7 @@ package com.airbnb.confservutils;
 
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
+import java.util.Collection;
 
 /**
  *
@@ -14,5 +15,5 @@ import com.genesyslab.platform.commons.collections.KeyValueCollection;
  */
 public interface IKeyValueProperties {
     KeyValueCollection getProperties(CfgObject obj);
-    String getName(CfgObject obj);
+    Collection<String> getName(CfgObject obj);
 }
