@@ -906,9 +906,9 @@ public class AppForm extends javax.swing.JFrame {
         Collection<T> cfgObjs = configServerManager.getResults(q, cls);
 
         if (cfgObjs == null || cfgObjs.isEmpty()) {
-            requestOutput("no objects found\n", false);
+            logger.debug("no objects found\n", false);
         } else {
-            requestOutput("retrieved " + cfgObjs.size() + " total objects type " + cls.getSimpleName());
+            logger.debug("retrieved " + cfgObjs.size() + " total objects type " + cls.getSimpleName());
             int flags = ((ss.isRegex()) ? Pattern.LITERAL : 0) | ((ss.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
             Pattern ptAll = null;
             Pattern ptSection = null;
@@ -1723,7 +1723,7 @@ public class AppForm extends javax.swing.JFrame {
         StringBuilder buf = new StringBuilder();
 
         if (cfgObjs == null || cfgObjs.isEmpty()) {
-            requestOutput("no objects found\n", false);
+            logger.debug("no objects found\n", false);
         } else {
             logger.debug("retrieved " + cfgObjs.size() + " total objects");
             int flags = ((searchParams.isRegex()) ? Pattern.LITERAL : 0) | ((searchParams.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
