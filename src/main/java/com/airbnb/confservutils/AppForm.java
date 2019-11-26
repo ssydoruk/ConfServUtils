@@ -1050,7 +1050,9 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
             }
-            requestOutput("Search done, located " + cnt + " objects -->\n" + buf + "<--\n");
+            if (cnt > 0) {
+                requestOutput("Search done, located " + cnt + " objects -->\n" + buf + "<--\n");
+            }
         }
     }
 
