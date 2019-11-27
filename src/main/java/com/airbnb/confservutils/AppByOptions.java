@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author stepan_sydoruk
  */
-public class AppByOptions extends javax.swing.JPanel implements ISearchSettings {
+public class AppByOptions extends javax.swing.JPanel implements ISearchSettings, ISearchCommon {
 
     /**
      * Creates new form AppByDBID
@@ -194,7 +194,6 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings 
         return StringUtils.stripToNull(tfOptionValue.getText());
     }
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cbApplicationType;
@@ -225,7 +224,28 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings 
 
     @Override
     public boolean isSearchAll() {
-        return tpSpecifyParameters.getSelectedIndex()==0;
+        return tpSpecifyParameters.getSelectedIndex() == 0;
+    }
+
+    @Override
+    public String getSearchSummary() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("App by options; ");
+        if(getSelectedAppType()!=null){
+                    buf.append("app type [").append(getSelectedAppType()).append("]");
+
+        }
+        
+        if (isSearchAll()) {
+            buf.append(" term [").append(getAllSearch()).append("] in all fields");
+        } else {
+            buf.append("name [" + getObjName() + "] section [" + getSection() + "] option [" + getOption());
+        }
+        buf.append(" rx[").append(isRegex() ? "yes" : "no").append("]");
+        buf.append(" CaSe[").append(isCaseSensitive() ? "yes" : "no").append("]");
+        buf.append("; ").append(isFullOutputSelected() ? "full" : "short").append(" output");
+        
+        return buf.toString();
     }
 
 }

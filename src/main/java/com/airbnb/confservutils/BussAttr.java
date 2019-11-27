@@ -6,6 +6,7 @@
 package com.airbnb.confservutils;
 
 import com.genesyslab.platform.commons.GEnum;
+import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -13,7 +14,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author stepan_sydoruk
  */
-public class BussAttr extends javax.swing.JPanel {
+public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
 
     /**
      * Creates new form AppByDBID
@@ -122,7 +123,6 @@ public class BussAttr extends javax.swing.JPanel {
         return StringUtils.stripToNull(tfObjectName.getText());
     }
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JCheckBox cbAttr;
@@ -137,5 +137,26 @@ public class BussAttr extends javax.swing.JPanel {
     private javax.swing.JRadioButton rbShortOutput;
     private javax.swing.JTextField tfObjectName;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public String getSearchSummary() {
+        StringBuilder buf = new StringBuilder();
+
+        buf.append("Search for ");
+        ArrayList<String> arr = new ArrayList();
+        if (iscbAttrSelected()) {
+            arr.add("attribute");
+        }
+        if (iscbAttrValueSelected()) {
+            arr.add("attribute value");
+        }
+        buf.append(StringUtils.join(arr,", "));
+        buf.append(" \"").append(getName()).append("\"");
+        buf.append(" rx[").append(isRegex() ? "yes" : "no").append("]");
+        buf.append(" CaSe[").append(isCaseSensitive() ? "yes" : "no").append("]");
+        buf.append("; ").append(isFullOutputSelected() ? "full" : "short").append(" output");
+        return buf.toString();
+
+    }
 
 }

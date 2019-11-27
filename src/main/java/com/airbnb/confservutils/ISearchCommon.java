@@ -5,13 +5,12 @@
  */
 package com.airbnb.confservutils;
 
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-
 /**
  *
  * @author stepan_sydoruk
  */
-interface IThreadedFun {
+public interface ISearchCommon {
 
-    public void fun() throws ConfigException, InterruptedException;
+    public String getSearchSummary();
+
 }

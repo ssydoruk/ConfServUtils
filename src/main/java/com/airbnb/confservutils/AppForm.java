@@ -537,7 +537,6 @@ public class AppForm extends javax.swing.JFrame {
         System.out.println(pfPassword.getPassword());
     }//GEN-LAST:event_pfPasswordActionPerformed
 
-
     private void btDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btDisconnectActionPerformed
         try {
             configServerManager.disconnect();
@@ -566,6 +565,7 @@ public class AppForm extends javax.swing.JFrame {
                     if (connectToConfigServer()) {
                         ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
                         try {
+                            requestOutput("Request: " + pn.getSearchSummary());
                             CfgObjectType t = pn.getSelectedItem();
                             int dbid = pn.getValue();
                             ICfgObject retrieveObject = configServerManager.retrieveObject(t, dbid);
@@ -616,7 +616,6 @@ public class AppForm extends javax.swing.JFrame {
 //            container.invalidate();
         }
     }
-
 
     private void miAppByIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAppByIPActionPerformed
         if (appByIP == null) {
@@ -672,6 +671,7 @@ public class AppForm extends javax.swing.JFrame {
         if (connectToConfigServer()) {
             BussAttr pn = (BussAttr) bussAttr.getContentPanel();
             try {
+                requestOutput("Request: " + pn.getSearchSummary());
 
                 if (pn.iscbAttrSelected()) {
                     CfgEnumeratorQuery query = new CfgEnumeratorQuery(configServerManager.getService());
@@ -767,7 +767,6 @@ public class AppForm extends javax.swing.JFrame {
             worker.cancel(true);
         }
     }//GEN-LAST:event_btCancelActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancel;
@@ -1049,8 +1048,9 @@ public class AppForm extends javax.swing.JFrame {
                         if (names.length > 1) {
                             buf.append('\t');
                             for (int i = 1; i < names.length; i++) {
-                                if(i>1)
+                                if (i > 1) {
                                     buf.append(", ");
+                                }
                                 buf.append(names[i]);
                             }
                         }
@@ -1065,7 +1065,7 @@ public class AppForm extends javax.swing.JFrame {
 
             }
             if (cnt > 0) {
-                requestOutput("Search done, located " + cnt + " objects -->\n" + buf + "<--\n");
+                requestOutput("Search done, located " + cnt + " objects type "+cls.getSimpleName()+" -->\n" + buf + "<--\n");
             }
         }
     }
@@ -1181,6 +1181,7 @@ public class AppForm extends javax.swing.JFrame {
 
                 AppByIP pn1 = (AppByIP) appByIP.getContentPanel();
                 String ip1 = pn1.getText();
+                requestOutput("Request: " + pn1.getSearchSummary());
 
                 try {
                     try {
@@ -1299,7 +1300,10 @@ public class AppForm extends javax.swing.JFrame {
                 if (connectToConfigServer()) {
 
                     AppByOptions pn = (AppByOptions) appByOption.getContentPanel();
+                    requestOutput("Request: " + pn.getSearchSummary());
+
                     try {
+
                         CfgAppType t = pn.getSelectedAppType();
                         CfgApplicationQuery q = new CfgApplicationQuery();
                         if (t != null) {
@@ -1392,6 +1396,7 @@ public class AppForm extends javax.swing.JFrame {
                 if (connectToConfigServer()) {
 
                     ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
+                    requestOutput("Request: " + pn.getSearchSummary());
 
                     CfgObjectType t = pn.getSelectedObjType();
                     if (t != null) {
@@ -1684,7 +1689,7 @@ public class AppForm extends javax.swing.JFrame {
             },
                     pn);
 //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
+            //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
         } else if (t == CfgObjectType.CFGTransaction) {
             CfgTransactionQuery query = new CfgTransactionQuery();
             String n = pn.getObjName();

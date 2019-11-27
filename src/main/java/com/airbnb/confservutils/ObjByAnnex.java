@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author stepan_sydoruk
  */
-public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings {
+public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, ISearchCommon {
 
     /**
      * Creates new form AppByDBID
@@ -310,7 +310,6 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings {
         return StringUtils.stripToNull(tfOptionValue.getText());
     }
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
@@ -363,6 +362,48 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings {
     public String getAllSearch() {
         return StringUtils.stripToNull(tfSearchString.getText());
 
+    }
+
+    @Override
+    public String getSearchSummary() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("Object by Annex;");
+        if (getSelectedObjType() != null) {
+            buf.append(" type [").append(getSelectedObjType()).append("]");
+        }
+        if (getSelectedObjSubType() != null) {
+            buf.append(" subtype [").append(getSelectedObjSubType()).append("]");
+        }
+
+        if (isSearchAll()) {
+            buf.append(" term \"").append(getAllSearch()).append("\" in all fields, including object attributes");
+        } else {
+            if (getObjName() != null) {
+                buf.append(" name [")
+                        .append(getObjName())
+                        .append("]");
+            }
+            if (getSection() != null) {
+                buf.append(" section [")
+                        .append(getSection())
+                        .append("]");
+            }
+            if (getOption() != null) {
+                buf.append(" option [")
+                        .append(getOption())
+                        .append("]");
+            }
+            if (getValue() != null) {
+                buf.append(" value [")
+                        .append(getValue())
+                        .append("]");
+            }
+        }
+        buf.append(" rx[").append(isRegex() ? "yes" : "no").append("]");
+        buf.append(" CaSe[").append(isCaseSensitive() ? "yes" : "no").append("]");
+        buf.append("; ").append(isFullOutputSelected() ? "full" : "short").append(" output");
+
+        return buf.toString();
     }
 
 }

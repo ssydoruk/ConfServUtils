@@ -11,7 +11,7 @@ import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
  *
  * @author stepan_sydoruk
  */
-public class ObjByDBID extends javax.swing.JPanel {
+public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
 
     /**
      * Creates new form AppByDBID
@@ -82,4 +82,9 @@ public class ObjByDBID extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JFormattedTextField tfDBID;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public String getSearchSummary() {
+        return "Search for object type " + getSelectedItem() + " dbid: " + tfDBID.getText();
+    }
 }

@@ -9,7 +9,7 @@ package com.airbnb.confservutils;
  *
  * @author stepan_sydoruk
  */
-public class AppByIP extends javax.swing.JPanel {
+public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
 
     public String getText() {
         return tfIPAddress.getText();
@@ -42,9 +42,13 @@ public class AppByIP extends javax.swing.JPanel {
         add(tfIPAddress);
     }// </editor-fold>//GEN-END:initComponents
 
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JTextField tfIPAddress;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public String getSearchSummary() {
+        return "App by IP; IP[" + tfIPAddress.getText() + "]";
+    }
 }

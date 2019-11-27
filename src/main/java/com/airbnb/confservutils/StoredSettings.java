@@ -79,7 +79,7 @@ class StoredSettings {
 
         @Override
         public String toString() {
-            return profile + " ( " + host + ":"+port+')';
+            return profile + " ( " + host + ":" + port + ')';
         }
 
         public String getProfile() {

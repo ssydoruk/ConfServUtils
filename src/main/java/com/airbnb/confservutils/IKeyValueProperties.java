@@ -14,6 +14,8 @@ import java.util.Collection;
  * @author stepan_sydoruk
  */
 public interface IKeyValueProperties {
+
     KeyValueCollection getProperties(CfgObject obj);
+
     Collection<String> getName(CfgObject obj);
 }
