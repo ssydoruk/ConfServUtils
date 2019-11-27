@@ -1039,9 +1039,19 @@ public class AppForm extends javax.swing.JFrame {
                     if (ss.isFullOutputSelected()) {
                         buf.append(cfgObj.toString()).append("\n");
                     } else {
-                        buf.append(props.getName(cfgObj)).append(", type:").append(cfgObj.getObjectType()).append(", DBID: " + cfgObj.getObjectDbid());
+                        Object[] names = props.getName(cfgObj).toArray();
+                        buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: " + cfgObj.getObjectDbid());
+                        buf.append("\n");
+                        if (names.length > 1) {
+                            buf.append('\t');
+                            for (int i = 1; i < names.length; i++) {
+                                if(i>1)
+                                    buf.append(", ");
+                                buf.append(names[i]);
+                            }
+                        }
                         if (checkForSectionOrOption) {
-                            buf.append("\t");
+                            buf.append("   ");
                             buf.append(kv);
                         }
                         buf.append("\n");
