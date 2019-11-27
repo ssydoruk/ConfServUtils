@@ -15,22 +15,26 @@ import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDNGroup;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumerator;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumeratorValue;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPlaceGroup;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentLoginQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgDNGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorValueQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgPersonQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
@@ -1577,10 +1581,6 @@ public class AppForm extends javax.swing.JFrame {
                 query.setName(n);
 
             }
-//                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
-//                            if (selectedObjSubType != null) {
-//                                query.(selectedObjSubType);
-//                            }
 
             findApps(
                     query,
@@ -1595,6 +1595,60 @@ public class AppForm extends javax.swing.JFrame {
                 public Collection<String> getName(CfgObject obj) {
                     Collection<String> ret = new ArrayList<>();
                     ret.add(((CfgAgentGroup) obj).getGroupInfo().getName());
+                    return ret;
+                }
+            },
+                    pn);
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDNGroup">
+        else if (t == CfgObjectType.CFGDNGroup) {
+            CfgDNGroupQuery query = new CfgDNGroupQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+
+            }
+
+            findApps(
+                    query,
+                    CfgDNGroup.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgDNGroup) obj).getGroupInfo().getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgDNGroup) obj).getGroupInfo().getName());
+                    return ret;
+                }
+            },
+                    pn);
+        } //</editor-fold>
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlaceGroup">
+        else if (t == CfgObjectType.CFGPlaceGroup) {
+            CfgPlaceGroupQuery query = new CfgPlaceGroupQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+
+            }
+
+            findApps(
+                    query,
+                    CfgPlaceGroup.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgPlaceGroup) obj).getGroupInfo().getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgPlaceGroup) obj).getGroupInfo().getName());
                     return ret;
                 }
             },
@@ -1630,7 +1684,7 @@ public class AppForm extends javax.swing.JFrame {
             },
                     pn);
 //</editor-fold>
-            //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
         } else if (t == CfgObjectType.CFGTransaction) {
             CfgTransactionQuery query = new CfgTransactionQuery();
             String n = pn.getObjName();
