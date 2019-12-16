@@ -83,6 +83,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -146,8 +147,18 @@ public class AppForm extends javax.swing.JFrame {
 
     }
 
+    private void configServerChanged(ActionEvent e) {
+        JComboBox cb = (JComboBox)e.getSource();
+        setTitle("ConfigServer query - "+cb.getSelectedItem().toString());
+        
+    }
+
     private void loadConfigServers() {
 //<editor-fold defaultstate="collapsed" desc="load configservers">
+        ActionListener[] actionListeners = cbConfigServer.getActionListeners();
+        for (ActionListener actionListener : actionListeners) {
+            cbConfigServer.removeActionListener(actionListener);
+        }
         cbConfigServer.removeAllItems();
         DefaultComboBoxModel mod = (DefaultComboBoxModel) cbConfigServer.getModel();
         for (StoredSettings.ConfServer cs : ds.getConfigServers()) {
@@ -156,6 +167,14 @@ public class AppForm extends javax.swing.JFrame {
         if (mod.getSize() > 0) {
             cbConfigServer.setSelectedIndex(0);
         }
+
+        cbConfigServer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                configServerChanged(e);
+            }
+
+        });
 //</editor-fold>
 
     }
@@ -314,6 +333,11 @@ public class AppForm extends javax.swing.JFrame {
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
 
         cbConfigServer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbConfigServer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbConfigServerActionPerformed(evt);
+            }
+        });
         jPanel4.add(cbConfigServer);
 
         btEditConfgServ.setText("...");
@@ -768,6 +792,11 @@ public class AppForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btCancelActionPerformed
 
+    private void cbConfigServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbConfigServerActionPerformed
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_cbConfigServerActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancel;
     private javax.swing.JButton btClearOutput;
@@ -1065,7 +1094,7 @@ public class AppForm extends javax.swing.JFrame {
 
             }
             if (cnt > 0) {
-                requestOutput("Search done, located " + cnt + " objects type "+cls.getSimpleName()+" -->\n" + buf + "<--\n");
+                requestOutput("Search done, located " + cnt + " objects type " + cls.getSimpleName() + " -->\n" + buf + "<--\n");
             }
         }
     }
