@@ -11,19 +11,7 @@ import com.genesyslab.platform.applicationblocks.com.CfgQuery;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDNGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumerator;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumeratorValue;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPlaceGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
+import com.genesyslab.platform.applicationblocks.com.objects.*;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentLoginQuery;
@@ -89,6 +77,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jasypt.util.text.StrongTextEncryptor;
@@ -105,6 +95,7 @@ public class AppForm extends javax.swing.JFrame {
 
     StoredSettings ds = null;
     private static final Logger logger = LogManager.getLogger();
+    private final AppForm theForm;
 
     public void runGui() throws FileNotFoundException, IOException {
         loadConfig();
@@ -148,9 +139,9 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private void configServerChanged(ActionEvent e) {
-        JComboBox cb = (JComboBox)e.getSource();
-        setTitle("ConfigServer query - "+cb.getSelectedItem().toString());
-        
+        JComboBox cb = (JComboBox) e.getSource();
+        setTitle("ConfigServer query - " + cb.getSelectedItem().toString());
+
     }
 
     private void loadConfigServers() {
@@ -188,6 +179,7 @@ public class AppForm extends javax.swing.JFrame {
      */
     public AppForm() {
         initComponents();
+        theForm=this;
         btCancel.setVisible(false);
         configServerManager = new ConfigServerManager(this);
         componentsEnabled = true;
@@ -218,6 +210,30 @@ public class AppForm extends javax.swing.JFrame {
         textEncryptor = new StrongTextEncryptor();
         textEncryptor.setPassword(ConfigConnection.class.getName());
         connectionStatusChanged();
+        jmExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("-1-");
+            }
+        });
+
+        jmExit.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                saveConfig();
+                dispose();
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent e) {
+
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent e) {
+
+            }
+        });
 
     }
 
@@ -316,7 +332,7 @@ public class AppForm extends javax.swing.JFrame {
         miAppByOption = new javax.swing.JMenuItem();
         miObjectByAnnex = new javax.swing.JMenuItem();
         miBusinessAttribute = new javax.swing.JMenuItem();
-        jMenu3 = new javax.swing.JMenu();
+        jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
 
@@ -501,22 +517,13 @@ public class AppForm extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
-        jMenu3.setText("Exit");
-        jMenu3.addMenuListener(new javax.swing.event.MenuListener() {
-            public void menuSelected(javax.swing.event.MenuEvent evt) {
-                jMenu3MenuSelected(evt);
-            }
-            public void menuDeselected(javax.swing.event.MenuEvent evt) {
-            }
-            public void menuCanceled(javax.swing.event.MenuEvent evt) {
-            }
-        });
-        jMenu3.addActionListener(new java.awt.event.ActionListener() {
+        jmExit.setText("Exit");
+        jmExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenu3ActionPerformed(evt);
+                jmExitActionPerformed(evt);
             }
         });
-        jMenuBar1.add(jMenu3);
+        jMenuBar1.add(jmExit);
 
         setJMenuBar(jMenuBar1);
 
@@ -594,7 +601,14 @@ public class AppForm extends javax.swing.JFrame {
                             int dbid = pn.getValue();
                             ICfgObject retrieveObject = configServerManager.retrieveObject(t, dbid);
                             if (retrieveObject != null) {
-                                requestOutput(retrieveObject.toString());
+                                if (pn.isFullOutput()) {
+                                    requestOutput(retrieveObject.toString());
+                                } else {
+                                    StringBuilder buf = new StringBuilder();
+
+                                    buf.append("Object type:" + retrieveObject.getObjectType() + " DBID:" + retrieveObject.getObjectDbid() + " name: " + getObjName(retrieveObject));
+                                    requestOutput(buf.toString());
+                                }
                             } else {
                                 requestOutput("Not found object DBID:" + dbid + " type:" + t);
                             }
@@ -603,10 +617,284 @@ public class AppForm extends javax.swing.JFrame {
                         }
                     }
                 }
+
             });
 
         }
     }//GEN-LAST:event_miObjByDBIDActionPerformed
+
+    private String getObjName(ICfgObject retrieveObject) {
+        if (retrieveObject instanceof CfgAccessGroup) {
+            return ((CfgAccessGroup) retrieveObject).getObjectPath();
+        } else if (retrieveObject instanceof CfgAccessGroupBrief) {
+            return ((CfgAccessGroupBrief) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgACE) {
+            return ((CfgACE) retrieveObject).getID().toString();
+        } else if (retrieveObject instanceof CfgACEID) {
+            return ((CfgACEID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgACL) {
+            return ((CfgACL) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgACLID) {
+            return ((CfgACLID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgActionCode) {
+            return ((CfgActionCode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAddress) {
+            return ((CfgAddress) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgAgentGroup) {
+            return ((CfgAgentGroup) retrieveObject).getGroupInfo().toString();
+        } else if (retrieveObject instanceof CfgAgentInfo) {
+            return ((CfgAgentInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgAgentLogin) {
+            return ((CfgAgentLogin) retrieveObject).getLoginCode();
+        } else if (retrieveObject instanceof CfgAgentLoginInfo) {
+            return ((CfgAgentLoginInfo) retrieveObject).getAgentLogin().getLoginCode();
+        } else if (retrieveObject instanceof CfgAlarmCondition) {
+            return ((CfgAlarmCondition) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgApplication) {
+            return ((CfgApplication) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAppPrototype) {
+            return ((CfgAppPrototype) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAppRank) {
+            return ((CfgAppRank) retrieveObject).getAppRank().toString();
+        } else if (retrieveObject instanceof CfgAppServicePermission) {
+            return ((CfgAppServicePermission) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgCallingList) {
+            return ((CfgCallingList) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCallingListInfo) {
+            return ((CfgCallingListInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgCampaign) {
+            return ((CfgCampaign) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCampaignGroup) {
+            return ((CfgCampaignGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCampaignGroupInfo) {
+            return ((CfgCampaignGroupInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgConnInfo) {
+            return ((CfgConnInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDelSwitchAccess) {
+            return ((CfgDelSwitchAccess) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAccessGroup) {
+            return ((CfgDeltaAccessGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaActionCode) {
+            return ((CfgDeltaActionCode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaAgentGroup) {
+            return ((CfgDeltaAgentGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAgentInfo) {
+            return ((CfgDeltaAgentInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAgentLogin) {
+            return ((CfgDeltaAgentLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAlarmCondition) {
+            return ((CfgDeltaAlarmCondition) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaApplication) {
+            return ((CfgDeltaApplication) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaAppPrototype) {
+            return ((CfgDeltaAppPrototype) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCallingList) {
+            return ((CfgDeltaCallingList) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCampaign) {
+            return ((CfgDeltaCampaign) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCampaignGroup) {
+            return ((CfgDeltaCampaignGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaDN) {
+            return ((CfgDeltaDN) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaDNGroup) {
+            return ((CfgDeltaDNGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaEnumerator) {
+            return ((CfgDeltaEnumerator) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaEnumeratorValue) {
+            return ((CfgDeltaEnumeratorValue) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaField) {
+            return ((CfgDeltaField) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFilter) {
+            return ((CfgDeltaFilter) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFolder) {
+            return ((CfgDeltaFolder) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFormat) {
+            return ((CfgDeltaFormat) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGroup) {
+            return ((CfgDeltaGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPCustomer) {
+            return ((CfgDeltaGVPCustomer) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPIVRProfile) {
+            return ((CfgDeltaGVPIVRProfile) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPReseller) {
+            return ((CfgDeltaGVPReseller) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaHost) {
+            return ((CfgDeltaHost) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaIVR) {
+            return ((CfgDeltaIVR) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaIVRPort) {
+            return ((CfgDeltaIVRPort) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaObjectiveTable) {
+            return ((CfgDeltaObjectiveTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPerson) {
+            return ((CfgDeltaPerson) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaPersonLastLogin) {
+            return ((CfgDeltaPersonLastLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaPhysicalSwitch) {
+            return ((CfgDeltaPhysicalSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPlace) {
+            return ((CfgDeltaPlace) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPlaceGroup) {
+            return ((CfgDeltaPlaceGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaRole) {
+            return ((CfgDeltaRole) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaScheduledTask) {
+            return ((CfgDeltaScheduledTask) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaScript) {
+            return ((CfgDeltaScript) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaService) {
+            return ((CfgDeltaService) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaSkill) {
+            return ((CfgDeltaSkill) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaStatDay) {
+            return ((CfgDeltaStatDay) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaStatTable) {
+            return ((CfgDeltaStatTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaSwitch) {
+            return ((CfgDeltaSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTableAccess) {
+            return ((CfgDeltaTableAccess) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTenant) {
+            return ((CfgDeltaTenant) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTimeZone) {
+            return ((CfgDeltaTimeZone) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTransaction) {
+            return ((CfgDeltaTransaction) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTreatment) {
+            return ((CfgDeltaTreatment) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaVoicePrompt) {
+            return ((CfgDeltaVoicePrompt) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDetectEvent) {
+            return ((CfgDetectEvent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDN) {
+            return ((CfgDN) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDNAccessNumber) {
+            return ((CfgDNAccessNumber) retrieveObject).getNumber();
+        } else if (retrieveObject instanceof CfgDNGroup) {
+            return ((CfgDNGroup) retrieveObject).getType().toString();
+        } else if (retrieveObject instanceof CfgDNInfo) {
+            return ((CfgDNInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgEnumerator) {
+            return ((CfgEnumerator) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgEnumeratorValue) {
+            return ((CfgEnumeratorValue) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgField) {
+            return ((CfgField) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFilter) {
+            return ((CfgFilter) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFolder) {
+            return ((CfgFolder) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFormat) {
+            return ((CfgFormat) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGroup) {
+            return ((CfgGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPCustomer) {
+            return ((CfgGVPCustomer) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPIVRProfile) {
+            return ((CfgGVPIVRProfile) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPReseller) {
+            return ((CfgGVPReseller) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgHost) {
+            return ((CfgHost) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgID) {
+            return ((CfgID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgIVR) {
+            return ((CfgIVR) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgIVRPort) {
+            return ((CfgIVRPort) retrieveObject).getPortNumber();
+        } else if (retrieveObject instanceof CfgMemberID) {
+            return ((CfgMemberID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectID) {
+            return ((CfgObjectID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectiveTable) {
+            return ((CfgObjectiveTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgObjectiveTableRecord) {
+            return ((CfgObjectiveTableRecord) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectResource) {
+            return ((CfgObjectResource) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgOS) {
+            return ((CfgOS) retrieveObject).getOStype().toString();
+        } else if (retrieveObject instanceof CfgOwnerID) {
+            return ((CfgOwnerID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgParentID) {
+            return ((CfgParentID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPerson) {
+            return ((CfgPerson) retrieveObject).getUserName();
+        } else if (retrieveObject instanceof CfgPersonBrief) {
+            return ((CfgPersonBrief) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPersonLastLogin) {
+            return ((CfgPersonLastLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPhones) {
+            return ((CfgPhones) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPhysicalSwitch) {
+            return ((CfgPhysicalSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgPlace) {
+            return ((CfgPlace) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgPlaceGroup) {
+            return ((CfgPlaceGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPortInfo) {
+            return ((CfgPortInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgRemovalEvent) {
+            return ((CfgRemovalEvent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgResourceID) {
+            return ((CfgResourceID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgRole) {
+            return ((CfgRole) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgRoleMember) {
+            return ((CfgRoleMember) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgScheduledTask) {
+            return ((CfgScheduledTask) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgScript) {
+            return ((CfgScript) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgServer) {
+            return ((CfgServer) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgServerHostID) {
+            return ((CfgServerHostID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgServerVersion) {
+            return ((CfgServerVersion) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgService) {
+            return ((CfgService) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgServiceInfo) {
+            return ((CfgServiceInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSkill) {
+            return ((CfgSkill) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSkillLevel) {
+            return ((CfgSkillLevel) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSolutionComponent) {
+            return ((CfgSolutionComponent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSolutionComponentDefinition) {
+            return ((CfgSolutionComponentDefinition) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgStatDay) {
+            return ((CfgStatDay) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgStatInterval) {
+            return ((CfgStatInterval) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgStatTable) {
+            return ((CfgStatTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSubcode) {
+            return ((CfgSubcode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSwitch) {
+            return ((CfgSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSwitchAccessCode) {
+            return ((CfgSwitchAccessCode) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgTableAccess) {
+            return ((CfgTableAccess) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTenant) {
+            return ((CfgTenant) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTenantBrief) {
+            return ((CfgTenantBrief) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTimeZone) {
+            return ((CfgTimeZone) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTransaction) {
+            return ((CfgTransaction) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTreatment) {
+            return ((CfgTreatment) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgUpdatePackageRecord) {
+            return ((CfgUpdatePackageRecord) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgVoicePrompt) {
+            return ((CfgVoicePrompt) retrieveObject).getName();
+        }
+        return null;
+    }
 
     RequestDialog appByIP = null;
 
@@ -654,15 +942,12 @@ public class AppForm extends javax.swing.JFrame {
         taOutput.setText("");
     }//GEN-LAST:event_btClearOutputActionPerformed
 
-    private void jMenu3MenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_jMenu3MenuSelected
-//    logger.info("exit pressed");        // TODO add your handling code here:
-        System.exit(0);
-    }//GEN-LAST:event_jMenu3MenuSelected
-
-    private void jMenu3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu3ActionPerformed
+    private void jmExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmExitActionPerformed
         // TODO add your handling code here:
         logger.info("jMenu3ActionPerformed pressed " + evt.getActionCommand());
-    }//GEN-LAST:event_jMenu3ActionPerformed
+//        theForm.dispose();
+        System.exit(0);
+    }//GEN-LAST:event_jmExitActionPerformed
 
     RequestDialog appByOption;
 
@@ -810,7 +1095,6 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -821,6 +1105,7 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JMenu jmExit;
     private javax.swing.JPanel jpConfServ;
     private javax.swing.JPanel jpOutput;
     private javax.swing.JMenuItem miAppByIP;
@@ -1232,7 +1517,8 @@ public class AppForm extends javax.swing.JFrame {
                                     Collection<CfgHost> hostsFound = configServerManager.getResults(hq, CfgHost.class);
                                     if (hostsFound != null) {
                                         for (CfgHost cfgHost : hostsFound) {
-                                            buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:").append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
+                                            buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:")
+                                                    .append(cfgHost.getDBID()).append(" type: ").append(cfgHost.getType()).append(" os: ").append(cfgHost.getOSinfo().getOStype()).append("\n");
                                             aq.setHostDbid(cfgHost.getDBID());
                                             Collection<CfgApplication> appsFound = aq.execute();
                                             buf.append("\tapplications on the host:\n");
@@ -1241,6 +1527,11 @@ public class AppForm extends javax.swing.JFrame {
                                             } else {
                                                 for (CfgApplication cfgApplication : appsFound) {
                                                     buf.append("\t\t\"").append(cfgApplication.getName()).append("\"").append(" (type:").append(cfgApplication.getType()).append(", DBID:").append(cfgApplication.getDBID()).append(")\n");
+                                                }
+                                                if (pn1.isFullOutput()) {
+                                                    for (CfgApplication cfgApplication : appsFound) {
+                                                        buf.append("\t\t\"").append(cfgApplication.toString()).append("\n<<<<<\n");
+                                                    }
                                                 }
                                             }
 //                                try {

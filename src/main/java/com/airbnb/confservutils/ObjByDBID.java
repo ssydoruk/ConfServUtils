@@ -32,6 +32,10 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
         }
     }
 
+    public boolean isFullOutput() {
+        return rbFullOutput.isSelected();
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -41,14 +45,20 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel3 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         tfDBID = new javax.swing.JFormattedTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         cbObjectType = new javax.swing.JComboBox<>();
+        jPanel9 = new javax.swing.JPanel();
+        rbFullOutput = new javax.swing.JRadioButton();
+        rbShortOutput = new javax.swing.JRadioButton();
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel3.setLayout(new javax.swing.BoxLayout(jPanel3, javax.swing.BoxLayout.PAGE_AXIS));
 
         jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -58,7 +68,7 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
         tfDBID.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         jPanel1.add(tfDBID);
 
-        add(jPanel1);
+        jPanel3.add(jPanel1);
 
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -67,7 +77,20 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
 
         jPanel2.add(cbObjectType);
 
-        add(jPanel2);
+        jPanel3.add(jPanel2);
+
+        add(jPanel3);
+
+        jPanel9.setLayout(new javax.swing.BoxLayout(jPanel9, javax.swing.BoxLayout.PAGE_AXIS));
+
+        rbFullOutput.setText("Print full output");
+        jPanel9.add(rbFullOutput);
+
+        rbShortOutput.setSelected(true);
+        rbShortOutput.setText("Print abbreviated output");
+        jPanel9.add(rbShortOutput);
+
+        add(jPanel9);
     }// </editor-fold>//GEN-END:initComponents
 
     public int getValue() {
@@ -80,6 +103,10 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JRadioButton rbFullOutput;
+    private javax.swing.JRadioButton rbShortOutput;
     private javax.swing.JFormattedTextField tfDBID;
     // End of variables declaration//GEN-END:variables
 

@@ -22,6 +22,10 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
         initComponents();
         tfIPAddress.setColumns(30);
     }
+    
+    public boolean isFullOutput(){
+        return rbFullOutput.isSelected();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -32,18 +36,45 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         tfIPAddress = new javax.swing.JTextField();
+        jPanel9 = new javax.swing.JPanel();
+        rbFullOutput = new javax.swing.JRadioButton();
+        rbShortOutput = new javax.swing.JRadioButton();
 
-        setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.LINE_AXIS));
+        setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.LINE_AXIS));
 
         jLabel1.setText("IP Address");
-        add(jLabel1);
-        add(tfIPAddress);
+        jPanel1.add(jLabel1);
+        jPanel1.add(tfIPAddress);
+
+        add(jPanel1);
+
+        jPanel9.setLayout(new javax.swing.BoxLayout(jPanel9, javax.swing.BoxLayout.PAGE_AXIS));
+
+        buttonGroup1.add(rbFullOutput);
+        rbFullOutput.setText("Print full output");
+        jPanel9.add(rbFullOutput);
+
+        buttonGroup1.add(rbShortOutput);
+        rbShortOutput.setSelected(true);
+        rbShortOutput.setText("Print abbreviated output");
+        jPanel9.add(rbShortOutput);
+
+        add(jPanel9);
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JRadioButton rbFullOutput;
+    private javax.swing.JRadioButton rbShortOutput;
     private javax.swing.JTextField tfIPAddress;
     // End of variables declaration//GEN-END:variables
 
