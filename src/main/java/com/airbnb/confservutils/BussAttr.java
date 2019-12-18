@@ -7,6 +7,7 @@ package com.airbnb.confservutils;
 
 import com.genesyslab.platform.commons.GEnum;
 import java.util.ArrayList;
+import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -73,7 +74,7 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
         cbAttrValue = new javax.swing.JCheckBox();
         jPanel6 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        tfObjectName = new javax.swing.JTextField();
+        tfObjectName = new javax.swing.JComboBox<>();
         jPanel4 = new javax.swing.JPanel();
         rbFullOutput = new javax.swing.JRadioButton();
         rbShortOutput = new javax.swing.JRadioButton();
@@ -96,6 +97,8 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
 
         jLabel5.setText("Name");
         jPanel6.add(jLabel5);
+
+        tfObjectName.setEditable(true);
         jPanel6.add(tfObjectName);
 
         add(jPanel6);
@@ -119,8 +122,9 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
         add(jPanel4);
     }// </editor-fold>//GEN-END:initComponents
 
+    @Override
     public String getName() {
-        return StringUtils.stripToNull(tfObjectName.getText());
+        return StringUtils.stripToNull(tfObjectName.getSelectedItem().toString());
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -135,7 +139,7 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JRadioButton rbFullOutput;
     private javax.swing.JRadioButton rbShortOutput;
-    private javax.swing.JTextField tfObjectName;
+    private javax.swing.JComboBox<String> tfObjectName;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -150,13 +154,24 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
         if (iscbAttrValueSelected()) {
             arr.add("attribute value");
         }
-        buf.append(StringUtils.join(arr,", "));
+        buf.append(StringUtils.join(arr, ", "));
         buf.append(" \"").append(getName()).append("\"");
         buf.append(" rx[").append(isRegex() ? "yes" : "no").append("]");
         buf.append(" CaSe[").append(isCaseSensitive() ? "yes" : "no").append("]");
         buf.append("; ").append(isFullOutputSelected() ? "full" : "short").append(" output");
         return buf.toString();
 
+    }
+
+    @Override
+    public void setChoices(Collection<String> choices) {
+        Utils.Swing.setChoices(tfObjectName, choices);
+
+    }
+
+    @Override
+    public Collection<String> getChoices() {
+        return Utils.Swing.getChoices(tfObjectName);
     }
 
 }

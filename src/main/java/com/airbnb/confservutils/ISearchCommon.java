@@ -5,6 +5,10 @@
  */
 package com.airbnb.confservutils;
 
+import java.util.Collection;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+
 /**
  *
  * @author stepan_sydoruk
@@ -12,5 +16,9 @@ package com.airbnb.confservutils;
 public interface ISearchCommon {
 
     public String getSearchSummary();
+
+    public void setChoices(Collection<String> choices);
+
+    public Collection<String> getChoices();
 
 }

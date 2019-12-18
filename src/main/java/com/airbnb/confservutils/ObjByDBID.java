@@ -5,7 +5,9 @@
  */
 package com.airbnb.confservutils;
 
+import Utils.Util;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
+import java.util.Collection;
 
 /**
  *
@@ -48,7 +50,7 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
         jPanel3 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        tfDBID = new javax.swing.JFormattedTextField();
+        tfDBID = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         cbObjectType = new javax.swing.JComboBox<>();
@@ -65,7 +67,7 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
         jLabel1.setText("DBID");
         jPanel1.add(jLabel1);
 
-        tfDBID.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        tfDBID.setEditable(true);
         jPanel1.add(tfDBID);
 
         jPanel3.add(jPanel1);
@@ -94,7 +96,8 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
     }// </editor-fold>//GEN-END:initComponents
 
     public int getValue() {
-        return ((Number) tfDBID.getValue()).intValue();
+        return Util.intOrDef(tfDBID.getSelectedItem().toString(), 0);
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -107,11 +110,21 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JRadioButton rbFullOutput;
     private javax.swing.JRadioButton rbShortOutput;
-    private javax.swing.JFormattedTextField tfDBID;
+    private javax.swing.JComboBox<String> tfDBID;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public String getSearchSummary() {
-        return "Search for object type " + getSelectedItem() + " dbid: " + tfDBID.getText();
+        return "Search for object type " + getSelectedItem() + " dbid: " + tfDBID.getSelectedItem().toString();
+    }
+
+    @Override
+    public void setChoices(Collection<String> choices) {
+        Utils.Swing.setChoices(tfDBID, choices);
+    }
+
+    @Override
+    public Collection<String> getChoices() {
+        return Utils.Swing.getChoices(tfDBID);
     }
 }

@@ -5,6 +5,8 @@
  */
 package com.airbnb.confservutils;
 
+import java.util.Collection;
+
 /**
  *
  * @author stepan_sydoruk
@@ -12,7 +14,7 @@ package com.airbnb.confservutils;
 public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
 
     public String getText() {
-        return tfIPAddress.getText();
+        return tfIPAddress.getSelectedItem().toString();
     }
 
     /**
@@ -20,7 +22,7 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
      */
     public AppByIP() {
         initComponents();
-        tfIPAddress.setColumns(30);
+//        tfIPAddress.set
     }
     
     public boolean isFullOutput(){
@@ -39,7 +41,7 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        tfIPAddress = new javax.swing.JTextField();
+        tfIPAddress = new javax.swing.JComboBox<>();
         jPanel9 = new javax.swing.JPanel();
         rbFullOutput = new javax.swing.JRadioButton();
         rbShortOutput = new javax.swing.JRadioButton();
@@ -50,6 +52,8 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
 
         jLabel1.setText("IP Address");
         jPanel1.add(jLabel1);
+
+        tfIPAddress.setEditable(true);
         jPanel1.add(tfIPAddress);
 
         add(jPanel1);
@@ -75,11 +79,21 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JRadioButton rbFullOutput;
     private javax.swing.JRadioButton rbShortOutput;
-    private javax.swing.JTextField tfIPAddress;
+    private javax.swing.JComboBox<String> tfIPAddress;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public String getSearchSummary() {
-        return "App by IP; IP[" + tfIPAddress.getText() + "]";
+        return "App by IP; IP[" + tfIPAddress.getSelectedItem().toString() + "]";
+    }
+
+    @Override
+    public void setChoices(Collection<String> choices) {
+        Utils.Swing.setChoices(tfIPAddress, choices);
+    }
+
+    @Override
+    public Collection<String> getChoices() {
+        return Utils.Swing.getChoices(tfIPAddress);
     }
 }

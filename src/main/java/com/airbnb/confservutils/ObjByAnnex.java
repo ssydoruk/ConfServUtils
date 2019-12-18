@@ -12,9 +12,12 @@ import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
 import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -151,19 +154,19 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jPanel12 = new javax.swing.JPanel();
         jPanel13 = new javax.swing.JPanel();
         lbSearchString = new javax.swing.JLabel();
-        tfSearchString = new javax.swing.JTextField();
+        tfSearchString = new javax.swing.JComboBox<>();
         jPanel6 = new javax.swing.JPanel();
         lbObjectName = new javax.swing.JLabel();
-        tfObjectName = new javax.swing.JTextField();
+        tfObjectName = new javax.swing.JComboBox<>();
         jPanel3 = new javax.swing.JPanel();
         lbSection = new javax.swing.JLabel();
-        tfSection = new javax.swing.JTextField();
+        tfSection = new javax.swing.JComboBox<>();
         jPanel1 = new javax.swing.JPanel();
         lbOption = new javax.swing.JLabel();
-        tfOption = new javax.swing.JTextField();
+        tfOption = new javax.swing.JComboBox<>();
         jPanel5 = new javax.swing.JPanel();
         lbOptionValue = new javax.swing.JLabel();
-        tfOptionValue = new javax.swing.JTextField();
+        tfOptionValue = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         cbObjectType = new javax.swing.JComboBox<>();
@@ -201,6 +204,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         lbSearchString.setText("Search string");
         jPanel13.add(lbSearchString);
+
+        tfSearchString.setEditable(true);
         jPanel13.add(tfSearchString);
 
         jPanel12.add(jPanel13);
@@ -209,6 +214,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         lbObjectName.setText("Object name");
         jPanel6.add(lbObjectName);
+
+        tfObjectName.setEditable(true);
         jPanel6.add(tfObjectName);
 
         jPanel12.add(jPanel6);
@@ -217,6 +224,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         lbSection.setText("Section name");
         jPanel3.add(lbSection);
+
+        tfSection.setEditable(true);
         jPanel3.add(tfSection);
 
         jPanel12.add(jPanel3);
@@ -225,6 +234,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         lbOption.setText("Option name");
         jPanel1.add(lbOption);
+
+        tfOption.setEditable(true);
         jPanel1.add(tfOption);
 
         jPanel12.add(jPanel1);
@@ -233,6 +244,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         lbOptionValue.setText("Option Value");
         jPanel5.add(lbOptionValue);
+
+        tfOptionValue.setEditable(true);
         jPanel5.add(tfOptionValue);
 
         jPanel12.add(jPanel5);
@@ -288,13 +301,13 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getSection() {
-        return StringUtils.stripToNull(tfSection.getText());
+        return StringUtils.stripToNull(tfSection.getSelectedItem().toString());
     }
 
     @Override
     public String getObjName() {
         if (!isSearchAll()) {
-            return StringUtils.stripToNull(tfObjectName.getText());
+            return StringUtils.stripToNull(tfObjectName.getSelectedItem().toString());
         } else {
             return null;
         }
@@ -302,12 +315,12 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getOption() {
-        return StringUtils.stripToNull(tfOption.getText());
+        return StringUtils.stripToNull(tfOption.getSelectedItem().toString());
     }
 
     @Override
     public String getValue() {
-        return StringUtils.stripToNull(tfOptionValue.getText());
+        return StringUtils.stripToNull(tfOptionValue.getSelectedItem().toString());
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -341,11 +354,11 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
     private javax.swing.JLabel lbSection;
     private javax.swing.JRadioButton rbFullOutput;
     private javax.swing.JRadioButton rbShortOutput;
-    private javax.swing.JTextField tfObjectName;
-    private javax.swing.JTextField tfOption;
-    private javax.swing.JTextField tfOptionValue;
-    private javax.swing.JTextField tfSearchString;
-    private javax.swing.JTextField tfSection;
+    private javax.swing.JComboBox<String> tfObjectName;
+    private javax.swing.JComboBox<String> tfOption;
+    private javax.swing.JComboBox<String> tfOptionValue;
+    private javax.swing.JComboBox<String> tfSearchString;
+    private javax.swing.JComboBox<String> tfSection;
     // End of variables declaration//GEN-END:variables
 
     private void setSubtypeValues(Collection values) {
@@ -360,7 +373,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getAllSearch() {
-        return StringUtils.stripToNull(tfSearchString.getText());
+        return StringUtils.stripToNull(tfSearchString.getSelectedItem().toString());
 
     }
 
@@ -404,6 +417,26 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         buf.append("; ").append(isFullOutputSelected() ? "full" : "short").append(" output");
 
         return buf.toString();
+    }
+
+    @Override
+    public void setChoices(Collection<String> choices) {
+        Utils.Swing.setChoices(tfSearchString, choices);
+        Utils.Swing.setChoices(tfObjectName, choices);
+        Utils.Swing.setChoices(tfOption, choices);
+        Utils.Swing.setChoices(tfOptionValue, choices);
+        Utils.Swing.setChoices(tfSection, choices);
+    }
+
+    @Override
+    public Collection<String> getChoices() {
+
+        return (isSearchAll())
+                ? Utils.Swing.getChoices(tfSearchString)
+                : Utils.Swing.getChoices(tfObjectName,
+                        tfOption,
+                        tfOptionValue,
+                        tfSection);
     }
 
 }

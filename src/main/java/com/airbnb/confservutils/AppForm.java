@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -179,7 +180,7 @@ public class AppForm extends javax.swing.JFrame {
      */
     public AppForm() {
         initComponents();
-        theForm=this;
+        theForm = this;
         btCancel.setVisible(false);
         configServerManager = new ConfigServerManager(this);
         componentsEnabled = true;
@@ -221,7 +222,7 @@ public class AppForm extends javax.swing.JFrame {
             @Override
             public void menuSelected(MenuEvent e) {
                 saveConfig();
-                dispose();
+                System.exit(0);
             }
 
             @Override
@@ -2146,6 +2147,8 @@ public class AppForm extends javax.swing.JFrame {
         }
     }
 
+    HashSet<String> searchValues = new HashSet<>();
+
     class RequestDialog extends StandardDialog {
 
         private JPanel contentPanel;
@@ -2216,6 +2219,9 @@ public class AppForm extends javax.swing.JFrame {
 
 //            setModal(true);
             pack();
+            if (contentPanel instanceof ISearchCommon) {
+                ((ISearchCommon) contentPanel).setChoices(searchValues);
+            }
 
 //            ScreenInfo.CenterWindow(this);
             setLocationRelativeTo(getParent());
@@ -2231,7 +2237,19 @@ public class AppForm extends javax.swing.JFrame {
 //            setVisible(false);
             setVisible(true);
 
-            return getDialogResult() == StandardDialog.RESULT_AFFIRMED;
+            if (getDialogResult() == StandardDialog.RESULT_AFFIRMED) {
+                if (contentPanel instanceof ISearchCommon) {
+                    Collection<String> choices = ((ISearchCommon) contentPanel).getChoices();
+                    if (choices != null && !choices.isEmpty()) {
+                        for (String choice : choices) {
+                            searchValues.add(choice);
+                        }
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
 
         }
     }
