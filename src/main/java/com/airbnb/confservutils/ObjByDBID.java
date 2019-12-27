@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import static Utils.Swing.checkBoxSelection;
 import Utils.Util;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import java.util.Collection;
@@ -115,7 +116,7 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public String getSearchSummary() {
-        return "Search for object type " + getSelectedItem() + " dbid: " + tfDBID.getSelectedItem().toString();
+        return "Search for object type " + getSelectedItem() + " dbid: " + checkBoxSelection(tfDBID);
     }
 
     @Override

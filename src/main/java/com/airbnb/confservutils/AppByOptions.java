@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import static Utils.Swing.checkBoxSelection;
 import static Utils.Swing.restrictHeight;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import java.awt.Dimension;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -57,7 +59,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String getAllSearch() {
-        return tfSearchString.getSelectedItem().toString();
+        return checkBoxSelection(tfSearchString);
     }
 
     /**
@@ -191,17 +193,17 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String getSection() {
-        return StringUtils.stripToNull(tfSection.getSelectedItem().toString());
+        return checkBoxSelection(tfSection);
     }
 
     @Override
     public String getOption() {
-        return StringUtils.stripToNull(tfOption.getSelectedItem().toString());
+        return checkBoxSelection(tfOption);
     }
 
     @Override
     public String getValue() {
-        return StringUtils.stripToNull(tfOptionValue.getSelectedItem().toString());
+        return checkBoxSelection(tfOptionValue);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

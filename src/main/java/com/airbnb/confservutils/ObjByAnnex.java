@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import static Utils.Swing.checkBoxSelection;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
@@ -301,13 +302,13 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getSection() {
-        return StringUtils.stripToNull(tfSection.getSelectedItem().toString());
+        return checkBoxSelection(tfSection);
     }
 
     @Override
     public String getObjName() {
         if (!isSearchAll()) {
-            return StringUtils.stripToNull(tfObjectName.getSelectedItem().toString());
+            return checkBoxSelection(tfObjectName);
         } else {
             return null;
         }
@@ -315,12 +316,12 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getOption() {
-        return StringUtils.stripToNull(tfOption.getSelectedItem().toString());
+        return checkBoxSelection(tfOption);
     }
 
     @Override
     public String getValue() {
-        return StringUtils.stripToNull(tfOptionValue.getSelectedItem().toString());
+        return checkBoxSelection(tfOptionValue);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -373,7 +374,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getAllSearch() {
-        return StringUtils.stripToNull(tfSearchString.getSelectedItem().toString());
+        return checkBoxSelection(tfSearchString);
 
     }
 

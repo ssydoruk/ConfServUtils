@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import static Utils.Swing.checkBoxSelection;
 import Utils.ValuesEditor;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.CfgQuery;
@@ -80,6 +81,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jasypt.util.text.StrongTextEncryptor;
@@ -141,7 +143,7 @@ public class AppForm extends javax.swing.JFrame {
 
     private void configServerChanged(ActionEvent e) {
         JComboBox cb = (JComboBox) e.getSource();
-        setTitle("ConfigServer query - " + cb.getSelectedItem().toString());
+        setTitle("ConfigServer query - " + checkBoxSelection(cb));
 
     }
 
@@ -1697,7 +1699,7 @@ public class AppForm extends javax.swing.JFrame {
                     if (ex instanceof InterruptedException) {
                         requestOutput("Interrupted", false);
                     } else {
-                        requestOutput("Exception processing: " + ex.toString(), false);
+                        requestOutput("Exception processing: " + ex.toString()+"\n"+StringUtils.join(ex.getStackTrace(), "\n"), false);
                     }
                 } else {
                     requestOutput("All done", false);

@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import static Utils.Swing.checkBoxSelection;
 import com.genesyslab.platform.commons.GEnum;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -124,7 +125,7 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public String getName() {
-        return StringUtils.stripToNull(tfObjectName.getSelectedItem().toString());
+        return checkBoxSelection(tfObjectName);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

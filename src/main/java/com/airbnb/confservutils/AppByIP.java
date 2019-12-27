@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import static Utils.Swing.checkBoxSelection;
 import java.util.Collection;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Collection;
 public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
 
     public String getText() {
-        return tfIPAddress.getSelectedItem().toString();
+        return checkBoxSelection(tfIPAddress);
     }
 
     /**
@@ -84,7 +85,7 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public String getSearchSummary() {
-        return "App by IP; IP[" + tfIPAddress.getSelectedItem().toString() + "]";
+        return "App by IP; IP[" + checkBoxSelection(tfIPAddress) + "]";
     }
 
     @Override
