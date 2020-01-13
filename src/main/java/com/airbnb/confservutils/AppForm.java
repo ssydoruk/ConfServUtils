@@ -14,20 +14,36 @@ import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.*;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAccessGroupQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgActionCodeQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentLoginQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAlarmConditionQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorValueQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgFolderQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgGVPIVRProfileQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgIVRPortQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgIVRQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgObjectiveTableQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgPersonQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgServiceQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgSkillQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgStatDayQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgStatTableQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTenantQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTimeZoneQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTreatmentQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgVoicePromptQuery;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
@@ -1699,7 +1715,7 @@ public class AppForm extends javax.swing.JFrame {
                     if (ex instanceof InterruptedException) {
                         requestOutput("Interrupted", false);
                     } else {
-                        requestOutput("Exception processing: " + ex.toString()+"\n"+StringUtils.join(ex.getStackTrace(), "\n"), false);
+                        requestOutput("Exception processing: " + ex.toString() + "\n" + StringUtils.join(ex.getStackTrace(), "\n"), false);
                     }
                 } else {
                     requestOutput("All done", false);
@@ -2099,9 +2115,540 @@ public class AppForm extends javax.swing.JFrame {
                 }
             },
                     pn);
-//</editor-fold>
 
-        } else {
+        } //</editor-fold>
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGGVPIVRProfile">
+        else if (t == CfgObjectType.CFGGVPIVRProfile) {
+            CfgGVPIVRProfileQuery query = new CfgGVPIVRProfileQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgGVPIVRProfile.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgGVPIVRProfile) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgGVPIVRProfile) obj).getName());
+                    ret.add(((CfgGVPIVRProfile) obj).getDescription());
+                    ret.add(((CfgGVPIVRProfile) obj).getDisplayName());
+                    ret.add(((CfgGVPIVRProfile) obj).getNotes());
+                    ret.add(((CfgGVPIVRProfile) obj).getStatus());
+                    ret.add(((CfgGVPIVRProfile) obj).getTfn());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAccessGroup">
+        else if (t == CfgObjectType.CFGAccessGroup) {
+            CfgAccessGroupQuery query = new CfgAccessGroupQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgAccessGroup.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return null;
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>        
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGActionCode">
+        else if (t == CfgObjectType.CFGActionCode) {
+            CfgActionCodeQuery query = new CfgActionCodeQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgActionCode.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgActionCode) obj).getUserProperties();
+
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgActionCode) obj).getName());
+                    ret.add(((CfgActionCode) obj).getCode());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAlarmCondition">
+        else if (t == CfgObjectType.CFGAlarmCondition) {
+            CfgAlarmConditionQuery query = new CfgAlarmConditionQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgAlarmCondition.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgAlarmCondition) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgAlarmCondition) obj).getName());
+                    ret.add(((CfgAlarmCondition) obj).getDescription());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGApplication">
+        else if (t == CfgObjectType.CFGApplication) {
+            CfgApplicationQuery query = new CfgApplicationQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgApplication.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgApplication) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgApplication) obj).getName());
+                    ret.add(((CfgApplication) obj).getCommandLine());
+                    ret.add(((CfgApplication) obj).getCommandLineArguments());
+                    ret.add(((CfgApplication) obj).getWorkDirectory());
+                    ret.add(((CfgApplication) obj).getVersion());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGFolder">
+        else if (t == CfgObjectType.CFGFolder) {
+            CfgFolderQuery query = new CfgFolderQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgFolder.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgFolder) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgFolder) obj).getName());
+                    ret.add(((CfgFolder) obj).getDescription());
+
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGHost">
+        else if (t == CfgObjectType.CFGHost) {
+            CfgHostQuery query = new CfgHostQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgHost.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgHost) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgHost) obj).getName());
+                    ret.add(((CfgHost) obj).getIPaddress());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTenant">
+        else if (t == CfgObjectType.CFGTenant) {
+            CfgTenantQuery query = new CfgTenantQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgTenant.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgTenant) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTenant) obj).getName());
+                    ret.add(((CfgTenant) obj).getChargeableNumber());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVRPort">
+        else if (t == CfgObjectType.CFGIVRPort) {
+            CfgIVRPortQuery query = new CfgIVRPortQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setPortNumber(n);
+            }
+
+            findApps(
+                    query,
+                    CfgIVRPort.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgIVRPort) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgIVRPort) obj).getDescription());
+                    ret.add(((CfgIVRPort) obj).getPortNumber());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVR">
+        else if (t == CfgObjectType.CFGIVR) {
+            CfgIVRQuery query = new CfgIVRQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgIVR.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgIVR) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgIVR) obj).getDescription());
+                    ret.add(((CfgIVR) obj).getName());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGObjectiveTable">
+        else if (t == CfgObjectType.CFGObjectiveTable) {
+            CfgObjectiveTableQuery query = new CfgObjectiveTableQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgObjectiveTable.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgObjectiveTable) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgObjectiveTable) obj).getDescription());
+                    ret.add(((CfgObjectiveTable) obj).getName());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGService">
+        else if (t == CfgObjectType.CFGService) {
+            CfgServiceQuery query = new CfgServiceQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgService.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgService) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgService) obj).getName());
+                    ret.add(((CfgService) obj).getVersion());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSkill">
+        else if (t == CfgObjectType.CFGSkill) {
+            CfgSkillQuery query = new CfgSkillQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgSkill.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgSkill) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgSkill) obj).getName());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatDay">
+        else if (t == CfgObjectType.CFGStatDay) {
+            CfgStatDayQuery query = new CfgStatDayQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgStatDay.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgStatDay) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgStatDay) obj).getName());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatTable">
+        else if (t == CfgObjectType.CFGStatTable) {
+            CfgStatTableQuery query = new CfgStatTableQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgStatTable.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgStatTable) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgStatTable) obj).getName());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTimeZone">
+        else if (t == CfgObjectType.CFGTimeZone) {
+            CfgTimeZoneQuery query = new CfgTimeZoneQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgTimeZone.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgTimeZone) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTimeZone) obj).getName());
+                    ret.add(((CfgTimeZone) obj).getDescription());
+                    ret.add(((CfgTimeZone) obj).getNameMSExplorer());
+                    ret.add(((CfgTimeZone) obj).getNameNetscape());
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTreatment">
+        else if (t == CfgObjectType.CFGTreatment) {
+            CfgTreatmentQuery query = new CfgTreatmentQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgTreatment.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgTreatment) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTreatment) obj).getName());
+                    ret.add(((CfgTreatment) obj).getDescription());
+
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+
+        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGVoicePrompt">
+        else if (t == CfgObjectType.CFGVoicePrompt) {
+            CfgVoicePromptQuery query = new CfgVoicePromptQuery();
+            String n = pn.getObjName();
+            if (n != null) {
+                query.setName(n);
+            }
+
+            findApps(
+                    query,
+                    CfgVoicePrompt.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return ((CfgVoicePrompt) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgVoicePrompt) obj).getName());
+                    ret.add(((CfgVoicePrompt) obj).getDescription());
+
+                    return ret;
+                }
+            },
+                    pn);
+
+        } //</editor-fold>   
+        else {
             if (warnNotFound) {
                 logger.info("Searching for type " + t + " not implemented yet");
             }
