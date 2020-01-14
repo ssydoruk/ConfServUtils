@@ -6,19 +6,30 @@
 package com.airbnb.confservutils;
 
 import static Utils.Swing.checkBoxSelection;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroup;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
 import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
+import com.jidesoft.swing.CheckBoxList;
+import com.jidesoft.swing.CheckBoxListSelectionModel;
+import java.awt.ScrollPane;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
+import javax.swing.JScrollPane;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -33,19 +44,35 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
      */
     public ObjByAnnex() {
         initComponents();
-        Main.loadGenesysTypes(cbObjectType, CfgObjectType.values());
-
-        cbObjectType.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    cbObjectTypeChanged(e.getItem());
-                }
-            }
+        Utils.Swing.restrictHeight(tfObjectName);
+        Utils.Swing.restrictHeight(tfOption);
+        Utils.Swing.restrictHeight(tfOptionValue);
+        Utils.Swing.restrictHeight(tfSearchString);
+        Utils.Swing.restrictHeight(tfSection);
+        clm = new DefaultListModel();
+        clb = new CheckBoxList((ListModel) clm);
+        jpObjectTypes.add(new JScrollPane(clb));
+        Main.loadGenesysTypes(clb, CfgObjectType.values(), new GEnum[]{
+            CfgObjectType.CFGNoObject,
+            CfgObjectType.CFGMaxObjectType,
+            CfgObjectType.CFGPersonLastLogin,
+            CfgObjectType.CFGCallingList,
+            CfgObjectType.CFGField,
+            CfgObjectType.CFGFormat,
+            CfgObjectType.CFGAppPrototype,
+            CfgObjectType.CFGCampaign,
+            CfgObjectType.CFGCampaignGroup,
+            CfgObjectType.CFGTableAccess,
+            CfgObjectType.CFGFilter
 
         });
 
-        cbObjectType.getModel().setSelectedItem(Main.anyType);
+        modelUncheck(clb.getCheckBoxListSelectionModel(), new GEnum[]{
+            CfgObjectType.CFGPerson,
+            CfgObjectType.CFGDN,
+            CfgObjectType.CFGAccessGroup,
+            CfgObjectType.CFGAgentLogin});
+
         rbShortOutput.setSelected(true);
         cbCaseSensitive.setSelected(false);
 
@@ -63,6 +90,18 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jrbEverywhere.setSelected(true);
 
     }
+
+    public List<CfgObjectType> getSelectedObjectTypes() {
+        ArrayList<CfgObjectType> ret = new ArrayList();
+        for (Object checkBoxListSelectedValue : clb.getCheckBoxListSelectedValues()) {
+            ret.add((CfgObjectType) ((CfgObjectTypeMenu) checkBoxListSelectedValue).getType());
+        }
+        return ret;
+
+    }
+
+    CheckBoxList clb;
+    DefaultListModel clm;
 
     private void jrbEverywhereSelected(boolean isSelected) {
         setVisible(false);
@@ -82,25 +121,6 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     private static final Logger logger = Main.getLogger();
 
-    private void cbObjectTypeChanged(Object item) {
-        GEnum t = cfgObjType(item);
-        if (t != null) {
-            if (t == CfgObjectType.CFGDN) {
-                setSubtypeValues(CfgDNType.values());
-                return;
-            } else if (t == CfgObjectType.CFGScript) {
-                setSubtypeValues(CfgScriptType.values());
-                return;
-            } else if (t == CfgObjectType.CFGTransaction) {
-                setSubtypeValues(CfgTransactionType.values());
-                return;
-            } else {
-                logger.info("Not filling subtype for object " + t);
-            }
-        }
-        setSubtypeValues(null);
-    }
-
     public boolean isCaseSensitive() {
         return cbCaseSensitive.isSelected();
     }
@@ -111,22 +131,6 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     public boolean isFullOutputSelected() {
         return rbFullOutput.isSelected();
-    }
-
-    /**
-     *
-     * @return application type if configured or null if all types
-     */
-    public CfgObjectType getSelectedObjType() {
-        return (CfgObjectType) cfgObjType(cbObjectType.getSelectedItem());
-    }
-
-    /**
-     *
-     * @return application type if configured or null if all types
-     */
-    public GEnum getSelectedObjSubType() {
-        return cfgObjType(cbObjectSubtype.getSelectedItem());
     }
 
     private GEnum cfgObjType(Object o) {
@@ -168,12 +172,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jPanel5 = new javax.swing.JPanel();
         lbOptionValue = new javax.swing.JLabel();
         tfOptionValue = new javax.swing.JComboBox<>();
-        jPanel2 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        cbObjectType = new javax.swing.JComboBox<>();
-        jPanel7 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
-        cbObjectSubtype = new javax.swing.JComboBox<>();
+        jpObjectTypes = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
         cbIsRegex = new javax.swing.JCheckBox();
@@ -255,23 +254,9 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         add(jPanel10);
 
-        jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
-
-        jLabel2.setText("Object type");
-        jPanel2.add(jLabel2);
-
-        jPanel2.add(cbObjectType);
-
-        add(jPanel2);
-
-        jPanel7.setLayout(new javax.swing.BoxLayout(jPanel7, javax.swing.BoxLayout.LINE_AXIS));
-
-        jLabel6.setText("Object subtype");
-        jPanel7.add(jLabel6);
-
-        jPanel7.add(cbObjectSubtype);
-
-        add(jPanel7);
+        jpObjectTypes.setBorder(javax.swing.BorderFactory.createTitledBorder("Object types"));
+        jpObjectTypes.setLayout(new javax.swing.BoxLayout(jpObjectTypes, javax.swing.BoxLayout.LINE_AXIS));
+        add(jpObjectTypes);
 
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -329,23 +314,18 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
     private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JCheckBox cbCaseSensitive;
     private javax.swing.JCheckBox cbIsRegex;
-    private javax.swing.JComboBox<String> cbObjectSubtype;
-    private javax.swing.JComboBox<String> cbObjectType;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
+    private javax.swing.JPanel jpObjectTypes;
     private javax.swing.JRadioButton jrbEverywhere;
     private javax.swing.JRadioButton jrbOnlySelected;
     private javax.swing.JLabel lbObjectName;
@@ -362,11 +342,6 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
     private javax.swing.JComboBox<String> tfSection;
     // End of variables declaration//GEN-END:variables
 
-    private void setSubtypeValues(Collection values) {
-        Main.loadGenesysTypes(cbObjectSubtype, values);
-
-    }
-
     @Override
     public boolean isSearchAll() {
         return jrbEverywhere.isSelected();
@@ -382,12 +357,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
     public String getSearchSummary() {
         StringBuilder buf = new StringBuilder();
         buf.append("Object by Annex;");
-        if (getSelectedObjType() != null) {
-            buf.append(" type [").append(getSelectedObjType()).append("]");
-        }
-        if (getSelectedObjSubType() != null) {
-            buf.append(" subtype [").append(getSelectedObjSubType()).append("]");
-        }
+        buf.append(" types [").append(StringUtils.join(getSelectedObjectTypes(), ",")).append("]");
 
         if (isSearchAll()) {
             buf.append(" term \"").append(getAllSearch()).append("\" in all fields, including object attributes");
@@ -438,6 +408,22 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
                         tfOption,
                         tfOptionValue,
                         tfSection);
+    }
+
+    private void modelUncheck(CheckBoxListSelectionModel selectionModel, GEnum[] gEnum) {
+        HashSet<GEnum> en = new HashSet<>(Arrays.asList(gEnum));
+
+        DefaultListModel model = (DefaultListModel) selectionModel.getModel();
+        selectionModel.clearSelection();
+        for (int i = 0; i < model.size(); i++) {
+            if (i != selectionModel.getAllEntryIndex()) {
+                CfgObjectTypeMenu get = (CfgObjectTypeMenu) model.get(i);
+                if (!en.contains(get.getType())) {
+                    selectionModel.addSelectionInterval(i, i);
+                }
+            }
+        }
+
     }
 
 }

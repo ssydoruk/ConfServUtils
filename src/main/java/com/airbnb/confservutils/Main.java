@@ -6,12 +6,20 @@
 package com.airbnb.confservutils;
 
 import com.genesyslab.platform.commons.GEnum;
+import com.jidesoft.swing.CheckBoxList;
+import com.jidesoft.swing.SearchableUtils;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -200,28 +208,58 @@ public class Main {
 
     public static final String anyType = "(Any type)";
 
-    public static void loadGenesysTypes(JComboBox cbObjectSubtype, Collection values) {
+    public static void loadGenesysTypes(JComboBox cbObjectSubtype, Collection values, GEnum[] exclude) {
         cbObjectSubtype.removeAllItems();
         cbObjectSubtype.setEnabled((values != null));
         if (values != null) {
 
-            ArrayList<CfgObjectTypeMenu> al = new ArrayList<>();
-
-            for (Object object : values) {
-                al.add(new CfgObjectTypeMenu((GEnum) object));
-            }
-
-            Collections.sort(al);
-
             DefaultComboBoxModel model = (DefaultComboBoxModel) cbObjectSubtype.getModel();
 
-            for (CfgObjectTypeMenu object : al) {
+            for (CfgObjectTypeMenu object : getMenuItems(values, (exclude == null) ? null : new HashSet<>(Arrays.asList(exclude)))) {
                 model.addElement(object);
             }
 
             model.insertElementAt(anyType, 0);
             cbObjectSubtype.setSelectedIndex(0);
             cbObjectSubtype.setEnabled(true);
+        }
+    }
+
+    public static void loadGenesysTypes(JComboBox cbObjectSubtype, Collection values) {
+        loadGenesysTypes(cbObjectSubtype, values, null);
+
+    }
+
+    private static List<CfgObjectTypeMenu> getMenuItems(Collection values, HashSet<GEnum> en) {
+
+        ArrayList<CfgObjectTypeMenu> al = new ArrayList<>();
+
+        for (Object object : values) {
+            if (en == null || !en.contains(object)) {
+                al.add(new CfgObjectTypeMenu((GEnum) object));
+            }
+        }
+
+        Collections.sort(al);
+        return al;
+    }
+
+    public static void loadGenesysTypes(CheckBoxList list, Collection values, GEnum[] exclude) {
+
+        DefaultListModel model = (DefaultListModel) list.getModel();
+
+        list.setEnabled((values != null));
+        if (values != null) {
+
+            for (CfgObjectTypeMenu object : getMenuItems(values, (exclude == null) ? null : new HashSet<>(Arrays.asList(exclude)))) {
+                model.addElement(object);
+            }
+            list.getCheckBoxListSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+            SearchableUtils.installSearchable(list);
+            model.insertElementAt(CheckBoxList.ALL_ENTRY, 0);
+
+//            list.setSelectedIndex(0);
+            list.setEnabled(true);
         }
 
     }

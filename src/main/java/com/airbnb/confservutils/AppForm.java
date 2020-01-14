@@ -1737,14 +1737,8 @@ public class AppForm extends javax.swing.JFrame {
                     ObjByAnnex pn = (ObjByAnnex) objByAnnex.getContentPanel();
                     requestOutput("Request: " + pn.getSearchSummary());
 
-                    CfgObjectType t = pn.getSelectedObjType();
-                    if (t != null) {
-                        doTheSearch(t, pn, true);
-
-                    } else {
-                        for (CfgObjectType value : CfgObjectType.values()) {
-                            doTheSearch(value, pn, false);
-                        }
+                    for (CfgObjectType value : pn.getSelectedObjectTypes()) {
+                        doTheSearch(value, pn, false);
                     }
 
                 }
@@ -1761,10 +1755,6 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (n != null) {
                 query.setDnNumber(n);
-            }
-            CfgDNType selectedObjSubType = (CfgDNType) pn.getSelectedObjSubType();
-            if (selectedObjSubType != null) {
-                query.setDnType(selectedObjSubType);
             }
 
             findApps(
@@ -2035,10 +2025,6 @@ public class AppForm extends javax.swing.JFrame {
             if (n != null) {
                 query.setName(n);
             }
-            CfgTransactionType tt = (CfgTransactionType) pn.getSelectedObjSubType();
-            if (tt != null) {
-                query.setObjectType(tt);
-            }
 
             findApps(
                     query,
@@ -2117,7 +2103,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGGVPIVRProfile">
         else if (t == CfgObjectType.CFGGVPIVRProfile) {
             CfgGVPIVRProfileQuery query = new CfgGVPIVRProfileQuery();
@@ -2150,7 +2135,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAccessGroup">
         else if (t == CfgObjectType.CFGAccessGroup) {
             CfgAccessGroupQuery query = new CfgAccessGroupQuery();
@@ -2178,7 +2162,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>        
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGActionCode">
         else if (t == CfgObjectType.CFGActionCode) {
             CfgActionCodeQuery query = new CfgActionCodeQuery();
@@ -2208,7 +2191,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAlarmCondition">
         else if (t == CfgObjectType.CFGAlarmCondition) {
             CfgAlarmConditionQuery query = new CfgAlarmConditionQuery();
@@ -2237,7 +2219,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGApplication">
         else if (t == CfgObjectType.CFGApplication) {
             CfgApplicationQuery query = new CfgApplicationQuery();
@@ -2269,7 +2250,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGFolder">
         else if (t == CfgObjectType.CFGFolder) {
             CfgFolderQuery query = new CfgFolderQuery();
@@ -2299,7 +2279,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGHost">
         else if (t == CfgObjectType.CFGHost) {
             CfgHostQuery query = new CfgHostQuery();
@@ -2328,7 +2307,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTenant">
         else if (t == CfgObjectType.CFGTenant) {
             CfgTenantQuery query = new CfgTenantQuery();
@@ -2357,7 +2335,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVRPort">
         else if (t == CfgObjectType.CFGIVRPort) {
             CfgIVRPortQuery query = new CfgIVRPortQuery();
@@ -2386,7 +2363,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVR">
         else if (t == CfgObjectType.CFGIVR) {
             CfgIVRQuery query = new CfgIVRQuery();
@@ -2415,7 +2391,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGObjectiveTable">
         else if (t == CfgObjectType.CFGObjectiveTable) {
             CfgObjectiveTableQuery query = new CfgObjectiveTableQuery();
@@ -2444,7 +2419,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGService">
         else if (t == CfgObjectType.CFGService) {
             CfgServiceQuery query = new CfgServiceQuery();
@@ -2473,7 +2447,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSkill">
         else if (t == CfgObjectType.CFGSkill) {
             CfgSkillQuery query = new CfgSkillQuery();
@@ -2501,7 +2474,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatDay">
         else if (t == CfgObjectType.CFGStatDay) {
             CfgStatDayQuery query = new CfgStatDayQuery();
@@ -2529,7 +2501,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatTable">
         else if (t == CfgObjectType.CFGStatTable) {
             CfgStatTableQuery query = new CfgStatTableQuery();
@@ -2557,7 +2528,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTimeZone">
         else if (t == CfgObjectType.CFGTimeZone) {
             CfgTimeZoneQuery query = new CfgTimeZoneQuery();
@@ -2588,7 +2558,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-        
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTreatment">
         else if (t == CfgObjectType.CFGTreatment) {
             CfgTreatmentQuery query = new CfgTreatmentQuery();
@@ -2618,7 +2587,6 @@ public class AppForm extends javax.swing.JFrame {
                     pn);
 
         } //</editor-fold>   
-
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGVoicePrompt">
         else if (t == CfgObjectType.CFGVoicePrompt) {
             CfgVoicePromptQuery query = new CfgVoicePromptQuery();
@@ -2692,6 +2660,7 @@ public class AppForm extends javax.swing.JFrame {
             }
             if (cnt > 0) {
                 requestOutput("Filtering done\n" + buf);
+
             }
         }
     }
