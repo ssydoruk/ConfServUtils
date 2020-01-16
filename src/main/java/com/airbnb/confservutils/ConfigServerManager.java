@@ -5,18 +5,30 @@
  */
 package com.airbnb.confservutils;
 
+import static Utils.StringUtils.matching;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.CfgQuery;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
+import com.genesyslab.platform.commons.collections.KeyValueCollection;
+import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.protocol.ChannelState;
+import com.genesyslab.platform.commons.protocol.Message;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.confserver.events.EventError;
+import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectCreated;
+import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
+import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
+import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -44,11 +56,11 @@ public class ConfigServerManager {
         try {
             disconnect();
         } catch (ProtocolException ex) {
-            Logger.getLogger(ConfigServerManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.fatal(ex);
         } catch (IllegalStateException ex) {
-            Logger.getLogger(ConfigServerManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.fatal(ex);
         } catch (InterruptedException ex) {
-            Logger.getLogger(ConfigServerManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.fatal(ex);
         }
         parentForm.requestOutput("connecting...\n", false);
 
@@ -105,6 +117,8 @@ public class ConfigServerManager {
         }
     }
 
+    public static final Logger logger = (Logger) Main.logger;
+
     public IConfService getService() {
         return service;
     }
@@ -124,6 +138,204 @@ public class ConfigServerManager {
             prevQueries.put(qToString, cfgObjs);
         }
         return cfgObjs;
+    }
+
+    private <T extends CfgObject> void findApps(
+            CfgQuery q,
+            Class< T> cls,
+            IKeyValueProperties props,
+            ISearchSettings ss
+    ) throws ConfigException, InterruptedException {
+
+        StringBuilder buf = new StringBuilder();
+
+        Collection<T> cfgObjs = getResults(q, cls);
+
+        if (cfgObjs == null || cfgObjs.isEmpty()) {
+            logger.debug("no objects found\n", false);
+        } else {
+            logger.debug("retrieved " + cfgObjs.size() + " total objects type " + cls.getSimpleName());
+            int flags = ((ss.isRegex()) ? Pattern.LITERAL : 0) | ((ss.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
+            Pattern ptAll = null;
+            Pattern ptSection = null;
+            Pattern ptOption = null;
+            Pattern ptVal = null;
+            String section = ss.getSection();
+            String option = ss.getOption();
+            String val = ss.getValue();
+
+            if (ss.isSearchAll()) {
+                ptAll = (ss.isSearchAll() && ss.getAllSearch() != null ? Pattern.compile(ss.getAllSearch(), flags) : null);
+            } else {
+                ptSection = (section == null) ? null : Pattern.compile(section, flags);
+                ptOption = (option == null) ? null : Pattern.compile(option, flags);
+                ptVal = (val == null) ? null : Pattern.compile(val, flags);
+            }
+            KeyValueCollection kv = new KeyValueCollection();
+
+            boolean checkForSectionOrOption = (ptAll != null || option != null || section != null || val != null);
+            int cnt = 0;
+            for (CfgObject cfgObj : cfgObjs) {
+                boolean shouldInclude = false;
+                if (checkForSectionOrOption) {
+                    KeyValueCollection options;
+                    options = props.getProperties(cfgObj);
+                    kv.clear();
+                    String sectionFound = null;
+                    if (ptAll != null) { // if we got here and we are searching for all, it means name is already matched
+                        for (String string : props.getName(cfgObj)) {
+                            if (matching(ptAll, string)) {
+                                shouldInclude = true;
+                                break;
+                            }
+                        }
+
+                    }
+                    if (options != null) {
+                        Enumeration<KeyValuePair> enumeration = options.getEnumeration();
+                        KeyValuePair el;
+
+                        while (enumeration.hasMoreElements()) {
+                            el = enumeration.nextElement();
+
+                            if (ptAll != null) {
+                                if (matching(ptAll, el.getStringKey())) {
+                                    sectionFound = el.getStringKey();
+                                    shouldInclude = true;
+                                }
+                            } else if (ptSection != null) {
+                                if (!matching(ptSection, el.getStringKey())) {
+                                    continue;
+                                } else {
+                                    sectionFound = el.getStringKey();
+                                }
+                            }
+
+                            if (ptVal == null && ptOption == null && ptAll == null) {
+                                kv.addObject(el.getStringKey(), new KeyValueCollection());
+                                shouldInclude = true;
+                            } else {
+                                KeyValueCollection addedValues = new KeyValueCollection();
+                                Object value = el.getValue();
+                                if (value instanceof KeyValueCollection) {
+                                    KeyValueCollection sectionValues = (KeyValueCollection) value;
+                                    Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
+                                    KeyValuePair theOpt;
+                                    while (optVal.hasMoreElements()) {
+                                        theOpt = optVal.nextElement();
+                                        boolean isOptFound = false;
+                                        boolean isValFound = false;
+
+                                        if (ptAll != null) {
+                                            if (matching(ptAll, theOpt.getStringKey())) {
+                                                isOptFound = true;
+                                            }
+                                            if (matching(ptAll, theOpt.getStringValue())) {
+                                                isValFound = true;
+                                            }
+                                        } else {
+                                            if (ptOption != null) {
+                                                if (matching(ptOption, theOpt.getStringKey())) {
+                                                    isOptFound = true;
+                                                }
+                                            }
+                                            if (ptVal != null) {
+                                                if (matching(ptVal, theOpt.getStringValue())) {
+                                                    isValFound = true;
+                                                }
+                                            }
+                                        }
+                                        if (isOptFound || isValFound) {
+                                            addedValues.addPair(theOpt);
+
+                                        }
+                                    }
+                                } else {
+                                    logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
+                                    if (ptVal != null) {
+                                        if (matching(ptVal, value.toString())) {
+                                            addedValues.addPair(el);
+
+                                        }
+                                    }
+                                }
+                                if (!addedValues.isEmpty() || sectionFound != null) {
+                                    String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
+                                    KeyValueCollection list = kv.getList(sect);
+                                    if (list == null) {
+                                        list = new KeyValueCollection();
+                                        kv.addList(sect, list);
+                                    }
+                                    for (Object addedValue : addedValues.toArray()) {
+                                        list.add(addedValue);
+                                    }
+//                                    kv.addObject(el.getStringKey(), addedValues);
+                                    shouldInclude = true;
+                                }
+
+                            }
+
+                        }
+                    }
+
+                } else {
+                    shouldInclude = true;
+                }
+                if (shouldInclude) {
+                    if (ss.isFullOutputSelected()) {
+                        buf.append(cfgObj.toString()).append("\n");
+                    } else {
+                        Object[] names = props.getName(cfgObj).toArray();
+                        buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: " + cfgObj.getObjectDbid());
+                        buf.append("\n");
+                        if (names.length > 1) {
+                            buf.append('\t');
+                            for (int i = 1; i < names.length; i++) {
+                                if (i > 1) {
+                                    buf.append(", ");
+                                }
+                                buf.append(names[i]);
+                            }
+                        }
+                        if (checkForSectionOrOption) {
+                            buf.append("   ");
+                            buf.append(kv);
+                        }
+                        buf.append("\n");
+                    }
+                    cnt++;
+                }
+
+            }
+            if (cnt > 0) {
+//                requestOutput("Search done, located " + cnt + " objects type " + cls.getSimpleName() + " -->\n" + buf + "<--\n");
+            }
+        }
+    }
+
+    public Message execRequest(Message reqUpdate) {
+        try {
+            Message resp = service.getProtocol().request(reqUpdate);
+
+            if (resp instanceof EventObjectUpdated) {
+                parentForm.requestOutput("!!Object updated dbid:" + ((EventObjectUpdated) resp).toString());
+            } else if (resp instanceof EventError) {
+                parentForm.requestOutput("Error on object update: "
+                        + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
+                        + "\tDescription: " + ((EventError) resp).getDescription());
+            } else if (resp instanceof EventObjectCreated) {
+                EventObjectCreated oc = (EventObjectCreated) resp;
+                ConfObject object = oc.getObject();
+                parentForm.requestOutput("new object DBID: " + object.getObjectDbid());
+                return resp;
+            }
+
+        } catch (ProtocolException ex) {
+            logger.fatal(ex);
+        } catch (IllegalStateException ex) {
+            logger.fatal(ex);
+        }
+        return null;
     }
 
 }

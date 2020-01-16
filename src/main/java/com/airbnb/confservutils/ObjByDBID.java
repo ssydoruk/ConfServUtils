@@ -48,6 +48,7 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel3 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -86,9 +87,11 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
 
         jPanel9.setLayout(new javax.swing.BoxLayout(jPanel9, javax.swing.BoxLayout.PAGE_AXIS));
 
+        buttonGroup1.add(rbFullOutput);
         rbFullOutput.setText("Print full output");
         jPanel9.add(rbFullOutput);
 
+        buttonGroup1.add(rbShortOutput);
         rbShortOutput.setSelected(true);
         rbShortOutput.setText("Print abbreviated output");
         jPanel9.add(rbShortOutput);
@@ -102,6 +105,7 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cbObjectType;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
