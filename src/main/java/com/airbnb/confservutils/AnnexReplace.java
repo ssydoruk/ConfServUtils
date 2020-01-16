@@ -31,6 +31,7 @@ import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
@@ -672,6 +673,24 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
             }
         }
         return null;
+    }
+
+    boolean checkParameters() {
+        if(rbAddSection.isSelected()){
+            if(StringUtils.isBlank(checkBoxSelection(tfAddSection))
+                    || StringUtils.isBlank(checkBoxSelection(tfAddKey))
+                    || StringUtils.isBlank(checkBoxSelection(tfAddValue))){
+                JOptionPane.showMessageDialog(theForm, "To create an option all of the section, key and value needs to be specified", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        else if(rbReplaceWith.isSelected()){
+            if(StringUtils.isBlank(checkBoxSelection(tfReplaceWith))){
+                JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return true;
     }
 
     class UserProperties {

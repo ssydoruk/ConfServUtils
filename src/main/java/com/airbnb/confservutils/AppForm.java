@@ -1155,6 +1155,9 @@ public class AppForm extends javax.swing.JFrame {
         }
 
         if (annexReplace.doShow()) {
+            if (!panelAnnexReplace.checkParameters()) {
+                return;
+            }
             if (connectToConfigServer()) {
 
                 AnnexReplace pn = (AnnexReplace) annexReplace.getContentPanel();
