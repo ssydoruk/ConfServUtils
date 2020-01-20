@@ -25,6 +25,7 @@ import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -313,12 +314,13 @@ public class ConfigServerManager {
         }
     }
 
-    public Message execRequest(Message reqUpdate) {
+    public Message execRequest(Message reqUpdate, CfgObjectType objType) {
         try {
             Message resp = service.getProtocol().request(reqUpdate);
 
             if (resp instanceof EventObjectUpdated) {
                 parentForm.requestOutput("!!Object updated dbid:" + ((EventObjectUpdated) resp).toString());
+                objectUpdated(objType);
             } else if (resp instanceof EventError) {
                 parentForm.requestOutput("Error on object update: "
                         + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
@@ -336,6 +338,20 @@ public class ConfigServerManager {
             logger.fatal(ex);
         }
         return null;
+    }
+
+    private void objectUpdated(CfgObjectType objType) {
+        for (Map.Entry<String, Collection<? extends CfgObject>> entry : prevQueries.entrySet()) {
+            String key = entry.getKey();
+            Collection<? extends CfgObject> value = entry.getValue();
+            for (CfgObject cfgObject : value) {
+                if (cfgObject.getObjectType().equals(objType)) {
+                    logger.info("removing updated type "+objType+" from buffer");
+                    prevQueries.remove(key);
+                }
+                break;
+            }
+        }
     }
 
 }

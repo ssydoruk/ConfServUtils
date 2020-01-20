@@ -85,7 +85,7 @@ public class UpdateUserProperties {
             logger.info("++" + d.toString());
             reqUpdate.setObjectDelta(d);
 
-            cfgManager.execRequest(reqUpdate);
+            cfgManager.execRequest(reqUpdate, objType);
         }
 
     }
