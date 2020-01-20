@@ -5,6 +5,12 @@
  */
 package com.airbnb.confservutils;
 
+import java.awt.Dimension;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+
 /**
  *
  * @author stepan_sydoruk
@@ -14,9 +20,12 @@ public class ObjectFound extends javax.swing.JPanel {
     /**
      * Creates new form ObjectFound
      */
+//    JMultilineLabel lbSummary = new JMultilineLabel();
+
     public ObjectFound() {
         initComponents();
-        Utils.Swing.restrictHeight(lbSummary);
+//        jPanel1.add(lbSummary);
+//        Utils.Swing.restrictHeight(lbSummary);
     }
 
     /**
@@ -29,22 +38,30 @@ public class ObjectFound extends javax.swing.JPanel {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        lbSummary = new javax.swing.JLabel();
+        pLabel = new javax.swing.JPanel();
+        lbSummary1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtfObjectProperties = new javax.swing.JTextPane();
 
-        setLayout(new java.awt.GridLayout(0, 1));
+        setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Search parameters"));
         jPanel1.setLayout(new java.awt.BorderLayout());
 
-        lbSummary.setText("Found the following object");
-        jPanel1.add(lbSummary, java.awt.BorderLayout.CENTER);
+        pLabel.setLayout(new java.awt.BorderLayout());
+
+        lbSummary1.setText("jLabel1");
+        pLabel.add(lbSummary1, java.awt.BorderLayout.CENTER);
+
+        jPanel1.add(pLabel, java.awt.BorderLayout.CENTER);
 
         add(jPanel1);
 
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Found object properties"));
         jPanel2.setLayout(new java.awt.BorderLayout());
 
+        jScrollPane1.setAutoscrolls(true);
         jScrollPane1.setViewportView(jtfObjectProperties);
 
         jPanel2.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -58,7 +75,8 @@ public class ObjectFound extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextPane jtfObjectProperties;
-    private javax.swing.JLabel lbSummary;
+    private javax.swing.JLabel lbSummary1;
+    private javax.swing.JPanel pLabel;
     // End of variables declaration//GEN-END:variables
 
     void setText(String string) {
@@ -66,6 +84,29 @@ public class ObjectFound extends javax.swing.JPanel {
     }
 
     void setInfoMsg(String infoMsg) {
-lbSummary.setText(infoMsg);
+        lbSummary1.setText(infoMsg);
+//        Utils.Swing.restrictHeight(lbSummary1);
+//        pLabel.setMaximumSize(new Dimension(pLabel.getSize().width, lbSummary1.getMinimumSize().height));
+//        lbSummary.setMaximumSize(maximumSize);
+
+    }
+
+    public class JMultilineLabel extends JTextArea {
+
+        private static final long serialVersionUID = 1L;
+
+        public JMultilineLabel() {
+            super();
+            setEditable(false);
+            setCursor(null);
+            setOpaque(false);
+            setFocusable(false);
+            setFont(UIManager.getFont("Label.font"));
+            setWrapStyleWord(true);
+            setLineWrap(true);
+            //According to Mariana this might improve it
+            setBorder(new EmptyBorder(5, 5, 5, 5));
+            setAlignmentY(JLabel.CENTER_ALIGNMENT);
         }
+    }
 }

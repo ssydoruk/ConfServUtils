@@ -420,11 +420,21 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     }
 
-    @Override
-    public String getSearchSummary() {
+    public String getSearchSummary(int maxTypes) {
         StringBuilder buf = new StringBuilder();
         buf.append("Object by Annex;");
-        buf.append(" types [").append(StringUtils.join(getSelectedObjectTypes(), ",")).append("]");
+        buf.append(" types [\n");
+        int num;
+
+        num = (maxTypes < 0 || maxTypes > getSelectedObjectTypes().size() - 1)
+                ? getSelectedObjectTypes().size()
+                : maxTypes;
+
+        buf.append(StringUtils.join(getSelectedObjectTypes().subList(0, num), ",\n\t"));
+        if (maxTypes > 0 && num < getSelectedObjectTypes().size()) {
+            buf.append("\n...(").append(getSelectedObjectTypes().size() - num).append(" more) ");
+        }
+        buf.append("]");
 
         if (isSearchAll()) {
             buf.append(" term \"").append(getAllSearch()).append("\" in all fields, including object attributes");
@@ -459,6 +469,11 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                 : "");
 
         return buf.toString();
+    }
+
+    @Override
+    public String getSearchSummary() {
+        return getSearchSummary(-1);
     }
 
     @Override
@@ -676,21 +691,27 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     }
 
     boolean checkParameters() {
-        if(rbAddSection.isSelected()){
-            if(StringUtils.isBlank(checkBoxSelection(tfAddSection))
+        if (rbAddSection.isSelected()) {
+            if (StringUtils.isBlank(checkBoxSelection(tfAddSection))
                     || StringUtils.isBlank(checkBoxSelection(tfAddKey))
-                    || StringUtils.isBlank(checkBoxSelection(tfAddValue))){
+                    || StringUtils.isBlank(checkBoxSelection(tfAddValue))) {
                 JOptionPane.showMessageDialog(theForm, "To create an option all of the section, key and value needs to be specified", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
-        }
-        else if(rbReplaceWith.isSelected()){
-            if(StringUtils.isBlank(checkBoxSelection(tfReplaceWith))){
+        } else if (rbReplaceWith.isSelected()) {
+            if (StringUtils.isBlank(checkBoxSelection(tfReplaceWith))) {
                 JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
         return true;
+    }
+
+    String getSearchSummaryHTML() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("<html>").append(getSearchSummary(2).replaceAll("\n", "<br>")).append("</html>");
+        return ret.toString();
+
     }
 
     class UserProperties {
