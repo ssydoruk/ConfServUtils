@@ -1156,12 +1156,12 @@ public class AppForm extends javax.swing.JFrame {
         }
 
         if (annexReplace.doShow()) {
-            
+
             AnnexReplace pn1 = (AnnexReplace) annexReplace.getContentPanel();
 //                showYesNoPanel(pn1.getSearchSummaryHTML(), "something" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something");
 //                if(0==1)
 //                    return;
-            
+
             if (!panelAnnexReplace.checkParameters()) {
                 return;
             }
@@ -1387,6 +1387,8 @@ public class AppForm extends javax.swing.JFrame {
             Pattern ptSection = null;
             Pattern ptOption = null;
             Pattern ptVal = null;
+            Pattern ptName = null;
+            String objName = ss.getObjName();
             String section = ss.getSection();
             String option = ss.getOption();
             String val = ss.getValue();
@@ -1397,6 +1399,7 @@ public class AppForm extends javax.swing.JFrame {
                 ptSection = (section == null) ? null : Pattern.compile(section, flags);
                 ptOption = (option == null) ? null : Pattern.compile(option, flags);
                 ptVal = (val == null) ? null : Pattern.compile(val, flags);
+                ptName = (objName == null) ? null : Pattern.compile(objName, flags);
             }
             KeyValueCollection kv = new KeyValueCollection();
 
@@ -1507,7 +1510,14 @@ public class AppForm extends javax.swing.JFrame {
                     }
 
                 } else {
-                    shouldInclude = true;
+                    if (checkNames) {
+                        for (String string : props.getName(cfgObj)) {
+                            if (matching(ptName, string)) {
+                                shouldInclude = true;
+                                break;
+                            }
+                        }
+                    }
                 }
                 if (shouldInclude) {
                     cnt++;
@@ -2110,7 +2120,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
 //</editor-fold>
-        //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
+            //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
         } else if (t == CfgObjectType.CFGTransaction) {
             CfgTransactionQuery query = new CfgTransactionQuery();
             String n = pn.getObjName();
