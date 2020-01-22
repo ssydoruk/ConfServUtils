@@ -25,8 +25,8 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
         initComponents();
 //        tfIPAddress.set
     }
-    
-    public boolean isFullOutput(){
+
+    public boolean isFullOutput() {
         return rbFullOutput.isSelected();
     }
 

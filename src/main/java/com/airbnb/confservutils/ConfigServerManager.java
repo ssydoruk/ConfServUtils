@@ -346,7 +346,7 @@ public class ConfigServerManager {
             Collection<? extends CfgObject> value = entry.getValue();
             for (CfgObject cfgObject : value) {
                 if (cfgObject.getObjectType().equals(objType)) {
-                    logger.info("removing updated type "+objType+" from buffer");
+                    logger.info("removing updated type " + objType + " from buffer");
                     prevQueries.remove(key);
                 }
                 break;

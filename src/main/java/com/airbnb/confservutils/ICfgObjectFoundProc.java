@@ -13,5 +13,6 @@ import com.genesyslab.platform.commons.collections.KeyValueCollection;
  * @author stepan_sydoruk
  */
 public interface ICfgObjectFoundProc {
+
     boolean proc(CfgObject obj, KeyValueCollection kv);
 }

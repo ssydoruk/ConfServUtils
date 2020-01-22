@@ -625,7 +625,6 @@ public class AppForm extends javax.swing.JFrame {
 
     RequestDialog objByDBID = null;
 
-
     private void miObjByDBIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miObjByDBIDActionPerformed
         if (objByDBID == null) {
             objByDBID = new RequestDialog(this, new ObjByDBID(), (JMenuItem) evt.getSource());
@@ -1160,7 +1159,6 @@ public class AppForm extends javax.swing.JFrame {
 //                showYesNoPanel(pn1.getSearchSummaryHTML(), "something" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something");
 //                if(0==1)
 //                    return;
-
             if (!panelAnnexReplace.checkParameters()) {
                 return;
             }
@@ -1183,7 +1181,9 @@ public class AppForm extends javax.swing.JFrame {
                                 if (yesToAll) {
                                     panelAnnexReplace.updateObj(obj, kv, configServerManager);
                                 } else {
-                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(), obj.toString() + "\n kv: " + kv.toString())) {
+                                    String estimateUpdateObj = panelAnnexReplace.estimateUpdateObj(obj, kv, configServerManager);
+                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(), obj.toString() + "\n kv: " + kv.toString()
+                                            + "\ntoUpdate: \n" + estimateUpdateObj)) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",

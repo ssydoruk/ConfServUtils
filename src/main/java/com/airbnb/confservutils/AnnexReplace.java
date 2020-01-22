@@ -431,12 +431,16 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
         buf.append(StringUtils.join(getSelectedObjectTypes().subList(0, num), ",\n\t"));
         if (maxTypes > 0 && num < getSelectedObjectTypes().size()) {
-            buf.append("\n...(").append(getSelectedObjectTypes().size() - num).append(" more) ");
+            buf.append("\n...(")
+                    .append(getSelectedObjectTypes().size() - num)
+                    .append(" more) ");
         }
         buf.append("]");
 
         if (isSearchAll()) {
-            buf.append(" term \"").append(getAllSearch()).append("\" in all fields, including object attributes");
+            buf.append(" term \"")
+                    .append(getAllSearch())
+                    .append("\" in all fields, including object attributes");
         } else {
             if (getObjName() != null) {
                 buf.append("\n\tname [")
@@ -510,6 +514,107 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     }
 
     static final private String BACKUP_PREFIX = "###";
+
+    String estimateUpdateObj(CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
+
+        StringBuilder ret = new StringBuilder();
+
+        if (rbAddSection.isSelected()) {
+            ret.append("addiong option: [")
+                    .append(checkBoxSelection(tfAddSection))
+                    .append("]/\"")
+                    .append(checkBoxSelection(tfAddKey))
+                    .append("\"=\"")
+                    .append(checkBoxSelection(tfAddValue))
+                    .append("\"\n");
+        } else if (rbRemove.isSelected()) {
+            ret.append("deleting kvp ")
+                    .append(kv)
+                    .append("\n");
+        } else if (rbReplaceWith.isSelected()) {
+//        sectionsList = new KeyValueCollection();
+//
+//        sectionOptions = new KeyValueCollection();
+//        sectionsList.addList("General", sectionOptions);
+//        sectionOptions.addString("ServerDescription", "Main server of the IT department");
+//        sectionOptions.addString("AdminAddress", "admin@somewhere.com");
+
+            for (Object object : kv) {
+                if (object instanceof KeyValuePair) {
+                    KeyValuePair kvp = (KeyValuePair) object;
+                    String section = kvp.getStringKey();
+                    Object value = kvp.getValue();
+                    ValueType valueType = kvp.getValueType();
+                    if (valueType == ValueType.TKV_LIST) {
+                        for (Object _kvInstance : (KeyValueCollection) value) {
+                            KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
+//                            upd.addUpdateKey(section, kvInstance.getStringKey(), checkBoxSelection(tfReplaceWith));
+                            ret.append("updating option value in [")
+                                    .append(section)
+                                    .append("]/\"")
+                                    .append(kvInstance.getStringKey())
+                                    .append("\" from \"")
+                                    .append(kvInstance.getStringValue())
+                                    .append("\" to \"")
+                                    .append(checkBoxSelection(tfReplaceWith))
+                                    .append("\"\n");
+                            if (cbMakeBackup.isSelected()) {
+                                String backupKey = BACKUP_PREFIX + kvInstance.getStringKey();
+                                if (updateExisted(obj, section, backupKey, kvInstance.getStringValue())) {
+//                                    upd.addUpdateKey(section, backupKey, kvInstance.getStringValue());
+                                    ret.append("updating option value [")
+                                            .append(section)
+                                            .append("]/\"")
+                                            .append(backupKey)
+                                            .append("\" with value \"")
+                                            .append(kvInstance.getStringValue())
+                                            .append("\"\n");
+                                } else {
+//                                    upd.addAddKey(section, backupKey, kvInstance.getStringValue());
+                                    ret.append("addiong option: [")
+                                            .append(section)
+                                            .append("]/\"")
+                                            .append(backupKey)
+                                            .append("\"=\"")
+                                            .append(kvInstance.getStringValue())
+                                            .append("\"\n");
+                                }
+                            }
+                        }
+                    } else {
+                        logger.error("Unsupport value type: " + valueType + " obj: " + obj.toString());
+                    }
+                    logger.info(kvp);
+
+                }
+
+            }
+//            upd.addUpdateKey(TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY);
+        } else if (rbRestoreFromBackup.isSelected()) {
+            ArrayList<UserProperties> allBackup = getAllBackup(obj);
+            if (allBackup.isEmpty()) {
+                theForm.requestOutput("No backup user properties");
+            } else {
+                for (UserProperties userProperties : allBackup) {
+                    String origProperty = userProperties.key.substring(BACKUP_PREFIX.length());
+                    setProperty(obj, ret, userProperties.section, origProperty, userProperties.value);
+                    if (cbMakeBackup.isSelected()) {
+                        String curValue = getCurValue(obj, userProperties.section, origProperty);
+                        if (curValue != null) {
+                            setProperty(obj, ret, userProperties.section, userProperties.key, curValue);
+                        }
+                    }
+                }
+            }
+        }
+
+//        upd.addAddKey("Caching", "CacheSizeLimit", "2044");
+//        upd.addAddKey("TServer", "PrimaryRegion", "NA");
+//        upd.addAddKey("us_urs_p", "event_arrive", "none");
+//        upd.addDeleteKey("Caching", "CacheSizeLimit", "2044");
+//        upd.commitUpdate();
+        return ret.toString();
+    }
 
     void updateObj(CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
 
@@ -659,6 +764,29 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
             upd.addUpdateKey(section, key, value);
         } else {
             upd.addAddKey(section, key, value);
+        }
+    }
+
+    private void setProperty(CfgObject obj, StringBuilder buf, String section, String key, String value) {
+
+        if (updateExisted(obj, section, key, value)) {
+//            upd.addUpdateKey(section, key, value);
+            buf.append("updating option value [")
+                    .append(section)
+                    .append("]/\"")
+                    .append(key)
+                    .append("\" with value \"")
+                    .append(value)
+                    .append("\"\n");
+        } else {
+//            upd.addAddKey(section, key, value);
+            buf.append("adding option: [")
+                    .append(section)
+                    .append("]/\"")
+                    .append(key)
+                    .append("\"=\"")
+                    .append(value)
+                    .append("\"\n");
         }
     }
 

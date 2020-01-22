@@ -21,7 +21,6 @@ public class ObjectFound extends javax.swing.JPanel {
      * Creates new form ObjectFound
      */
 //    JMultilineLabel lbSummary = new JMultilineLabel();
-
     public ObjectFound() {
         initComponents();
 //        jPanel1.add(lbSummary);
@@ -68,7 +67,6 @@ public class ObjectFound extends javax.swing.JPanel {
 
         add(jPanel2);
     }// </editor-fold>//GEN-END:initComponents
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
