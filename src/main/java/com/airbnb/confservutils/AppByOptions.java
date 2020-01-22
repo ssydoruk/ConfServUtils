@@ -29,7 +29,6 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
         initComponents();
         Main.loadGenesysTypes(cbApplicationType, CfgAppType.values());
         rbShortOutput.setSelected(true);
-        cbCaseSensitive.setSelected(false);
         restrictHeight(tfSearchString);
         restrictHeight(tfOption);
         restrictHeight(tfOptionValue);
@@ -185,6 +184,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
         cbIsRegex.setText("Regular expression");
         jPanel4.add(cbIsRegex);
 
+        cbCaseSensitive.setSelected(true);
         cbCaseSensitive.setText("Case sensitive");
         jPanel4.add(cbCaseSensitive);
 

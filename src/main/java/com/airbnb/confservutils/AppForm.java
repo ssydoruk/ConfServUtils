@@ -1157,7 +1157,6 @@ public class AppForm extends javax.swing.JFrame {
 
         if (annexReplace.doShow()) {
 
-            AnnexReplace pn1 = (AnnexReplace) annexReplace.getContentPanel();
 //                showYesNoPanel(pn1.getSearchSummaryHTML(), "something" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something");
 //                if(0==1)
 //                    return;

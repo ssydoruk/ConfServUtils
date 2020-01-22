@@ -80,8 +80,6 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
             CfgObjectType.CFGAccessGroup,
             CfgObjectType.CFGAgentLogin});
 
-        cbCaseSensitive.setSelected(false);
-
         ItemListener itemListener = new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -266,6 +264,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         cbIsRegex.setText("Regular expression");
         jPanel8.add(cbIsRegex);
 
+        cbCaseSensitive.setSelected(true);
         cbCaseSensitive.setText("Case sensitive");
         jPanel8.add(cbCaseSensitive);
 

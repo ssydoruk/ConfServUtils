@@ -24,7 +24,6 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
     public BussAttr() {
         initComponents();
         rbShortOutput.setSelected(true);
-        cbCaseSensitive.setSelected(false);
         cbAttr.setSelected(true);
         cbAttrValue.setSelected(true);
 
@@ -117,6 +116,7 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
         cbIsRegex.setText("Regular expression");
         jPanel4.add(cbIsRegex);
 
+        cbCaseSensitive.setSelected(true);
         cbCaseSensitive.setText("Case sensitive");
         jPanel4.add(cbCaseSensitive);
 

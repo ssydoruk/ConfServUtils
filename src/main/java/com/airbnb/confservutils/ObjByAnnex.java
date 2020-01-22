@@ -74,7 +74,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
             CfgObjectType.CFGAgentLogin});
 
         rbShortOutput.setSelected(true);
-        cbCaseSensitive.setSelected(false);
+//        cbCaseSensitive.setSelected(false);
 
         jrbEverywhere.addItemListener(new ItemListener() {
             @Override
@@ -265,6 +265,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         cbIsRegex.setText("Regular expression");
         jPanel8.add(cbIsRegex);
 
+        cbCaseSensitive.setSelected(true);
         cbCaseSensitive.setText("Case sensitive");
         jPanel8.add(cbCaseSensitive);
 
@@ -295,7 +296,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         if (!isSearchAll()) {
             return checkBoxSelection(tfObjectName);
         } else {
-            return null;
+            return getAllSearch();
         }
     }
 

@@ -100,7 +100,8 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
     }// </editor-fold>//GEN-END:initComponents
 
     public int getValue() {
-        return Util.intOrDef(tfDBID.getSelectedItem().toString(), 0);
+        Object selectedItem = tfDBID.getSelectedItem();
+        return (selectedItem != null) ? Util.intOrDef(selectedItem.toString(), 0) : 0;
 
     }
 
