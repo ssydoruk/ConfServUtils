@@ -79,6 +79,7 @@ public class ObjectFound extends javax.swing.JPanel {
 
     void setText(String string) {
         jtfObjectProperties.setText(string);
+        jtfObjectProperties.invalidate();
     }
 
     void setInfoMsg(String infoMsg) {

@@ -1139,7 +1139,6 @@ public class AppForm extends javax.swing.JFrame {
         }
         pn1.setInfoMsg(infoMsg);
         pn1.setText(msg);
-        pn1.invalidate();
 
         infoDialog.showModal();
 
@@ -1175,15 +1174,16 @@ public class AppForm extends javax.swing.JFrame {
                     try {
                         if (!doTheSearch(value, pn, false, false, new ICfgObjectFoundProc() {
                             @Override
-                            public boolean proc(CfgObject obj, KeyValueCollection kv) {
+                            public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
                                 logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
 //                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
                                 if (yesToAll) {
                                     panelAnnexReplace.updateObj(obj, kv, configServerManager);
                                 } else {
                                     String estimateUpdateObj = panelAnnexReplace.estimateUpdateObj(obj, kv, configServerManager);
-                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(), obj.toString() + "\n kv: " + kv.toString()
-                                            + "\ntoUpdate: \n" + estimateUpdateObj)) {
+                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched " + total
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -1373,6 +1373,7 @@ public class AppForm extends javax.swing.JFrame {
             ICfgObjectFoundProc foundProc
     ) throws ConfigException, InterruptedException {
         int cnt = 0;
+        HashMap<CfgObject, KeyValueCollection> matchedObjects = new HashMap<>();
 
         StringBuilder buf = new StringBuilder();
         Collection<T> cfgObjs = configServerManager.getResults(q, cls);
@@ -1391,6 +1392,7 @@ public class AppForm extends javax.swing.JFrame {
             String section = ss.getSection();
             String option = ss.getOption();
             String val = ss.getValue();
+            int paramsToCheck = 0;
 
             if (ss.isSearchAll()) {
                 ptAll = (ss.isSearchAll() && ss.getAllSearch() != null ? Pattern.compile(ss.getAllSearch(), flags) : null);
@@ -1399,29 +1401,67 @@ public class AppForm extends javax.swing.JFrame {
                 ptOption = (option == null) ? null : Pattern.compile(option, flags);
                 ptVal = (val == null) ? null : Pattern.compile(val, flags);
                 ptName = (objName == null) ? null : Pattern.compile(objName, flags);
+
+                if (ptSection != null) {
+                    paramsToCheck++;
+                }
+                if (ptOption != null) {
+                    paramsToCheck++;
+                }
+                if (ptVal != null) {
+                    paramsToCheck++;
+                }
+                if (ptName != null) {
+                    paramsToCheck++;
+                }
+
             }
             KeyValueCollection kv = new KeyValueCollection();
 
-            boolean checkForSectionOrOption = (ptAll != null || option != null || section != null || val != null);
+//            boolean checkForSectionOrOption = (ptAll != null || option != null || section != null || val != null);
+
+            /*
+            Treat options combinations as AND operator; if several is specified,
+            1) all must be true to be included.
+            
+            2) If all is specified, only one match is good to include, but all values are checked
+            
+            3) if no options on object but option search is specified, do not include the object
+             */
             for (CfgObject cfgObj : cfgObjs) {
                 boolean shouldInclude = false;
-                if (checkForSectionOrOption) {
-                    KeyValueCollection options;
-                    options = props.getProperties(cfgObj);
-                    kv.clear();
-                    String sectionFound = null;
-                    if (ptAll != null) { // if we got here and we are searching for all, it means name is already matched
-                        if (checkNames) {
-                            for (String string : props.getName(cfgObj)) {
-                                if (matching(ptAll, string)) {
-                                    shouldInclude = true;
-                                    break;
-                                }
+                int paramsChecked = 0;
+                kv.clear();
+
+                if (ptAll != null) {
+                    if (checkNames) {
+                        for (String string : props.getName(cfgObj)) {
+                            if (matching(ptAll, string)) {
+                                shouldInclude = true;
+                                break;
                             }
                         }
-
                     }
-                    if (options != null) {
+                } else {
+                    if (checkNames && ptName != null) {
+                        for (String string : props.getName(cfgObj)) {
+                            if (matching(ptName, string)) {
+                                paramsChecked++;
+                                if (paramsChecked >= paramsToCheck) { // only object name is specified
+                                    shouldInclude = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (ptAll != null || paramsChecked < paramsToCheck) {
+                    KeyValueCollection options;
+                    options = props.getProperties(cfgObj);
+                    String sectionFound = null;
+                    if (options == null && ptAll == null) {
+                        shouldInclude = false; // rule 3)
+                    } else {
                         Enumeration<KeyValuePair> enumeration = options.getEnumeration();
                         KeyValuePair el;
 
@@ -1438,10 +1478,11 @@ public class AppForm extends javax.swing.JFrame {
                                     continue;
                                 } else {
                                     sectionFound = el.getStringKey();
+                                    paramsChecked++;
                                 }
                             }
 
-                            if (ptVal == null && ptOption == null && ptAll == null) {
+                            if (ptAll != null || paramsChecked >= paramsToCheck) {
                                 kv.addObject(el.getStringKey(), new KeyValueCollection());
                                 shouldInclude = true;
                             } else {
@@ -1466,11 +1507,13 @@ public class AppForm extends javax.swing.JFrame {
                                         } else {
                                             if (ptOption != null) {
                                                 if (matching(ptOption, theOpt.getStringKey())) {
+                                                    paramsChecked++;
                                                     isOptFound = true;
                                                 }
                                             }
                                             if (ptVal != null) {
                                                 if (matching(ptVal, theOpt.getStringValue())) {
+                                                    paramsChecked++;
                                                     isValFound = true;
                                                 }
                                             }
@@ -1480,10 +1523,14 @@ public class AppForm extends javax.swing.JFrame {
 
                                         }
                                     }
+                                    if (ptAll == null && paramsChecked >= paramsToCheck) {
+                                        shouldInclude = true;
+                                    }
                                 } else {
                                     logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
                                     if (ptVal != null) {
                                         if (matching(ptVal, value.toString())) {
+                                            paramsChecked++;
                                             addedValues.addPair(el);
 
                                         }
@@ -1507,24 +1554,10 @@ public class AppForm extends javax.swing.JFrame {
 
                         }
                     }
-
-                } else {
-                    if (checkNames) {
-                        for (String string : props.getName(cfgObj)) {
-                            if (matching(ptName, string)) {
-                                shouldInclude = true;
-                                break;
-                            }
-                        }
-                    }
                 }
                 if (shouldInclude) {
                     cnt++;
-                    if (foundProc != null) {
-                        if (!foundProc.proc(cfgObj, kv)) {
-                            return true;
-                        }
-                    } else {
+                    if (foundProc == null) {
                         if (ss.isFullOutputSelected()) {
                             buf.append(cfgObj.toString()).append("\n");
                         } else {
@@ -1540,17 +1573,24 @@ public class AppForm extends javax.swing.JFrame {
                                     buf.append(names[i]);
                                 }
                             }
-                            if (checkForSectionOrOption) {
-                                buf.append("   ");
-                                buf.append(kv);
-                            }
+
                             buf.append("\n");
                         }
+                    } else {
+                        matchedObjects.put(cfgObj, kv);
                     }
                 }
 
             }
-            if (cnt > 0) {
+            if (foundProc != null) {
+                int i = 0;
+                for (Map.Entry<CfgObject, KeyValueCollection> entry : matchedObjects.entrySet()) {
+                    if (!foundProc.proc(entry.getKey(), entry.getValue(), ++i, matchedObjects.size())) {
+                        return true;
+                    }
+                }
+
+            } else if (cnt > 0) {
                 requestOutput("Search done, located " + cnt + " objects type " + cls.getSimpleName() + " -->\n" + buf + "<--\n");
             }
         }

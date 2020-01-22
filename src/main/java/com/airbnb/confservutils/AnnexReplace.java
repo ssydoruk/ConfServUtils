@@ -520,7 +520,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         StringBuilder ret = new StringBuilder();
 
         if (rbAddSection.isSelected()) {
-            ret.append("addiong option: [")
+            ret.append("adding option: [")
                     .append(checkBoxSelection(tfAddSection))
                     .append("]/\"")
                     .append(checkBoxSelection(tfAddKey))
@@ -571,7 +571,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                                             .append("\"\n");
                                 } else {
 //                                    upd.addAddKey(section, backupKey, kvInstance.getStringValue());
-                                    ret.append("addiong option: [")
+                                    ret.append("adding option: [")
                                             .append(section)
                                             .append("]/\"")
                                             .append(backupKey)
