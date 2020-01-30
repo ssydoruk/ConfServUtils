@@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author stepan_sydoruk
  */
-public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings, ISearchCommon {
+public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings, ISearchCommon, IUpdateSettings {
 
     private final AppForm theForm;
 
@@ -513,178 +513,6 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     }
 
-    static final private String BACKUP_PREFIX = "###";
-
-    String estimateUpdateObj(CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
-
-        StringBuilder ret = new StringBuilder();
-
-        if (rbAddSection.isSelected()) {
-            ret.append("adding option: [")
-                    .append(checkBoxSelection(tfAddSection))
-                    .append("]/\"")
-                    .append(checkBoxSelection(tfAddKey))
-                    .append("\"=\"")
-                    .append(checkBoxSelection(tfAddValue))
-                    .append("\"\n");
-        } else if (rbRemove.isSelected()) {
-            ret.append("deleting kvp ")
-                    .append(kv)
-                    .append("\n");
-        } else if (rbReplaceWith.isSelected()) {
-//        sectionsList = new KeyValueCollection();
-//
-//        sectionOptions = new KeyValueCollection();
-//        sectionsList.addList("General", sectionOptions);
-//        sectionOptions.addString("ServerDescription", "Main server of the IT department");
-//        sectionOptions.addString("AdminAddress", "admin@somewhere.com");
-
-            for (Object object : kv) {
-                if (object instanceof KeyValuePair) {
-                    KeyValuePair kvp = (KeyValuePair) object;
-                    String section = kvp.getStringKey();
-                    Object value = kvp.getValue();
-                    ValueType valueType = kvp.getValueType();
-                    if (valueType == ValueType.TKV_LIST) {
-                        for (Object _kvInstance : (KeyValueCollection) value) {
-                            KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-//                            upd.addUpdateKey(section, kvInstance.getStringKey(), checkBoxSelection(tfReplaceWith));
-                            ret.append("updating option value in [")
-                                    .append(section)
-                                    .append("]/\"")
-                                    .append(kvInstance.getStringKey())
-                                    .append("\" from \"")
-                                    .append(kvInstance.getStringValue())
-                                    .append("\" to \"")
-                                    .append(checkBoxSelection(tfReplaceWith))
-                                    .append("\"\n");
-                            if (cbMakeBackup.isSelected()) {
-                                String backupKey = BACKUP_PREFIX + kvInstance.getStringKey();
-                                if (updateExisted(obj, section, backupKey, kvInstance.getStringValue())) {
-//                                    upd.addUpdateKey(section, backupKey, kvInstance.getStringValue());
-                                    ret.append("updating option value [")
-                                            .append(section)
-                                            .append("]/\"")
-                                            .append(backupKey)
-                                            .append("\" with value \"")
-                                            .append(kvInstance.getStringValue())
-                                            .append("\"\n");
-                                } else {
-//                                    upd.addAddKey(section, backupKey, kvInstance.getStringValue());
-                                    ret.append("adding option: [")
-                                            .append(section)
-                                            .append("]/\"")
-                                            .append(backupKey)
-                                            .append("\"=\"")
-                                            .append(kvInstance.getStringValue())
-                                            .append("\"\n");
-                                }
-                            }
-                        }
-                    } else {
-                        logger.error("Unsupport value type: " + valueType + " obj: " + obj.toString());
-                    }
-                    logger.info(kvp);
-
-                }
-
-            }
-//            upd.addUpdateKey(TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY);
-        } else if (rbRestoreFromBackup.isSelected()) {
-            ArrayList<UserProperties> allBackup = getAllBackup(obj);
-            if (allBackup.isEmpty()) {
-                theForm.requestOutput("No backup user properties");
-            } else {
-                for (UserProperties userProperties : allBackup) {
-                    String origProperty = userProperties.key.substring(BACKUP_PREFIX.length());
-                    setProperty(obj, ret, userProperties.section, origProperty, userProperties.value);
-                    if (cbMakeBackup.isSelected()) {
-                        String curValue = getCurValue(obj, userProperties.section, origProperty);
-                        if (curValue != null) {
-                            setProperty(obj, ret, userProperties.section, userProperties.key, curValue);
-                        }
-                    }
-                }
-            }
-        }
-
-//        upd.addAddKey("Caching", "CacheSizeLimit", "2044");
-//        upd.addAddKey("TServer", "PrimaryRegion", "NA");
-//        upd.addAddKey("us_urs_p", "event_arrive", "none");
-//        upd.addDeleteKey("Caching", "CacheSizeLimit", "2044");
-//        upd.commitUpdate();
-        return ret.toString();
-    }
-
-    void updateObj(CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
-
-        UpdateUserProperties upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid());
-
-        if (rbAddSection.isSelected()) {
-            upd.addAddKey(checkBoxSelection(tfAddSection), checkBoxSelection(tfAddKey), checkBoxSelection(tfAddValue));
-        } else if (rbRemove.isSelected()) {
-            upd.addDeleteKey(kv);
-        } else if (rbReplaceWith.isSelected()) {
-//        sectionsList = new KeyValueCollection();
-//
-//        sectionOptions = new KeyValueCollection();
-//        sectionsList.addList("General", sectionOptions);
-//        sectionOptions.addString("ServerDescription", "Main server of the IT department");
-//        sectionOptions.addString("AdminAddress", "admin@somewhere.com");
-
-            for (Object object : kv) {
-                if (object instanceof KeyValuePair) {
-                    KeyValuePair kvp = (KeyValuePair) object;
-                    String section = kvp.getStringKey();
-                    Object value = kvp.getValue();
-                    ValueType valueType = kvp.getValueType();
-                    if (valueType == ValueType.TKV_LIST) {
-                        for (Object _kvInstance : (KeyValueCollection) value) {
-                            KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                            upd.addUpdateKey(section, kvInstance.getStringKey(), checkBoxSelection(tfReplaceWith));
-                            if (cbMakeBackup.isSelected()) {
-                                String backupKey = BACKUP_PREFIX + kvInstance.getStringKey();
-                                if (updateExisted(obj, section, backupKey, kvInstance.getStringValue())) {
-                                    upd.addUpdateKey(section, backupKey, kvInstance.getStringValue());
-                                } else {
-                                    upd.addAddKey(section, backupKey, kvInstance.getStringValue());
-                                }
-                            }
-                        }
-                    } else {
-                        logger.error("Unsupport value type: " + valueType + " obj: " + obj.toString());
-                    }
-                    logger.info(kvp);
-
-                }
-
-            }
-//            upd.addUpdateKey(TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY);
-        } else if (rbRestoreFromBackup.isSelected()) {
-            ArrayList<UserProperties> allBackup = getAllBackup(obj);
-            if (allBackup.isEmpty()) {
-                theForm.requestOutput("No backup user properties");
-            } else {
-                for (UserProperties userProperties : allBackup) {
-                    String origProperty = userProperties.key.substring(BACKUP_PREFIX.length());
-                    setProperty(obj, upd, userProperties.section, origProperty, userProperties.value);
-                    if (cbMakeBackup.isSelected()) {
-                        String curValue = getCurValue(obj, userProperties.section, origProperty);
-                        if (curValue != null) {
-                            setProperty(obj, upd, userProperties.section, userProperties.key, curValue);
-                        }
-                    }
-                }
-            }
-        }
-
-//        upd.addAddKey("Caching", "CacheSizeLimit", "2044");
-//        upd.addAddKey("TServer", "PrimaryRegion", "NA");
-//        upd.addAddKey("us_urs_p", "event_arrive", "none");
-//        upd.addDeleteKey("Caching", "CacheSizeLimit", "2044");
-        upd.commitUpdate();
-    }
-
     private StringBuilder getReplaceWith() {
         return new StringBuilder()
                 .append(rbReplaceWith.getText())
@@ -704,117 +532,6 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                 .append("] val[:")
                 .append(checkBoxSelection(tfAddValue))
                 .append("]");
-    }
-
-    private boolean updateExisted(CfgObject obj, String section, String stringKey, String stringValue) {
-        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
-        if (property != null && !property.isEmpty()) {
-            for (Object object : property) {
-                if (object instanceof KeyValuePair) {
-                    KeyValuePair kvp = (KeyValuePair) object;
-                    Object value = kvp.getValue();
-                    ValueType valueType = kvp.getValueType();
-
-                    if (kvp.getStringKey().equals(section)) {
-                        if (valueType == ValueType.TKV_LIST) {
-                            for (Object _kvInstance : (KeyValueCollection) value) {
-                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                                if (kvInstance.getStringKey().equals(stringKey)) {
-                                    return true;
-                                }
-                            }
-                        } else {
-                            theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private ArrayList<UserProperties> getAllBackup(CfgObject obj) {
-        ArrayList<UserProperties> ret = new ArrayList<>();
-        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
-        if (property != null && !property.isEmpty()) {
-            for (Object object : property) {
-                if (object instanceof KeyValuePair) {
-                    KeyValuePair kvp = (KeyValuePair) object;
-                    Object value = kvp.getValue();
-                    ValueType valueType = kvp.getValueType();
-
-                    if (valueType == ValueType.TKV_LIST) {
-                        for (Object _kvInstance : (KeyValueCollection) value) {
-                            KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                            if (kvInstance.getStringKey().startsWith(BACKUP_PREFIX)) {
-                                ret.add(new UserProperties(kvp.getStringKey(), kvInstance.getStringKey(), kvInstance.getStringValue()));
-                            }
-                        }
-                    } else {
-                        theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
-                    }
-                }
-            }
-        }
-        return ret;
-    }
-
-    private void setProperty(CfgObject obj, UpdateUserProperties upd, String section, String key, String value) {
-        if (updateExisted(obj, section, key, value)) {
-            upd.addUpdateKey(section, key, value);
-        } else {
-            upd.addAddKey(section, key, value);
-        }
-    }
-
-    private void setProperty(CfgObject obj, StringBuilder buf, String section, String key, String value) {
-
-        if (updateExisted(obj, section, key, value)) {
-//            upd.addUpdateKey(section, key, value);
-            buf.append("updating option value [")
-                    .append(section)
-                    .append("]/\"")
-                    .append(key)
-                    .append("\" with value \"")
-                    .append(value)
-                    .append("\"\n");
-        } else {
-//            upd.addAddKey(section, key, value);
-            buf.append("adding option: [")
-                    .append(section)
-                    .append("]/\"")
-                    .append(key)
-                    .append("\"=\"")
-                    .append(value)
-                    .append("\"\n");
-        }
-    }
-
-    private String getCurValue(CfgObject obj, String section, String origProperty) {
-        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
-        if (property != null && !property.isEmpty()) {
-            for (Object object : property) {
-                if (object instanceof KeyValuePair) {
-                    KeyValuePair kvp = (KeyValuePair) object;
-                    if (kvp.getStringKey().equals(section)) {
-                        Object value = kvp.getValue();
-                        ValueType valueType = kvp.getValueType();
-
-                        if (valueType == ValueType.TKV_LIST) {
-                            for (Object _kvInstance : (KeyValueCollection) value) {
-                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                                if (kvInstance.getStringKey().equals(origProperty)) {
-                                    return kvInstance.getStringValue();
-                                }
-                            }
-                        } else {
-                            theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
-                        }
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     boolean checkParameters() {
@@ -841,18 +558,48 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     }
 
-    class UserProperties {
+    @Override
+    public String addSection() {
+        return checkBoxSelection(tfAddSection);
+    }
 
-        private final String key;
-        private final String section;
-        private final String value;
+    @Override
+    public String addKey() {
+        return checkBoxSelection(tfAddKey);
+    }
 
-        public UserProperties(String _section, String _key, String _value) {
-            section = _section;
-            key = _key;
-            value = _value;
+    @Override
+    public String addValue() {
+        return checkBoxSelection(tfAddValue);
+    }
 
+    @Override
+    public boolean isMakeBackup() {
+        return cbMakeBackup.isSelected();
+    }
+
+    @Override
+    public UpdateAction getUpdateAction() {
+        if (rbAddSection.isSelected()) {
+            return UpdateAction.ADD_SECTION;
+        } else if (rbRemove.isSelected()) {
+            return UpdateAction.REMOVE;
+        } else if (rbReplaceWith.isSelected()) {
+            return UpdateAction.REPLACE_WITH;
+        } else {
+            return UpdateAction.RESTORE_FROM_BACKUP;
         }
+    }
+
+    @Override
+    public String replaceWith(String currentValue) {
+        return checkBoxSelection(tfReplaceWith);
+
+    }
+
+    @Override
+    public String getReplaceKey(String stringKey) {
+        return stringKey;
     }
 
 }

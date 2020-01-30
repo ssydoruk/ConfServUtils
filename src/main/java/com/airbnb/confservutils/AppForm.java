@@ -48,6 +48,7 @@ import com.genesyslab.platform.applicationblocks.com.queries.CfgTreatmentQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgVoicePromptQuery;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
+import com.genesyslab.platform.commons.collections.ValueType;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
@@ -365,7 +366,11 @@ public class AppForm extends javax.swing.JFrame {
         miAppByOption = new javax.swing.JMenuItem();
         miObjectByAnnex = new javax.swing.JMenuItem();
         miBusinessAttribute = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        miOneORS = new javax.swing.JMenuItem();
+        miAllORSs = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -507,7 +512,7 @@ public class AppForm extends javax.swing.JFrame {
 
         getContentPane().add(jpOutput);
 
-        jMenu1.setText("ConfigRequest");
+        jMenu1.setText("Query");
 
         miObjByDBID.setText("Object by DBID");
         miObjByDBID.addActionListener(new java.awt.event.ActionListener() {
@@ -549,15 +554,39 @@ public class AppForm extends javax.swing.JFrame {
         });
         jMenu1.add(miBusinessAttribute);
 
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Update");
+
         miAnnexSearchReplace.setText("Annex search and replace");
         miAnnexSearchReplace.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miAnnexSearchReplaceActionPerformed(evt);
             }
         });
-        jMenu1.add(miAnnexSearchReplace);
+        jMenu2.add(miAnnexSearchReplace);
 
-        jMenuBar1.add(jMenu1);
+        jMenu3.setText("ORS Cluster");
+
+        miOneORS.setText("Leave 1 ORS");
+        miOneORS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miOneORSActionPerformed(evt);
+            }
+        });
+        jMenu3.add(miOneORS);
+
+        miAllORSs.setText("Restore all ORSs");
+        miAllORSs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miAllORSsActionPerformed(evt);
+            }
+        });
+        jMenu3.add(miAllORSs);
+
+        jMenu2.add(jMenu3);
+
+        jMenuBar1.add(jMenu2);
 
         jmExit.setText("Exit");
         jmExit.addActionListener(new java.awt.event.ActionListener() {
@@ -1145,9 +1174,17 @@ public class AppForm extends javax.swing.JFrame {
         return infoDialog.getDialogResult();
     }
     boolean yesToAll;
+    UpdateUserProperties upd = null;
+
+    private KeyValueCollection getAllValuesInSection(CfgObject obj, ISearchSettings seearchSettings) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 
     private void miAnnexSearchReplaceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAnnexSearchReplaceActionPerformed
         yesToAll = false;
+        upd = null;
+
         if (annexReplace == null) {
             panelAnnexReplace = new AnnexReplace(this);
             annexReplace = new RequestDialog(this, panelAnnexReplace, (JMenuItem) evt.getSource());
@@ -1178,9 +1215,13 @@ public class AppForm extends javax.swing.JFrame {
                                 logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
 //                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
                                 if (yesToAll) {
-                                    panelAnnexReplace.updateObj(obj, kv, configServerManager);
+                                    if (upd != null) {
+                                        upd.updateObj(pn, obj, kv, configServerManager);
+                                    }
+
                                 } else {
-                                    String estimateUpdateObj = panelAnnexReplace.estimateUpdateObj(obj, kv, configServerManager);
+                                    upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                                    String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv, configServerManager);
                                     switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched " + total
                                             + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
                                             + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
@@ -1191,13 +1232,13 @@ public class AppForm extends javax.swing.JFrame {
                                                     JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
                                                 yesToAll = true;
-                                                panelAnnexReplace.updateObj(obj, kv, configServerManager);
+                                                upd.updateObj(pn, obj, kv, configServerManager);
                                                 break;
                                             }
                                             break;
 
                                         case JOptionPane.YES_OPTION:
-                                            panelAnnexReplace.updateObj(obj, kv, configServerManager);
+                                            upd.updateObj(pn, obj, kv, configServerManager);
                                             break;
 
                                         case JOptionPane.NO_OPTION:
@@ -1226,6 +1267,397 @@ public class AppForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_miAnnexSearchReplaceActionPerformed
 
+    private void miAllORSsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAllORSsActionPerformed
+        upd = null;
+        yesToAll = false;
+
+        if (connectToConfigServer()) {
+
+            ISearchSettings seearchSettings = new ISearchSettings() {
+                @Override
+                public boolean isCaseSensitive() {
+                    return false;
+                }
+
+                @Override
+                public boolean isRegex() {
+                    return false;
+                }
+
+                @Override
+                public boolean isFullOutputSelected() {
+                    return false;
+                }
+
+                @Override
+                public boolean isSearchAll() {
+                    return false;
+                }
+
+                @Override
+                public String getAllSearch() {
+                    return null;
+                }
+
+                @Override
+                public String getSection() {
+                    return "cluster";
+                }
+
+                @Override
+                public String getObjName() {
+                    return null;
+                }
+
+                @Override
+                public String getOption() {
+                    return null;
+                }
+
+                @Override
+                public String getValue() {
+                    return null;
+                }
+            };
+
+            class AUpdateSettings implements IUpdateSettings {
+
+                @Override
+                public String addSection() {
+                    return null;
+                }
+
+                @Override
+                public String addKey() {
+                    return null;
+                }
+
+                @Override
+                public String addValue() {
+                    return null;
+                }
+
+                @Override
+                public boolean isMakeBackup() {
+                    return true;
+                }
+
+                @Override
+                public IUpdateSettings.UpdateAction getUpdateAction() {
+                    return IUpdateSettings.UpdateAction.RENAME_SECTION;
+                }
+
+                @Override
+                public String replaceWith(String currentValue) {
+                    if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
+                        return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
+                    } else {
+                        return currentValue;
+                    }
+
+                }
+
+                @Override
+                public String getReplaceKey(String currentValue) {
+                    return UpdateUserProperties.uncommented(currentValue);
+
+                }
+            }
+            ;
+
+            AUpdateSettings us = new AUpdateSettings();
+
+            ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+                @Override
+                public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
+//                    kv = getAllValuesInSection(obj, seearchSettings);
+                    kv = new KeyValueCollection();
+                    kv.addList(seearchSettings.getSection(), ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection()));
+//                            ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection());
+                    logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+
+//                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
+                    if (yesToAll) {
+                        upd.updateObj(us, obj, kv, configServerManager);
+                    } else {
+                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                        String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
+                        switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
+                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                            case YES_TO_ALL:
+                                if (JOptionPane.showConfirmDialog(theForm,
+                                        "Are you sure you want to modify this and all following found objects?",
+                                        "Please confirm",
+                                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                    yesToAll = true;
+                                    upd.updateObj(us, obj, kv, configServerManager);
+                                    break;
+                                }
+                                break;
+
+                            case JOptionPane.YES_OPTION:
+                                upd.updateObj(us, obj, kv, configServerManager);
+                                break;
+
+                            case JOptionPane.NO_OPTION:
+                                break;
+
+                            case JOptionPane.CANCEL_OPTION:
+                                return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+            };
+
+            CfgObjectType value = CfgObjectType.CFGTransaction;
+
+            try {
+
+                CfgTransactionQuery query = new CfgTransactionQuery();
+                query.setObjectType(CfgTransactionType.CFGTRTList);
+                String n = seearchSettings.getObjName();
+                if (seearchSettings.isCaseSensitive() && n != null) {
+                    query.setName(n);
+                }
+
+                if (findObjects(
+                        query,
+                        CfgTransaction.class,
+                        new IKeyValueProperties() {
+                    @Override
+                    public KeyValueCollection getProperties(CfgObject obj) {
+                        return ((CfgTransaction) obj).getUserProperties();
+                    }
+
+                    @Override
+                    public Collection<String> getName(CfgObject obj) {
+                        return new ArrayList<>();
+                    }
+                },
+                        seearchSettings, false, foundProc)) {
+
+                }
+
+            } catch (ConfigException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }//GEN-LAST:event_miAllORSsActionPerformed
+
+    private void miOneORSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miOneORSActionPerformed
+        upd = null;
+        yesToAll = false;
+
+        if (connectToConfigServer()) {
+
+            ISearchSettings seearchSettings = new ISearchSettings() {
+                @Override
+                public boolean isCaseSensitive() {
+                    return false;
+                }
+
+                @Override
+                public boolean isRegex() {
+                    return false;
+                }
+
+                @Override
+                public boolean isFullOutputSelected() {
+                    return false;
+                }
+
+                @Override
+                public boolean isSearchAll() {
+                    return false;
+                }
+
+                @Override
+                public String getAllSearch() {
+                    return null;
+                }
+
+                @Override
+                public String getSection() {
+                    return "cluster";
+                }
+
+                @Override
+                public String getObjName() {
+                    return null;
+                }
+
+                @Override
+                public String getOption() {
+                    return null;
+                }
+
+                @Override
+                public String getValue() {
+                    return null;
+                }
+            };
+
+            class AUpdateSettings implements IUpdateSettings {
+
+                private boolean oneActive = false;
+
+                @Override
+                public String addSection() {
+                    return null;
+                }
+
+                @Override
+                public String addKey() {
+                    return null;
+                }
+
+                @Override
+                public String addValue() {
+                    return null;
+                }
+
+                @Override
+                public boolean isMakeBackup() {
+                    return true;
+                }
+
+                @Override
+                public IUpdateSettings.UpdateAction getUpdateAction() {
+                    return UpdateAction.RENAME_SECTION;
+                }
+
+                @Override
+                public String replaceWith(String currentValue) {
+                    if (!oneActive) {
+                        oneActive = true;
+                        if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
+                            return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
+                        } else {
+                            return currentValue;
+                        }
+                    }
+                    return currentValue;
+
+                }
+
+                public void setOneActive(boolean oneActive) {
+                    this.oneActive = oneActive;
+                }
+
+                @Override
+                public String getReplaceKey(String currentValue) {
+                    if (!oneActive) {
+                        oneActive = true;
+                        if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
+                            return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
+                        } else {
+                            return currentValue;
+                        }
+                    }
+                    return UpdateUserProperties.getCommentedKey(currentValue);
+                }
+            }
+            ;
+
+            AUpdateSettings us = new AUpdateSettings();
+
+            ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+                @Override
+                public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
+//                    kv = getAllValuesInSection(obj, seearchSettings);
+                    kv = new KeyValueCollection();
+                    kv.addList(seearchSettings.getSection(), ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection()));
+//                            ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection());
+                    logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+
+//                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
+                    if (yesToAll) {
+                        us.setOneActive(false);
+                        upd.updateObj(us, obj, kv, configServerManager);
+                    } else {
+                        us.setOneActive(false);
+                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                        String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
+                        switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
+                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                            case YES_TO_ALL:
+                                if (JOptionPane.showConfirmDialog(theForm,
+                                        "Are you sure you want to modify this and all following found objects?",
+                                        "Please confirm",
+                                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                    yesToAll = true;
+                                    us.setOneActive(false);
+                                    upd.updateObj(us, obj, kv, configServerManager);
+                                    break;
+                                }
+                                break;
+
+                            case JOptionPane.YES_OPTION:
+                                us.setOneActive(false);
+                                upd.updateObj(us, obj, kv, configServerManager);
+                                break;
+
+                            case JOptionPane.NO_OPTION:
+                                break;
+
+                            case JOptionPane.CANCEL_OPTION:
+                                return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+            };
+
+            CfgObjectType value = CfgObjectType.CFGTransaction;
+
+            try {
+
+                CfgTransactionQuery query = new CfgTransactionQuery();
+                query.setObjectType(CfgTransactionType.CFGTRTList);
+                String n = seearchSettings.getObjName();
+                if (seearchSettings.isCaseSensitive() && n != null) {
+                    query.setName(n);
+                }
+
+                if (findObjects(
+                        query,
+                        CfgTransaction.class,
+                        new IKeyValueProperties() {
+                    @Override
+                    public KeyValueCollection getProperties(CfgObject obj) {
+                        return ((CfgTransaction) obj).getUserProperties();
+                    }
+
+                    @Override
+                    public Collection<String> getName(CfgObject obj) {
+                        return new ArrayList<>();
+                    }
+                },
+                        seearchSettings, false, foundProc)) {
+
+                }
+
+            } catch (ConfigException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }//GEN-LAST:event_miOneORSActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancel;
     private javax.swing.JButton btClearOutput;
@@ -1239,6 +1671,8 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -1252,12 +1686,14 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenu jmExit;
     private javax.swing.JPanel jpConfServ;
     private javax.swing.JPanel jpOutput;
+    private javax.swing.JMenuItem miAllORSs;
     private javax.swing.JMenuItem miAnnexSearchReplace;
     private javax.swing.JMenuItem miAppByIP;
     private javax.swing.JMenuItem miAppByOption;
     private javax.swing.JMenuItem miBusinessAttribute;
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
+    private javax.swing.JMenuItem miOneORS;
     private javax.swing.JPasswordField pfPassword;
     private javax.swing.JTextArea taOutput;
     // End of variables declaration//GEN-END:variables
@@ -1624,7 +2060,8 @@ public class AppForm extends javax.swing.JFrame {
                                     buf.append(r.getTarget().toString(true)).append("\n");
                                     String mask = r.getTarget().getLabelString(0) + "*";
                                     hq.setName(mask);
-                                    Collection<CfgHost> hostsFound = configServerManager.getResults(hq, CfgHost.class);
+                                    Collection<CfgHost> hostsFound = configServerManager.getResults(hq, CfgHost.class
+                                    );
                                     if (hostsFound != null) {
                                         for (CfgHost cfgHost : hostsFound) {
                                             buf.append("Found host: ").append(cfgHost.getName()).append(" DBID:")
@@ -1738,6 +2175,7 @@ public class AppForm extends javax.swing.JFrame {
                         CfgApplicationQuery q = new CfgApplicationQuery();
                         if (t != null) {
                             q.setAppType(t);
+
                         }
                         findObjects(
                                 q,
@@ -1872,6 +2310,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setDnNumber(n);
+
             }
 
             if (findObjects(
@@ -1906,6 +2345,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
@@ -1940,6 +2380,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setLoginCode(n);
+
             }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
@@ -1974,6 +2415,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
@@ -2006,6 +2448,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setUserName(n);
+
             }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
@@ -2133,6 +2576,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
@@ -2165,6 +2609,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2195,6 +2640,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2225,6 +2671,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2256,6 +2703,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2290,6 +2738,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2319,6 +2768,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2350,6 +2800,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2380,6 +2831,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2413,6 +2865,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2444,6 +2897,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2474,6 +2928,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2504,6 +2959,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setPortNumber(n);
+
             }
 
             if (findObjects(
@@ -2534,6 +2990,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2564,6 +3021,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2594,6 +3052,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2624,6 +3083,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2653,6 +3113,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2682,6 +3143,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2711,6 +3173,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2743,6 +3206,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
@@ -2774,6 +3238,7 @@ public class AppForm extends javax.swing.JFrame {
             String n = pn.getObjName();
             if (pn.isCaseSensitive() && n != null) {
                 query.setName(n);
+
             }
 
             if (findObjects(
