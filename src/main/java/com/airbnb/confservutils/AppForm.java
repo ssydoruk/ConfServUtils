@@ -1918,7 +1918,7 @@ public class AppForm extends javax.swing.JFrame {
                                 }
                             }
 
-                            if (ptAll != null || paramsChecked >= paramsToCheck) {
+                            if (paramsToCheck > 0 && paramsChecked >= paramsToCheck) {
                                 kv.addObject(el.getStringKey(), new KeyValueCollection());
                                 shouldInclude = true;
                             } else {
@@ -1959,7 +1959,7 @@ public class AppForm extends javax.swing.JFrame {
 
                                         }
                                     }
-                                    if (ptAll == null && paramsChecked >= paramsToCheck) {
+                                    if (paramsChecked > 0 && paramsChecked >= paramsToCheck) {
                                         shouldInclude = true;
                                     }
                                 } else {
@@ -1999,18 +1999,27 @@ public class AppForm extends javax.swing.JFrame {
                         } else {
                             Object[] names = props.getName(cfgObj).toArray();
                             buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: " + cfgObj.getObjectDbid());
-                            buf.append("\n");
                             if (names.length > 1) {
                                 buf.append('\t');
+                                int added = 1;
                                 for (int i = 1; i < names.length; i++) {
-                                    if (i > 1) {
+                                    if (added > 1) {
                                         buf.append(", ");
                                     }
-                                    buf.append(names[i]);
+                                    Object obj = names[i];
+                                    if (obj != null) {
+                                        String s = obj.toString();
+                                        if (StringUtils.isNotBlank(s)) {
+                                            buf.append(s);
+                                            added++;
+                                        }
+                                    }
                                 }
                             }
-
                             buf.append("\n");
+                            if (kv != null && !kv.isEmpty()) {
+                                buf.append("\t").append(kv.toString()).append("\n\n");
+                            }
                         }
                     } else {
                         matchedObjects.put(cfgObj, kv);
