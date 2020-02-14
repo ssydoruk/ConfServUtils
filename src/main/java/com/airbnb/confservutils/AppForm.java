@@ -1920,7 +1920,8 @@ public class AppForm extends javax.swing.JFrame {
                 if (ptSection == null
                         && ptOption == null
                         && ptVal == null
-                        && ptName == null) {
+                        && ptName == null
+                        && ptAll == null) {
                     shouldInclude = true;
                 } else {
 
