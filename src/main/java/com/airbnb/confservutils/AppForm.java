@@ -59,6 +59,7 @@ import com.genesyslab.platform.configuration.protocol.obj.ConfStructureCollectio
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
+import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
 import com.genesyslab.platform.configuration.protocol.types.CfgStructureType;
 import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import com.google.gson.FieldNamingPolicy;
@@ -371,6 +372,9 @@ public class AppForm extends javax.swing.JFrame {
         jMenu3 = new javax.swing.JMenu();
         miOneORS = new javax.swing.JMenuItem();
         miAllORSs = new javax.swing.JMenuItem();
+        jMenu4 = new javax.swing.JMenu();
+        miBufferingOff = new javax.swing.JMenuItem();
+        miBufferingOn = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -585,6 +589,26 @@ public class AppForm extends javax.swing.JFrame {
         jMenu3.add(miAllORSs);
 
         jMenu2.add(jMenu3);
+
+        jMenu4.setText("ORS scripts buffering");
+
+        miBufferingOff.setText("Turn buffering off");
+        miBufferingOff.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miBufferingOffActionPerformed(evt);
+            }
+        });
+        jMenu4.add(miBufferingOff);
+
+        miBufferingOn.setText("Turn buffering on");
+        miBufferingOn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miBufferingOnActionPerformed(evt);
+            }
+        });
+        jMenu4.add(miBufferingOn);
+
+        jMenu2.add(jMenu4);
 
         jMenuBar1.add(jMenu2);
 
@@ -1318,24 +1342,24 @@ public class AppForm extends javax.swing.JFrame {
                 public String getValue() {
                     return null;
                 }
+
+                @Override
+                public void setCaseSensitive(boolean setBool) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public void setRegex(boolean setBool) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public void setObjName(String objName) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
             };
 
             class AUpdateSettings implements IUpdateSettings {
-
-                @Override
-                public String addSection() {
-                    return null;
-                }
-
-                @Override
-                public String addKey() {
-                    return null;
-                }
-
-                @Override
-                public String addValue() {
-                    return null;
-                }
 
                 @Override
                 public boolean isMakeBackup() {
@@ -1361,6 +1385,11 @@ public class AppForm extends javax.swing.JFrame {
                 public String getReplaceKey(String currentValue) {
                     return UpdateUserProperties.uncommented(currentValue);
 
+                }
+
+                @Override
+                public Collection<UserProperties> getAddedKVP() {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             }
             ;
@@ -1436,7 +1465,9 @@ public class AppForm extends javax.swing.JFrame {
 
                     @Override
                     public Collection<String> getName(CfgObject obj) {
-                        return new ArrayList<>();
+                        Collection<String> ret = new ArrayList<>();
+
+                        return ret;
                     }
                 },
                         seearchSettings, false, foundProc)) {
@@ -1503,26 +1534,26 @@ public class AppForm extends javax.swing.JFrame {
                 public String getValue() {
                     return null;
                 }
+
+                @Override
+                public void setCaseSensitive(boolean setBool) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public void setRegex(boolean setBool) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
+
+                @Override
+                public void setObjName(String objName) {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
             };
 
             class AUpdateSettings implements IUpdateSettings {
 
                 private boolean oneActive = false;
-
-                @Override
-                public String addSection() {
-                    return null;
-                }
-
-                @Override
-                public String addKey() {
-                    return null;
-                }
-
-                @Override
-                public String addValue() {
-                    return null;
-                }
 
                 @Override
                 public boolean isMakeBackup() {
@@ -1563,6 +1594,11 @@ public class AppForm extends javax.swing.JFrame {
                         }
                     }
                     return UpdateUserProperties.getCommentedKey(currentValue);
+                }
+
+                @Override
+                public Collection<UserProperties> getAddedKVP() {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             }
             ;
@@ -1658,6 +1694,15 @@ public class AppForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_miOneORSActionPerformed
 
+    private void miBufferingOffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miBufferingOffActionPerformed
+        strategyBuffering(false, evt);
+    }//GEN-LAST:event_miBufferingOffActionPerformed
+
+    private void miBufferingOnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miBufferingOnActionPerformed
+        strategyBuffering(true, evt);
+
+    }//GEN-LAST:event_miBufferingOnActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancel;
     private javax.swing.JButton btClearOutput;
@@ -1673,6 +1718,7 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -1690,6 +1736,8 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miAnnexSearchReplace;
     private javax.swing.JMenuItem miAppByIP;
     private javax.swing.JMenuItem miAppByOption;
+    private javax.swing.JMenuItem miBufferingOff;
+    private javax.swing.JMenuItem miBufferingOn;
     private javax.swing.JMenuItem miBusinessAttribute;
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
@@ -1869,125 +1917,131 @@ public class AppForm extends javax.swing.JFrame {
                 int paramsChecked = 0;
                 kv.clear();
 
-                if (ptAll != null) {
-                    if (checkNames) {
-                        for (String string : props.getName(cfgObj)) {
-                            if (matching(ptAll, string)) {
-                                shouldInclude = true;
-                                break;
-                            }
-                        }
-                    }
+                if (ptSection == null
+                        && ptOption == null
+                        && ptVal == null
+                        && ptName == null) {
+                    shouldInclude = true;
                 } else {
-                    if (checkNames && ptName != null) {
-                        for (String string : props.getName(cfgObj)) {
-                            if (matching(ptName, string)) {
-                                paramsChecked++;
-                                if (paramsChecked >= paramsToCheck) { // only object name is specified
+
+                    if (ptAll != null) {
+                        if (checkNames) {
+                            for (String string : props.getName(cfgObj)) {
+                                if (matching(ptAll, string)) {
                                     shouldInclude = true;
+                                    break;
                                 }
-                                break;
+                            }
+                        }
+                    } else {
+                        if (checkNames && ptName != null) {
+                            for (String string : props.getName(cfgObj)) {
+                                if (matching(ptName, string)) {
+                                    paramsChecked++;
+                                    shouldInclude = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                if (ptAll != null || paramsChecked < paramsToCheck) {
-                    KeyValueCollection options;
-                    options = props.getProperties(cfgObj);
-                    String sectionFound = null;
-                    if (options == null && ptAll == null) {
-                        shouldInclude = false; // rule 3)
-                    } else {
-                        Enumeration<KeyValuePair> enumeration = options.getEnumeration();
-                        KeyValuePair el;
+                    if (ptAll != null || paramsChecked < paramsToCheck) {
+                        KeyValueCollection options;
+                        options = props.getProperties(cfgObj);
+                        String sectionFound = null;
+                        if (options == null && ptAll == null) {
+                            shouldInclude = false; // rule 3)
+                        } else {
+                            Enumeration<KeyValuePair> enumeration = options.getEnumeration();
+                            KeyValuePair el;
 
-                        while (enumeration.hasMoreElements()) {
-                            el = enumeration.nextElement();
+                            while (enumeration.hasMoreElements()) {
+                                el = enumeration.nextElement();
 
-                            if (ptAll != null) {
-                                if (matching(ptAll, el.getStringKey())) {
-                                    sectionFound = el.getStringKey();
-                                    shouldInclude = true;
-                                }
-                            } else if (ptSection != null) {
-                                if (!matching(ptSection, el.getStringKey())) {
-                                    continue;
-                                } else {
-                                    sectionFound = el.getStringKey();
-                                    paramsChecked++;
-                                }
-                            }
-
-                            if (paramsToCheck > 0 && paramsChecked >= paramsToCheck) {
-                                kv.addObject(el.getStringKey(), new KeyValueCollection());
-                                shouldInclude = true;
-                            } else {
-                                KeyValueCollection addedValues = new KeyValueCollection();
-                                Object value = el.getValue();
-                                if (value instanceof KeyValueCollection) {
-                                    KeyValueCollection sectionValues = (KeyValueCollection) value;
-                                    Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
-                                    KeyValuePair theOpt;
-                                    while (optVal.hasMoreElements()) {
-                                        theOpt = optVal.nextElement();
-                                        boolean isOptFound = false;
-                                        boolean isValFound = false;
-
-                                        if (ptAll != null) {
-                                            if (matching(ptAll, theOpt.getStringKey())) {
-                                                isOptFound = true;
-                                            }
-                                            if (matching(ptAll, theOpt.getStringValue())) {
-                                                isValFound = true;
-                                            }
-                                        } else {
-                                            if (ptOption != null) {
-                                                if (matching(ptOption, theOpt.getStringKey())) {
-                                                    paramsChecked++;
-                                                    isOptFound = true;
-                                                }
-                                            }
-                                            if (ptVal != null) {
-                                                if (matching(ptVal, theOpt.getStringValue())) {
-                                                    paramsChecked++;
-                                                    isValFound = true;
-                                                }
-                                            }
-                                        }
-                                        if (isOptFound || isValFound) {
-                                            addedValues.addPair(theOpt);
-
-                                        }
-                                    }
-                                    if (paramsChecked > 0 && paramsChecked >= paramsToCheck) {
+                                if (ptAll != null) {
+                                    if (matching(ptAll, el.getStringKey())) {
+                                        sectionFound = el.getStringKey();
                                         shouldInclude = true;
                                     }
-                                } else {
-                                    logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
-                                    if (ptVal != null) {
-                                        if (matching(ptVal, value.toString())) {
-                                            paramsChecked++;
-                                            addedValues.addPair(el);
-
-                                        }
+                                } else if (ptSection != null) {
+                                    if (!matching(ptSection, el.getStringKey())) {
+                                        continue;
+                                    } else {
+                                        sectionFound = el.getStringKey();
+                                        paramsChecked++;
                                     }
                                 }
-                                if (!addedValues.isEmpty() || sectionFound != null) {
-                                    String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
-                                    KeyValueCollection list = kv.getList(sect);
-                                    if (list == null) {
-                                        list = new KeyValueCollection();
-                                        kv.addList(sect, list);
-                                    }
-                                    for (Object addedValue : addedValues.toArray()) {
-                                        list.add(addedValue);
-                                    }
-//                                    kv.addObject(el.getStringKey(), addedValues);
+
+                                if (paramsToCheck > 0 && paramsChecked >= paramsToCheck) {
+                                    kv.addObject(el.getStringKey(), new KeyValueCollection());
                                     shouldInclude = true;
+                                } else {
+                                    KeyValueCollection addedValues = new KeyValueCollection();
+                                    Object value = el.getValue();
+                                    if (value instanceof KeyValueCollection) {
+                                        KeyValueCollection sectionValues = (KeyValueCollection) value;
+                                        Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
+                                        KeyValuePair theOpt;
+                                        while (optVal.hasMoreElements()) {
+                                            theOpt = optVal.nextElement();
+                                            boolean isOptFound = false;
+                                            boolean isValFound = false;
+
+                                            if (ptAll != null) {
+                                                if (matching(ptAll, theOpt.getStringKey())) {
+                                                    isOptFound = true;
+                                                }
+                                                if (matching(ptAll, theOpt.getStringValue())) {
+                                                    isValFound = true;
+                                                }
+                                            } else {
+                                                if (ptOption != null) {
+                                                    if (matching(ptOption, theOpt.getStringKey())) {
+                                                        paramsChecked++;
+                                                        isOptFound = true;
+                                                    }
+                                                }
+                                                if (ptVal != null) {
+                                                    if (matching(ptVal, theOpt.getStringValue())) {
+                                                        paramsChecked++;
+                                                        isValFound = true;
+                                                    }
+                                                }
+                                            }
+                                            if (isOptFound || isValFound) {
+                                                addedValues.addPair(theOpt);
+
+                                            }
+                                        }
+                                        if (paramsChecked > 0 && paramsChecked >= paramsToCheck) {
+                                            shouldInclude = true;
+                                        }
+                                    } else {
+                                        logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
+                                        if (ptVal != null) {
+                                            if (matching(ptVal, value.toString())) {
+                                                paramsChecked++;
+                                                addedValues.addPair(el);
+
+                                            }
+                                        }
+                                    }
+                                    if (!addedValues.isEmpty() || sectionFound != null) {
+                                        String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
+                                        KeyValueCollection list = kv.getList(sect);
+                                        if (list == null) {
+                                            list = new KeyValueCollection();
+                                            kv.addList(sect, list);
+                                        }
+                                        for (Object addedValue : addedValues.toArray()) {
+                                            list.add(addedValue);
+                                        }
+//                                    kv.addObject(el.getStringKey(), addedValues);
+                                        shouldInclude = true;
+                                    }
+
                                 }
 
                             }
-
                         }
                     }
                 }
@@ -3325,6 +3379,345 @@ public class AppForm extends javax.swing.JFrame {
 
     HashSet<String> searchValues = new HashSet<>();
 
+    public static final HashMap<String, Integer> cacheOptions = createCacheOptions();
+
+    private static HashMap<String, Integer> createCacheOptions() {
+        HashMap<String, Integer> ret = new HashMap<>();
+        ret.put("assembled-cache-reload-threshold", 0);
+        ret.put("max-age", 0);
+        ret.put("max-assembled-cache-age", 0);
+
+        return ret;
+    }
+
+    private static final String appSection = "application";
+    RequestDialog getObjName = null;
+    FindObject findObj = null;
+
+    /**
+     *
+     * @param turnOn - turn on buffering; if true, means add cache parameters,
+     * remove them
+     */
+    private void strategyBuffering(boolean turnOn, ActionEvent evt) {
+        upd = null;
+        yesToAll = false;
+
+        if (getObjName == null) {
+            findObj = new FindObject();
+            getObjName = new RequestDialog(this, findObj);
+        }
+        findObj.setCaseSensitive(false);
+        if (!getObjName.doShow("Specify name for " + CfgScript.class.getSimpleName())) {
+            return;
+        }
+
+        if (connectToConfigServer()) {
+            ISearchSettings seearchSettings;
+            IUpdateSettings us;
+            if (turnOn) {
+                //<editor-fold defaultstate="collapsed" desc="turnOn">
+                seearchSettings = new ISearchSettings() {
+
+                    boolean caseSensitive = false;
+                    boolean regex = true;
+                    String objName = null;
+
+                    @Override
+                    public boolean isCaseSensitive() {
+                        return caseSensitive;
+                    }
+
+                    @Override
+                    public boolean isRegex() {
+                        return regex;
+                    }
+
+                    @Override
+                    public boolean isFullOutputSelected() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isSearchAll() {
+                        return false;
+                    }
+
+                    @Override
+                    public String getAllSearch() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getSection() {
+                        return "^" + appSection + "$";
+                    }
+
+                    @Override
+                    public String getObjName() {
+                        return objName;
+                    }
+
+                    @Override
+                    public String getOption() {
+                        return null;
+
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return null;
+                    }
+
+                    @Override
+                    public void setCaseSensitive(boolean setBool) {
+                        caseSensitive = setBool;
+                    }
+
+                    @Override
+                    public void setRegex(boolean setBool) {
+                        regex = setBool;
+                    }
+
+                    @Override
+                    public void setObjName(String objName) {
+                        this.objName = objName;
+                    }
+
+                };
+
+                us = new IUpdateSettings() {
+
+                    @Override
+                    public boolean isMakeBackup() {
+                        return false;
+                    }
+
+                    @Override
+                    public IUpdateSettings.UpdateAction getUpdateAction() {
+                        return IUpdateSettings.UpdateAction.ADD_SECTION;
+                    }
+
+                    @Override
+                    public String replaceWith(String currentValue) {
+
+                        return null;
+
+                    }
+
+                    @Override
+                    public String getReplaceKey(String currentValue) {
+                        return null;
+                    }
+
+                    @Override
+                    public Collection<UserProperties> getAddedKVP() {
+                        Collection<UserProperties> ret = new ArrayList<>();
+                        for (Map.Entry<String, Integer> entry : cacheOptions.entrySet()) {
+                            ret.add(new UserProperties(appSection, entry.getKey(), entry.getValue().toString()));
+
+                        }
+                        return ret;
+                    }
+                };
+//</editor-fold>
+
+            } else {
+                //<editor-fold defaultstate="collapsed" desc="turnOff">
+                seearchSettings = new ISearchSettings() {
+                    boolean caseSensitive = false;
+                    boolean regex = true;
+                    String objName = null;
+
+                    @Override
+                    public boolean isCaseSensitive() {
+                        return caseSensitive;
+                    }
+
+                    @Override
+                    public boolean isRegex() {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean isFullOutputSelected() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isSearchAll() {
+                        return false;
+                    }
+
+                    @Override
+                    public String getAllSearch() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getSection() {
+                        return "^" + appSection + "$";
+                    }
+
+                    @Override
+                    public String getObjName() {
+                        return objName;
+                    }
+
+                    @Override
+                    public String getOption() {
+                        return StringUtils.join(cacheOptions.keySet(), "|");
+
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return null;
+                    }
+
+                    @Override
+                    public void setCaseSensitive(boolean setBool) {
+                        caseSensitive = setBool;
+                    }
+
+                    @Override
+                    public void setRegex(boolean setBool) {
+                        regex = setBool;
+                    }
+
+                    @Override
+                    public void setObjName(String objName) {
+                        this.objName = objName;
+                    }
+                };
+
+                us = new IUpdateSettings() {
+
+                    @Override
+                    public boolean isMakeBackup() {
+                        return false;
+                    }
+
+                    @Override
+                    public IUpdateSettings.UpdateAction getUpdateAction() {
+                        return IUpdateSettings.UpdateAction.REMOVE;
+                    }
+
+                    @Override
+                    public String replaceWith(String currentValue) {
+                        return null;
+                    }
+
+                    @Override
+                    public String getReplaceKey(String currentValue) {
+                        return null;
+                    }
+
+                    @Override
+                    public Collection<UserProperties> getAddedKVP() {
+                        Collection<UserProperties> ret = new ArrayList<>();
+                        for (Map.Entry<String, Integer> entry : cacheOptions.entrySet()) {
+                            ret.add(new UserProperties(appSection, entry.getKey(), entry.getValue().toString()));
+
+                        }
+                        return ret;
+                    }
+                };
+//</editor-fold>
+
+            }
+
+            ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+                @Override
+                public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
+//                    kv = getAllValuesInSection(obj, seearchSettings);
+//                    kv = new KeyValueCollection();
+//                    kv.addList(seearchSettings.getSection(), ((CfgScript) obj).getUserProperties().getList(seearchSettings.getSection()));
+//                            ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection());
+                    logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+
+//                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
+                    if (yesToAll) {
+                        upd.updateObj(us, obj, kv, configServerManager);
+                    } else {
+                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                        String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
+                        if (estimateUpdateObj != null) //
+                        {
+                            switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
+                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                                case YES_TO_ALL:
+                                    if (JOptionPane.showConfirmDialog(theForm,
+                                            "Are you sure you want to modify this and all following found objects?",
+                                            "Please confirm",
+                                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                        yesToAll = true;
+                                        upd.updateObj(us, obj, kv, configServerManager);
+                                        break;
+                                    }
+                                    break;
+
+                                case JOptionPane.YES_OPTION:
+                                    upd.updateObj(us, obj, kv, configServerManager);
+                                    break;
+
+                                case JOptionPane.NO_OPTION:
+                                    break;
+
+                                case JOptionPane.CANCEL_OPTION:
+                                    return false;
+                            }
+                        }
+                    }
+
+                    return true;
+                }
+
+            };
+
+            try {
+
+                seearchSettings.setCaseSensitive(findObj.isCaseSensitive());
+                seearchSettings.setObjName(findObj.getName());
+
+                CfgScriptQuery query = new CfgScriptQuery();
+                query.setScriptType(CfgScriptType.CFGEnhancedRouting);
+                String n = seearchSettings.getObjName();
+                if (seearchSettings.isCaseSensitive() && n != null) {
+                    query.setName(n);
+                }
+
+                if (findObjects(
+                        query,
+                        CfgScript.class,
+                        new IKeyValueProperties() {
+                    @Override
+                    public KeyValueCollection getProperties(CfgObject obj) {
+                        return ((CfgScript) obj).getUserProperties();
+                    }
+
+                    @Override
+                    public Collection<String> getName(CfgObject obj) {
+                        Collection<String> ret = new ArrayList<>();
+                        ret.add(((CfgScript) obj).getName());
+                        return ret;
+                    }
+                },
+                        seearchSettings, true, foundProc)) {
+
+                }
+
+            } catch (ConfigException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }
+
     class RequestDialog extends StandardDialog {
 
         private JPanel contentPanel;
@@ -3395,6 +3788,11 @@ public class AppForm extends javax.swing.JFrame {
             buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             buttonPanel.setSizeConstraint(ButtonPanel.NO_LESS_THAN); // since the checkbox is quite wide, we don't want all of them have the same size.
             return buttonPanel;
+        }
+
+        public boolean doShow(String Title) {
+            setTitle(Title);
+            return doShow();
         }
 
         public boolean doShow() {

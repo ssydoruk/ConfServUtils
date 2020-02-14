@@ -5,7 +5,9 @@
  */
 package com.airbnb.confservutils;
 
+import Utils.Pair;
 import static Utils.Swing.checkBoxSelection;
+import static com.airbnb.confservutils.UserProperties.kvpToString;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
@@ -17,7 +19,10 @@ import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import javax.swing.JOptionPane;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -50,6 +55,12 @@ public class UpdateUserProperties {
     KeyValueCollection createSections = new KeyValueCollection();
     KeyValueCollection deleteSections = new KeyValueCollection();
 
+    private void prepareUpdate() {
+        updateSections.clear();
+        createSections.clear();
+        deleteSections.clear();
+    }
+
     public static KeyValueCollection getSection(KeyValueCollection sections, String section) {
         KeyValueCollection list = sections.getList(section);
         if (list == null) {
@@ -68,8 +79,38 @@ public class UpdateUserProperties {
         getSection(updateSections, section).addString(key, val);
     }
 
-    void addDeleteKey(String section, String key, String val) {
-        getSection(deleteSections, section).addString(key, val);
+    void addAddKey(String section, String key, String val, CfgObject obj) {
+        Pair<String, String> existing = updateExisted(obj, section, key);
+
+        if (StringUtils.isNotEmpty(existing.getKey())) {
+            String newSection = existing.getKey();
+            String newKey = existing.getValue();
+            if (StringUtils.isBlank(newKey)) {
+                getSection(createSections, newSection).addString(key, val);
+
+            } else {
+                addUpdateKey(newSection, newKey, val);
+            }
+
+        } else {
+            getSection(createSections, section).addString(key, val);
+        }
+    }
+
+    void addDeleteKey(String section, String key, String val, CfgObject obj) {
+
+        Pair<String, String> existing = updateExisted(obj, section, key);
+        if (StringUtils.isNotEmpty(existing.getKey())) {
+            if ((StringUtils.isNotEmpty(key) && StringUtils.isNotEmpty(existing.getValue()))) {
+                getSection(deleteSections, existing.getKey()).addString(existing.getValue(), val);
+            }
+
+            if ((StringUtils.isEmpty(key) && StringUtils.isEmpty(existing.getValue()))) {
+                getSection(deleteSections, existing.getKey()).addString("", "");
+            }
+
+        }
+
     }
 
     private static final Logger logger = Main.getLogger();
@@ -80,28 +121,34 @@ public class UpdateUserProperties {
             CfgMetadata metaData = service.getMetaData();
             ConfObjectDelta d = new ConfObjectDelta(metaData, objType);
 
-            ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue(deltaByType.get(objType));
+            String dByType = deltaByType.get(objType);
+            if (StringUtils.isAllEmpty(dByType)) {
+                JOptionPane.showConfirmDialog(theForm, "Cannot find delta by type!!!", "Update failed", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_OPTION);
+            } else {
 
-            obj1.setPropertyValue("DBID", DBID);              // - required
+                ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue(dByType);
 
-            if (!updateSections.isEmpty()) {
-                d.setPropertyValue("changedUserProperties", updateSections);
+                obj1.setPropertyValue("DBID", DBID);              // - required
+
+                if (!updateSections.isEmpty()) {
+                    d.setPropertyValue("changedUserProperties", updateSections);
+                }
+
+                if (!deleteSections.isEmpty()) {
+                    d.setPropertyValue("deletedUserProperties", deleteSections);
+                }
+
+                if (!createSections.isEmpty()) {
+
+                    obj1.setPropertyValue("userProperties", createSections);
+                }
+
+                RequestUpdateObject reqUpdate = RequestUpdateObject.create();
+                logger.info("++" + d.toString());
+                reqUpdate.setObjectDelta(d);
+
+                cfgManager.execRequest(reqUpdate, objType);
             }
-
-            if (!deleteSections.isEmpty()) {
-                d.setPropertyValue("deletedUserProperties", deleteSections);
-            }
-
-            if (!createSections.isEmpty()) {
-
-                obj1.setPropertyValue("userProperties", createSections);
-            }
-
-            RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-            logger.info("++" + d.toString());
-            reqUpdate.setObjectDelta(d);
-
-            cfgManager.execRequest(reqUpdate, objType);
         }
 
     }
@@ -112,6 +159,7 @@ public class UpdateUserProperties {
         HashMap<CfgObjectType, String> ret = new HashMap<>();
         ret.put(CfgObjectType.CFGDN, "deltaDN");
         ret.put(CfgObjectType.CFGTransaction, "deltaTransaction");
+        ret.put(CfgObjectType.CFGScript, "deltaScript");
 
         return ret;
     }
@@ -122,8 +170,8 @@ public class UpdateUserProperties {
 
     static final public String BACKUP_PREFIX = "#";
 
-    public void updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
-
+    public void fillUpdate(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
+        prepareUpdate();
         switch (us.getUpdateAction()) {
             case RENAME_SECTION:
                 for (Object object : kv) {
@@ -140,11 +188,9 @@ public class UpdateUserProperties {
                                     theForm.requestOutput("\t!! skipping, no change in key\n");
                                 } else {
 
-                                    if (updateExisted(obj, section, newKey, kvInstance.getStringValue())) {
-                                        addDeleteKey(section, newKey, kvInstance.getStringValue());
-                                    }
+                                    addDeleteKey(section, newKey, kvInstance.getStringValue(), obj);
                                     addAddKey(section, newKey, kvInstance.getStringValue());
-                                    addDeleteKey(section, kvInstance.getStringKey(), kvInstance.getStringValue());
+                                    addDeleteKey(section, kvInstance.getStringKey(), kvInstance.getStringValue(), obj);
                                 }
                             }
                         } else {
@@ -155,13 +201,27 @@ public class UpdateUserProperties {
                 }
                 break;
 
-            case ADD_SECTION:
-                addAddKey(us.addSection(), us.addKey(), us.addValue());
-                break;
+            case ADD_SECTION: {
+                Collection<UserProperties> addedKVP = us.getAddedKVP();
+                if (addedKVP != null) {
+                    for (UserProperties userProperties : addedKVP) {
+                        addAddKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
 
-            case REMOVE:
-                addDeleteKey(kv);
-                break;
+                    }
+                }
+            }
+            break;
+
+            case REMOVE: {
+                Collection<UserProperties> addedKVP = us.getAddedKVP();
+                if (addedKVP != null) {
+                    for (UserProperties userProperties : addedKVP) {
+                        addDeleteKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
+
+                    }
+                }
+            }
+            break;
 
             case REPLACE_WITH:
                 for (Object object : kv) {
@@ -199,18 +259,24 @@ public class UpdateUserProperties {
                     theForm.requestOutput("No backup user properties");
                 } else {
                     for (UserProperties userProperties : allBackup) {
-                        String origProperty = userProperties.key.substring(BACKUP_PREFIX.length());
-                        setProperty(obj, userProperties.section, origProperty, userProperties.value);
+                        String origProperty = userProperties.getKey().substring(BACKUP_PREFIX.length());
+                        setProperty(obj, userProperties.getSection(), origProperty, userProperties.getValue());
                         if (us.isMakeBackup()) {
-                            String curValue = getCurValue(obj, userProperties.section, origProperty);
+                            String curValue = getCurValue(obj, userProperties.getSection(), origProperty);
                             if (curValue != null) {
-                                setProperty(obj, userProperties.section, userProperties.key, curValue);
+                                setProperty(obj, userProperties.getSection(), userProperties.getKey(), curValue);
                             }
                         }
                     }
                 }
                 break;
         }
+
+    }
+
+    public void updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
+
+        fillUpdate(us, obj, kv, configServerManager);
 
         commitUpdate();
     }
@@ -245,11 +311,78 @@ public class UpdateUserProperties {
         }
         return null;
     }
+    
+    /**
+     * 
+     * @param us
+     * @param obj
+     * @param kv
+     * @param configServerManager
+     * @return null if there is nothing to update or string with all updates
+     */
 
     public String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
+        fillUpdate(us, obj, kv, configServerManager);
 
         StringBuilder ret = new StringBuilder();
+        if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty()) {
+            if (!updateSections.isEmpty()) {
+                for (Object object : updateSections) {
+                    if (object instanceof KeyValuePair) {
+                        KeyValuePair kvp = (KeyValuePair) object;
+                        Object value = kvp.getValue();
+                        ValueType valueType = kvp.getValueType();
+                        if (valueType == ValueType.TKV_LIST) {
+                            for (Object _kvInstance : (KeyValueCollection) value) {
+                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
+                                ret.append("update: [" + kvp.getStringKey() + "]/\"" + kvInstance.getStringKey() + "\"=\'" + kvInstance.getStringValue() + "\'\n");
+                            }
+                        } else {
+                            theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
+                        }
+                    }
+                }
+            }
 
+            if (!createSections.isEmpty()) {
+                for (Object object : createSections) {
+                    if (object instanceof KeyValuePair) {
+                        KeyValuePair kvp = (KeyValuePair) object;
+                        Object value = kvp.getValue();
+                        ValueType valueType = kvp.getValueType();
+                        if (valueType == ValueType.TKV_LIST) {
+                            for (Object _kvInstance : (KeyValueCollection) value) {
+                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
+                                ret.append("create: [" + kvp.getStringKey() + "]/\"" + kvInstance.getStringKey() + "\"=\'" + kvInstance.getStringValue() + "\'\n");
+                            }
+                        } else {
+                            theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
+                        }
+                    }
+                }
+            }
+
+            if (!deleteSections.isEmpty()) {
+                for (Object object : deleteSections) {
+                    if (object instanceof KeyValuePair) {
+                        KeyValuePair kvp = (KeyValuePair) object;
+                        Object value = kvp.getValue();
+                        ValueType valueType = kvp.getValueType();
+                        if (valueType == ValueType.TKV_LIST) {
+                            for (Object _kvInstance : (KeyValueCollection) value) {
+                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
+                                ret.append("deletes: [" + kvp.getStringKey() + "]/\"" + kvInstance.getStringKey() + "\"=\'" + kvInstance.getStringValue() + "\'\n");
+                            }
+                        } else {
+                            theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
+                        }
+                    }
+                }
+            }
+        } else {
+            return null;
+        }
+        /*
         switch (us.getUpdateAction()) {
             case RENAME_SECTION:
                 for (Object object : kv) {
@@ -284,20 +417,36 @@ public class UpdateUserProperties {
                 break;
 
             case ADD_SECTION:
-                ret.append("adding option: [")
-                        .append(us.addSection())
-                        .append("]/\"")
-                        .append(us.addKey())
-                        .append("\"=\"")
-                        .append(us.addValue())
-                        .append("\"\n");
+                Collection<UserProperties> addedKVP = us.getAddedKVP();
+                if (addedKVP != null) {
+                    for (UserProperties userProperties : addedKVP) {
+//                        addAddKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue());
+                        ret.append("adding option: [")
+                                .append(userProperties.getSection())
+                                .append("]/\"")
+                                .append(userProperties.getKey())
+                                .append("\"=\"")
+                                .append(userProperties.getValue())
+                                .append("\"\n");
+
+                    }
+                }
                 break;
 
-            case REMOVE:
-                ret.append("deleting kvp ")
-                        .append(kv)
-                        .append("\n");
+            case REMOVE: {
+                addedKVP = us.getAddedKVP();
+                if (addedKVP != null) {
+                    for (UserProperties userProperties : addedKVP) {
+
+                        ret.append("deleting kvp ")
+                                .append(userProperties.toString())
+                                .append("\n");
+
+                    }
+                }
+
                 break;
+            }
 
             case REPLACE_WITH:
                 for (Object object : kv) {
@@ -358,20 +507,62 @@ public class UpdateUserProperties {
                     theForm.requestOutput("No backup user properties");
                 } else {
                     for (UserProperties userProperties : allBackup) {
-                        String origProperty = userProperties.key.substring(BACKUP_PREFIX.length());
-                        setProperty(obj, ret, userProperties.section, origProperty, userProperties.value);
+                        String origProperty = userProperties.getKey().substring(BACKUP_PREFIX.length());
+                        setProperty(obj, ret, userProperties.getSection(), origProperty, userProperties.getValue());
                         if (us.isMakeBackup()) {
-                            String curValue = getCurValue(obj, userProperties.section, origProperty);
+                            String curValue = getCurValue(obj, userProperties.getSection(), origProperty);
                             if (curValue != null) {
-                                setProperty(obj, ret, userProperties.section, userProperties.key, curValue);
+                                setProperty(obj, ret, userProperties.getSection(), userProperties.getKey(), curValue);
                             }
                         }
                     }
                 }
                 break;
         }
+         */
 
         return ret.toString();
+    }
+
+    /**
+     * searches for current section and key and if found, returns current
+     * values. Comparison is done case insensitive
+     *
+     * @param obj
+     * @param section
+     * @param stringKey
+     * @return
+     */
+    private Pair<String, String> updateExisted(CfgObject obj, String section, String stringKey) {
+        Pair<String, String> ret = new Pair<>(null, null);
+        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
+        if (property != null && !property.isEmpty()) {
+            for (Object object : property) {
+                if (object instanceof KeyValuePair) {
+                    KeyValuePair kvp = (KeyValuePair) object;
+                    Object value = kvp.getValue();
+                    ValueType valueType = kvp.getValueType();
+
+                    if (kvp.getStringKey().equalsIgnoreCase(section)) {
+                        ret.setKey(kvp.getStringKey());
+                        if (StringUtils.isEmpty(stringKey)) {
+                            break;
+                        } else if (valueType == ValueType.TKV_LIST) {
+                            for (Object _kvInstance : (KeyValueCollection) value) {
+                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
+                                if (kvInstance.getStringKey().equalsIgnoreCase(stringKey)) {
+                                    ret.setValue(kvInstance.getStringKey());
+                                    break;
+                                }
+                            }
+                        } else {
+                            theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
     private boolean updateExisted(CfgObject obj, String section, String stringKey, String stringValue) {
@@ -458,27 +649,4 @@ public class UpdateUserProperties {
         }
     }
 
-    private static String kvpToString(String _section, String _key, String _value) {
-        return "[" + _section + "]/\"" + _key + "\"=\'" + _value + "\'";
-
-    }
-
-    class UserProperties {
-
-        @Override
-        public String toString() {
-            return kvpToString(section, key, value);
-        }
-
-        private final String key;
-        private final String section;
-        private final String value;
-
-        public UserProperties(String _section, String _key, String _value) {
-            section = _section;
-            key = _key;
-            value = _value;
-
-        }
-    }
 }

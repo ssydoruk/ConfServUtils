@@ -559,21 +559,6 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     }
 
     @Override
-    public String addSection() {
-        return checkBoxSelection(tfAddSection);
-    }
-
-    @Override
-    public String addKey() {
-        return checkBoxSelection(tfAddKey);
-    }
-
-    @Override
-    public String addValue() {
-        return checkBoxSelection(tfAddValue);
-    }
-
-    @Override
     public boolean isMakeBackup() {
         return cbMakeBackup.isSelected();
     }
@@ -600,6 +585,32 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     @Override
     public String getReplaceKey(String stringKey) {
         return stringKey;
+    }
+
+    @Override
+    public Collection<UserProperties> getAddedKVP() {
+        Collection<UserProperties> ret = new ArrayList<>();
+        ret.add(new UserProperties(
+                checkBoxSelection(tfAddSection),
+                checkBoxSelection(tfAddKey),
+                checkBoxSelection(tfAddValue)));
+
+        return ret;
+    }
+
+    @Override
+    public void setCaseSensitive(boolean setBool) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setRegex(boolean setBool) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setObjName(String objName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

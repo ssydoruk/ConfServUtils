@@ -5,6 +5,8 @@
  */
 package com.airbnb.confservutils;
 
+import java.util.Collection;
+
 /**
  *
  * @author stepan_sydoruk
@@ -18,11 +20,8 @@ public interface IUpdateSettings {
         RENAME_SECTION
     };
 
-    public String addSection();
-
-    public String addKey();
-
-    public String addValue();
+    
+    public Collection<UserProperties> getAddedKVP();
 
     public boolean isMakeBackup();
 
