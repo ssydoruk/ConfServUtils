@@ -375,6 +375,7 @@ public class AppForm extends javax.swing.JFrame {
         jMenu4 = new javax.swing.JMenu();
         miBufferingOff = new javax.swing.JMenuItem();
         miBufferingOn = new javax.swing.JMenuItem();
+        miAppOptionsReplace = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -609,6 +610,14 @@ public class AppForm extends javax.swing.JFrame {
         jMenu4.add(miBufferingOn);
 
         jMenu2.add(jMenu4);
+
+        miAppOptionsReplace.setText("App options search and replace");
+        miAppOptionsReplace.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miAppOptionsReplaceActionPerformed(evt);
+            }
+        });
+        jMenu2.add(miAppOptionsReplace);
 
         jMenuBar1.add(jMenu2);
 
@@ -1179,6 +1188,10 @@ public class AppForm extends javax.swing.JFrame {
 
     RequestDialog annexReplace;
     AnnexReplace panelAnnexReplace;
+
+    RequestDialog appOptionsChange;
+    AppOptionsChange panelAppOptionsChange;
+
     InfoPanel infoDialog = null;
     ObjectFound pn1 = null;
 
@@ -1244,7 +1257,7 @@ public class AppForm extends javax.swing.JFrame {
                                     }
 
                                 } else {
-                                    upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                                    upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
                                     String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv, configServerManager);
                                     switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched " + total
                                             + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
@@ -1409,7 +1422,7 @@ public class AppForm extends javax.swing.JFrame {
                     if (yesToAll) {
                         upd.updateObj(us, obj, kv, configServerManager);
                     } else {
-                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
                         String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                         switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
                                 + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
@@ -1620,7 +1633,7 @@ public class AppForm extends javax.swing.JFrame {
                         upd.updateObj(us, obj, kv, configServerManager);
                     } else {
                         us.setOneActive(false);
-                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
                         String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                         switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
                                 + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
@@ -1703,6 +1716,123 @@ public class AppForm extends javax.swing.JFrame {
 
     }//GEN-LAST:event_miBufferingOnActionPerformed
 
+    private void miAppOptionsReplaceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAppOptionsReplaceActionPerformed
+        yesToAll = false;
+        upd = null;
+
+        if (appOptionsChange == null) {
+            panelAppOptionsChange = new AppOptionsChange(this);
+            appOptionsChange = new RequestDialog(this, panelAppOptionsChange, (JMenuItem) evt.getSource());
+        }
+
+        if (appOptionsChange.doShow()) {
+//                showYesNoPanel(pn1.getSearchSummaryHTML(), "something" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something");
+//                if(0==1)
+//                    return;
+            if (!panelAppOptionsChange.checkParameters()) {
+                return;
+            }
+            if (connectToConfigServer()) {
+
+                ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+                    @Override
+                    public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
+//                    kv = getAllValuesInSection(obj, seearchSettings);
+//                    kv = new KeyValueCollection();
+//                    kv.addList(seearchSettings.getSection(), ((CfgScript) obj).getUserProperties().getList(seearchSettings.getSection()));
+//                            ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection());
+                        logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+
+//                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
+                        if (yesToAll) {
+                            upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                        } else {
+                            upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
+                            upd.setCustomKVPProc(new UpdateUserProperties.ICustomKVP() {
+                                @Override
+                                public KeyValueCollection getCustomKVP(CfgObject _obj) {
+                                    return ((CfgApplication) _obj).getOptions();
+                                }
+                            });
+                            upd.setPropKeys("changedOptions", "deletedOptions", "options");
+                            String estimateUpdateObj = upd.estimateUpdateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                            if (estimateUpdateObj != null) //
+                            {
+                                switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(), "Object " + current + " of matched " + total
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                                    case YES_TO_ALL:
+                                        if (JOptionPane.showConfirmDialog(theForm,
+                                                "Are you sure you want to modify this and all following found objects?",
+                                                "Please confirm",
+                                                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                            yesToAll = true;
+                                            upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                                            break;
+                                        }
+                                        break;
+
+                                    case JOptionPane.YES_OPTION:
+                                        upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                                        break;
+
+                                    case JOptionPane.NO_OPTION:
+                                        break;
+
+                                    case JOptionPane.CANCEL_OPTION:
+                                        return false;
+                                }
+                            }
+                        }
+
+                        return true;
+                    }
+
+                };
+
+                try {
+                    CfgApplicationQuery query = new CfgApplicationQuery();
+
+                    CfgAppType selectedAppType = panelAppOptionsChange.getSelectedAppType();
+                    if (selectedAppType != null) {
+                        query.setAppType(selectedAppType);
+                    }
+                    String n = panelAppOptionsChange.getObjName();
+                    if (panelAppOptionsChange.isCaseSensitive() && n != null) {
+                        query.setName(n);
+                    }
+
+                    if (findObjects(
+                            query,
+                            CfgApplication.class,
+                            new IKeyValueProperties() {
+                        @Override
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return ((CfgApplication) obj).getOptions();
+                        }
+
+                        @Override
+                        public Collection<String> getName(CfgObject obj) {
+                            Collection<String> ret = new ArrayList<>();
+                            ret.add(((CfgApplication) obj).getName());
+                            return ret;
+                        }
+                    },
+                            panelAppOptionsChange, true, foundProc)) {
+
+                    }
+
+                } catch (ConfigException ex) {
+                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InterruptedException ex) {
+                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        }
+    }//GEN-LAST:event_miAppOptionsReplaceActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancel;
     private javax.swing.JButton btClearOutput;
@@ -1736,6 +1866,7 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miAnnexSearchReplace;
     private javax.swing.JMenuItem miAppByIP;
     private javax.swing.JMenuItem miAppByOption;
+    private javax.swing.JMenuItem miAppOptionsReplace;
     private javax.swing.JMenuItem miBufferingOff;
     private javax.swing.JMenuItem miBufferingOn;
     private javax.swing.JMenuItem miBusinessAttribute;
@@ -3641,7 +3772,7 @@ public class AppForm extends javax.swing.JFrame {
                     if (yesToAll) {
                         upd.updateObj(us, obj, kv, configServerManager);
                     } else {
-                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), obj.getObjectDbid(), theForm);
+                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(),  theForm);
                         String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                         if (estimateUpdateObj != null) //
                         {

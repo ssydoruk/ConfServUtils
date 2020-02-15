@@ -40,15 +40,13 @@ public class UpdateUserProperties {
 
     }
 
-    private final int DBID;
     private final CfgObjectType objType;
     private final ConfigServerManager cfgManager;
     private final AppForm theForm;
 
-    UpdateUserProperties(ConfigServerManager _configServerManager, CfgObjectType _objType, int _dbid, AppForm _theForm) {
+    UpdateUserProperties(ConfigServerManager _configServerManager, CfgObjectType _objType, AppForm _theForm) {
         this.cfgManager = _configServerManager;
         this.objType = _objType;
-        this.DBID = _dbid;
         theForm = _theForm;
     }
     KeyValueCollection updateSections = new KeyValueCollection();
@@ -115,7 +113,17 @@ public class UpdateUserProperties {
 
     private static final Logger logger = Main.getLogger();
 
-    void commitUpdate() {
+    private String changedPropsKey = "changedUserProperties";
+    private String deletedPropsKey = "deletedUserProperties";
+    private String createdPropsKey = "userProperties";
+
+    public void setPropKeys(String _changedPropsKey, String _deletedPropsKey, String _createdPropsKey) {
+        changedPropsKey = _changedPropsKey;
+        deletedPropsKey = _deletedPropsKey;
+        createdPropsKey = _createdPropsKey;
+    }
+
+    void commitUpdate(CfgObject obj) {
         if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty()) {
             IConfService service = cfgManager.getService();
             CfgMetadata metaData = service.getMetaData();
@@ -128,19 +136,18 @@ public class UpdateUserProperties {
 
                 ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue(dByType);
 
-                obj1.setPropertyValue("DBID", DBID);              // - required
+                obj1.setPropertyValue("DBID", obj.getObjectDbid());              // - required
 
                 if (!updateSections.isEmpty()) {
-                    d.setPropertyValue("changedUserProperties", updateSections);
+                    d.setPropertyValue(changedPropsKey, updateSections);
                 }
 
                 if (!deleteSections.isEmpty()) {
-                    d.setPropertyValue("deletedUserProperties", deleteSections);
+                    d.setPropertyValue(deletedPropsKey, deleteSections);
                 }
 
                 if (!createSections.isEmpty()) {
-
-                    obj1.setPropertyValue("userProperties", createSections);
+                    obj1.setPropertyValue(createdPropsKey, createSections);
                 }
 
                 RequestUpdateObject reqUpdate = RequestUpdateObject.create();
@@ -160,6 +167,7 @@ public class UpdateUserProperties {
         ret.put(CfgObjectType.CFGDN, "deltaDN");
         ret.put(CfgObjectType.CFGTransaction, "deltaTransaction");
         ret.put(CfgObjectType.CFGScript, "deltaScript");
+        ret.put(CfgObjectType.CFGApplication, "deltaApplication");
 
         return ret;
     }
@@ -278,7 +286,7 @@ public class UpdateUserProperties {
 
         fillUpdate(us, obj, kv, configServerManager);
 
-        commitUpdate();
+        commitUpdate(obj);
     }
 
     public static String getCommentedKey(String key) {
@@ -286,7 +294,8 @@ public class UpdateUserProperties {
     }
 
     private String getCurValue(CfgObject obj, String section, String origProperty) {
-        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
+        KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
+
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
                 if (object instanceof KeyValuePair) {
@@ -311,16 +320,15 @@ public class UpdateUserProperties {
         }
         return null;
     }
-    
+
     /**
-     * 
+     *
      * @param us
      * @param obj
      * @param kv
      * @param configServerManager
      * @return null if there is nothing to update or string with all updates
      */
-
     public String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
         fillUpdate(us, obj, kv, configServerManager);
 
@@ -535,7 +543,8 @@ public class UpdateUserProperties {
      */
     private Pair<String, String> updateExisted(CfgObject obj, String section, String stringKey) {
         Pair<String, String> ret = new Pair<>(null, null);
-        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
+
+        KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
                 if (object instanceof KeyValuePair) {
@@ -566,7 +575,8 @@ public class UpdateUserProperties {
     }
 
     private boolean updateExisted(CfgObject obj, String section, String stringKey, String stringValue) {
-        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
+        KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
+
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
                 if (object instanceof KeyValuePair) {
@@ -594,7 +604,8 @@ public class UpdateUserProperties {
 
     private ArrayList<UserProperties> getAllBackup(CfgObject obj) {
         ArrayList<UserProperties> ret = new ArrayList<>();
-        KeyValueCollection property = (KeyValueCollection) obj.getProperty("userProperties");
+        KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
+
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
                 if (object instanceof KeyValuePair) {
@@ -648,5 +659,16 @@ public class UpdateUserProperties {
                     .append("\"\n");
         }
     }
+
+    private ICustomKVP customKVPProc = null;
+
+    public void setCustomKVPProc(ICustomKVP customKVPProc) {
+        this.customKVPProc = customKVPProc;
+    }
+
+    public static interface ICustomKVP {
+
+        public KeyValueCollection getCustomKVP(CfgObject obj);
+    };
 
 }

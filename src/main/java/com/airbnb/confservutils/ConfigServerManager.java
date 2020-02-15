@@ -316,6 +316,7 @@ public class ConfigServerManager {
 
     public Message execRequest(Message reqUpdate, CfgObjectType objType) {
         try {
+            parentForm.requestOutput("Executing update: " + reqUpdate.toString());
             Message resp = service.getProtocol().request(reqUpdate);
 
             if (resp instanceof EventObjectUpdated) {
@@ -348,8 +349,8 @@ public class ConfigServerManager {
                 if (cfgObject.getObjectType().equals(objType)) {
                     logger.info("removing updated type " + objType + " from buffer");
                     prevQueries.remove(key);
+                    break;
                 }
-                break;
             }
         }
     }
