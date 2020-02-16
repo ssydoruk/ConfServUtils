@@ -43,8 +43,7 @@ class StoredSettings {
 
     void loadConfServs(ArrayList<Object[]> data) {
         configServers.clear();
-        for (Iterator<Object[]> it = data.iterator(); it.hasNext();) {
-            Object[] objects = (Object[]) it.next();
+        for (Object[] objects : data) {
             configServers.add(new ConfServer(objects[0], objects[1], objects[2], objects[3]));
         }
     }

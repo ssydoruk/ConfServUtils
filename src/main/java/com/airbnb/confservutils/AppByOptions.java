@@ -8,13 +8,7 @@ package com.airbnb.confservutils;
 import static Utils.Swing.checkBoxSelection;
 import static Utils.Swing.restrictHeight;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import java.awt.Dimension;
-import java.util.ArrayList;
 import java.util.Collection;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -251,7 +245,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
         if (isSearchAll()) {
             buf.append(" term [").append(getAllSearch()).append("] in all fields");
         } else {
-            buf.append("name [" + getObjName() + "] section [" + getSection() + "] option [" + getOption());
+            buf.append("name [").append(getObjName()).append("] section [").append(getSection()).append("] option [").append(getOption());
         }
         buf.append(" rx[").append(isRegex() ? "yes" : "no").append("]");
         buf.append(" CaSe[").append(isCaseSensitive() ? "yes" : "no").append("]");

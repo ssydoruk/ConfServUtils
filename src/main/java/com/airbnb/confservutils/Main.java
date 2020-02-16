@@ -18,7 +18,6 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -99,7 +98,7 @@ public class Main {
             showHelpExit(e.getMessage(), options);
         }
 
-        if (cmd.hasOption(optHelp.getLongOpt())) {
+        if (cmd != null && cmd.hasOption(optHelp.getLongOpt())) {
             showHelpExit(options);
         }
 

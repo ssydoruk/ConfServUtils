@@ -15,7 +15,7 @@ import javax.swing.JComboBox;
  */
 public class CfgObjectTypeMenu implements Comparable<CfgObjectTypeMenu> {
 
-    private GEnum type;
+    private final GEnum type;
 
     public CfgObjectTypeMenu(GEnum type) {
         this.type = type;

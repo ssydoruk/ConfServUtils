@@ -6,15 +6,10 @@
 package com.airbnb.confservutils;
 
 import static Utils.Swing.checkBoxSelection;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroup;
 import com.genesyslab.platform.commons.GEnum;
-import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
-import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import com.jidesoft.swing.CheckBoxList;
 import com.jidesoft.swing.CheckBoxListSelectionModel;
-import java.awt.ScrollPane;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -24,12 +19,9 @@ import java.util.HashSet;
 import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 

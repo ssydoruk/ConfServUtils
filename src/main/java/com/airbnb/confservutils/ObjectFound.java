@@ -5,7 +5,6 @@
  */
 package com.airbnb.confservutils;
 
-import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;

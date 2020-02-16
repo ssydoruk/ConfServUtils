@@ -5,20 +5,13 @@
  */
 package com.airbnb.confservutils;
 
+import Utils.GridEditor;
 import static Utils.Swing.checkBoxSelection;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroup;
 import com.genesyslab.platform.commons.GEnum;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.collections.KeyValuePair;
-import com.genesyslab.platform.commons.collections.ValueType;
-import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
-import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import com.jidesoft.swing.CheckBoxList;
 import com.jidesoft.swing.CheckBoxListSelectionModel;
-import java.awt.ScrollPane;
+import java.awt.Window;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -28,13 +21,10 @@ import java.util.HashSet;
 import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +33,7 @@ import org.apache.logging.log4j.Logger;
  * @author stepan_sydoruk
  */
 public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings, ISearchCommon, IUpdateSettings {
-
+    
     private final AppForm theForm;
 
     /**
@@ -71,77 +61,74 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
             CfgObjectType.CFGCampaignGroup,
             CfgObjectType.CFGTableAccess,
             CfgObjectType.CFGFilter
-
+        
         });
-
+        
         modelUncheck(clb.getCheckBoxListSelectionModel(), new GEnum[]{
             CfgObjectType.CFGPerson,
             CfgObjectType.CFGDN,
             CfgObjectType.CFGAccessGroup,
             CfgObjectType.CFGAgentLogin});
-
+        
         ItemListener itemListener = new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-
+                
                 AbstractButton aButton = (AbstractButton) e.getSource();
                 ButtonModel aModel = aButton.getModel();
-
+                
                 rbActionChanged(aButton.getModel().isSelected(), aButton);
-
+                
             }
         };
-
+        
         rbReplaceWith.addItemListener(itemListener);
         rbAddSection.addItemListener(itemListener);
         rbRemove.addItemListener(itemListener);
         rbRestoreFromBackup.addItemListener(itemListener);
         rbReplaceWith.setSelected(true);
-
+        
     }
-
+    
     public List<CfgObjectType> getSelectedObjectTypes() {
         ArrayList<CfgObjectType> ret = new ArrayList();
         for (Object checkBoxListSelectedValue : clb.getCheckBoxListSelectedValues()) {
             ret.add((CfgObjectType) ((CfgObjectTypeMenu) checkBoxListSelectedValue).getType());
         }
         return ret;
-
+        
     }
-
+    
     CheckBoxList clb;
     DefaultListModel clm;
-
+    
     private void rbActionChanged(boolean isSelected, AbstractButton rbButton) {
         jpActions.setVisible(false);
         cbMakeBackup.setEnabled(rbAddSection.isSelected() || rbReplaceWith.isSelected());
-        tfAddSection.setEnabled(rbAddSection.isSelected());
-        tfAddKey.setEnabled(rbAddSection.isSelected());
-        tfAddValue.setEnabled(rbAddSection.isSelected());
-        lbKey.setEnabled(rbAddSection.isSelected());
-        lbValue.setEnabled(rbAddSection.isSelected());
         tfReplaceWith.setEnabled(rbReplaceWith.isSelected());
-
+        btEditKVPs.setEnabled(rbAddSection.isSelected());
         jpActions.setVisible(true);
     }
-
+    
     private static final Logger logger = Main.getLogger();
-
+    
     @Override
     public boolean isCaseSensitive() {
         return cbCaseSensitive.isSelected();
     }
-
+    
     @Override
     public boolean isRegex() {
         return cbIsRegex.isSelected();
     }
-
+    
     @Override
     public boolean isFullOutputSelected() {
         return false;
     }
-
+    
+    private GridEditor kvpEditor;
+    
     private GEnum cfgObjType(Object o) {
         if (o == null || o instanceof String) {
             return null;
@@ -192,11 +179,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         cbMakeBackup = new javax.swing.JCheckBox();
         jPanel17 = new javax.swing.JPanel();
         rbAddSection = new javax.swing.JRadioButton();
-        tfAddSection = new javax.swing.JComboBox<>();
-        lbKey = new javax.swing.JLabel();
-        tfAddKey = new javax.swing.JComboBox<>();
-        lbValue = new javax.swing.JLabel();
-        tfAddValue = new javax.swing.JComboBox<>();
+        btEditKVPs = new javax.swing.JButton();
         rbRemove = new javax.swing.JRadioButton();
         rbRestoreFromBackup = new javax.swing.JRadioButton();
 
@@ -306,23 +289,16 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         jPanel17.setLayout(new javax.swing.BoxLayout(jPanel17, javax.swing.BoxLayout.LINE_AXIS));
 
         bgReplaceAction.add(rbAddSection);
-        rbAddSection.setText("add section");
+        rbAddSection.setText("add annex options KVP");
         jPanel17.add(rbAddSection);
 
-        tfAddSection.setEditable(true);
-        jPanel17.add(tfAddSection);
-
-        lbKey.setText("key");
-        jPanel17.add(lbKey);
-
-        tfAddKey.setEditable(true);
-        jPanel17.add(tfAddKey);
-
-        lbValue.setText("value");
-        jPanel17.add(lbValue);
-
-        tfAddValue.setEditable(true);
-        jPanel17.add(tfAddValue);
+        btEditKVPs.setText("...");
+        btEditKVPs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btEditKVPsActionPerformed(evt);
+            }
+        });
+        jPanel17.add(btEditKVPs);
 
         jPanel15.add(jPanel17);
 
@@ -341,11 +317,48 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         add(jpActions);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btEditKVPsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEditKVPsActionPerformed
+        
+        if (kvpEditor == null) {
+            kvpEditor = new GridEditor((Window) this.getRootPane().getParent(), "KVPs to add",
+                    "Select %d profiles");
+        }
+        ArrayList<Object[]> values = new ArrayList<>();
+        for (UserProperties updateProperty : updateProperties) {
+            values.add(new String[]{updateProperty.getSection(), updateProperty.getKey(), updateProperty.getValue()});
+            
+        }
+        //        for (StoredSettings.ConfServer configServer : ds.getConfigServers()) {
+        //            Object[] v = new Object[4];
+        //            v[0] = configServer.getProfile();
+        //            v[1] = configServer.getHost();
+        //            v[2] = configServer.getPort();
+        //            v[3] = configServer.getApp();
+        //            values.add(v);
+        //        }
+        //        for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
+        //            values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
+        //        }
+        kvpEditor.setData(new Object[]{"Section", "Key", "Value"},
+                values
+        );
+        kvpEditor.doShow();
+        ArrayList<Object[]> data = kvpEditor.getData();
+        
+        updateProperties.clear();
+        
+        for (Object[] objects : data) {
+            updateProperties.add(new UserProperties(objects[0].toString(), objects[1].toString(), objects[2].toString()));
+        }
+        
+        btEditKVPs.setText((updateProperties.isEmpty()) ? "..." : updateProperties.size() + " kvp(s)");
+    }//GEN-LAST:event_btEditKVPsActionPerformed
+    
     @Override
     public String getSection() {
         return checkBoxSelection(tfSection);
     }
-
+    
     @Override
     public String getObjName() {
         if (!isSearchAll()) {
@@ -354,12 +367,12 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
             return null;
         }
     }
-
+    
     @Override
     public String getOption() {
         return checkBoxSelection(tfOption);
     }
-
+    
     @Override
     public String getValue() {
         return checkBoxSelection(tfOptionValue);
@@ -367,6 +380,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup bgReplaceAction;
+    private javax.swing.JButton btEditKVPs;
     private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JCheckBox cbCaseSensitive;
     private javax.swing.JCheckBox cbIsRegex;
@@ -388,19 +402,14 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jpActions;
     private javax.swing.JPanel jpObjectTypes;
-    private javax.swing.JLabel lbKey;
     private javax.swing.JLabel lbObjectName;
     private javax.swing.JLabel lbOption;
     private javax.swing.JLabel lbOptionValue;
     private javax.swing.JLabel lbSection;
-    private javax.swing.JLabel lbValue;
     private javax.swing.JRadioButton rbAddSection;
     private javax.swing.JRadioButton rbRemove;
     private javax.swing.JRadioButton rbReplaceWith;
     private javax.swing.JRadioButton rbRestoreFromBackup;
-    private javax.swing.JComboBox<String> tfAddKey;
-    private javax.swing.JComboBox<String> tfAddSection;
-    private javax.swing.JComboBox<String> tfAddValue;
     private javax.swing.JComboBox<String> tfObjectName;
     private javax.swing.JComboBox<String> tfOption;
     private javax.swing.JComboBox<String> tfOptionValue;
@@ -412,23 +421,23 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     public boolean isSearchAll() {
         return false;
     }
-
+    
     @Override
     public String getAllSearch() {
         return null;
-
+        
     }
-
+    
     public String getSearchSummary(int maxTypes) {
         StringBuilder buf = new StringBuilder();
         buf.append("Object by Annex;");
         buf.append(" types [\n");
         int num;
-
+        
         num = (maxTypes < 0 || maxTypes > getSelectedObjectTypes().size() - 1)
                 ? getSelectedObjectTypes().size()
                 : maxTypes;
-
+        
         buf.append(StringUtils.join(getSelectedObjectTypes().subList(0, num), ",\n\t"));
         if (maxTypes > 0 && num < getSelectedObjectTypes().size()) {
             buf.append("\n...(")
@@ -436,7 +445,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                     .append(" more) ");
         }
         buf.append("]");
-
+        
         if (isSearchAll()) {
             buf.append(" term \"")
                     .append(getAllSearch())
@@ -470,36 +479,36 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                 : rbRemove.isSelected() ? rbRemove.getText()
                 : rbRestoreFromBackup.isSelected() ? rbRestoreFromBackup.getText()
                 : "");
-
+        
         return buf.toString();
     }
-
+    
     @Override
     public String getSearchSummary() {
         return getSearchSummary(-1);
     }
-
+    
     @Override
     public void setChoices(Collection<String> choices) {
-
+        
         Utils.Swing.setChoices(tfObjectName, choices);
         Utils.Swing.setChoices(tfOption, choices);
         Utils.Swing.setChoices(tfOptionValue, choices);
         Utils.Swing.setChoices(tfSection, choices);
     }
-
+    
     @Override
     public Collection<String> getChoices() {
-
+        
         return Utils.Swing.getChoices(tfObjectName,
                 tfOption,
                 tfOptionValue,
                 tfSection);
     }
-
+    
     private void modelUncheck(CheckBoxListSelectionModel selectionModel, GEnum[] gEnum) {
         HashSet<GEnum> en = new HashSet<>(Arrays.asList(gEnum));
-
+        
         DefaultListModel model = (DefaultListModel) selectionModel.getModel();
         selectionModel.clearSelection();
         for (int i = 0; i < model.size(); i++) {
@@ -510,9 +519,9 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                 }
             }
         }
-
+        
     }
-
+    
     private StringBuilder getReplaceWith() {
         return new StringBuilder()
                 .append(rbReplaceWith.getText())
@@ -521,24 +530,26 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                 .append(") backup:")
                 .append(cbMakeBackup.isSelected());
     }
-
+    
     private StringBuilder getAddSection() {
-        return new StringBuilder()
-                .append(rbAddSection.getText())
-                .append(" sect[")
-                .append(checkBoxSelection(tfAddSection))
-                .append("] key[:")
-                .append(checkBoxSelection(tfAddKey))
-                .append("] val[:")
-                .append(checkBoxSelection(tfAddValue))
-                .append("]");
+        StringBuilder ret = new StringBuilder(rbAddSection.getText());
+        updateProperties.forEach((updateProperty) -> {
+            ret.append("\tsect[")
+                    .append(updateProperty.getSection())
+                    .append("] key[:")
+                    .append(updateProperty.getKey())
+                    .append("] val[:")
+                    .append(updateProperty.getValue())
+                    .append("]\n");
+        });
+        return ret;
     }
-
+    
+    private final ArrayList<UserProperties> updateProperties = new ArrayList<>();
+    
     boolean checkParameters() {
         if (rbAddSection.isSelected()) {
-            if (StringUtils.isBlank(checkBoxSelection(tfAddSection))
-                    || StringUtils.isBlank(checkBoxSelection(tfAddKey))
-                    || StringUtils.isBlank(checkBoxSelection(tfAddValue))) {
+            if (updateProperties.isEmpty()) {
                 JOptionPane.showMessageDialog(theForm, "To create an option all of the section, key and value needs to be specified", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
@@ -550,19 +561,19 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         }
         return true;
     }
-
+    
     String getSearchSummaryHTML() {
         StringBuilder ret = new StringBuilder();
         ret.append("<html>").append(getSearchSummary(2).replaceAll("\n", "<br>")).append("</html>");
         return ret.toString();
-
+        
     }
-
+    
     @Override
     public boolean isMakeBackup() {
         return cbMakeBackup.isSelected();
     }
-
+    
     @Override
     public UpdateAction getUpdateAction() {
         if (rbAddSection.isSelected()) {
@@ -575,42 +586,36 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
             return UpdateAction.RESTORE_FROM_BACKUP;
         }
     }
-
+    
     @Override
     public String replaceWith(String currentValue) {
         return checkBoxSelection(tfReplaceWith);
-
+        
     }
-
+    
     @Override
     public String getReplaceKey(String stringKey) {
         return stringKey;
     }
-
+    
     @Override
     public Collection<UserProperties> getAddedKVP() {
-        Collection<UserProperties> ret = new ArrayList<>();
-        ret.add(new UserProperties(
-                checkBoxSelection(tfAddSection),
-                checkBoxSelection(tfAddKey),
-                checkBoxSelection(tfAddValue)));
-
-        return ret;
+        return updateProperties;
     }
-
+    
     @Override
     public void setCaseSensitive(boolean setBool) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public void setRegex(boolean setBool) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public void setObjName(String objName) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
 }

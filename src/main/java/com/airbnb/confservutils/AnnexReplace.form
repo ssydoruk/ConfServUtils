@@ -252,51 +252,16 @@
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                           <ComponentRef name="bgReplaceAction"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="add section"/>
+                        <Property name="text" type="java.lang.String" value="add annex options KVP"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JComboBox" name="tfAddSection">
+                    <Component class="javax.swing.JButton" name="btEditKVPs">
                       <Properties>
-                        <Property name="editable" type="boolean" value="true"/>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
-                        </Property>
+                        <Property name="text" type="java.lang.String" value="..."/>
                       </Properties>
-                      <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
-                      </AuxValues>
-                    </Component>
-                    <Component class="javax.swing.JLabel" name="lbKey">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="key"/>
-                      </Properties>
-                    </Component>
-                    <Component class="javax.swing.JComboBox" name="tfAddKey">
-                      <Properties>
-                        <Property name="editable" type="boolean" value="true"/>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
-                        </Property>
-                      </Properties>
-                      <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
-                      </AuxValues>
-                    </Component>
-                    <Component class="javax.swing.JLabel" name="lbValue">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="value"/>
-                      </Properties>
-                    </Component>
-                    <Component class="javax.swing.JComboBox" name="tfAddValue">
-                      <Properties>
-                        <Property name="editable" type="boolean" value="true"/>
-                        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                          <StringArray count="0"/>
-                        </Property>
-                      </Properties>
-                      <AuxValues>
-                        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
-                      </AuxValues>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btEditKVPsActionPerformed"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>

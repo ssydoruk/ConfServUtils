@@ -5,22 +5,11 @@
  */
 package com.airbnb.confservutils;
 
+import Utils.GridEditor;
 import static Utils.Swing.checkBoxSelection;
-import Utils.ValuesEditor;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroup;
 import com.genesyslab.platform.commons.GEnum;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.collections.KeyValuePair;
-import com.genesyslab.platform.commons.collections.ValueType;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
-import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
-import com.jidesoft.swing.CheckBoxList;
 import com.jidesoft.swing.CheckBoxListSelectionModel;
-import java.awt.ScrollPane;
 import java.awt.Window;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -28,16 +17,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -95,18 +78,11 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         }
     }
 
-
-
-
     private void rbActionChanged(boolean isSelected, AbstractButton rbButton) {
         jpActions.setVisible(false);
         cbMakeBackup.setEnabled(rbAddSection.isSelected() || rbReplaceWith.isSelected());
-        tfAddSection.setEnabled(rbAddSection.isSelected());
-        tfAddKey.setEnabled(rbAddSection.isSelected());
-        tfAddValue.setEnabled(rbAddSection.isSelected());
-        lbKey.setEnabled(rbAddSection.isSelected());
-        lbValue.setEnabled(rbAddSection.isSelected());
         tfReplaceWith.setEnabled(rbReplaceWith.isSelected());
+        btEditKVPs.setEnabled(rbAddSection.isSelected());
 
         jpActions.setVisible(true);
     }
@@ -128,7 +104,7 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         return false;
     }
 
-    private ArrayList<UserProperties> updateProperties = new ArrayList<>();
+    private final ArrayList<UserProperties> updateProperties = new ArrayList<>();
 
     private GEnum cfgObjType(Object o) {
         if (o == null || o instanceof String) {
@@ -137,7 +113,7 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
             return ((CfgObjectTypeMenu) o).getType();
         }
     }
-    private ValuesEditor confServEditor;
+    private GridEditor kvpEditor;
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -183,11 +159,6 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         cbMakeBackup = new javax.swing.JCheckBox();
         jPanel17 = new javax.swing.JPanel();
         rbAddSection = new javax.swing.JRadioButton();
-        tfAddSection = new javax.swing.JComboBox<>();
-        lbKey = new javax.swing.JLabel();
-        tfAddKey = new javax.swing.JComboBox<>();
-        lbValue = new javax.swing.JLabel();
-        tfAddValue = new javax.swing.JComboBox<>();
         btEditKVPs = new javax.swing.JButton();
         rbRemove = new javax.swing.JRadioButton();
         rbRestoreFromBackup = new javax.swing.JRadioButton();
@@ -303,23 +274,8 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         jPanel17.setLayout(new javax.swing.BoxLayout(jPanel17, javax.swing.BoxLayout.LINE_AXIS));
 
         bgReplaceAction.add(rbAddSection);
-        rbAddSection.setText("add options");
+        rbAddSection.setText("add app KVP options");
         jPanel17.add(rbAddSection);
-
-        tfAddSection.setEditable(true);
-        jPanel17.add(tfAddSection);
-
-        lbKey.setText("key");
-        jPanel17.add(lbKey);
-
-        tfAddKey.setEditable(true);
-        jPanel17.add(tfAddKey);
-
-        lbValue.setText("value");
-        jPanel17.add(lbValue);
-
-        tfAddValue.setEditable(true);
-        jPanel17.add(tfAddValue);
 
         btEditKVPs.setText("...");
         btEditKVPs.addActionListener(new java.awt.event.ActionListener() {
@@ -348,11 +304,15 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
 
     private void btEditKVPsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEditKVPsActionPerformed
 
-        if (confServEditor == null) {
-            confServEditor = new ValuesEditor((Window) this.getRootPane().getParent(), "KVPs to add",
+        if (kvpEditor == null) {
+            kvpEditor = new GridEditor((Window) this.getRootPane().getParent(), "KVPs to add",
                     "Select %d profiles");
         }
         ArrayList<Object[]> values = new ArrayList<>();
+        for (UserProperties updateProperty : updateProperties) {
+            values.add(new String[]{updateProperty.getSection(), updateProperty.getKey(), updateProperty.getValue()});
+
+        }
 //        for (StoredSettings.ConfServer configServer : ds.getConfigServers()) {
 //            Object[] v = new Object[4];
 //            v[0] = configServer.getProfile();
@@ -364,11 +324,11 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         //        for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
         //            values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
         //        }
-        confServEditor.setData(new Object[]{"Section", "Key", "Value"},
+        kvpEditor.setData(new Object[]{"Section", "Key", "Value"},
                 values
         );
-        confServEditor.doShow();
-        ArrayList<Object[]> data = confServEditor.getData();
+        kvpEditor.doShow();
+        ArrayList<Object[]> data = kvpEditor.getData();
 
         updateProperties.clear();
 
@@ -434,19 +394,14 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jpActions;
-    private javax.swing.JLabel lbKey;
     private javax.swing.JLabel lbObjectName;
     private javax.swing.JLabel lbOption;
     private javax.swing.JLabel lbOptionValue;
     private javax.swing.JLabel lbSection;
-    private javax.swing.JLabel lbValue;
     private javax.swing.JRadioButton rbAddSection;
     private javax.swing.JRadioButton rbRemove;
     private javax.swing.JRadioButton rbReplaceWith;
     private javax.swing.JRadioButton rbRestoreFromBackup;
-    private javax.swing.JComboBox<String> tfAddKey;
-    private javax.swing.JComboBox<String> tfAddSection;
-    private javax.swing.JComboBox<String> tfAddValue;
     private javax.swing.JComboBox<String> tfObjectName;
     private javax.swing.JComboBox<String> tfOption;
     private javax.swing.JComboBox<String> tfOptionValue;
@@ -468,7 +423,6 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
     public String getSearchSummary(int maxTypes) {
         StringBuilder buf = new StringBuilder();
         buf.append("App by options;");
-
 
         if (isSearchAll()) {
             buf.append(" term \"")
@@ -556,22 +510,23 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
     }
 
     private StringBuilder getAddSection() {
-        return new StringBuilder()
-                .append(rbAddSection.getText())
-                .append(" sect[")
-                .append(checkBoxSelection(tfAddSection))
-                .append("] key[:")
-                .append(checkBoxSelection(tfAddKey))
-                .append("] val[:")
-                .append(checkBoxSelection(tfAddValue))
-                .append("]");
+        StringBuilder ret = new StringBuilder(rbAddSection.getText());
+        for (UserProperties updateProperty : updateProperties) {
+            ret.append("\tsect[")
+                    .append(updateProperty.getSection())
+                    .append("] key[:")
+                    .append(updateProperty.getKey())
+                    .append("] val[:")
+                    .append(updateProperty.getValue())
+                    .append("]\n");
+
+        }
+        return ret;
     }
 
     boolean checkParameters() {
         if (rbAddSection.isSelected()) {
-            if (StringUtils.isBlank(checkBoxSelection(tfAddSection))
-                    || StringUtils.isBlank(checkBoxSelection(tfAddKey))
-                    || StringUtils.isBlank(checkBoxSelection(tfAddValue))) {
+            if (updateProperties.isEmpty()) {
                 JOptionPane.showMessageDialog(theForm, "To create an option all of the section, key and value needs to be specified", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
@@ -622,18 +577,7 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
 
     @Override
     public Collection<UserProperties> getAddedKVP() {
-        if (updateProperties.isEmpty()) {
-            Collection<UserProperties> ret = new ArrayList<>();
-            ret.add(new UserProperties(
-                    checkBoxSelection(tfAddSection),
-                    checkBoxSelection(tfAddKey),
-                    checkBoxSelection(tfAddValue)));
-
-            return ret;
-        } else {
-            return updateProperties;
-
-        }
+        return updateProperties;
 
     }
 

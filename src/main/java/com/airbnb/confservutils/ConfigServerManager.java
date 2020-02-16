@@ -22,13 +22,12 @@ import com.genesyslab.platform.configuration.protocol.confserver.events.EventObj
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -267,9 +266,7 @@ public class ConfigServerManager {
                                         list = new KeyValueCollection();
                                         kv.addList(sect, list);
                                     }
-                                    for (Object addedValue : addedValues.toArray()) {
-                                        list.add(addedValue);
-                                    }
+                                    list.addAll(Arrays.asList(addedValues.toArray()));
 //                                    kv.addObject(el.getStringKey(), addedValues);
                                     shouldInclude = true;
                                 }
@@ -287,7 +284,7 @@ public class ConfigServerManager {
                         buf.append(cfgObj.toString()).append("\n");
                     } else {
                         Object[] names = props.getName(cfgObj).toArray();
-                        buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: " + cfgObj.getObjectDbid());
+                        buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: ").append(cfgObj.getObjectDbid());
                         buf.append("\n");
                         if (names.length > 1) {
                             buf.append('\t');

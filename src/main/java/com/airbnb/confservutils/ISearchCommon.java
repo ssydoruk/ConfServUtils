@@ -6,8 +6,6 @@
 package com.airbnb.confservutils;
 
 import java.util.Collection;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 
 /**
  *

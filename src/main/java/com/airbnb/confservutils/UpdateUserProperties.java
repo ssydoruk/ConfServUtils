@@ -6,8 +6,6 @@
 package com.airbnb.confservutils;
 
 import Utils.Pair;
-import static Utils.Swing.checkBoxSelection;
-import static com.airbnb.confservutils.UserProperties.kvpToString;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
@@ -343,7 +341,7 @@ public class UpdateUserProperties {
                         if (valueType == ValueType.TKV_LIST) {
                             for (Object _kvInstance : (KeyValueCollection) value) {
                                 KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                                ret.append("update: [" + kvp.getStringKey() + "]/\"" + kvInstance.getStringKey() + "\"=\'" + kvInstance.getStringValue() + "\'\n");
+                                ret.append("update: [").append(kvp.getStringKey()).append("]/\"").append(kvInstance.getStringKey()).append("\"=\'").append(kvInstance.getStringValue()).append("\'\n");
                             }
                         } else {
                             theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
@@ -361,7 +359,7 @@ public class UpdateUserProperties {
                         if (valueType == ValueType.TKV_LIST) {
                             for (Object _kvInstance : (KeyValueCollection) value) {
                                 KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                                ret.append("create: [" + kvp.getStringKey() + "]/\"" + kvInstance.getStringKey() + "\"=\'" + kvInstance.getStringValue() + "\'\n");
+                                ret.append("create: [").append(kvp.getStringKey()).append("]/\"").append(kvInstance.getStringKey()).append("\"=\'").append(kvInstance.getStringValue()).append("\'\n");
                             }
                         } else {
                             theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
@@ -379,7 +377,7 @@ public class UpdateUserProperties {
                         if (valueType == ValueType.TKV_LIST) {
                             for (Object _kvInstance : (KeyValueCollection) value) {
                                 KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                                ret.append("deletes: [" + kvp.getStringKey() + "]/\"" + kvInstance.getStringKey() + "\"=\'" + kvInstance.getStringValue() + "\'\n");
+                                ret.append("deletes: [").append(kvp.getStringKey()).append("]/\"").append(kvInstance.getStringKey()).append("\"=\'").append(kvInstance.getStringValue()).append("\'\n");
                             }
                         } else {
                             theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());

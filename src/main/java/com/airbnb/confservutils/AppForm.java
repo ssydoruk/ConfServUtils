@@ -48,19 +48,10 @@ import com.genesyslab.platform.applicationblocks.com.queries.CfgTreatmentQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgVoicePromptQuery;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
-import com.genesyslab.platform.commons.collections.ValueType;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
-import com.genesyslab.platform.configuration.protocol.obj.ConfStructure;
-import com.genesyslab.platform.configuration.protocol.obj.ConfStructureCollection;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
-import com.genesyslab.platform.configuration.protocol.types.CfgStructureType;
 import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -69,7 +60,6 @@ import com.jidesoft.dialog.ButtonPanel;
 import com.jidesoft.dialog.StandardDialog;
 import static com.jidesoft.dialog.StandardDialog.RESULT_AFFIRMED;
 import static com.jidesoft.dialog.StandardDialog.RESULT_CANCELLED;
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -88,15 +78,14 @@ import java.io.OutputStreamWriter;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.util.Pair;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -108,7 +97,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -148,9 +136,9 @@ public class AppForm extends javax.swing.JFrame {
                     .setPrettyPrinting()
                     .create();
 
-            InputStreamReader reader = new InputStreamReader(new FileInputStream(f));
-            ds = gson.fromJson(reader, StoredSettings.class);
-            reader.close();
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(f))) {
+                ds = gson.fromJson(reader, StoredSettings.class);
+            }
         } else {
             ds = new StoredSettings();
         }
@@ -369,13 +357,13 @@ public class AppForm extends javax.swing.JFrame {
         miBusinessAttribute = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
+        miAppOptionsReplace = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         miOneORS = new javax.swing.JMenuItem();
         miAllORSs = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
         miBufferingOff = new javax.swing.JMenuItem();
         miBufferingOn = new javax.swing.JMenuItem();
-        miAppOptionsReplace = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -571,6 +559,14 @@ public class AppForm extends javax.swing.JFrame {
         });
         jMenu2.add(miAnnexSearchReplace);
 
+        miAppOptionsReplace.setText("App options search and replace");
+        miAppOptionsReplace.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miAppOptionsReplaceActionPerformed(evt);
+            }
+        });
+        jMenu2.add(miAppOptionsReplace);
+
         jMenu3.setText("ORS Cluster");
 
         miOneORS.setText("Leave 1 ORS");
@@ -610,14 +606,6 @@ public class AppForm extends javax.swing.JFrame {
         jMenu4.add(miBufferingOn);
 
         jMenu2.add(jMenu4);
-
-        miAppOptionsReplace.setText("App options search and replace");
-        miAppOptionsReplace.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miAppOptionsReplaceActionPerformed(evt);
-            }
-        });
-        jMenu2.add(miAppOptionsReplace);
 
         jMenuBar1.add(jMenu2);
 
@@ -710,7 +698,7 @@ public class AppForm extends javax.swing.JFrame {
                                 } else {
                                     StringBuilder buf = new StringBuilder();
 
-                                    buf.append("Object type:" + retrieveObject.getObjectType() + " DBID:" + retrieveObject.getObjectDbid() + " name: " + getObjName(retrieveObject));
+                                    buf.append("Object type:").append(retrieveObject.getObjectType()).append(" DBID:").append(retrieveObject.getObjectDbid()).append(" name: ").append(getObjName(retrieveObject));
                                     requestOutput(buf.toString());
                                 }
                             } else {
@@ -1405,7 +1393,6 @@ public class AppForm extends javax.swing.JFrame {
                     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             }
-            ;
 
             AUpdateSettings us = new AUpdateSettings();
 
@@ -1614,7 +1601,6 @@ public class AppForm extends javax.swing.JFrame {
                     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
             }
-            ;
 
             AUpdateSettings us = new AUpdateSettings();
 
@@ -2164,9 +2150,7 @@ public class AppForm extends javax.swing.JFrame {
                                             list = new KeyValueCollection();
                                             kv.addList(sect, list);
                                         }
-                                        for (Object addedValue : addedValues.toArray()) {
-                                            list.add(addedValue);
-                                        }
+                                        list.addAll(Arrays.asList(addedValues.toArray()));
 //                                    kv.addObject(el.getStringKey(), addedValues);
                                         shouldInclude = true;
                                     }
@@ -2184,7 +2168,7 @@ public class AppForm extends javax.swing.JFrame {
                             buf.append(cfgObj.toString()).append("\n");
                         } else {
                             Object[] names = props.getName(cfgObj).toArray();
-                            buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: " + cfgObj.getObjectDbid());
+                            buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: ").append(cfgObj.getObjectDbid());
                             if (names.length > 1) {
                                 buf.append('\t');
                                 int added = 1;
@@ -2203,7 +2187,7 @@ public class AppForm extends javax.swing.JFrame {
                                 }
                             }
                             buf.append("\n");
-                            if (kv != null && !kv.isEmpty()) {
+                            if (!kv.isEmpty()) {
                                 buf.append("\t").append(kv.toString()).append("\n\n");
                             }
                         }
@@ -2244,12 +2228,12 @@ public class AppForm extends javax.swing.JFrame {
                         Lookup l = new Lookup(ReverseMap.fromAddress(ip1), org.xbill.DNS.Type.PTR);
                         Record[] hostNames = l.run();
                         if (hostNames == null) {
-                            buf.append("IP [" + ip1 + "] not resolved\n");
+                            buf.append("IP [").append(ip1).append("] not resolved\n");
                         } else {
                             if ((connectToConfigServer())) {
                                 CfgHostQuery hq = new CfgHostQuery(configServerManager.getService());
                                 CfgApplicationQuery aq = new CfgApplicationQuery(configServerManager.getService());
-                                buf.append("resolved IP[" + ip1 + "] to ");
+                                buf.append("resolved IP[").append(ip1).append("] to ");
                                 for (Record hostName : hostNames) {
                                     PTRRecord r = (PTRRecord) hostName;
                                     buf.append(r.getTarget().toString(true)).append("\n");
@@ -2334,7 +2318,7 @@ public class AppForm extends javax.swing.JFrame {
                             }
                         }
                     } catch (UnknownHostException ex) {
-                        buf.append(ex.getMessage() + "\n");
+                        StringBuilder append = buf.append(ex.getMessage()).append("\n");
                         java.util.logging.Logger.getLogger(Main.class
                                 .getName()).log(java.util.logging.Level.SEVERE, null, ex);
 
@@ -3772,7 +3756,7 @@ public class AppForm extends javax.swing.JFrame {
                     if (yesToAll) {
                         upd.updateObj(us, obj, kv, configServerManager);
                     } else {
-                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(),  theForm);
+                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
                         String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                         if (estimateUpdateObj != null) //
                         {
