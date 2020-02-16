@@ -1295,7 +1295,7 @@ public class AppForm extends javax.swing.JFrame {
     private void miAllORSsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAllORSsActionPerformed
         upd = null;
         yesToAll = false;
-        FindObject objName = editObjName(CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
+        FindObject objName = getObjName(CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
 
         if (objName == null) {
             return;
@@ -1479,7 +1479,7 @@ public class AppForm extends javax.swing.JFrame {
         upd = null;
         yesToAll = false;
 
-        FindObject objName = editObjName(CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
+        FindObject objName = getObjName(CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
 
         if (objName == null) {
             return;
@@ -1712,7 +1712,7 @@ public class AppForm extends javax.swing.JFrame {
 //                    kv = new KeyValueCollection();
 //                    kv.addList(seearchSettings.getSection(), ((CfgScript) obj).getUserProperties().getList(seearchSettings.getSection()));
 //                            ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection());
-                        logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+                        logger.info("found obj " + getObjName(obj) + " type " + obj.getObjectType() + " DBID:" + obj.getObjectDbid() + " at " + obj.getObjectPath());
 
 //                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
                         if (yesToAll) {
@@ -2001,7 +2001,6 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
             }
-            KeyValueCollection kv = new KeyValueCollection();
 
 //            boolean checkForSectionOrOption = (ptAll != null || option != null || section != null || val != null);
 
@@ -2016,7 +2015,7 @@ public class AppForm extends javax.swing.JFrame {
             for (CfgObject cfgObj : cfgObjs) {
                 boolean shouldInclude = false;
                 int paramsChecked = 0;
-                kv.clear();
+                KeyValueCollection kv = new KeyValueCollection();
 
                 if (ptSection == null
                         && ptOption == null
@@ -2046,11 +2045,11 @@ public class AppForm extends javax.swing.JFrame {
                             }
                         }
                     }
-                    if (ptAll != null) {
+                    if (ptAll != null || paramsChecked <= paramsToCheck) {
                         KeyValueCollection options;
                         options = props.getProperties(cfgObj);
                         String sectionFound = null;
-                        if (options == null && ptAll == null) {
+                        if (options == null && (ptAll == null || paramsToCheck > 0)) {
                             shouldInclude = false; // rule 3)
                         } else {
                             Enumeration<KeyValuePair> enumeration = options.getEnumeration();
@@ -2073,72 +2072,66 @@ public class AppForm extends javax.swing.JFrame {
                                     }
                                 }
 
-                                if (paramsToCheck > 0 && paramsChecked >= paramsToCheck) {
-                                    kv.addObject(el.getStringKey(), new KeyValueCollection());
-                                    shouldInclude = true;
-                                } else {
-                                    KeyValueCollection addedValues = new KeyValueCollection();
-                                    Object value = el.getValue();
-                                    if (value instanceof KeyValueCollection) {
-                                        KeyValueCollection sectionValues = (KeyValueCollection) value;
-                                        Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
-                                        KeyValuePair theOpt;
-                                        while (optVal.hasMoreElements()) {
-                                            theOpt = optVal.nextElement();
-                                            boolean isOptFound = false;
-                                            boolean isValFound = false;
+                                KeyValueCollection addedValues = new KeyValueCollection();
+                                Object value = el.getValue();
+                                if (value instanceof KeyValueCollection) {
+                                    KeyValueCollection sectionValues = (KeyValueCollection) value;
+                                    Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
+                                    KeyValuePair theOpt;
+                                    while (optVal.hasMoreElements()) {
+                                        theOpt = optVal.nextElement();
+                                        boolean isOptFound = false;
+                                        boolean isValFound = false;
 
-                                            if (ptAll != null) {
-                                                if (matching(ptAll, theOpt.getStringKey())) {
+                                        if (ptAll != null) {
+                                            if (matching(ptAll, theOpt.getStringKey())) {
+                                                isOptFound = true;
+                                            }
+                                            if (matching(ptAll, theOpt.getStringValue())) {
+                                                isValFound = true;
+                                            }
+                                        } else {
+                                            if (ptOption != null) {
+                                                if (matching(ptOption, theOpt.getStringKey())) {
+                                                    paramsChecked++;
                                                     isOptFound = true;
                                                 }
-                                                if (matching(ptAll, theOpt.getStringValue())) {
+                                            }
+                                            if (ptVal != null) {
+                                                if (matching(ptVal, theOpt.getStringValue())) {
+                                                    paramsChecked++;
                                                     isValFound = true;
                                                 }
-                                            } else {
-                                                if (ptOption != null) {
-                                                    if (matching(ptOption, theOpt.getStringKey())) {
-                                                        paramsChecked++;
-                                                        isOptFound = true;
-                                                    }
-                                                }
-                                                if (ptVal != null) {
-                                                    if (matching(ptVal, theOpt.getStringValue())) {
-                                                        paramsChecked++;
-                                                        isValFound = true;
-                                                    }
-                                                }
-                                            }
-                                            if (isOptFound || isValFound) {
-                                                addedValues.addPair(theOpt);
-
                                             }
                                         }
-                                        if (paramsChecked > 0 && paramsChecked >= paramsToCheck) {
-                                            shouldInclude = true;
-                                        }
-                                    } else {
-                                        logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
-                                        if (ptVal != null) {
-                                            if (matching(ptVal, value.toString())) {
-                                                paramsChecked++;
-                                                addedValues.addPair(el);
+                                        if (isOptFound || isValFound) {
+                                            addedValues.addPair(theOpt);
 
-                                            }
                                         }
                                     }
-                                    if (!addedValues.isEmpty() || sectionFound != null) {
-                                        String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
-                                        KeyValueCollection list = kv.getList(sect);
-                                        if (list == null) {
-                                            list = new KeyValueCollection();
-                                            kv.addList(sect, list);
-                                        }
-                                        list.addAll(Arrays.asList(addedValues.toArray()));
-//                                    kv.addObject(el.getStringKey(), addedValues);
+                                    if (paramsChecked > 0 && paramsChecked >= paramsToCheck) {
                                         shouldInclude = true;
                                     }
+                                } else {
+                                    logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
+                                    if (ptVal != null) {
+                                        if (matching(ptVal, value.toString())) {
+                                            paramsChecked++;
+                                            addedValues.addPair(el);
 
+                                        }
+                                    }
+                                }
+                                if (!addedValues.isEmpty() || sectionFound != null) {
+                                    String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
+                                    KeyValueCollection list = kv.getList(sect);
+                                    if (list == null) {
+                                        list = new KeyValueCollection();
+                                        kv.addList(sect, list);
+                                    }
+                                    list.addAll(Arrays.asList(addedValues.toArray()));
+//                                    kv.addObject(el.getStringKey(), addedValues);
+                                    shouldInclude = true;
                                 }
 
                             }
@@ -2183,6 +2176,8 @@ public class AppForm extends javax.swing.JFrame {
             }
             if (foundProc != null) {
                 int i = 0;
+                requestOutput("Search done, located " + cnt + " objects type " + cls.getSimpleName() + "\n");
+
                 for (Map.Entry<CfgObject, KeyValueCollection> entry : matchedObjects.entrySet()) {
                     if (!foundProc.proc(entry.getKey(), entry.getValue(), ++i, matchedObjects.size())) {
                         return true;
@@ -3490,7 +3485,7 @@ public class AppForm extends javax.swing.JFrame {
         return ret;
     }
 
-    private FindObject editObjName(String objClass) {
+    private FindObject getObjName(String objClass) {
         if (getObjName == null) {
             findObj = new FindObject();
             getObjName = new RequestDialog(this, findObj);
@@ -3517,7 +3512,7 @@ public class AppForm extends javax.swing.JFrame {
         upd = null;
         yesToAll = false;
 
-        FindObject objName = editObjName(CfgScript.class.getSimpleName() + " type " + CfgScriptType.CFGEnhancedRouting);
+        FindObject objName = getObjName(CfgScript.class.getSimpleName() + " type " + CfgScriptType.CFGEnhancedRouting);
 
         if (objName == null) {
             return;

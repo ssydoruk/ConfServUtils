@@ -171,7 +171,9 @@ public class UpdateUserProperties {
     }
 
     void addDeleteKey(KeyValueCollection kv) {
-        deleteSections = kv;
+        for (Object object : kv) {
+            deleteSections.add(object);
+        }
     }
 
     static final public String BACKUP_PREFIX = "#";
@@ -219,12 +221,16 @@ public class UpdateUserProperties {
             break;
 
             case REMOVE: {
-                Collection<UserProperties> addedKVP = us.getAddedKVP();
-                if (addedKVP != null) {
-                    for (UserProperties userProperties : addedKVP) {
-                        addDeleteKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
-
-                    }
+                if (kv != null && !kv.isEmpty()) {
+                    addDeleteKey(kv);
+                } else {
+//                    Collection<UserProperties> addedKVP = us.getAddedKVP();
+//                    if (addedKVP != null) {
+//                        for (UserProperties userProperties : addedKVP) {
+//                            addDeleteKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
+//
+//                        }
+//                    }
                 }
             }
             break;

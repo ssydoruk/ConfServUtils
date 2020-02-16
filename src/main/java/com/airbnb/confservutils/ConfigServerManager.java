@@ -22,12 +22,19 @@ import com.genesyslab.platform.configuration.protocol.confserver.events.EventObj
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
+import javax.swing.SwingWorker;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -127,9 +134,10 @@ public class ConfigServerManager {
     <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls) throws ConfigException, InterruptedException {
         Main.logger.debug("query " + q + " for object type " + cls);
         String qToString = q.toString();
+        checkQueryNeedsUpdate();
 
         Collection<T> cfgObjs = null;
-        if (prevQueries.containsKey(qToString)) {
+        if (prevQueries.containsKey(qToString) && prevQueries.get(qToString) != null) {
             cfgObjs = (Collection<T>) prevQueries.get(qToString);
         } else {
             Main.logger.debug("executing the request " + q);
@@ -312,7 +320,9 @@ public class ConfigServerManager {
     }
 
     public Message execRequest(Message reqUpdate, CfgObjectType objType) {
+
         try {
+            // Call the SwingWorker from within the Swing thread
             parentForm.requestOutput("Executing update: " + reqUpdate.toString());
             Message resp = service.getProtocol().request(reqUpdate);
 
@@ -336,20 +346,31 @@ public class ConfigServerManager {
             logger.fatal(ex);
         }
         return null;
+
     }
 
-    private void objectUpdated(CfgObjectType objType) {
-        for (Map.Entry<String, Collection<? extends CfgObject>> entry : prevQueries.entrySet()) {
-            String key = entry.getKey();
-            Collection<? extends CfgObject> value = entry.getValue();
-            for (CfgObject cfgObject : value) {
-                if (cfgObject.getObjectType().equals(objType)) {
-                    logger.info("removing updated type " + objType + " from buffer");
-                    prevQueries.remove(key);
-                    break;
+    private HashSet<CfgObjectType> lastUpdatedObjects = new HashSet<CfgObjectType>();
+
+    private void checkQueryNeedsUpdate() {
+        for (CfgObjectType lastUpdatedObject : lastUpdatedObjects) {
+            for (Map.Entry<String, Collection<? extends CfgObject>> entry : prevQueries.entrySet()) {
+                String key = entry.getKey();
+                Collection<? extends CfgObject> value = entry.getValue();
+                for (CfgObject cfgObject : value) {
+                    if (lastUpdatedObject.equals(cfgObject.getObjectType())) {
+                        logger.info("removing updated type " + cfgObject.getObjectType() + " from buffer");
+                        prevQueries.put(key, null);
+                        break;
+                    }
                 }
             }
         }
+        lastUpdatedObjects.clear();
+
+    }
+
+    private void objectUpdated(CfgObjectType objType) {
+        lastUpdatedObjects.add(objType);
     }
 
 }
