@@ -29,10 +29,5 @@ public interface ISearchSettings {
 
     public String getValue();
     
-    public void setCaseSensitive(boolean setBool);
-    
-    public void setRegex(boolean setBool);
-    
-    public void setObjName(String objName);
 
 }

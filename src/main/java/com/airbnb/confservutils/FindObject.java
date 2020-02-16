@@ -36,7 +36,9 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
         return cbIsRegex.isSelected();
     }
 
-    
+    public void setLabel(String s) {
+        nameTitle.setText(s);
+    }
 
     private GEnum cfgObjType(Object o) {
         if (o instanceof String) {
@@ -45,8 +47,8 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
             return ((CfgObjectTypeMenu) o).getType();
         }
     }
-    
-    public void setCaseSensitive(boolean isCase){
+
+    public void setCaseSensitive(boolean isCase) {
         cbCaseSensitive.setSelected(isCase);
     }
 
@@ -61,8 +63,8 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel7 = new javax.swing.JPanel();
+        nameTitle = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
-        jLabel5 = new javax.swing.JLabel();
         tfObjectName = new javax.swing.JComboBox<>();
         jPanel4 = new javax.swing.JPanel();
         cbIsRegex = new javax.swing.JCheckBox();
@@ -70,13 +72,12 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
-        jPanel7.setLayout(new javax.swing.BoxLayout(jPanel7, javax.swing.BoxLayout.LINE_AXIS));
+        jPanel7.setLayout(new java.awt.BorderLayout());
+        jPanel7.add(nameTitle, java.awt.BorderLayout.CENTER);
+
         add(jPanel7);
 
         jPanel6.setLayout(new javax.swing.BoxLayout(jPanel6, javax.swing.BoxLayout.LINE_AXIS));
-
-        jLabel5.setText("Name");
-        jPanel6.add(jLabel5);
 
         tfObjectName.setEditable(true);
         jPanel6.add(tfObjectName);
@@ -86,7 +87,6 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.PAGE_AXIS));
 
         cbIsRegex.setText("Regular expression");
-        cbIsRegex.setEnabled(false);
         jPanel4.add(cbIsRegex);
 
         cbCaseSensitive.setSelected(true);
@@ -105,10 +105,10 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JCheckBox cbCaseSensitive;
     private javax.swing.JCheckBox cbIsRegex;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JLabel nameTitle;
     private javax.swing.JComboBox<String> tfObjectName;
     // End of variables declaration//GEN-END:variables
 

@@ -134,7 +134,7 @@ public class ConfigServerManager {
         } else {
             Main.logger.debug("executing the request " + q);
             cfgObjs = service.retrieveMultipleObjects(cls, q);
-            Main.logger.debug("received " + ((cfgObjs == null) ? 0 : cfgObjs.size()) + " objects");
+            Main.logger.debug("retrieved " + ((cfgObjs == null) ? 0 : cfgObjs.size()) + " objects");
             prevQueries.put(qToString, cfgObjs);
         }
         return cfgObjs;

@@ -1295,18 +1295,23 @@ public class AppForm extends javax.swing.JFrame {
     private void miAllORSsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAllORSsActionPerformed
         upd = null;
         yesToAll = false;
+        FindObject objName = editObjName(CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
+
+        if (objName == null) {
+            return;
+        }
 
         if (connectToConfigServer()) {
 
             ISearchSettings seearchSettings = new ISearchSettings() {
                 @Override
                 public boolean isCaseSensitive() {
-                    return false;
+                    return objName.isCaseSensitive();
                 }
 
                 @Override
                 public boolean isRegex() {
-                    return false;
+                    return objName.isRegex();
                 }
 
                 @Override
@@ -1326,12 +1331,16 @@ public class AppForm extends javax.swing.JFrame {
 
                 @Override
                 public String getSection() {
-                    return "cluster";
+                    if (objName.isRegex()) {
+                        return "^cluster$";
+                    } else {
+                        return "cluster";
+                    }
                 }
 
                 @Override
                 public String getObjName() {
-                    return null;
+                    return objName.getName();
                 }
 
                 @Override
@@ -1344,20 +1353,6 @@ public class AppForm extends javax.swing.JFrame {
                     return null;
                 }
 
-                @Override
-                public void setCaseSensitive(boolean setBool) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public void setRegex(boolean setBool) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public void setObjName(String objName) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
             };
 
             class AUpdateSettings implements IUpdateSettings {
@@ -1448,11 +1443,8 @@ public class AppForm extends javax.swing.JFrame {
             try {
 
                 CfgTransactionQuery query = new CfgTransactionQuery();
+//                setQueryNameFilter(query, objName.getName(), objName.isRegex());
                 query.setObjectType(CfgTransactionType.CFGTRTList);
-                String n = seearchSettings.getObjName();
-                if (seearchSettings.isCaseSensitive() && n != null) {
-                    query.setName(n);
-                }
 
                 if (findObjects(
                         query,
@@ -1487,17 +1479,23 @@ public class AppForm extends javax.swing.JFrame {
         upd = null;
         yesToAll = false;
 
+        FindObject objName = editObjName(CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
+
+        if (objName == null) {
+            return;
+        }
+
         if (connectToConfigServer()) {
 
             ISearchSettings seearchSettings = new ISearchSettings() {
                 @Override
                 public boolean isCaseSensitive() {
-                    return false;
+                    return objName.isCaseSensitive();
                 }
 
                 @Override
                 public boolean isRegex() {
-                    return false;
+                    return objName.isRegex();
                 }
 
                 @Override
@@ -1517,12 +1515,16 @@ public class AppForm extends javax.swing.JFrame {
 
                 @Override
                 public String getSection() {
-                    return "cluster";
+                    if (objName.isRegex()) {
+                        return "^cluster$";
+                    } else {
+                        return "cluster";
+                    }
                 }
 
                 @Override
                 public String getObjName() {
-                    return null;
+                    return objName.getName();
                 }
 
                 @Override
@@ -1535,20 +1537,6 @@ public class AppForm extends javax.swing.JFrame {
                     return null;
                 }
 
-                @Override
-                public void setCaseSensitive(boolean setBool) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public void setRegex(boolean setBool) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-
-                @Override
-                public void setObjName(String objName) {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
             };
 
             class AUpdateSettings implements IUpdateSettings {
@@ -1660,11 +1648,8 @@ public class AppForm extends javax.swing.JFrame {
             try {
 
                 CfgTransactionQuery query = new CfgTransactionQuery();
+//                setQueryNameFilter(query, objName.getName(), objName.isRegex());
                 query.setObjectType(CfgTransactionType.CFGTRTList);
-                String n = seearchSettings.getObjName();
-                if (seearchSettings.isCaseSensitive() && n != null) {
-                    query.setName(n);
-                }
 
                 if (findObjects(
                         query,
@@ -1977,12 +1962,11 @@ public class AppForm extends javax.swing.JFrame {
         HashMap<CfgObject, KeyValueCollection> matchedObjects = new HashMap<>();
 
         StringBuilder buf = new StringBuilder();
+
         Collection<T> cfgObjs = configServerManager.getResults(q, cls);
 
-        if (cfgObjs == null || cfgObjs.isEmpty()) {
-            logger.debug("no objects found\n", false);
-        } else {
-            logger.debug("retrieved " + cfgObjs.size() + " total objects type " + cls.getSimpleName());
+        if (cfgObjs != null && !cfgObjs.isEmpty()) {
+//            logger.debug("retrieved " + cfgObjs.size() + " total objects type " + cls.getSimpleName());
             int flags = ((ss.isRegex()) ? 0 : Pattern.LITERAL) | ((ss.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
             Pattern ptAll = null;
             Pattern ptSection = null;
@@ -2062,7 +2046,7 @@ public class AppForm extends javax.swing.JFrame {
                             }
                         }
                     }
-                    if (ptAll != null || paramsChecked < paramsToCheck) {
+                    if (ptAll != null) {
                         KeyValueCollection options;
                         options = props.getProperties(cfgObj);
                         String sectionFound = null;
@@ -3506,6 +3490,20 @@ public class AppForm extends javax.swing.JFrame {
         return ret;
     }
 
+    private FindObject editObjName(String objClass) {
+        if (getObjName == null) {
+            findObj = new FindObject();
+            getObjName = new RequestDialog(this, findObj);
+        }
+        findObj.setCaseSensitive(false);
+        findObj.setLabel("Specify name for " + objClass);
+        if (!getObjName.doShow("Edit ")) {
+            return null;
+        } else {
+            return findObj;
+        }
+    }
+
     private static final String appSection = "application";
     RequestDialog getObjName = null;
     FindObject findObj = null;
@@ -3519,34 +3517,27 @@ public class AppForm extends javax.swing.JFrame {
         upd = null;
         yesToAll = false;
 
-        if (getObjName == null) {
-            findObj = new FindObject();
-            getObjName = new RequestDialog(this, findObj);
-        }
-        findObj.setCaseSensitive(false);
-        if (!getObjName.doShow("Specify name for " + CfgScript.class.getSimpleName())) {
+        FindObject objName = editObjName(CfgScript.class.getSimpleName() + " type " + CfgScriptType.CFGEnhancedRouting);
+
+        if (objName == null) {
             return;
         }
 
         if (connectToConfigServer()) {
-            ISearchSettings seearchSettings;
+            ISearchSettings searchSettings;
             IUpdateSettings us;
             if (turnOn) {
                 //<editor-fold defaultstate="collapsed" desc="turnOn">
-                seearchSettings = new ISearchSettings() {
-
-                    boolean caseSensitive = false;
-                    boolean regex = true;
-                    String objName = null;
+                searchSettings = new ISearchSettings() {
 
                     @Override
                     public boolean isCaseSensitive() {
-                        return caseSensitive;
+                        return objName.isCaseSensitive();
                     }
 
                     @Override
                     public boolean isRegex() {
-                        return regex;
+                        return objName.isRegex();
                     }
 
                     @Override
@@ -3566,12 +3557,16 @@ public class AppForm extends javax.swing.JFrame {
 
                     @Override
                     public String getSection() {
-                        return "^" + appSection + "$";
+                        if (objName.isRegex()) {
+                            return "^" + appSection + "$";
+                        } else {
+                            return appSection;
+                        }
                     }
 
                     @Override
                     public String getObjName() {
-                        return objName;
+                        return objName.getName();
                     }
 
                     @Override
@@ -3583,21 +3578,6 @@ public class AppForm extends javax.swing.JFrame {
                     @Override
                     public String getValue() {
                         return null;
-                    }
-
-                    @Override
-                    public void setCaseSensitive(boolean setBool) {
-                        caseSensitive = setBool;
-                    }
-
-                    @Override
-                    public void setRegex(boolean setBool) {
-                        regex = setBool;
-                    }
-
-                    @Override
-                    public void setObjName(String objName) {
-                        this.objName = objName;
                     }
 
                 };
@@ -3640,14 +3620,11 @@ public class AppForm extends javax.swing.JFrame {
 
             } else {
                 //<editor-fold defaultstate="collapsed" desc="turnOff">
-                seearchSettings = new ISearchSettings() {
-                    boolean caseSensitive = false;
-                    boolean regex = true;
-                    String objName = null;
+                searchSettings = new ISearchSettings() {
 
                     @Override
                     public boolean isCaseSensitive() {
-                        return caseSensitive;
+                        return objName.isCaseSensitive();
                     }
 
                     @Override
@@ -3677,7 +3654,7 @@ public class AppForm extends javax.swing.JFrame {
 
                     @Override
                     public String getObjName() {
-                        return objName;
+                        return objName.getName();
                     }
 
                     @Override
@@ -3691,20 +3668,6 @@ public class AppForm extends javax.swing.JFrame {
                         return null;
                     }
 
-                    @Override
-                    public void setCaseSensitive(boolean setBool) {
-                        caseSensitive = setBool;
-                    }
-
-                    @Override
-                    public void setRegex(boolean setBool) {
-                        regex = setBool;
-                    }
-
-                    @Override
-                    public void setObjName(String objName) {
-                        this.objName = objName;
-                    }
                 };
 
                 us = new IUpdateSettings() {
@@ -3760,7 +3723,7 @@ public class AppForm extends javax.swing.JFrame {
                         String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                         if (estimateUpdateObj != null) //
                         {
-                            switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
+                            switch (showYesNoPanel(searchSettings.toString(), "Object " + current + " of matched " + total
                                     + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
                                     + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
                                 case YES_TO_ALL:
@@ -3795,15 +3758,8 @@ public class AppForm extends javax.swing.JFrame {
 
             try {
 
-                seearchSettings.setCaseSensitive(findObj.isCaseSensitive());
-                seearchSettings.setObjName(findObj.getName());
-
                 CfgScriptQuery query = new CfgScriptQuery();
                 query.setScriptType(CfgScriptType.CFGEnhancedRouting);
-                String n = seearchSettings.getObjName();
-                if (seearchSettings.isCaseSensitive() && n != null) {
-                    query.setName(n);
-                }
 
                 if (findObjects(
                         query,
@@ -3821,7 +3777,7 @@ public class AppForm extends javax.swing.JFrame {
                         return ret;
                     }
                 },
-                        seearchSettings, true, foundProc)) {
+                        searchSettings, true, foundProc)) {
 
                 }
 
@@ -3831,6 +3787,27 @@ public class AppForm extends javax.swing.JFrame {
                 java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
             }
 
+        }
+        logger.info("Done buffering update");
+    }
+
+    private void setQueryNameFilter(CfgQuery query, String name, boolean regex) {
+        if (StringUtils.isNotEmpty(name)) {
+            if (query instanceof CfgTransactionQuery) {
+                ((CfgTransactionQuery) query).setName(getNamePattern(name, regex));
+            } else if (query instanceof CfgScriptQuery) {
+                ((CfgScriptQuery) query).setName(getNamePattern(name, regex));
+            } else {
+                theForm.requestOutput("!!! not supported filter for " + query);
+            }
+        }
+    }
+
+    private String getNamePattern(String name, boolean regex) {
+        if (regex) {
+            return name;
+        } else {
+            return "*" + name + "*";
         }
     }
 

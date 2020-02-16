@@ -581,19 +581,5 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
 
     }
 
-    @Override
-    public void setCaseSensitive(boolean setBool) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setRegex(boolean setBool) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setObjName(String objName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
 }
