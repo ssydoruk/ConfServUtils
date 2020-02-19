@@ -100,6 +100,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -2204,9 +2205,17 @@ public class AppForm extends javax.swing.JFrame {
                 try {
                     try {
 //                enableComponents(this, false);
-                        Lookup l = new Lookup(ReverseMap.fromAddress(ip1), org.xbill.DNS.Type.PTR);
-                        Record[] hostNames = l.run();
-                        if (hostNames == null) {
+                        ArrayList<Record> hostNames = new ArrayList<>();
+
+                        for (int t1 : new int[]{org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A}) {
+                            Lookup l = new Lookup(ReverseMap.fromAddress(ip1), t1);
+                            Record[] hosts = l.run();
+                            if(ArrayUtils.isNotEmpty(hosts)){
+                                hostNames.addAll(Arrays.asList(hosts));
+                            }
+
+                        }
+                        if (hostNames.isEmpty()) {
                             buf.append("IP [").append(ip1).append("] not resolved\n");
                         } else {
                             if ((connectToConfigServer())) {
@@ -2216,6 +2225,7 @@ public class AppForm extends javax.swing.JFrame {
                                 for (Record hostName : hostNames) {
                                     PTRRecord r = (PTRRecord) hostName;
                                     buf.append(r.getTarget().toString(true)).append("\n");
+//                                    String mask = StringUtils.strip(StringUtils.trim(r.getTarget().getLabelString(0))) + "*";
                                     String mask = r.getTarget().getLabelString(0) + "*";
                                     hq.setName(mask);
                                     Collection<CfgHost> hostsFound = configServerManager.getResults(hq, CfgHost.class

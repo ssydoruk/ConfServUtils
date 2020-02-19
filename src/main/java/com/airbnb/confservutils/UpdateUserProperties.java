@@ -68,11 +68,15 @@ public class UpdateUserProperties {
     }
 
     void addAddKey(String section, String key, String val) {
-        getSection(createSections, section).addString(key, val);
+        getSection(createSections, section).addString(cleanString(key), cleanString(val));
+    }
+
+    private static String cleanString(String s) {
+        return StringUtils.strip(StringUtils.trim(s));
     }
 
     void addUpdateKey(String section, String key, String val) {
-        getSection(updateSections, section).addString(key, val);
+        getSection(updateSections, section).addString(cleanString(key), cleanString(val));
     }
 
     void addAddKey(String section, String key, String val, CfgObject obj) {
@@ -82,14 +86,14 @@ public class UpdateUserProperties {
             String newSection = existing.getKey();
             String newKey = existing.getValue();
             if (StringUtils.isBlank(newKey)) {
-                getSection(createSections, newSection).addString(key, val);
+                getSection(createSections, newSection).addString(cleanString(key), cleanString(val));
 
             } else {
                 addUpdateKey(newSection, newKey, val);
             }
 
         } else {
-            getSection(createSections, section).addString(key, val);
+            getSection(createSections, section).addString(cleanString(key), cleanString(val));
         }
     }
 
@@ -98,7 +102,7 @@ public class UpdateUserProperties {
         Pair<String, String> existing = updateExisted(obj, section, key);
         if (StringUtils.isNotEmpty(existing.getKey())) {
             if ((StringUtils.isNotEmpty(key) && StringUtils.isNotEmpty(existing.getValue()))) {
-                getSection(deleteSections, existing.getKey()).addString(existing.getValue(), val);
+                getSection(deleteSections, existing.getKey()).addString(existing.getValue(), cleanString(val));
             }
 
             if ((StringUtils.isEmpty(key) && StringUtils.isEmpty(existing.getValue()))) {
