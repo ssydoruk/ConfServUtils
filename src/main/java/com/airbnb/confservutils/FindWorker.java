@@ -78,8 +78,10 @@ public class FindWorker {
         } else {
             boolean nameMatched = false;
             boolean sectionMatched = false;
+            boolean includeKVP = false;
             boolean keyMatched = false;
             boolean valMatched = false;
+
             boolean otherNonNull = ptSection != null || ptKey != null || ptVal != null;
 
             // matching object name(s)
@@ -139,47 +141,53 @@ public class FindWorker {
                             Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
                             KeyValuePair theOpt;
                             while (optVal.hasMoreElements()) {
+                                keyMatched = false;
+                                valMatched = false;
+
                                 theOpt = optVal.nextElement();
-                                boolean isOptFound = false;
-                                boolean isValFound = false;
 
                                 if (ptAll != null) {
                                     if (matching(ptAll, theOpt.getStringKey())) {
-                                        isOptFound = true;
+                                        keyMatched = true;
                                     }
                                     if (matching(ptAll, theOpt.getStringValue())) {
-                                        isValFound = true;
+                                        valMatched = true;
                                     }
                                 } else {
                                     if (ptKey != null) {
                                         if (matching(ptKey, theOpt.getStringKey())) {
                                             keyMatched = true;
-                                            isOptFound = true;
                                         }
                                     }
                                     if (ptVal != null) {
                                         if (matching(ptVal, theOpt.getStringValue())) {
                                             valMatched = true;
-                                            isValFound = true;
                                         }
                                     }
                                 }
-                                if (isOptFound || isValFound) {
-                                    addedValues.addPair(theOpt);
-
+                                if (keyMatched || valMatched) {
+                                    if (ptAll != null) {
+                                        addedValues.addPair(theOpt);
+                                    } else {
+                                        int paramsRequested = numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null);
+                                        int paramsFound = numTrue(nameMatched, sectionMatched, keyMatched, valMatched);
+                                        if (paramsFound >= paramsRequested) {
+                                            addedValues.addPair(theOpt);
+                                        }
+                                    }
                                 }
                             }
                         } else {
-                            logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
-                            if (ptVal != null) {
-                                if (matching(ptVal, value.toString())) {
-                                    valMatched = true; // !!!!!
-                                    addedValues.addPair(el);
-
-                                }
-                            }
+                            logger.info("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
+//                            if (ptVal != null) {
+//                                if (matching(ptVal, value.toString())) {
+//                                    valMatched = true; // !!!!!
+//                                    addedValues.addPair(el);
+//
+//                                }
+//                            }
                         }
-                        if (!addedValues.isEmpty() || sectionFound != null) {
+                        if (!addedValues.isEmpty() || (sectionFound != null && numTrue(nameMatched, sectionMatched, keyMatched, valMatched) >= numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null))) {
                             String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
                             KeyValueCollection list = kv.getList(sect);
                             if (list == null) {
@@ -192,14 +200,23 @@ public class FindWorker {
                     }
                 }
             }
-
-            return ((ptAll != null && (nameMatched || sectionMatched || nameMatched || keyMatched))
-                    || ((ptName == null || (ptName != null && nameMatched))
-                    && (ptSection == null || (ptSection != null && sectionMatched))
-                    && (ptKey == null || (ptKey != null && keyMatched))
-                    && (ptVal == null || (ptVal != null && valMatched))))
-                            ? kv : null;
+            if (ptAll != null) {
+                return (nameMatched || sectionMatched || valMatched || keyMatched) ? kv : null;
+            } else {
+                return (kv.isEmpty() || (ptName != null && nameMatched)) ? null : kv;
+            }
         }
+
+    }
+
+    static int numTrue(boolean... bools) {
+        int ret = 0;
+
+        // using for each loop to display contents of a 
+        for (boolean b : bools) {
+            ret += (b ? 1 : 0);
+        }
+        return ret;
 
     }
 
