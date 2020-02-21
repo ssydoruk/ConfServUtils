@@ -214,8 +214,14 @@ public class FindWorker {
                 logger.debug(" ** all **  match " + ((nameMatched || sectionMatched || valMatched || keyMatched) ? "" : "NOT") + " found");
                 return (nameMatched || sectionMatched || valMatched || keyMatched) ? kv : null;
             } else {
-                logger.debug(" ** match " + ((kv.isEmpty() || (ptName != null && !nameMatched)) ? "NOT" : "") + " found");
-                return (kv.isEmpty() || (ptName != null && !nameMatched)) ? null : kv;
+                KeyValueCollection ret = null;
+
+                ret
+                        = (numTrue(nameMatched, sectionMatched, keyMatched, valMatched) >= numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null)) ? kv : null;
+
+                logger.debug(" ** match " + ((ret == null) ? "NOT" : "") + " found");
+
+                return ret;
             }
         }
 
