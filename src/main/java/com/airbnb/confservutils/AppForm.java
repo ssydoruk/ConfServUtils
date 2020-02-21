@@ -1249,8 +1249,9 @@ public class AppForm extends javax.swing.JFrame {
                                     upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
                                     String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv, configServerManager);
                                     switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched " + total
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
                                             + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                                    )) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -1408,8 +1409,9 @@ public class AppForm extends javax.swing.JFrame {
                         upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
                         String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                         switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
+                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
                                 + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                        )) {
                             case YES_TO_ALL:
                                 if (JOptionPane.showConfirmDialog(theForm,
                                         "Are you sure you want to modify this and all following found objects?",
@@ -1611,8 +1613,9 @@ public class AppForm extends javax.swing.JFrame {
                         upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
                         String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                         switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
+                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
                                 + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                        )) {
                             case YES_TO_ALL:
                                 if (JOptionPane.showConfirmDialog(theForm,
                                         "Are you sure you want to modify this and all following found objects?",
@@ -1731,8 +1734,9 @@ public class AppForm extends javax.swing.JFrame {
                             if (estimateUpdateObj != null) //
                             {
                                 switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(), "Object " + current + " of matched " + total
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
                                         + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                                )) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -1770,10 +1774,10 @@ public class AppForm extends javax.swing.JFrame {
                     if (selectedAppType != null) {
                         query.setAppType(selectedAppType);
                     }
-                    String n = panelAppOptionsChange.getObjName();
-                    if (panelAppOptionsChange.isCaseSensitive() && n != null) {
-                        query.setName(n);
-                    }
+//                    String n = panelAppOptionsChange.getObjName();
+//                    if (panelAppOptionsChange.isCaseSensitive() && n != null) {
+//                        query.setName(n);
+//                    }
 
                     if (findObjects(
                             query,
@@ -2308,11 +2312,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
         if (t == CfgObjectType.CFGDN) {
             CfgDNQuery query = new CfgDNQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setDnNumber(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setDnNumber(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2343,11 +2347,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
         else if (t == CfgObjectType.CFGSwitch) {
             CfgSwitchQuery query = new CfgSwitchQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
 //                                query.(selectedObjSubType);
@@ -2378,11 +2382,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
         else if (t == CfgObjectType.CFGAgentLogin) {
             CfgAgentLoginQuery query = new CfgAgentLoginQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setLoginCode(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setLoginCode(n);
+//
+//            }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
 //                                query.(selectedObjSubType);
@@ -2413,11 +2417,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlace">
         else if (t == CfgObjectType.CFGPlace) {
             CfgPlaceQuery query = new CfgPlaceQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
 //                                query.(selectedObjSubType);
@@ -2446,11 +2450,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPerson">
         else if (t == CfgObjectType.CFGPerson) {
             CfgPersonQuery query = new CfgPersonQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setUserName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setUserName(n);
+//
+//            }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
 //                                query.(selectedObjSubType);
@@ -2487,11 +2491,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
         else if (t == CfgObjectType.CFGAgentGroup) {
             CfgAgentGroupQuery query = new CfgAgentGroupQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2516,11 +2520,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDNGroup">
         else if (t == CfgObjectType.CFGDNGroup) {
             CfgDNGroupQuery query = new CfgDNGroupQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2545,11 +2549,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlaceGroup">
         else if (t == CfgObjectType.CFGPlaceGroup) {
             CfgPlaceGroupQuery query = new CfgPlaceGroupQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2574,11 +2578,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
         else if (t == CfgObjectType.CFGScript) {
             CfgScriptQuery query = new CfgScriptQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 //                            CfgSwitchType selectedObjSubType = (CfgSwitchType) pn.getSelectedObjSubType();
 //                            if (selectedObjSubType != null) {
 //                                query.(selectedObjSubType);
@@ -2607,11 +2611,11 @@ public class AppForm extends javax.swing.JFrame {
             //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
         } else if (t == CfgObjectType.CFGTransaction) {
             CfgTransactionQuery query = new CfgTransactionQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2638,11 +2642,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
         else if (t == CfgObjectType.CFGEnumerator) {
             CfgEnumeratorQuery query = new CfgEnumeratorQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2669,11 +2673,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumeratorValue">
         else if (t == CfgObjectType.CFGEnumeratorValue) {
             CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2701,11 +2705,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGGVPIVRProfile">
         else if (t == CfgObjectType.CFGGVPIVRProfile) {
             CfgGVPIVRProfileQuery query = new CfgGVPIVRProfileQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2736,11 +2740,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAccessGroup">
         else if (t == CfgObjectType.CFGAccessGroup) {
             CfgAccessGroupQuery query = new CfgAccessGroupQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2766,11 +2770,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGActionCode">
         else if (t == CfgObjectType.CFGActionCode) {
             CfgActionCodeQuery query = new CfgActionCodeQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2798,11 +2802,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAlarmCondition">
         else if (t == CfgObjectType.CFGAlarmCondition) {
             CfgAlarmConditionQuery query = new CfgAlarmConditionQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2829,11 +2833,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGApplication">
         else if (t == CfgObjectType.CFGApplication) {
             CfgApplicationQuery query = new CfgApplicationQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2863,11 +2867,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGFolder">
         else if (t == CfgObjectType.CFGFolder) {
             CfgFolderQuery query = new CfgFolderQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2895,11 +2899,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGHost">
         else if (t == CfgObjectType.CFGHost) {
             CfgHostQuery query = new CfgHostQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2926,11 +2930,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTenant">
         else if (t == CfgObjectType.CFGTenant) {
             CfgTenantQuery query = new CfgTenantQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2957,11 +2961,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVRPort">
         else if (t == CfgObjectType.CFGIVRPort) {
             CfgIVRPortQuery query = new CfgIVRPortQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setPortNumber(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setPortNumber(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -2988,11 +2992,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVR">
         else if (t == CfgObjectType.CFGIVR) {
             CfgIVRQuery query = new CfgIVRQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3019,11 +3023,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGObjectiveTable">
         else if (t == CfgObjectType.CFGObjectiveTable) {
             CfgObjectiveTableQuery query = new CfgObjectiveTableQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3050,11 +3054,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGService">
         else if (t == CfgObjectType.CFGService) {
             CfgServiceQuery query = new CfgServiceQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3081,11 +3085,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSkill">
         else if (t == CfgObjectType.CFGSkill) {
             CfgSkillQuery query = new CfgSkillQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3111,11 +3115,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatDay">
         else if (t == CfgObjectType.CFGStatDay) {
             CfgStatDayQuery query = new CfgStatDayQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3141,11 +3145,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatTable">
         else if (t == CfgObjectType.CFGStatTable) {
             CfgStatTableQuery query = new CfgStatTableQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3171,11 +3175,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTimeZone">
         else if (t == CfgObjectType.CFGTimeZone) {
             CfgTimeZoneQuery query = new CfgTimeZoneQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3204,11 +3208,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTreatment">
         else if (t == CfgObjectType.CFGTreatment) {
             CfgTreatmentQuery query = new CfgTreatmentQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3236,11 +3240,11 @@ public class AppForm extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGVoicePrompt">
         else if (t == CfgObjectType.CFGVoicePrompt) {
             CfgVoicePromptQuery query = new CfgVoicePromptQuery();
-            String n = pn.getObjName();
-            if (pn.isCaseSensitive() && n != null) {
-                query.setName(n);
-
-            }
+//            String n = pn.getObjName();
+//            if (pn.isCaseSensitive() && n != null) {
+//                query.setName(n);
+//
+//            }
 
             if (findObjects(
                     query,
@@ -3562,8 +3566,9 @@ public class AppForm extends javax.swing.JFrame {
                         if (estimateUpdateObj != null) //
                         {
                             switch (showYesNoPanel(searchSettings.toString(), "Object " + current + " of matched " + total
+                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
                                     + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                            )) {
                                 case YES_TO_ALL:
                                     if (JOptionPane.showConfirmDialog(theForm,
                                             "Are you sure you want to modify this and all following found objects?",

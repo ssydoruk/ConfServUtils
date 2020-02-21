@@ -356,11 +356,13 @@ public class ConfigServerManager {
             for (Map.Entry<String, Collection<? extends CfgObject>> entry : prevQueries.entrySet()) {
                 String key = entry.getKey();
                 Collection<? extends CfgObject> value = entry.getValue();
-                for (CfgObject cfgObject : value) {
-                    if (lastUpdatedObject.equals(cfgObject.getObjectType())) {
-                        logger.info("removing updated type " + cfgObject.getObjectType() + " from buffer");
-                        prevQueries.put(key, null);
-                        break;
+                if (value != null) {
+                    for (CfgObject cfgObject : value) {
+                        if (lastUpdatedObject.equals(cfgObject.getObjectType())) {
+                            logger.info("removing updated type " + cfgObject.getObjectType() + " from buffer");
+                            prevQueries.put(key, null);
+                            break;
+                        }
                     }
                 }
             }

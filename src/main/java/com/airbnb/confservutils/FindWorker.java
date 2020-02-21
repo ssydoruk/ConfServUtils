@@ -74,6 +74,8 @@ public class FindWorker {
                 && ptVal == null
                 && ptName == null
                 && ptAll == null) {
+            logger.debug("** No criteria; object added");
+
             return new KeyValueCollection(); // no search parameters means we return all objects
         } else {
             boolean nameMatched = false;
@@ -97,11 +99,14 @@ public class FindWorker {
                     if (ptName != null) {
                         for (String string : props.getName(cfgObj)) {
                             if (matching(ptName, string)) {
+                                logger.debug("Name [" + string + "] matched against " + ptName);
                                 nameMatched = true;
 
                             }
                         }
                         if (!nameMatched) { // name specified but none matches
+                            logger.debug("** name specified but not matched. Object ignored");
+
                             return null;
                         }
                     }
@@ -114,6 +119,7 @@ public class FindWorker {
                 String sectionFound = null;
 
                 if (options == null && (ptAll == null || otherNonNull)) {
+                    logger.debug("** no options. Object ignored");
                     return null; // rule 3)
                 } else {
                     Enumeration<KeyValuePair> enumeration = options.getEnumeration();
@@ -129,6 +135,8 @@ public class FindWorker {
                             }
                         } else if (ptSection != null) {
                             if (matching(ptSection, el.getStringKey())) {
+                                logger.debug("Section [" + el.getStringKey() + "] matched against " + ptSection);
+
                                 sectionFound = el.getStringKey();
                                 sectionMatched = true;
                             }
@@ -166,6 +174,8 @@ public class FindWorker {
                                     }
                                 }
                                 if (keyMatched || valMatched) {
+                                    logger.debug("sect[" + el.getStringKey() + "] km[" + keyMatched + "] vm[" + valMatched + "] key[" + theOpt.getStringKey() + "] val[" + theOpt.getStringValue() + "]");
+
                                     if (ptAll != null) {
                                         addedValues.addPair(theOpt);
                                     } else {
@@ -201,9 +211,11 @@ public class FindWorker {
                 }
             }
             if (ptAll != null) {
+                logger.debug(" ** all **  match " + ((nameMatched || sectionMatched || valMatched || keyMatched) ? "" : "NOT") + " found");
                 return (nameMatched || sectionMatched || valMatched || keyMatched) ? kv : null;
             } else {
-                return (kv.isEmpty() || (ptName != null && nameMatched)) ? null : kv;
+                logger.debug(" ** match " + ((kv.isEmpty() || (ptName != null && !nameMatched)) ? "NOT" : "") + " found");
+                return (kv.isEmpty() || (ptName != null && !nameMatched)) ? null : kv;
             }
         }
 
