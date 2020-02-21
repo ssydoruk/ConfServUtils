@@ -1463,7 +1463,7 @@ public class AppForm extends javax.swing.JFrame {
                         return ret;
                     }
                 },
-                        seearchSettings, false, foundProc)) {
+                        new FindWorker(seearchSettings), false, foundProc)) {
 
                 }
 
@@ -1666,7 +1666,7 @@ public class AppForm extends javax.swing.JFrame {
                         return new ArrayList<>();
                     }
                 },
-                        seearchSettings, false, foundProc)) {
+                        new FindWorker(seearchSettings), false, foundProc)) {
 
                 }
 
@@ -1791,7 +1791,7 @@ public class AppForm extends javax.swing.JFrame {
                             return ret;
                         }
                     },
-                            panelAppOptionsChange, true, foundProc)) {
+                            new FindWorker(panelAppOptionsChange), true, foundProc)) {
 
                     }
 
@@ -1955,7 +1955,7 @@ public class AppForm extends javax.swing.JFrame {
             CfgQuery q,
             Class< T> cls,
             IKeyValueProperties props,
-            ISearchSettings ss,
+            FindWorker ss,
             boolean checkNames,
             ICfgObjectFoundProc foundProc
     ) throws ConfigException, InterruptedException {
@@ -1967,179 +1967,12 @@ public class AppForm extends javax.swing.JFrame {
         Collection<T> cfgObjs = configServerManager.getResults(q, cls);
 
         if (cfgObjs != null && !cfgObjs.isEmpty()) {
-//            logger.debug("retrieved " + cfgObjs.size() + " total objects type " + cls.getSimpleName());
-            int flags = ((ss.isRegex()) ? 0 : Pattern.LITERAL) | ((ss.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
-            Pattern ptAll = null;
-            Pattern ptSection = null;
-            Pattern ptOption = null;
-            Pattern ptVal = null;
-            Pattern ptName = null;
-            String objName = ss.getObjName();
-            String section = ss.getSection();
-            String option = ss.getOption();
-            String val = ss.getValue();
-            int paramsToCheck = 0;
 
-            if (ss.isSearchAll()) {
-                ptAll = (ss.isSearchAll() && ss.getAllSearch() != null ? Pattern.compile(ss.getAllSearch(), flags) : null);
-            } else {
-                ptSection = (section == null) ? null : Pattern.compile(section, flags);
-                ptOption = (option == null) ? null : Pattern.compile(option, flags);
-                ptVal = (val == null) ? null : Pattern.compile(val, flags);
-                ptName = (objName == null) ? null : Pattern.compile(objName, flags);
-
-                if (ptSection != null) {
-                    paramsToCheck++;
-                }
-                if (ptOption != null) {
-                    paramsToCheck++;
-                }
-                if (ptVal != null) {
-                    paramsToCheck++;
-                }
-                if (ptName != null) {
-                    paramsToCheck++;
-                }
-
-            }
-
-//            boolean checkForSectionOrOption = (ptAll != null || option != null || section != null || val != null);
-
-            /*
-            Treat options combinations as AND operator; if several is specified,
-            1) all must be true to be included.
-            
-            2) If all is specified, only one match is good to include, but all values are checked
-            
-            3) if no options on object but option search is specified, do not include the object
-             */
             for (CfgObject cfgObj : cfgObjs) {
-                boolean shouldInclude = false;
-                int paramsChecked = 0;
-                KeyValueCollection kv = new KeyValueCollection();
 
-                if (ptSection == null
-                        && ptOption == null
-                        && ptVal == null
-                        && ptName == null
-                        && ptAll == null) {
-                    shouldInclude = true;
-                } else {
+                KeyValueCollection kv = ss.matchConfigObject(cfgObj, props, checkNames);
 
-                    if (ptAll != null) {
-                        if (checkNames) {
-                            for (String string : props.getName(cfgObj)) {
-                                if (matching(ptAll, string)) {
-                                    shouldInclude = true;
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        if (checkNames && ptName != null) {
-                            for (String string : props.getName(cfgObj)) {
-                                if (matching(ptName, string)) {
-                                    paramsChecked++;
-                                    shouldInclude = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (ptAll != null || paramsChecked <= paramsToCheck) {
-                        KeyValueCollection options;
-                        options = props.getProperties(cfgObj);
-                        String sectionFound = null;
-                        if (options == null && (ptAll == null || paramsToCheck > 0)) {
-                            shouldInclude = false; // rule 3)
-                        } else {
-                            Enumeration<KeyValuePair> enumeration = options.getEnumeration();
-                            KeyValuePair el;
-
-                            while (enumeration.hasMoreElements()) {
-                                el = enumeration.nextElement();
-
-                                if (ptAll != null) {
-                                    if (matching(ptAll, el.getStringKey())) {
-                                        sectionFound = el.getStringKey();
-                                        shouldInclude = true;
-                                    }
-                                } else if (ptSection != null) {
-                                    if (!matching(ptSection, el.getStringKey())) {
-                                        continue;
-                                    } else {
-                                        sectionFound = el.getStringKey();
-                                        paramsChecked++;
-                                    }
-                                }
-
-                                KeyValueCollection addedValues = new KeyValueCollection();
-                                Object value = el.getValue();
-                                if (value instanceof KeyValueCollection) {
-                                    KeyValueCollection sectionValues = (KeyValueCollection) value;
-                                    Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
-                                    KeyValuePair theOpt;
-                                    while (optVal.hasMoreElements()) {
-                                        theOpt = optVal.nextElement();
-                                        boolean isOptFound = false;
-                                        boolean isValFound = false;
-
-                                        if (ptAll != null) {
-                                            if (matching(ptAll, theOpt.getStringKey())) {
-                                                isOptFound = true;
-                                            }
-                                            if (matching(ptAll, theOpt.getStringValue())) {
-                                                isValFound = true;
-                                            }
-                                        } else {
-                                            if (ptOption != null) {
-                                                if (matching(ptOption, theOpt.getStringKey())) {
-                                                    paramsChecked++;
-                                                    isOptFound = true;
-                                                }
-                                            }
-                                            if (ptVal != null) {
-                                                if (matching(ptVal, theOpt.getStringValue())) {
-                                                    paramsChecked++;
-                                                    isValFound = true;
-                                                }
-                                            }
-                                        }
-                                        if (isOptFound || isValFound) {
-                                            addedValues.addPair(theOpt);
-
-                                        }
-                                    }
-                                    if (paramsChecked > 0 && paramsChecked >= paramsToCheck) {
-                                        shouldInclude = true;
-                                    }
-                                } else {
-                                    logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
-                                    if (ptVal != null) {
-                                        if (matching(ptVal, value.toString())) {
-                                            paramsChecked++;
-                                            addedValues.addPair(el);
-
-                                        }
-                                    }
-                                }
-                                if (!addedValues.isEmpty() || sectionFound != null) {
-                                    String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
-                                    KeyValueCollection list = kv.getList(sect);
-                                    if (list == null) {
-                                        list = new KeyValueCollection();
-                                        kv.addList(sect, list);
-                                    }
-                                    list.addAll(Arrays.asList(addedValues.toArray()));
-//                                    kv.addObject(el.getStringKey(), addedValues);
-                                    shouldInclude = true;
-                                }
-
-                            }
-                        }
-                    }
-                }
-                if (shouldInclude) {
+                if (kv != null) {
                     cnt++;
                     if (foundProc == null) {
                         if (ss.isFullOutputSelected()) {
@@ -2210,7 +2043,7 @@ public class AppForm extends javax.swing.JFrame {
                         for (int t1 : new int[]{org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A}) {
                             Lookup l = new Lookup(ReverseMap.fromAddress(ip1), t1);
                             Record[] hosts = l.run();
-                            if(ArrayUtils.isNotEmpty(hosts)){
+                            if (ArrayUtils.isNotEmpty(hosts)) {
                                 hostNames.addAll(Arrays.asList(hosts));
                             }
 
@@ -2362,7 +2195,7 @@ public class AppForm extends javax.swing.JFrame {
 
                             }
                         },
-                                pn,
+                                new FindWorker(pn),
                                 true,
                                 null);
 
@@ -2501,7 +2334,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn,
+                    new FindWorker(pn),
                     checkNames,
                     foundProc)) {
                 return false;
@@ -2536,7 +2369,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn,
+                    new FindWorker(pn),
                     checkNames,
                     foundProc)) {
                 return false;
@@ -2571,7 +2404,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn,
+                    new FindWorker(pn),
                     checkNames,
                     foundProc)) {
                 return false;
@@ -2606,7 +2439,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
         } //</editor-fold>
@@ -2647,7 +2480,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
         } //</editor-fold>
@@ -2676,7 +2509,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
         } //</editor-fold>
@@ -2705,7 +2538,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
         } //</editor-fold>
@@ -2734,7 +2567,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
         } //</editor-fold>
@@ -2767,7 +2600,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 //</editor-fold>
@@ -2798,7 +2631,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
         } //</editor-fold>
@@ -2829,7 +2662,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
         } //</editor-fold>
@@ -2860,7 +2693,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -2895,7 +2728,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -2925,7 +2758,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -2957,7 +2790,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -2988,7 +2821,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3022,7 +2855,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3054,7 +2887,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3085,7 +2918,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3116,7 +2949,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3147,7 +2980,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3178,7 +3011,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3209,7 +3042,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3240,7 +3073,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3270,7 +3103,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3300,7 +3133,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3330,7 +3163,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3363,7 +3196,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3395,7 +3228,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3427,7 +3260,7 @@ public class AppForm extends javax.swing.JFrame {
                     return ret;
                 }
             },
-                    pn, checkNames, foundProc)) {
+                    new FindWorker(pn), checkNames, foundProc)) {
                 return false;
             }
 
@@ -3782,7 +3615,7 @@ public class AppForm extends javax.swing.JFrame {
                         return ret;
                     }
                 },
-                        searchSettings, true, foundProc)) {
+                        new FindWorker(searchSettings), true, foundProc)) {
 
                 }
 

@@ -27,6 +27,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
         restrictHeight(tfOption);
         restrictHeight(tfOptionValue);
         restrictHeight(tfSection);
+        restrictHeight(tfName);
 
     }
 
@@ -47,7 +48,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String getObjName() {
-        return null;
+        return checkBoxSelection(tfName);
     }
 
     @Override
@@ -85,6 +86,9 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
         tfSearchString = new javax.swing.JComboBox<>();
         jPanel9 = new javax.swing.JPanel();
         jpParams = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        tfName = new javax.swing.JComboBox<>();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         tfSection = new javax.swing.JComboBox<>();
@@ -121,6 +125,16 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
         tpSpecifyParameters.addTab("Everywhere", jpEverywhere);
 
         jpParams.setLayout(new javax.swing.BoxLayout(jpParams, javax.swing.BoxLayout.PAGE_AXIS));
+
+        jPanel6.setLayout(new javax.swing.BoxLayout(jPanel6, javax.swing.BoxLayout.LINE_AXIS));
+
+        jLabel5.setText("app name");
+        jPanel6.add(jLabel5);
+
+        tfName.setEditable(true);
+        jPanel6.add(tfName);
+
+        jpParams.add(jPanel6);
 
         jPanel3.setLayout(new javax.swing.BoxLayout(jPanel3, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -209,11 +223,13 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jpEverywhere;
@@ -221,6 +237,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
     private javax.swing.JLabel lbSearchString;
     private javax.swing.JRadioButton rbFullOutput;
     private javax.swing.JRadioButton rbShortOutput;
+    private javax.swing.JComboBox<String> tfName;
     private javax.swing.JComboBox<String> tfOption;
     private javax.swing.JComboBox<String> tfOptionValue;
     private javax.swing.JComboBox<String> tfSearchString;
@@ -260,6 +277,7 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
         Utils.Swing.setChoices(tfSection, choices);
         Utils.Swing.setChoices(tfOption, choices);
         Utils.Swing.setChoices(tfOptionValue, choices);
+        Utils.Swing.setChoices(tfName, choices);
 
     }
 
@@ -270,7 +288,8 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
                 : Utils.Swing.getChoices(
                         tfOption,
                         tfOptionValue,
-                        tfSection);
+                        tfSection,
+                        tfName);
     }
 
 }
