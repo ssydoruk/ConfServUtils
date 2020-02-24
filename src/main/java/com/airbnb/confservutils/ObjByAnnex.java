@@ -257,7 +257,6 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         cbIsRegex.setText("Regular expression");
         jPanel8.add(cbIsRegex);
 
-        cbCaseSensitive.setSelected(true);
         cbCaseSensitive.setText("Case sensitive");
         jPanel8.add(cbCaseSensitive);
 

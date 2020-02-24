@@ -112,11 +112,12 @@ public class FindWorker {
                     }
                 }
             }
+//            boolean shouldContinue=( ptName==null || nameMatched);
 
-            if (ptAll != null || otherNonNull) {
+            if (ptAll != null || ((ptName == null || nameMatched) && otherNonNull)) {
                 KeyValueCollection options;
                 options = props.getProperties(cfgObj);
-                String sectionFound = null;
+                String sectionName = null;
 
                 if (options == null && (ptAll == null || otherNonNull)) {
                     logger.debug("** no options. Object ignored");
@@ -126,19 +127,20 @@ public class FindWorker {
                     KeyValuePair el;
 
                     while (enumeration.hasMoreElements()) {
+                        sectionMatched = false;
                         el = enumeration.nextElement();
-
+                        sectionName = el.getStringKey();
                         if (ptAll != null) {
-                            if (matching(ptAll, el.getStringKey())) {
-                                sectionFound = el.getStringKey();
+                            if (matching(ptAll, sectionName)) {
+
                                 sectionMatched = true;
                             }
                         } else if (ptSection != null) {
-                            if (matching(ptSection, el.getStringKey())) {
-                                logger.debug("Section [" + el.getStringKey() + "] matched against " + ptSection);
-
-                                sectionFound = el.getStringKey();
+                            if (matching(ptSection, sectionName)) {
+                                logger.debug("Section [" + sectionName + "] matched against " + ptSection);
                                 sectionMatched = true;
+                            } else {
+                                continue;
                             }
                         }
 
@@ -174,7 +176,7 @@ public class FindWorker {
                                     }
                                 }
                                 if (keyMatched || valMatched) {
-                                    logger.debug("sect[" + el.getStringKey() + "] km[" + keyMatched + "] vm[" + valMatched + "] key[" + theOpt.getStringKey() + "] val[" + theOpt.getStringValue() + "]");
+                                    logger.debug("sect[" + sectionName + "] km[" + keyMatched + "] vm[" + valMatched + "] key[" + theOpt.getStringKey() + "] val[" + theOpt.getStringValue() + "]");
 
                                     if (ptAll != null) {
                                         addedValues.addPair(theOpt);
@@ -197,12 +199,12 @@ public class FindWorker {
 //                                }
 //                            }
                         }
-                        if (!addedValues.isEmpty() || (sectionFound != null && numTrue(nameMatched, sectionMatched, keyMatched, valMatched) >= numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null))) {
-                            String sect = (sectionFound != null) ? sectionFound : el.getStringKey();
-                            KeyValueCollection list = kv.getList(sect);
+                        if (!addedValues.isEmpty() || (numTrue(nameMatched, sectionMatched, keyMatched, valMatched)
+                                >= numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null))) {
+                            KeyValueCollection list = kv.getList(sectionName);
                             if (list == null) {
                                 list = new KeyValueCollection();
-                                kv.addList(sect, list);
+                                kv.addList(sectionName, list);
                             }
                             list.addAll(Arrays.asList(addedValues.toArray()));
 //                                    kv.addObject(el.getStringKey(), addedValues);
@@ -217,7 +219,10 @@ public class FindWorker {
                 KeyValueCollection ret = null;
 
                 ret
-                        = (numTrue(nameMatched, sectionMatched, keyMatched, valMatched) >= numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null)) ? kv : null;
+                        = (!kv.isEmpty()
+                        || (ptName != null && nameMatched && numTrue(ptSection != null, ptKey != null, ptVal != null) == 0))
+                        ? kv
+                        : null;
 
                 logger.debug(" ** match " + ((ret == null) ? "NOT" : "") + " found");
 

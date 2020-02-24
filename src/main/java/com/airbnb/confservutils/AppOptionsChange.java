@@ -223,7 +223,6 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         cbIsRegex.setText("Regular expression");
         jPanel8.add(cbIsRegex);
 
-        cbCaseSensitive.setSelected(true);
         cbCaseSensitive.setText("Case sensitive");
         jPanel8.add(cbCaseSensitive);
 
