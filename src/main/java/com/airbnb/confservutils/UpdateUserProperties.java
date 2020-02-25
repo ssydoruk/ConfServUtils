@@ -30,11 +30,8 @@ import org.apache.logging.log4j.Logger;
 public class UpdateUserProperties {
 
     static String uncommented(String currentValue) {
-        if (currentValue.startsWith(BACKUP_PREFIX)) {
-            return currentValue.substring(BACKUP_PREFIX.length());
-        } else {
-            return currentValue;
-        }
+
+        return StringUtils.stripStart(currentValue, BACKUP_PREFIX);
 
     }
 

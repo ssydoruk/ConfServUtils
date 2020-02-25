@@ -1295,190 +1295,10 @@ public class AppForm extends javax.swing.JFrame {
     }//GEN-LAST:event_miAnnexSearchReplaceActionPerformed
 
     private void miAllORSsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAllORSsActionPerformed
-        upd = null;
-        yesToAll = false;
-        FindObject objName = getObjName(CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
-
-        if (objName == null) {
-            return;
-        }
-
-        if (connectToConfigServer()) {
-
-            ISearchSettings seearchSettings = new ISearchSettings() {
-                @Override
-                public boolean isCaseSensitive() {
-                    return objName.isCaseSensitive();
-                }
-
-                @Override
-                public boolean isRegex() {
-                    return objName.isRegex();
-                }
-
-                @Override
-                public boolean isFullOutputSelected() {
-                    return false;
-                }
-
-                @Override
-                public boolean isSearchAll() {
-                    return false;
-                }
-
-                @Override
-                public String getAllSearch() {
-                    return null;
-                }
-
-                @Override
-                public String getSection() {
-                    if (objName.isRegex()) {
-                        return "^cluster$";
-                    } else {
-                        return "cluster";
-                    }
-                }
-
-                @Override
-                public String getObjName() {
-                    return objName.getName();
-                }
-
-                @Override
-                public String getOption() {
-                    return null;
-                }
-
-                @Override
-                public String getValue() {
-                    return null;
-                }
-
-            };
-
-            class AUpdateSettings implements IUpdateSettings {
-
-                @Override
-                public boolean isMakeBackup() {
-                    return true;
-                }
-
-                @Override
-                public IUpdateSettings.UpdateAction getUpdateAction() {
-                    return IUpdateSettings.UpdateAction.RENAME_SECTION;
-                }
-
-                @Override
-                public String replaceWith(String currentValue) {
-                    if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
-                        return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
-                    } else {
-                        return currentValue;
-                    }
-
-                }
-
-                @Override
-                public String getReplaceKey(String currentValue) {
-                    return UpdateUserProperties.uncommented(currentValue);
-
-                }
-
-                @Override
-                public Collection<UserProperties> getAddedKVP() {
-                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                }
-            }
-
-            AUpdateSettings us = new AUpdateSettings();
-
-            ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
-                @Override
-                public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
-//                    kv = getAllValuesInSection(obj, seearchSettings);
-                    kv = new KeyValueCollection();
-                    kv.addList(seearchSettings.getSection(), ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection()));
-//                            ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection());
-                    logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
-
-//                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
-                    if (yesToAll) {
-                        upd.updateObj(us, obj, kv, configServerManager);
-                    } else {
-                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
-                        String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
-                        switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
-                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                        )) {
-                            case YES_TO_ALL:
-                                if (JOptionPane.showConfirmDialog(theForm,
-                                        "Are you sure you want to modify this and all following found objects?",
-                                        "Please confirm",
-                                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                                    yesToAll = true;
-                                    upd.updateObj(us, obj, kv, configServerManager);
-                                    break;
-                                }
-                                break;
-
-                            case JOptionPane.YES_OPTION:
-                                upd.updateObj(us, obj, kv, configServerManager);
-                                break;
-
-                            case JOptionPane.NO_OPTION:
-                                break;
-
-                            case JOptionPane.CANCEL_OPTION:
-                                return false;
-                        }
-                    }
-
-                    return true;
-                }
-
-            };
-
-            CfgObjectType value = CfgObjectType.CFGTransaction;
-
-            try {
-
-                CfgTransactionQuery query = new CfgTransactionQuery();
-//                setQueryNameFilter(query, objName.getName(), objName.isRegex());
-                query.setObjectType(CfgTransactionType.CFGTRTList);
-
-                if (findObjects(
-                        query,
-                        CfgTransaction.class,
-                        new IKeyValueProperties() {
-                    @Override
-                    public KeyValueCollection getProperties(CfgObject obj) {
-                        return ((CfgTransaction) obj).getUserProperties();
-                    }
-
-                    @Override
-                    public Collection<String> getName(CfgObject obj) {
-                        Collection<String> ret = new ArrayList<>();
-
-                        return ret;
-                    }
-                },
-                        new FindWorker(seearchSettings), false, foundProc)) {
-
-                }
-
-            } catch (ConfigException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InterruptedException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-        }
+        modifyCluster(false);
     }//GEN-LAST:event_miAllORSsActionPerformed
 
-    private void miOneORSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miOneORSActionPerformed
+    private void modifyCluster(boolean oneORS) {
         upd = null;
         yesToAll = false;
 
@@ -1546,6 +1366,9 @@ public class AppForm extends javax.swing.JFrame {
 
                 private boolean oneActive = false;
 
+                public AUpdateSettings() {
+                }
+
                 @Override
                 public boolean isMakeBackup() {
                     return true;
@@ -1553,21 +1376,25 @@ public class AppForm extends javax.swing.JFrame {
 
                 @Override
                 public IUpdateSettings.UpdateAction getUpdateAction() {
-                    return UpdateAction.RENAME_SECTION;
+                    return IUpdateSettings.UpdateAction.RENAME_SECTION;
                 }
 
                 @Override
                 public String replaceWith(String currentValue) {
-                    if (!oneActive) {
-                        oneActive = true;
-                        if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
-                            return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
-                        } else {
-                            return currentValue;
+                    if (oneORS) {
+                        if (!oneActive) {
+                            oneActive = true;
+                            if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
+                                return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
+                            } else {
+                                return currentValue;
+                            }
                         }
+                        return currentValue;
+                    } else {
+                        return UpdateUserProperties.uncommented(currentValue);
                     }
-                    return currentValue;
-
+                    
                 }
 
                 public void setOneActive(boolean oneActive) {
@@ -1576,15 +1403,19 @@ public class AppForm extends javax.swing.JFrame {
 
                 @Override
                 public String getReplaceKey(String currentValue) {
-                    if (!oneActive) {
-                        oneActive = true;
-                        if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
-                            return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
-                        } else {
-                            return currentValue;
+                    if (oneORS) {
+                        if (!oneActive) {
+                            oneActive = true;
+                            if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
+                                return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
+                            } else {
+                                return currentValue;
+                            }
                         }
+                        return UpdateUserProperties.getCommentedKey(currentValue);
+                    } else {
+                        return UpdateUserProperties.uncommented(currentValue);
                     }
-                    return UpdateUserProperties.getCommentedKey(currentValue);
                 }
 
                 @Override
@@ -1666,10 +1497,12 @@ public class AppForm extends javax.swing.JFrame {
 
                     @Override
                     public Collection<String> getName(CfgObject obj) {
-                        return new ArrayList<>();
+                        Collection<String> ret = new ArrayList<>();
+                        ret.add(((CfgTransaction) obj).getName());
+                        return ret;
                     }
                 },
-                        new FindWorker(seearchSettings), false, foundProc)) {
+                        new FindWorker(seearchSettings), true, foundProc)) {
 
                 }
 
@@ -1680,6 +1513,11 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         }
+    }
+
+
+    private void miOneORSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miOneORSActionPerformed
+        modifyCluster(true);
     }//GEN-LAST:event_miOneORSActionPerformed
 
     private void miBufferingOffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miBufferingOffActionPerformed

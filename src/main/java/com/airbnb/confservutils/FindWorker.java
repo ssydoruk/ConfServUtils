@@ -20,33 +20,33 @@ import org.apache.logging.log4j.LogManager;
  * @author stepan_sydoruk
  */
 public class FindWorker {
-
+    
     private final ISearchSettings ss;
-
+    
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();
-
+    
     public boolean isFullOutputSelected() {
         return ss.isFullOutputSelected();
     }
-
+    
     public FindWorker(ISearchSettings ss) {
         this.ss = ss;
         initSearch();
     }
-
+    
     private Pattern ptAll = null;
     private Pattern ptSection = null;
     private Pattern ptKey = null;
     private Pattern ptVal = null;
     private Pattern ptName = null;
-
+    
     private void initSearch() {
         int flags = ((ss.isRegex()) ? 0 : Pattern.LITERAL) | ((ss.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
         String objName = ss.getObjName();
         String section = ss.getSection();
         String option = ss.getOption();
         String val = ss.getValue();
-
+        
         if (ss.isSearchAll()) {
             ptAll = (ss.isSearchAll() && ss.getAllSearch() != null ? Pattern.compile(ss.getAllSearch(), flags) : null);
         } else {
@@ -54,7 +54,7 @@ public class FindWorker {
             ptKey = (option == null) ? null : Pattern.compile(option, flags);
             ptVal = (val == null) ? null : Pattern.compile(val, flags);
             ptName = (objName == null) ? null : Pattern.compile(objName, flags);
-
+            
         }
     }
 
@@ -68,14 +68,14 @@ public class FindWorker {
      */
     public KeyValueCollection matchConfigObject(CfgObject cfgObj, IKeyValueProperties props, boolean checkNames) {
         KeyValueCollection kv = new KeyValueCollection();
-
+        
         if (ptSection == null
                 && ptKey == null
                 && ptVal == null
                 && ptName == null
                 && ptAll == null) {
             logger.debug("** No criteria; object added");
-
+            
             return new KeyValueCollection(); // no search parameters means we return all objects
         } else {
             boolean nameMatched = false;
@@ -83,7 +83,7 @@ public class FindWorker {
             boolean includeKVP = false;
             boolean keyMatched = false;
             boolean valMatched = false;
-
+            
             boolean otherNonNull = ptSection != null || ptKey != null || ptVal != null;
 
             // matching object name(s)
@@ -98,15 +98,16 @@ public class FindWorker {
                 } else {
                     if (ptName != null) {
                         for (String string : props.getName(cfgObj)) {
+                            logger.trace("checking name of obj[" + cfgObj.getObjectType() + "] path[" + cfgObj.getObjectPath() + "] name[" + string + "]");
                             if (matching(ptName, string)) {
                                 logger.debug("Name [" + string + "] matched against " + ptName);
                                 nameMatched = true;
-
+                                
                             }
                         }
                         if (!nameMatched) { // name specified but none matches
                             logger.debug("** name specified but not matched. Object ignored");
-
+                            
                             return null;
                         }
                     }
@@ -118,21 +119,21 @@ public class FindWorker {
                 KeyValueCollection options;
                 options = props.getProperties(cfgObj);
                 String sectionName = null;
-
+                
                 if (options == null && (ptAll == null || otherNonNull)) {
                     logger.debug("** no options. Object ignored");
                     return null; // rule 3)
                 } else {
                     Enumeration<KeyValuePair> enumeration = options.getEnumeration();
                     KeyValuePair el;
-
+                    
                     while (enumeration.hasMoreElements()) {
                         sectionMatched = false;
                         el = enumeration.nextElement();
                         sectionName = el.getStringKey();
                         if (ptAll != null) {
                             if (matching(ptAll, sectionName)) {
-
+                                
                                 sectionMatched = true;
                             }
                         } else if (ptSection != null) {
@@ -143,7 +144,7 @@ public class FindWorker {
                                 continue;
                             }
                         }
-
+                        
                         KeyValueCollection addedValues = new KeyValueCollection();
                         Object value = el.getValue();
                         if (value instanceof KeyValueCollection) {
@@ -153,9 +154,9 @@ public class FindWorker {
                             while (optVal.hasMoreElements()) {
                                 keyMatched = false;
                                 valMatched = false;
-
+                                
                                 theOpt = optVal.nextElement();
-
+                                
                                 if (ptAll != null) {
                                     if (matching(ptAll, theOpt.getStringKey())) {
                                         keyMatched = true;
@@ -177,7 +178,7 @@ public class FindWorker {
                                 }
                                 if (keyMatched || valMatched) {
                                     logger.debug("sect[" + sectionName + "] km[" + keyMatched + "] vm[" + valMatched + "] key[" + theOpt.getStringKey() + "] val[" + theOpt.getStringValue() + "]");
-
+                                    
                                     if (ptAll != null) {
                                         addedValues.addPair(theOpt);
                                     } else {
@@ -217,21 +218,21 @@ public class FindWorker {
                 return (nameMatched || sectionMatched || valMatched || keyMatched) ? kv : null;
             } else {
                 KeyValueCollection ret = null;
-
+                
                 ret
                         = (!kv.isEmpty()
                         || (ptName != null && nameMatched && numTrue(ptSection != null, ptKey != null, ptVal != null) == 0))
                         ? kv
                         : null;
-
+                
                 logger.debug(" ** match " + ((ret == null) ? "NOT" : "") + " found");
-
+                
                 return ret;
             }
         }
-
+        
     }
-
+    
     static int numTrue(boolean... bools) {
         int ret = 0;
 
@@ -240,7 +241,7 @@ public class FindWorker {
             ret += (b ? 1 : 0);
         }
         return ret;
-
+        
     }
-
+    
 }
