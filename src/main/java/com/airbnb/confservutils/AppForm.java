@@ -1818,12 +1818,12 @@ public class AppForm extends javax.swing.JFrame {
                     cnt++;
                     if (foundProc == null) {
                         if (ss.isFullOutputSelected()) {
-                            buf.append(cfgObj.toString()).append("\n");
+                            buf.append("----> path: ").append(cfgObj.getObjectPath()).append(" ").append(cfgObj.toString()).append("\n");
                         } else {
                             Object[] names = props.getName(cfgObj).toArray();
-                            buf.append("\"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: ").append(cfgObj.getObjectDbid());
+                            buf.append("----> \"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: ").append(cfgObj.getObjectDbid());
                             if (names.length > 1) {
-                                buf.append('\t');
+                                buf.append("\n\t");
                                 int added = 1;
                                 for (int i = 1; i < names.length; i++) {
                                     if (added > 1) {
