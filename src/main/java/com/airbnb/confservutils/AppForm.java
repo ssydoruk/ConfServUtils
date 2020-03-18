@@ -1235,7 +1235,7 @@ public class AppForm extends javax.swing.JFrame {
 //                showYesNoPanel(pn.getSearchSummary());
                 for (CfgObjectType value : pn.getSelectedObjectTypes()) {
                     try {
-                        if (!doTheSearch(value, pn, false, false, new ICfgObjectFoundProc() {
+                        if (!doTheSearch(value, pn, false, true, new ICfgObjectFoundProc() {
                             @Override
                             public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
                                 logger.info("found " + obj.toString() + "\n kv: " + kv.toString());

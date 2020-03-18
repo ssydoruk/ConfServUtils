@@ -323,8 +323,8 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         //        for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
         //            values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
         //        }
-        kvpEditor.setData(new Object[]{"Section", "Key", "Value"},
-                values
+        kvpEditor.setData(new Object[]{"Section", "Key", "Value", "Action"},
+                values, 3
         );
         kvpEditor.doShow();
         ArrayList<Object[]> data = kvpEditor.getData();

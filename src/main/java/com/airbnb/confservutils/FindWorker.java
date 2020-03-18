@@ -120,9 +120,11 @@ public class FindWorker {
                 options = props.getProperties(cfgObj);
                 String sectionName = null;
 
-                if (options == null && (ptAll == null || otherNonNull)) {
-                    logger.debug("** no options. Object ignored");
-                    return null; // rule 3)
+                if (options == null) {
+                    if (ptAll == null || otherNonNull) {
+                        logger.debug("** no options. Object ignored");
+                        return null; // rule 3)
+                    }
                 } else {
                     Enumeration<KeyValuePair> enumeration = options.getEnumeration();
                     KeyValuePair el;

@@ -167,6 +167,7 @@ public class UpdateUserProperties {
         ret.put(CfgObjectType.CFGTransaction, "deltaTransaction");
         ret.put(CfgObjectType.CFGScript, "deltaScript");
         ret.put(CfgObjectType.CFGApplication, "deltaApplication");
+        ret.put(CfgObjectType.CFGAgentLogin, "deltaAgentLogin");
 
         return ret;
     }

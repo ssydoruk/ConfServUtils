@@ -20,6 +20,7 @@ class UserProperties {
     private final String section;
     private final String value;
 
+ 
     public UserProperties(String _section, String _key, String _value) {
         section = _section;
         key = _key;
