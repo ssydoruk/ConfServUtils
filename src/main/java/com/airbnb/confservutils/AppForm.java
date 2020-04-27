@@ -196,7 +196,7 @@ public class AppForm extends javax.swing.JFrame {
     private ValuesEditor confServEditor;
 
     private String profile;
-    private static final int YES_TO_ALL = 100;
+    public static final int YES_TO_ALL = 100;
 
     /**
      * Creates new form AppForm
@@ -365,6 +365,7 @@ public class AppForm extends javax.swing.JFrame {
         jMenu4 = new javax.swing.JMenu();
         miBufferingOff = new javax.swing.JMenuItem();
         miBufferingOn = new javax.swing.JMenuItem();
+        jmLoadStrategy = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -607,6 +608,14 @@ public class AppForm extends javax.swing.JFrame {
         jMenu4.add(miBufferingOn);
 
         jMenu2.add(jMenu4);
+
+        jmLoadStrategy.setText("Load ORS strategy");
+        jmLoadStrategy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmLoadStrategyActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jmLoadStrategy);
 
         jMenuBar1.add(jMenu2);
 
@@ -1184,7 +1193,7 @@ public class AppForm extends javax.swing.JFrame {
     InfoPanel infoDialog = null;
     ObjectFound pn1 = null;
 
-    private int showYesNoPanel(String infoMsg, String msg) {
+    public int showYesNoPanel(String infoMsg, String msg) {
 
         if (infoDialog == null) {
             pn1 = new ObjectFound();
@@ -1394,7 +1403,7 @@ public class AppForm extends javax.swing.JFrame {
                     } else {
                         return UpdateUserProperties.uncommented(currentValue);
                     }
-                    
+
                 }
 
                 public void setOneActive(boolean oneActive) {
@@ -1647,6 +1656,26 @@ public class AppForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_miAppOptionsReplaceActionPerformed
 
+    RequestDialog loadORSStrategy;
+    LoadORSStrategy panelLoadORSStrategy;
+
+
+    private void jmLoadStrategyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmLoadStrategyActionPerformed
+        yesToAll = false;
+        upd = null;
+
+        if (loadORSStrategy == null) {
+            panelLoadORSStrategy = new LoadORSStrategy(this);
+            loadORSStrategy = new RequestDialog(this, panelLoadORSStrategy, (JMenuItem) evt.getSource());
+        }
+
+        if (connectToConfigServer()) {
+            if (loadORSStrategy.doShow("Load ORS strategies on routing points", panelLoadORSStrategy)) {
+                panelLoadORSStrategy.doUpdate(configServerManager);
+            }
+        }
+    }//GEN-LAST:event_jmLoadStrategyActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancel;
     private javax.swing.JButton btClearOutput;
@@ -1674,6 +1703,7 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JMenu jmExit;
+    private javax.swing.JMenuItem jmLoadStrategy;
     private javax.swing.JPanel jpConfServ;
     private javax.swing.JPanel jpOutput;
     private javax.swing.JMenuItem miAllORSs;
@@ -1793,7 +1823,7 @@ public class AppForm extends javax.swing.JFrame {
      * @throws ConfigException
      * @throws InterruptedException
      */
-    private <T extends CfgObject> boolean findObjects(
+    public <T extends CfgObject> boolean findObjects(
             CfgQuery q,
             Class< T> cls,
             IKeyValueProperties props,
@@ -3170,7 +3200,7 @@ public class AppForm extends javax.swing.JFrame {
         return ret;
     }
 
-    private FindObject getObjName(String objClass) {
+    public FindObject getObjName(String objClass) {
         if (getObjName == null) {
             findObj = new FindObject();
             getObjName = new RequestDialog(this, findObj);
@@ -3562,6 +3592,13 @@ public class AppForm extends javax.swing.JFrame {
             buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             buttonPanel.setSizeConstraint(ButtonPanel.NO_LESS_THAN); // since the checkbox is quite wide, we don't want all of them have the same size.
             return buttonPanel;
+        }
+
+        public boolean doShow(String title, IConfigPanel onShow) {
+            if (onShow != null) {
+                onShow.showProc();
+            }
+            return doShow(title);
         }
 
         public boolean doShow(String Title) {
