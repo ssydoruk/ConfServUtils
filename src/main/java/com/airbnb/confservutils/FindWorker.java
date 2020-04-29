@@ -5,7 +5,6 @@
  */
 package com.airbnb.confservutils;
 
-import Utils.Pair;
 import static Utils.StringUtils.matching;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;

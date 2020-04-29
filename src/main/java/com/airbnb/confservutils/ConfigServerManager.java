@@ -22,19 +22,13 @@ import com.genesyslab.platform.configuration.protocol.confserver.events.EventObj
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
-import javax.swing.SwingWorker;
 import org.apache.logging.log4j.Logger;
 
 /**

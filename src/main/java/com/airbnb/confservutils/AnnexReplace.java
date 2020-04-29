@@ -75,8 +75,6 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
             public void itemStateChanged(ItemEvent e) {
                 
                 AbstractButton aButton = (AbstractButton) e.getSource();
-                ButtonModel aModel = aButton.getModel();
-                
                 rbActionChanged(aButton.getModel().isSelected(), aButton);
                 
             }

@@ -6,7 +6,6 @@
 package com.airbnb.confservutils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import javax.swing.DefaultComboBoxModel;
 
 /**
