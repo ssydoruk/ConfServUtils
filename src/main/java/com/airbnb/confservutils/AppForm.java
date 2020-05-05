@@ -1076,66 +1076,107 @@ public class AppForm extends javax.swing.JFrame {
 
     private void runBussAttrPerformed(ActionEvent evt) {
         if (connectToConfigServer()) {
+
             BussAttr pn = (BussAttr) bussAttr.getContentPanel();
             try {
                 requestOutput("Request: " + pn.getSearchSummary());
 
+//<editor-fold defaultstate="collapsed" desc="iSearchSettings">
+                ISearchSettings seearchSettings = new ISearchSettings() {
+                    @Override
+                    public boolean isCaseSensitive() {
+                        return pn.isCaseSensitive();
+                    }
+
+                    @Override
+                    public boolean isRegex() {
+                        return pn.isRegex();
+                    }
+
+                    @Override
+                    public boolean isFullOutputSelected() {
+                        return pn.isFullOutputSelected();
+                    }
+
+                    @Override
+                    public boolean isSearchAll() {
+                        return false;
+                    }
+
+                    @Override
+                    public String getAllSearch() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getSection() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getObjName() {
+                        return (pn.getName() == null) ? null : pn.getName();
+                    }
+
+                    @Override
+                    public String getOption() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return null;
+                    }
+
+                };
+//</editor-fold>
+
                 if (pn.iscbAttrSelected()) {
                     CfgEnumeratorQuery query = new CfgEnumeratorQuery(configServerManager.getService());
 
-                    Collection<CfgEnumerator> execute = query.execute();
-                    execQuery(query, new ISearchNamedProperties() {
+                    findObjects(
+                            query,
+                            CfgEnumerator.class,
+                            new IKeyValueProperties() {
                         @Override
-                        public String[] getNamedProperties(CfgObject obj) {
-                            CfgEnumerator o = (CfgEnumerator) obj;
-                            String[] ret = new String[3];
-                            ret[0] = o.getDescription();
-                            ret[1] = o.getDisplayName();
-                            ret[2] = o.getName();
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return ((CfgEnumerator) obj).getUserProperties();
+                        }
+
+                        @Override
+                        public Collection<String> getName(CfgObject obj) {
+                            Collection<String> ret = new ArrayList<>();
+                            ret.add(((CfgEnumerator) obj).getName());
+                            ret.add(((CfgEnumerator) obj).getDescription());
+                            ret.add(((CfgEnumerator) obj).getDisplayName());
                             return ret;
                         }
-
-                        @Override
-                        public String getName(CfgObject obj) {
-                            return ((CfgEnumerator) obj).getDisplayName();
-                        }
-
-                        @Override
-                        public String getShortPrint(CfgObject obj) {
-                            CfgEnumerator o = (CfgEnumerator) obj;
-                            return "Business Attribute [" + o.getDisplayName() + "] DBID: " + o.getDBID();
-                        }
                     },
-                            pn);
+                            new FindWorker(seearchSettings), true, null);
 
                 }
                 if (pn.iscbAttrValueSelected()) {
                     CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery(configServerManager.getService());
 
-                    execQuery(query, new ISearchNamedProperties() {
+                    findObjects(
+                            query,
+                            CfgEnumeratorValue.class,
+                            new IKeyValueProperties() {
                         @Override
-                        public String[] getNamedProperties(CfgObject obj) {
-                            CfgEnumeratorValue o = (CfgEnumeratorValue) obj;
-                            String[] ret = new String[3];
-                            ret[0] = o.getDescription();
-                            ret[1] = o.getDisplayName();
-                            ret[2] = o.getName();
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return ((CfgEnumeratorValue) obj).getUserProperties();
+                        }
 
+                        @Override
+                        public Collection<String> getName(CfgObject obj) {
+                            Collection<String> ret = new ArrayList<>();
+                            ret.add(((CfgEnumeratorValue) obj).getName());
+                            ret.add(((CfgEnumeratorValue) obj).getDescription());
+                            ret.add(((CfgEnumeratorValue) obj).getDisplayName());
                             return ret;
                         }
-
-                        @Override
-                        public String getName(CfgObject obj) {
-                            return ((CfgEnumeratorValue) obj).getDisplayName();
-                        }
-
-                        @Override
-                        public String getShortPrint(CfgObject obj) {
-                            CfgEnumeratorValue o = (CfgEnumeratorValue) obj;
-                            return "BI Value [" + o.getDisplayName() + "] DBID: " + o.getDBID();
-                        }
                     },
-                            pn);
+                            new FindWorker(seearchSettings), true, null);
 
                 }
 
