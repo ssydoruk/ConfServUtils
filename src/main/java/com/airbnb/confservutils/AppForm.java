@@ -495,6 +495,7 @@ public class AppForm extends javax.swing.JFrame {
         jpOutput.setBorder(javax.swing.BorderFactory.createTitledBorder("Output window"));
         jpOutput.setLayout(new java.awt.BorderLayout());
 
+        taOutput.setEditable(false);
         taOutput.setColumns(20);
         taOutput.setRows(5);
         jScrollPane1.setViewportView(taOutput);
