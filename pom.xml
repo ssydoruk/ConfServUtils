@@ -47,32 +47,32 @@
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>comappblock</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
         </dependency>
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>system</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
         </dependency>
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>protocol</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
         </dependency>
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>kvlists</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
         </dependency>
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>connection</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
         </dependency>
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>configurationprotocol</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
             <type>jar</type>
         </dependency>        
         <dependency>
@@ -88,18 +88,40 @@
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>commons</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
             <artifactId>commonsappblock</artifactId>
-            <version>853.2.9</version>
+            <version>900.7.5</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
-            <artifactId>netty</artifactId>
-            <version>3.10.6.Final</version>
+            <artifactId>netty-bom</artifactId>
+            <version>4.1.49.Final</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport</artifactId>
+            <version>4.1.49.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler-proxy</artifactId>
+            <version>4.1.48.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative-boringssl-static</artifactId>
+            <version>2.0.30.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative</artifactId>
+            <version>2.0.30.Final</version>
+            <classifier>osx-x86_64</classifier>
         </dependency>
     </dependencies>
     <properties>
