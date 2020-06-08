@@ -116,11 +116,6 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
-        jlRPs.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jScrollPane1.setViewportView(jlRPs);
 
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -140,7 +135,6 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
         jpORSStrategies.setBorder(javax.swing.BorderFactory.createTitledBorder("ORS strategies"));
         jpORSStrategies.setLayout(new javax.swing.BoxLayout(jpORSStrategies, javax.swing.BoxLayout.PAGE_AXIS));
 
-        jcbORSStrategies.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jpORSStrategies.add(jcbORSStrategies);
 
         jbSelectStrategies.setText("Select...");
@@ -279,7 +273,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
             @Override
             public Collection<UserProperties> getAddedKVP() {
-                 ArrayList<UserProperties> prop = new ArrayList<>();
+                ArrayList<UserProperties> prop = new ArrayList<>();
                 prop.add(new UserProperties("Orchestration", "application", "script:" + selApp));
                 return prop;
             }
@@ -570,8 +564,12 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
     @Override
     public void showProc() {
-        loadStrategies(true);
-        loadPRs(true);
+        if (jcbORSStrategies.getModel() != null && jcbORSStrategies.getModel().getSize() == 0) {
+            loadStrategies(true);
+        }
+        if (jlRPs.getModel() != null && jlRPs.getModel().getSize() == 0) {
+            loadPRs(true);
+        }
     }
 
     private void adjustBorderTitle(JPanel thePanel, String sBaseTitle, ArrayList<ComboItem> r) {
