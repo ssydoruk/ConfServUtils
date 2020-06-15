@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../src/main/java/com/airbnb/confservutils"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {}
+}

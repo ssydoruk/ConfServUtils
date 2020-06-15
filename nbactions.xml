@@ -7,12 +7,11 @@
             </packagings>
             <goals>
                 <goal>process-classes</goal>
-                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Dlog4j.configurationFile=/Users/stepan_sydoruk/GCTI/etc/csUtilsDebug.xml -classpath %classpath com.airbnb.confservutils.Main --gui-profile=/Users/stepan_sydoruk/GCTI/var/confUtil.txt</exec.args>
+                <exec.args>-Dlog4j.configurationFile=/Users/stepan_sydoruk/GCTI/etc/csUtilsDebug.xml -classpath %classpath com.airbnb.confservutils.Main --gui-profile /Users/stepan_sydoruk/GCTI/var/confUtil.txt</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>.</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -22,13 +21,12 @@
             </packagings>
             <goals>
                 <goal>process-classes</goal>
-                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
             </goals>
             <properties>
-                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -Dlog4j.configurationFile=/Users/stepan_sydoruk/GCTI/etc/csUtilsDebug.xml -classpath %classpath com.airbnb.confservutils.Main --gui-profile=/Users/stepan_sydoruk/GCTI/var/confUtil.txt</exec.args>
+                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -Dlog4j.configurationFile=/Users/stepan_sydoruk/GCTI/etc/csUtilsDebug.xml -classpath %classpath com.airbnb.confservutils.Main --gui-profile /Users/stepan_sydoruk/GCTI/var/confUtil.txt</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
-                <exec.workingdir>.</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -38,12 +36,11 @@
             </packagings>
             <goals>
                 <goal>process-classes</goal>
-                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Dlog4j.configurationFile=/Users/stepan_sydoruk/GCTI/etc/csUtilsDebug.xml -classpath %classpath ${packageClassName} --gui-profile=/Users/stepan_sydoruk/GCTI/var/confUtil.txt</exec.args>
+                <exec.args>-Dlog4j.configurationFile=/Users/stepan_sydoruk/GCTI/etc/csUtilsDebug.xml -classpath %classpath com.airbnb.confservutils.Main --gui-profile /Users/stepan_sydoruk/GCTI/var/confUtil.txt</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>.</exec.workingdir>
             </properties>
         </action>
     </actions>

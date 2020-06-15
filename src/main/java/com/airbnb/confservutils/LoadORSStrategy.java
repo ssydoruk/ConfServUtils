@@ -15,10 +15,12 @@ import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
+import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
 import com.jidesoft.swing.CheckBoxListSelectionModel;
+import java.awt.HeadlessException;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -232,7 +234,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
     }
 
     boolean yesToAll;
-    UpdateUserProperties upd = null;
+    UpdateCFGObjectProcessor upd = null;
 
     void doUpdate(ConfigServerManager configServerManager) {
         this.configServerManager = configServerManager;
@@ -281,7 +283,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
         AUpdateSettings us = new AUpdateSettings();
 
-        upd = new UpdateUserProperties(configServerManager, CfgObjectType.CFGDN, theForm);
+        upd = new UpdateCFGObjectProcessor(configServerManager, CfgObjectType.CFGDN, theForm);
 //        upd.setCustomKVPProc(new UpdateUserProperties.ICustomKVP() {
 //            @Override
 //            public KeyValueCollection getCustomKVP(CfgObject _obj) {
@@ -297,45 +299,52 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
             KeyValueCollection kv = new KeyValueCollection();
 
-            if (yesToAll) {
-                us.setOneActive(false);
-                upd.updateObj(us, (CfgObject) selDN.getObj(), null, configServerManager);
-            } else {
-                us.setOneActive(false);
+            try {
+                if (yesToAll) {
+                    us.setOneActive(false);
+                    upd.updateObj(us, (CfgObject) selDN.getObj(), null, configServerManager);
+                } else {
+                    us.setOneActive(false);
 //                upd = new UpdateUserProperties(configServerManager, CfgObjectType.CFGDN, theForm);
-                String estimateUpdateObj = upd.estimateUpdateObj(us, obj, null, configServerManager);
-                switch (theForm.showYesNoPanel("Load ORS strategy on DN", "Object " + (i + 1) + " of matched " + selectedIndices.length
-                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                )) {
-                    case AppForm.YES_TO_ALL:
-                        if (JOptionPane.showConfirmDialog(theForm,
-                                "Are you sure you want to modify this and all following found objects?",
-                                "Please confirm",
-                                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                    String estimateUpdateObj = upd.estimateUpdateObj(us, obj, null, configServerManager);
+                    switch (theForm.showYesNoPanel("Load ORS strategy on DN", "Object " + (i + 1) + " of matched " + selectedIndices.length
+                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                    )) {
+                        case AppForm.YES_TO_ALL:
+                            if (JOptionPane.showConfirmDialog(theForm,
+                                    "Are you sure you want to modify this and all following found objects?",
+                                    "Please confirm",
+                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
-                            yesToAll = true;
+                                yesToAll = true;
+                                us.setOneActive(false);
+                                upd.updateObj(us, obj, kv, configServerManager);
+                                break;
+                            }
+                            break;
+
+                        case JOptionPane.YES_OPTION:
                             us.setOneActive(false);
                             upd.updateObj(us, obj, kv, configServerManager);
                             break;
-                        }
-                        break;
 
-                    case JOptionPane.YES_OPTION:
-                        us.setOneActive(false);
-                        upd.updateObj(us, obj, kv, configServerManager);
-                        break;
+                        case JOptionPane.NO_OPTION:
+                            break;
 
-                    case JOptionPane.NO_OPTION:
-                        break;
-
-                    case JOptionPane.CANCEL_OPTION:
-                        shouldStop = true;
-                        break;
+                        case JOptionPane.CANCEL_OPTION:
+                            shouldStop = true;
+                            break;
+                    }
                 }
-            }
-            if (shouldStop) {
-                break;
+                if (shouldStop) {
+                    break;
+                }
+            } catch (ProtocolException protocolException) {
+                theForm.showError("Exception while updating: " + protocolException.getMessage());
+
+            } catch (HeadlessException headlessException) {
+                theForm.showError("Exception while updating: " + headlessException.getMessage());
             }
         }
 

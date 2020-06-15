@@ -8,14 +8,25 @@ package com.airbnb.confservutils;
 import Utils.Pair;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaApplication;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.collections.ValueType;
+import com.genesyslab.platform.commons.protocol.Message;
+import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttribute;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeReference;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionClass;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionObject;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgTypeMask;
+import com.genesyslab.platform.configuration.protocol.metadata.ICfgClassOperationalInfo;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,9 +38,9 @@ import org.apache.logging.log4j.Logger;
  *
  * @author stepan_sydoruk
  */
-public class UpdateUserProperties {
+public class UpdateCFGObjectProcessor {
 
-    static String uncommented(String currentValue) {
+    public static String uncommented(String currentValue) {
 
         return StringUtils.stripStart(currentValue, BACKUP_PREFIX);
 
@@ -38,12 +49,17 @@ public class UpdateUserProperties {
     private final CfgObjectType objType;
     private final ConfigServerManager cfgManager;
     private final AppForm theForm;
+    private CfgObject cfgObjproperties;
+    private KVPUpdater annexUpdates;
 
-    UpdateUserProperties(ConfigServerManager _configServerManager, CfgObjectType _objType, AppForm _theForm) {
+    UpdateCFGObjectProcessor(ConfigServerManager _configServerManager, CfgObjectType _objType, AppForm _theForm) {
+        this.cfgObjproperties = null;
         this.cfgManager = _configServerManager;
         this.objType = _objType;
         theForm = _theForm;
+        annexUpdates = new KVPUpdater(true);
     }
+
     KeyValueCollection updateSections = new KeyValueCollection();
     KeyValueCollection createSections = new KeyValueCollection();
     KeyValueCollection deleteSections = new KeyValueCollection();
@@ -76,6 +92,10 @@ public class UpdateUserProperties {
         getSection(updateSections, section).addString(cleanString(key), cleanString(val));
     }
 
+    void addAddKeyForce(String section, String key, String val, CfgObject obj) {
+        getSection(createSections, section).addString(cleanString(key), cleanString(val));
+    }
+
     void addAddKey(String section, String key, String val, CfgObject obj) {
         Pair<String, String> existing = updateExisted(obj, section, key);
 
@@ -95,7 +115,6 @@ public class UpdateUserProperties {
     }
 
     void addDeleteKey(String section, String key, String val, CfgObject obj) {
-
         Pair<String, String> existing = updateExisted(obj, section, key);
         if (StringUtils.isNotEmpty(existing.getKey())) {
             if ((StringUtils.isNotEmpty(key) && StringUtils.isNotEmpty(existing.getValue()))) {
@@ -122,8 +141,40 @@ public class UpdateUserProperties {
         createdPropsKey = _createdPropsKey;
     }
 
-    void commitUpdate(CfgObject obj) {
-        if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty()) {
+    String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager, CfgApplication appNew) {
+        cfgObjproperties = appNew;
+        return estimateUpdateObj(us, obj, kv, configServerManager);
+    }
+
+    class KVPUpdater {
+
+        private KeyValueCollection updateSections = new KeyValueCollection();
+        private KeyValueCollection createSections = new KeyValueCollection();
+        private KeyValueCollection deleteSections = new KeyValueCollection();
+
+        private String changedPropsKey;
+        private String deletedPropsKey;
+        private String createdPropsKey;
+
+        public KVPUpdater(boolean isUserProperties) {
+            if (isUserProperties) {
+                initKeys("changedUserProperties", "deletedUserProperties", "userProperties");
+            } else {
+                initKeys("changedOptions", "deletedOptions", "options");
+            }
+
+        }
+
+        private void initKeys(String changedPropsKey, String deletedPropsKey, String createdPropsKey) {
+            this.changedPropsKey = changedPropsKey;
+            this.deletedPropsKey = deletedPropsKey;
+            this.createdPropsKey = createdPropsKey;
+        }
+
+    }
+
+    Message commitUpdate(CfgObject obj) throws ProtocolException {
+        if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty() || cfgObjproperties != null) {
             IConfService service = cfgManager.getService();
             CfgMetadata metaData = service.getMetaData();
             ConfObjectDelta d = new ConfObjectDelta(metaData, objType);
@@ -149,14 +200,43 @@ public class UpdateUserProperties {
                     obj1.setPropertyValue(createdPropsKey, createSections);
                 }
 
+                if (cfgObjproperties != null) {
+                    int cfgPrimitiveInt = CfgTypeMask.Primitive.getCfgType();
+                    for (CfgDescriptionAttribute attr : cfgObjproperties.getMetaData().getAttributes()) {
+                        if (!attr.isKey() && (attr.getTypeBitMask() & cfgPrimitiveInt) != 0) {
+                            String name = attr.getName();
+                            Object prop = cfgObjproperties.getProperty(name);
+                            if (prop != null) {
+                                obj1.setPropertyValue(name, prop);
+                            }
+                        }
+                    }
+                }
+//                    CfgApplication app = new CfgApplication(service);
+//                    app.setCommandLine("line");
+//                    app.setCommandLineArguments("args");
+//                    CfgDescriptionClass metaData1 = app.getMetaData();
+//                    ICfgClassOperationalInfo delta = metaData1.getDelta();
+//                    Collection<CfgDescriptionAttribute> keys = metaData1.getKeys();
+//                    Collection<CfgDescriptionAttribute> attributes = metaData1.getAttributes();
+//                    CfgDescriptionObject attributeInfo = obj1.getClassInfo();
+//                app.getp 
+//                obj1.setPropertyValue("commandLine", "aaa");
+
                 RequestUpdateObject reqUpdate = RequestUpdateObject.create();
                 logger.info("++" + d.toString());
                 reqUpdate.setObjectDelta(d);
+                logger.info("++ req: " + reqUpdate);
 
-                cfgManager.execRequest(reqUpdate, objType);
+                Message ret = cfgManager.execRequest(reqUpdate, objType);
+                logger.info("++ ret: " + ret.toString());
+
+                return ret;
+
             }
-        }
 
+        }
+        return null;
     }
 
     public static final HashMap<CfgObjectType, String> deltaByType = createDeltaByType();
@@ -216,6 +296,17 @@ public class UpdateUserProperties {
                 if (addedKVP != null) {
                     for (UserProperties userProperties : addedKVP) {
                         addAddKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
+
+                    }
+                }
+            }
+            break;
+
+            case ADD_OPTION_FORCE: {
+                Collection<UserProperties> addedKVP = us.getAddedKVP();
+                if (addedKVP != null) {
+                    for (UserProperties userProperties : addedKVP) {
+                        addAddKeyForce(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
 
                     }
                 }
@@ -288,11 +379,16 @@ public class UpdateUserProperties {
 
     }
 
-    public void updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
+    public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager, CfgObject newObjectProperties) throws ProtocolException {
+        cfgObjproperties = newObjectProperties;
+        return updateObj(us, obj, kv, configServerManager);
+    }
+
+    public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) throws ProtocolException {
 
         fillUpdate(us, obj, kv, configServerManager);
 
-        commitUpdate(obj);
+        return commitUpdate(obj);
     }
 
     public static String getCommentedKey(String key) {
@@ -339,7 +435,7 @@ public class UpdateUserProperties {
         fillUpdate(us, obj, kv, configServerManager);
 
         StringBuilder ret = new StringBuilder();
-        if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty()) {
+        if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty() || cfgObjproperties != null) {
             if (!updateSections.isEmpty()) {
                 for (Object object : updateSections) {
                     if (object instanceof KeyValuePair) {
@@ -389,6 +485,20 @@ public class UpdateUserProperties {
                             }
                         } else {
                             theForm.showError("Unsupport value type: " + valueType + " obj: " + obj.toString());
+                        }
+                    }
+                }
+            }
+
+            if (cfgObjproperties != null) {
+                ret.append("Properties change:\n");
+                int cfgPrimitiveInt = CfgTypeMask.Primitive.getCfgType();
+                for (CfgDescriptionAttribute attr : cfgObjproperties.getMetaData().getAttributes()) {
+                    if (!attr.isKey() && (attr.getTypeBitMask() & cfgPrimitiveInt) != 0) {
+                        String name = attr.getName();
+                        Object prop = cfgObjproperties.getProperty(name);
+                        if (prop != null) {
+                            ret.append("\t[").append(name).append("]:[").append(prop).append("]\n");
                         }
                     }
                 }

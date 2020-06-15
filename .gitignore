@@ -33,3 +33,4 @@ foundation.txt
 target/
 confServUtils/
 .DS_Store
+.idea

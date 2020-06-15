@@ -6,6 +6,7 @@
 package com.airbnb.confservutils;
 
 import Utils.InfoPanel;
+import Utils.Pair;
 import static Utils.StringUtils.matching;
 import static Utils.Swing.checkBoxSelection;
 import Utils.ValuesEditor;
@@ -47,7 +48,11 @@ import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery
 import com.genesyslab.platform.applicationblocks.com.queries.CfgTreatmentQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgVoicePromptQuery;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
+import com.genesyslab.platform.commons.collections.KeyValuePair;
+import com.genesyslab.platform.commons.collections.ValueType;
+import com.genesyslab.platform.commons.protocol.Message;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
@@ -60,6 +65,7 @@ import com.jidesoft.dialog.StandardDialog;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -362,6 +368,7 @@ public class AppForm extends javax.swing.JFrame {
         miBufferingOff = new javax.swing.JMenuItem();
         miBufferingOn = new javax.swing.JMenuItem();
         jmLoadStrategy = new javax.swing.JMenuItem();
+        miRestartService = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -438,7 +445,7 @@ public class AppForm extends javax.swing.JFrame {
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
-                .addContainerGap(815, Short.MAX_VALUE)
+                .addContainerGap(475, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addGap(43, 43, 43))
         );
@@ -613,6 +620,14 @@ public class AppForm extends javax.swing.JFrame {
             }
         });
         jMenu2.add(jmLoadStrategy);
+
+        miRestartService.setText("Restart service");
+        miRestartService.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miRestartServiceActionPerformed(evt);
+            }
+        });
+        jMenu2.add(miRestartService);
 
         jMenuBar1.add(jMenu2);
 
@@ -1228,6 +1243,9 @@ public class AppForm extends javax.swing.JFrame {
     RequestDialog appOptionsChange;
     AppOptionsChange panelAppOptionsChange;
 
+    RequestDialog appRestartServices;
+    RestartServices panelRestartServices;
+
     InfoPanel infoDialog = null;
     ObjectFound pn1 = null;
 
@@ -1247,7 +1265,7 @@ public class AppForm extends javax.swing.JFrame {
         return infoDialog.getDialogResult();
     }
     boolean yesToAll;
-    UpdateUserProperties upd = null;
+    UpdateCFGObjectProcessor upd = null;
 
     private KeyValueCollection getAllValuesInSection(CfgObject obj, ISearchSettings seearchSettings) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -1287,40 +1305,47 @@ public class AppForm extends javax.swing.JFrame {
                             public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
                                 logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
 //                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
-                                if (yesToAll) {
-                                    if (upd != null) {
-                                        upd.updateObj(pn, obj, kv, configServerManager);
-                                    }
 
-                                } else {
-                                    upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
-                                    String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv, configServerManager);
-                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched " + total
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                                    )) {
-                                        case YES_TO_ALL:
-                                            if (JOptionPane.showConfirmDialog(theForm,
-                                                    "Are you sure you want to modify this and all following found objects?",
-                                                    "Please confirm",
-                                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                                try {
+                                    if (yesToAll) {
+                                        if (upd != null) {
+                                            upd.updateObj(pn, obj, kv, configServerManager);
+                                        }
 
-                                                yesToAll = true;
+                                    } else {
+                                        upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                                        String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv, configServerManager);
+                                        switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched " + total
+                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                        )) {
+                                            case YES_TO_ALL:
+                                                if (JOptionPane.showConfirmDialog(theForm,
+                                                        "Are you sure you want to modify this and all following found objects?",
+                                                        "Please confirm",
+                                                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                                    yesToAll = true;
+                                                    upd.updateObj(pn, obj, kv, configServerManager);
+                                                    break;
+                                                }
+                                                break;
+
+                                            case JOptionPane.YES_OPTION:
                                                 upd.updateObj(pn, obj, kv, configServerManager);
                                                 break;
-                                            }
-                                            break;
 
-                                        case JOptionPane.YES_OPTION:
-                                            upd.updateObj(pn, obj, kv, configServerManager);
-                                            break;
+                                            case JOptionPane.NO_OPTION:
+                                                break;
 
-                                        case JOptionPane.NO_OPTION:
-                                            break;
-
-                                        case JOptionPane.CANCEL_OPTION:
-                                            return false;
+                                            case JOptionPane.CANCEL_OPTION:
+                                                return false;
+                                        }
                                     }
+                                } catch (ProtocolException protocolException) {
+                                    showError("Exception while updating: " + protocolException.getMessage());
+                                } catch (HeadlessException headlessException) {
+                                    showError("Exception while updating: " + headlessException.getMessage());
                                 }
 
                                 return true;
@@ -1431,15 +1456,15 @@ public class AppForm extends javax.swing.JFrame {
                     if (oneORS) {
                         if (!oneActive) {
                             oneActive = true;
-                            if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
-                                return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
+                            if (currentValue.startsWith(UpdateCFGObjectProcessor.BACKUP_PREFIX)) {
+                                return currentValue.substring(UpdateCFGObjectProcessor.BACKUP_PREFIX.length());
                             } else {
                                 return currentValue;
                             }
                         }
                         return currentValue;
                     } else {
-                        return UpdateUserProperties.uncommented(currentValue);
+                        return UpdateCFGObjectProcessor.uncommented(currentValue);
                     }
 
                 }
@@ -1453,15 +1478,15 @@ public class AppForm extends javax.swing.JFrame {
                     if (oneORS) {
                         if (!oneActive) {
                             oneActive = true;
-                            if (currentValue.startsWith(UpdateUserProperties.BACKUP_PREFIX)) {
-                                return currentValue.substring(UpdateUserProperties.BACKUP_PREFIX.length());
+                            if (currentValue.startsWith(UpdateCFGObjectProcessor.BACKUP_PREFIX)) {
+                                return currentValue.substring(UpdateCFGObjectProcessor.BACKUP_PREFIX.length());
                             } else {
                                 return currentValue;
                             }
                         }
-                        return UpdateUserProperties.getCommentedKey(currentValue);
+                        return UpdateCFGObjectProcessor.getCommentedKey(currentValue);
                     } else {
-                        return UpdateUserProperties.uncommented(currentValue);
+                        return UpdateCFGObjectProcessor.uncommented(currentValue);
                     }
                 }
 
@@ -1483,41 +1508,47 @@ public class AppForm extends javax.swing.JFrame {
                     logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
 
 //                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
-                    if (yesToAll) {
-                        us.setOneActive(false);
-                        upd.updateObj(us, obj, kv, configServerManager);
-                    } else {
-                        us.setOneActive(false);
-                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
-                        String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
-                        switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
-                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                        )) {
-                            case YES_TO_ALL:
-                                if (JOptionPane.showConfirmDialog(theForm,
-                                        "Are you sure you want to modify this and all following found objects?",
-                                        "Please confirm",
-                                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                    try {
+                        if (yesToAll) {
+                            us.setOneActive(false);
+                            upd.updateObj(us, obj, kv, configServerManager);
+                        } else {
+                            us.setOneActive(false);
+                            upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                            String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
+                            switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
+                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                            )) {
+                                case YES_TO_ALL:
+                                    if (JOptionPane.showConfirmDialog(theForm,
+                                            "Are you sure you want to modify this and all following found objects?",
+                                            "Please confirm",
+                                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
-                                    yesToAll = true;
+                                        yesToAll = true;
+                                        us.setOneActive(false);
+                                        upd.updateObj(us, obj, kv, configServerManager);
+                                        break;
+                                    }
+                                    break;
+
+                                case JOptionPane.YES_OPTION:
                                     us.setOneActive(false);
                                     upd.updateObj(us, obj, kv, configServerManager);
                                     break;
-                                }
-                                break;
 
-                            case JOptionPane.YES_OPTION:
-                                us.setOneActive(false);
-                                upd.updateObj(us, obj, kv, configServerManager);
-                                break;
+                                case JOptionPane.NO_OPTION:
+                                    break;
 
-                            case JOptionPane.NO_OPTION:
-                                break;
-
-                            case JOptionPane.CANCEL_OPTION:
-                                return false;
+                                case JOptionPane.CANCEL_OPTION:
+                                    return false;
+                            }
                         }
+                    } catch (ProtocolException protocolException) {
+                        showError("Exception while updating: " + protocolException.getMessage());
+                    } catch (HeadlessException headlessException) {
+                        showError("Exception while updating: " + headlessException.getMessage());
                     }
 
                     return true;
@@ -1604,47 +1635,53 @@ public class AppForm extends javax.swing.JFrame {
                         logger.info("found obj " + getObjName(obj) + " type " + obj.getObjectType() + " DBID:" + obj.getObjectDbid() + " at " + obj.getObjectPath());
 
 //                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
-                        if (yesToAll) {
-                            upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
-                        } else {
-                            upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
-                            upd.setCustomKVPProc(new UpdateUserProperties.ICustomKVP() {
-                                @Override
-                                public KeyValueCollection getCustomKVP(CfgObject _obj) {
-                                    return ((CfgApplication) _obj).getOptions();
-                                }
-                            });
-                            upd.setPropKeys("changedOptions", "deletedOptions", "options");
-                            String estimateUpdateObj = upd.estimateUpdateObj(panelAppOptionsChange, obj, kv, configServerManager);
-                            if (estimateUpdateObj != null) //
-                            {
-                                switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(), "Object " + current + " of matched " + total
-                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                                )) {
-                                    case YES_TO_ALL:
-                                        if (JOptionPane.showConfirmDialog(theForm,
-                                                "Are you sure you want to modify this and all following found objects?",
-                                                "Please confirm",
-                                                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                        try {
+                            if (yesToAll) {
+                                upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                            } else {
+                                upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                                upd.setCustomKVPProc(new UpdateCFGObjectProcessor.ICustomKVP() {
+                                    @Override
+                                    public KeyValueCollection getCustomKVP(CfgObject _obj) {
+                                        return ((CfgApplication) _obj).getOptions();
+                                    }
+                                });
+                                upd.setPropKeys("changedOptions", "deletedOptions", "options");
+                                String estimateUpdateObj = upd.estimateUpdateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                                if (estimateUpdateObj != null) //
+                                {
+                                    switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(), "Object " + current + " of matched " + total
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                    )) {
+                                        case YES_TO_ALL:
+                                            if (JOptionPane.showConfirmDialog(theForm,
+                                                    "Are you sure you want to modify this and all following found objects?",
+                                                    "Please confirm",
+                                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
-                                            yesToAll = true;
+                                                yesToAll = true;
+                                                upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                                                break;
+                                            }
+                                            break;
+
+                                        case JOptionPane.YES_OPTION:
                                             upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
                                             break;
-                                        }
-                                        break;
 
-                                    case JOptionPane.YES_OPTION:
-                                        upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
-                                        break;
+                                        case JOptionPane.NO_OPTION:
+                                            break;
 
-                                    case JOptionPane.NO_OPTION:
-                                        break;
-
-                                    case JOptionPane.CANCEL_OPTION:
-                                        return false;
+                                        case JOptionPane.CANCEL_OPTION:
+                                            return false;
+                                    }
                                 }
                             }
+                        } catch (ProtocolException protocolException) {
+                            showError("Exception while updating: " + protocolException.getMessage());
+                        } catch (HeadlessException headlessException) {
+                            showError("Exception while updating: " + headlessException.getMessage());
                         }
 
                         return true;
@@ -1714,6 +1751,331 @@ public class AppForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jmLoadStrategyActionPerformed
 
+    private void miRestartServiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miRestartServiceActionPerformed
+        yesToAll = false;
+        upd = null;
+
+        if (appRestartServices == null) {
+            panelRestartServices = new RestartServices(this);
+            appRestartServices = new RequestDialog(this, panelRestartServices, (JMenuItem) evt.getSource());
+        }
+
+        if (appRestartServices.doShow()) {
+//                showYesNoPanel(pn1.getSearchSummaryHTML(), "something" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: " + "something");
+//                if(0==1)
+//                    return;
+            if (!panelRestartServices.checkParameters()) {
+                return;
+            }
+
+            if (connectToConfigServer()) {
+                CfgApplication appNew = new CfgApplication(configServerManager.getService());
+                String remoteCommand = panelRestartServices.getRemoteCommand();
+
+                if (StringUtils.isBlank(remoteCommand)) {
+                    JOptionPane.showMessageDialog(theForm, "Remote command cannot be empty", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
+                    return;
+
+                } else {
+                    String[] split = StringUtils.split(remoteCommand);
+                    if (split.length > 0) {
+                        appNew.setCommandLine(split[0]);
+                        appNew.setCommandLineArguments((split.length > 1) ? StringUtils.join(ArrayUtils.subarray(split, 1, split.length), " ") : ".");
+
+                    }
+                }
+
+                String remoteRestartScript = panelRestartServices.getStatusScript();
+                if (StringUtils.isBlank(remoteRestartScript)) {
+                    JOptionPane.showMessageDialog(theForm, "Status script parameter cannot be empty", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
+                    return;
+
+                }
+
+                ISearchSettings seearchSettings = new ISearchSettings() {
+                    @Override
+                    public boolean isCaseSensitive() {
+                        return panelRestartServices.isCaseSensitive();
+                    }
+
+                    @Override
+                    public boolean isRegex() {
+                        return panelRestartServices.isRegex();
+                    }
+
+                    @Override
+                    public boolean isFullOutputSelected() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isSearchAll() {
+                        return false;
+                    }
+
+                    @Override
+                    public String getAllSearch() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getSection() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getObjName() {
+//                        return panelRestartServices.getName();
+                        return "esv1_wbagent_ors6_01";
+                    }
+
+                    @Override
+                    public String getOption() {
+                        return "start_command";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return null;
+                    }
+
+                };
+
+                IUpdateSettings us = new IUpdateSettings() {
+
+                    @Override
+                    public boolean isMakeBackup() {
+                        return true;
+                    }
+
+                    @Override
+                    public IUpdateSettings.UpdateAction getUpdateAction() {
+                        return IUpdateSettings.UpdateAction.RENAME_SECTION;
+                    }
+
+                    @Override
+                    public String replaceWith(String currentValue) {
+                        return currentValue + "1";
+                    }
+
+                    @Override
+                    public String getReplaceKey(String currentValue) {
+                        return UpdateCFGObjectProcessor.getCommentedKey(currentValue);
+                    }
+
+                    @Override
+                    public Collection<UserProperties> getAddedKVP() {
+                        Collection<UserProperties> ret = new ArrayList<>();
+                        ret.add(new UserProperties("a", "b", "c"));
+                        return ret;
+                    }
+                };
+
+                class RestoreSettings implements IUpdateSettings {
+
+                    @Override
+                    public boolean isMakeBackup() {
+                        return true;
+                    }
+
+                    @Override
+                    public IUpdateSettings.UpdateAction getUpdateAction() {
+                        return IUpdateSettings.UpdateAction.ADD_OPTION_FORCE;
+                    }
+
+                    @Override
+                    public String replaceWith(String currentValue) {
+                        return UpdateCFGObjectProcessor.uncommented(currentValue);
+                    }
+
+                    @Override
+                    public String getReplaceKey(String currentValue) {
+                        return UpdateCFGObjectProcessor.uncommented(currentValue);
+                    }
+
+                    @Override
+                    public Collection<UserProperties> getAddedKVP() {
+//                        ret.add(new UserProperties(kv., profile, profile))s
+                        if (up != null) {
+                            Collection<UserProperties> ret = new ArrayList<>();
+                            ret.add(up);
+                            return ret;
+                        } else {
+                            return null;
+                        }
+                    }
+
+                    private UserProperties up;
+
+                    public void replaceKVP(KeyValueCollection _kv) {
+                        up = null;
+                        for (Object object : _kv) {
+                            if (object instanceof KeyValuePair) {
+                                KeyValuePair kvp = (KeyValuePair) object;
+                                String section = kvp.getStringKey();
+                                if (section.equals("start_stop")) {
+                                    Object value = kvp.getValue();
+                                    ValueType valueType = kvp.getValueType();
+                                    if (valueType == ValueType.TKV_LIST) {
+                                        for (Object _kvInstance : (KeyValueCollection) value) {
+                                            KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
+                                            if (kvInstance.getStringKey().equals("start_command")) {
+                                                up = new UserProperties(section, kvInstance.getStringKey(), kvInstance.getValueAsString());
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                RestoreSettings usRestore = new RestoreSettings();
+
+                CfgApplication appSaved = new CfgApplication(configServerManager.getService());
+
+                upd = new UpdateCFGObjectProcessor(configServerManager, CfgObjectType.CFGApplication, theForm);
+
+//                            logger.debug((new Gson()).toJson(app));
+//                upd.setPropKeys("changedOptions", "deletedOptions", "options");
+                ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+                    @Override
+                    public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
+//                    kv = getAllValuesInSection(obj, seearchSettings);
+//                    kv = new KeyValueCollection();
+//                    kv.addList(seearchSettings.getSection(), ((CfgScript) obj).getUserProperties().getList(seearchSettings.getSection()));
+//                            ((CfgTransaction) obj).getUserProperties().getList(seearchSettings.getSection());
+                        logger.info("found obj " + getObjName(obj) + " type " + obj.getObjectType() + " DBID:" + obj.getObjectDbid() + " at " + obj.getObjectPath());
+
+//                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
+                        try {
+                            if (yesToAll) {
+                                upd.updateObj(us, obj, kv, configServerManager, appNew);
+                            } else {
+
+                                String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager, appNew);
+                                if (estimateUpdateObj != null) //
+                                {
+                                    switch (showYesNoPanel(panelRestartServices.getSearchSummaryHTML(), "Object " + current + " of matched " + total
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                    )) {
+                                        case YES_TO_ALL:
+                                            if (JOptionPane.showConfirmDialog(theForm,
+                                                    "Are you sure you want to modify this and all following found objects?",
+                                                    "Please confirm",
+                                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                                yesToAll = true;
+                                                upd.updateObj(us, obj, kv, configServerManager, appNew);
+                                                break;
+                                            }
+                                            break;
+
+                                        case JOptionPane.YES_OPTION:
+                                            appSaved.setCommandLine(((CfgApplication) obj).getCommandLine());
+                                            appSaved.setCommandLineArguments(((CfgApplication) obj).getCommandLineArguments());
+                                            usRestore.replaceKVP(kv);
+                                            Message updateObj = upd.updateObj(us, obj, kv, configServerManager, appNew);
+                                            if (updateObj != null && updateObj.messageId() == EventObjectUpdated.ID) {
+                                                logger.debug("object updated");
+
+                                                try {
+                                                    String remoteCmd = remoteRestartScript + " " + ((CfgApplication) obj).getName();
+                                                    requestOutput("Executing: " + remoteRestartScript);
+                                                    Pair<ArrayList<String>, ArrayList<String>> executeCommand = Utils.UnixProcess.ExtProcess.executeCommand(remoteCmd, true, true);
+                                                    if (executeCommand != null) {
+                                                        ArrayList<String> lines;
+                                                        if ((lines = executeCommand.getKey()) != null) {
+                                                            requestOutput("Stdout: " + StringUtils.join(lines));
+                                                        }
+                                                        if ((lines = executeCommand.getValue()) != null) {
+                                                            requestOutput("Stderr: " + StringUtils.join(lines));
+                                                        }
+                                                    }
+                                                } catch (IOException ex) {
+                                                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                                                } catch (InterruptedException ex) {
+                                                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                                                }
+                                                updateObj = upd.updateObj(usRestore, obj, kv, configServerManager, appSaved);
+                                                if (updateObj != null
+                                                        && updateObj.messageId() == EventObjectUpdated.ID) {
+                                                    logger.debug("object restored");
+                                                } else {
+                                                    showError("Failed to restore object: " + ((updateObj != null) ? updateObj : null));
+                                                    return false;
+                                                }
+                                            } else {
+                                                showError("Failed to update object: " + ((updateObj != null) ? updateObj : null));
+                                                return false;
+                                            }
+                                            break;
+
+                                        case JOptionPane.NO_OPTION:
+                                            break;
+
+                                        case JOptionPane.CANCEL_OPTION:
+                                            return false;
+                                    }
+                                }
+                            }
+                        } catch (ProtocolException protocolException) {
+                            showError("Exception while updating: " + protocolException.getMessage());
+                            return false;
+                        } catch (HeadlessException headlessException) {
+                            showError("Exception while updating: " + headlessException.getMessage());
+                            return false;
+                        }
+
+                        return true;
+                    }
+
+                };
+
+                try {
+                    CfgApplicationQuery query = new CfgApplicationQuery();
+
+                    CfgAppType selectedAppType = panelRestartServices.getSelectedAppType();
+                    if (selectedAppType != null) {
+                        query.setAppType(selectedAppType);
+                    }
+//                    String n = panelRestartServices.getObjName();
+//                    if (panelRestartServices.isCaseSensitive() && n != null) {
+//                        query.setName(n);
+//                    }
+
+                    if (findObjects(
+                            query,
+                            CfgApplication.class,
+                            new IKeyValueProperties() {
+                        @Override
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return ((CfgApplication) obj).getUserProperties();
+                        }
+
+                        @Override
+                        public Collection<String> getName(CfgObject obj) {
+                            Collection<String> ret = new ArrayList<>();
+                            ret.add(((CfgApplication) obj).getName());
+                            return ret;
+                        }
+                    },
+                            new FindWorker(seearchSettings), true, foundProc)) {
+
+                    }
+
+                } catch (ConfigException ex) {
+                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InterruptedException ex) {
+                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        }
+    }//GEN-LAST:event_miRestartServiceActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancel;
     private javax.swing.JButton btClearOutput;
@@ -1755,6 +2117,7 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
     private javax.swing.JMenuItem miOneORS;
+    private javax.swing.JMenuItem miRestartService;
     private javax.swing.JPasswordField pfPassword;
     private javax.swing.JTextArea taOutput;
     // End of variables declaration//GEN-END:variables
@@ -3464,40 +3827,46 @@ public class AppForm extends javax.swing.JFrame {
                     logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
 
 //                                int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() + "\n kv: " + kv.toString());
-                    if (yesToAll) {
-                        upd.updateObj(us, obj, kv, configServerManager);
-                    } else {
-                        upd = new UpdateUserProperties(configServerManager, obj.getObjectType(), theForm);
-                        String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
-                        if (estimateUpdateObj != null) //
-                        {
-                            switch (showYesNoPanel(searchSettings.toString(), "Object " + current + " of matched " + total
-                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-                            )) {
-                                case YES_TO_ALL:
-                                    if (JOptionPane.showConfirmDialog(theForm,
-                                            "Are you sure you want to modify this and all following found objects?",
-                                            "Please confirm",
-                                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                    try {
+                        if (yesToAll) {
+                            upd.updateObj(us, obj, kv, configServerManager);
+                        } else {
+                            upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                            String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
+                            if (estimateUpdateObj != null) //
+                            {
+                                switch (showYesNoPanel(searchSettings.toString(), "Object " + current + " of matched " + total
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                )) {
+                                    case YES_TO_ALL:
+                                        if (JOptionPane.showConfirmDialog(theForm,
+                                                "Are you sure you want to modify this and all following found objects?",
+                                                "Please confirm",
+                                                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
-                                        yesToAll = true;
+                                            yesToAll = true;
+                                            upd.updateObj(us, obj, kv, configServerManager);
+                                            break;
+                                        }
+                                        break;
+
+                                    case JOptionPane.YES_OPTION:
                                         upd.updateObj(us, obj, kv, configServerManager);
                                         break;
-                                    }
-                                    break;
 
-                                case JOptionPane.YES_OPTION:
-                                    upd.updateObj(us, obj, kv, configServerManager);
-                                    break;
+                                    case JOptionPane.NO_OPTION:
+                                        break;
 
-                                case JOptionPane.NO_OPTION:
-                                    break;
-
-                                case JOptionPane.CANCEL_OPTION:
-                                    return false;
+                                    case JOptionPane.CANCEL_OPTION:
+                                        return false;
+                                }
                             }
                         }
+                    } catch (ProtocolException protocolException) {
+                        showError("Exception while updating: " + protocolException.getMessage());
+                    } catch (HeadlessException headlessException) {
+                        showError("Exception while updating: " + headlessException.getMessage());
                     }
 
                     return true;

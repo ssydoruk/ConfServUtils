@@ -313,7 +313,7 @@ public class ConfigServerManager {
         }
     }
 
-    public Message execRequest(Message reqUpdate, CfgObjectType objType) {
+    public Message execRequest(Message reqUpdate, CfgObjectType objType) throws ProtocolException {
 
         try {
             // Call the SwingWorker from within the Swing thread
@@ -331,15 +331,16 @@ public class ConfigServerManager {
                 EventObjectCreated oc = (EventObjectCreated) resp;
                 ConfObject object = oc.getObject();
                 parentForm.requestOutput("new object DBID: " + object.getObjectDbid());
-                return resp;
             }
+            return resp;
 
         } catch (ProtocolException ex) {
             logger.fatal(ex);
+            throw ex;
         } catch (IllegalStateException ex) {
             logger.fatal(ex);
+            throw ex;
         }
-        return null;
 
     }
 
