@@ -8,6 +8,7 @@ package com.airbnb.confservutils;
 import com.genesyslab.platform.commons.GEnum;
 import com.jidesoft.swing.CheckBoxList;
 import com.jidesoft.swing.SearchableUtils;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +49,8 @@ public class Main {
     private static Option optConfigProfile;
     private static Option optHelp;
     private static Option optLoaderLog;
-    StoredSettings ds = null;
+    static Logger logger;
+    public static final String anyType = "(Any type)";
 
     public static Logger getLogger() {
         return logger;
@@ -112,7 +114,7 @@ public class Main {
                 AppForm frm = new AppForm();
                 frm.setProfile(sGUIProfile);
                 frm.runGui();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 showHelpExit("Not able to run application: " + ex.getMessage(), options);
             }
         } else {
@@ -203,10 +205,6 @@ public class Main {
         logger.info("log initialized");
     }
 
-    static Logger logger;
-
-    public static final String anyType = "(Any type)";
-
     public static void loadGenesysTypes(JComboBox cbObjectSubtype, Collection values, GEnum[] exclude) {
         cbObjectSubtype.removeAllItems();
         cbObjectSubtype.setEnabled((values != null));
@@ -262,5 +260,6 @@ public class Main {
         }
 
     }
+    StoredSettings ds = null;
 
 }

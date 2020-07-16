@@ -113,14 +113,17 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     private static final Logger logger = Main.getLogger();
 
+    @Override
     public boolean isCaseSensitive() {
         return cbCaseSensitive.isSelected();
     }
 
+    @Override
     public boolean isRegex() {
         return cbIsRegex.isSelected();
     }
 
+    @Override
     public boolean isFullOutputSelected() {
         return rbFullOutput.isSelected();
     }

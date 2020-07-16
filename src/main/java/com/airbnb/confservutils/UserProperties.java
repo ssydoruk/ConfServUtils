@@ -11,21 +11,25 @@ package com.airbnb.confservutils;
  */
 class UserProperties {
 
-    @Override
-    public String toString() {
-        return kvpToString(section, key, value);
+    public static String kvpToString(String _section, String _key, String _value) {
+        return "[" + _section + "]/\"" + _key + "\"=\'" + _value + "\'";
+
     }
 
     private final String key;
     private final String section;
     private final String value;
 
- 
     public UserProperties(String _section, String _key, String _value) {
         section = _section;
         key = _key;
         value = _value;
 
+    }
+
+    @Override
+    public String toString() {
+        return kvpToString(section, key, value);
     }
 
     public String getKey() {
@@ -38,13 +42,6 @@ class UserProperties {
 
     public String getValue() {
         return value;
-    }
-    
-    
-
-    public static String kvpToString(String _section, String _key, String _value) {
-        return "[" + _section + "]/\"" + _key + "\"=\'" + _value + "\'";
-
     }
 
 }

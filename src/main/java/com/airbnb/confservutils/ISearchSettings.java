@@ -28,6 +28,5 @@ public interface ISearchSettings {
     public String getOption();
 
     public String getValue();
-    
 
 }

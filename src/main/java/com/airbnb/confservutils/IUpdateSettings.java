@@ -16,15 +16,14 @@ public interface IUpdateSettings {
     public String getReplaceKey(String stringKey);
 
     public enum UpdateAction {
-        ADD_SECTION, 
-        REMOVE, 
-        REPLACE_WITH, 
+        ADD_SECTION,
+        REMOVE,
+        REPLACE_WITH,
         RESTORE_FROM_BACKUP,
         ADD_OPTION_FORCE,
         RENAME_SECTION
     };
 
-    
     public Collection<UserProperties> getAddedKVP();
 
     public boolean isMakeBackup();

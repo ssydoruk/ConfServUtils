@@ -23,18 +23,16 @@
 //===============================================================================
 package com.airbnb.confservutils;
 
-import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.ConfServiceFactory;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
+import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.connection.configuration.KeyValueConfiguration;
-
-import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import com.genesyslab.platform.configuration.protocol.ConfServerProtocol;
-
 import com.genesyslab.platform.commons.protocol.ChannelState;
 import com.genesyslab.platform.commons.protocol.Endpoint;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.ConfServerProtocol;
+import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import org.apache.logging.log4j.LogManager;
 
 /**

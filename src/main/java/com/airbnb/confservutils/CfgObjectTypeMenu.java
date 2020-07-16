@@ -15,6 +15,26 @@ import javax.swing.JComboBox;
  */
 public class CfgObjectTypeMenu implements Comparable<CfgObjectTypeMenu> {
 
+    public static void setSelectedItem(JComboBox cb, GEnum item) {
+        ComboBoxModel model = cb.getModel();
+        int idx = -1;
+        for (int i = 0; i < model.getSize(); i++) {
+            Object elementAt = model.getElementAt(i);
+            if (elementAt instanceof CfgObjectTypeMenu) {
+//                LogManager.getLogger().info((((CfgObjectTypeMenu) elementAt).getType() + " - " + item));
+                if (((CfgObjectTypeMenu) elementAt).getType() == item) {
+                    idx = i;
+                    break;
+                }
+            }
+
+        }
+        if (idx >= 0) {
+            cb.setSelectedIndex(idx);
+        }
+
+    }
+
     private final GEnum type;
 
     public CfgObjectTypeMenu(GEnum type) {
@@ -48,26 +68,6 @@ public class CfgObjectTypeMenu implements Comparable<CfgObjectTypeMenu> {
 
     public GEnum getType() {
         return type;
-    }
-
-    public static void setSelectedItem(JComboBox cb, GEnum item) {
-        ComboBoxModel model = cb.getModel();
-        int idx = -1;
-        for (int i = 0; i < model.getSize(); i++) {
-            Object elementAt = model.getElementAt(i);
-            if (elementAt instanceof CfgObjectTypeMenu) {
-//                LogManager.getLogger().info((((CfgObjectTypeMenu) elementAt).getType() + " - " + item));
-                if (((CfgObjectTypeMenu) elementAt).getType() == item) {
-                    idx = i;
-                    break;
-                }
-            }
-
-        }
-        if (idx >= 0) {
-            cb.setSelectedIndex(idx);
-        }
-
     }
 
 }

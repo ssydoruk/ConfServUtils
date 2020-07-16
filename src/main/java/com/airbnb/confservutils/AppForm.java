@@ -16,7 +16,6 @@ import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.*;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAccessGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgActionCodeQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
@@ -1271,7 +1270,6 @@ public class AppForm extends javax.swing.JFrame {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-
     private void miAnnexSearchReplaceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAnnexSearchReplaceActionPerformed
         yesToAll = false;
         upd = null;
@@ -1593,7 +1591,6 @@ public class AppForm extends javax.swing.JFrame {
         }
     }
 
-
     private void miOneORSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miOneORSActionPerformed
         modifyCluster(true);
     }//GEN-LAST:event_miOneORSActionPerformed
@@ -1734,7 +1731,6 @@ public class AppForm extends javax.swing.JFrame {
     RequestDialog loadORSStrategy;
     LoadORSStrategy panelLoadORSStrategy;
 
-
     private void jmLoadStrategyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmLoadStrategyActionPerformed
         yesToAll = false;
         upd = null;
@@ -1873,6 +1869,8 @@ public class AppForm extends javax.swing.JFrame {
 
                 class RestoreSettings implements IUpdateSettings {
 
+                    private UserProperties up;
+
                     @Override
                     public boolean isMakeBackup() {
                         return true;
@@ -1905,8 +1903,6 @@ public class AppForm extends javax.swing.JFrame {
                         }
                     }
 
-                    private UserProperties up;
-
                     public void replaceKVP(KeyValueCollection _kv) {
                         up = null;
                         for (Object object : _kv) {
@@ -1929,7 +1925,8 @@ public class AppForm extends javax.swing.JFrame {
                             }
                         }
                     }
-                };
+                }
+                ;
 
                 RestoreSettings usRestore = new RestoreSettings();
 
@@ -2506,7 +2503,7 @@ public class AppForm extends javax.swing.JFrame {
                 workStarted(true);
                 try {
                     fun.fun();
-                } catch (Exception e) {
+                } catch (ConfigException | InterruptedException e) {
                     ex = e;
                 }
                 return null;
@@ -3933,10 +3930,6 @@ public class AppForm extends javax.swing.JFrame {
 
         private JPanel contentPanel;
 
-        public JPanel getContentPanel() {
-            return contentPanel;
-        }
-
         private RequestDialog(Window parent, JPanel contentPanel, JMenuItem mi) {
             this(parent, contentPanel);
             setTitle(mi.getText() + " parameters");
@@ -3947,6 +3940,11 @@ public class AppForm extends javax.swing.JFrame {
             super(parent);
             this.contentPanel = contentPanel;
             setTitle("Enter request parameters");
+        }
+
+        @Override
+        public JPanel getContentPanel() {
+            return contentPanel;
         }
 
         @Override
@@ -3970,6 +3968,7 @@ public class AppForm extends javax.swing.JFrame {
             buttonPanel.addButton(cancelButton);
 
             cancelButton.setAction(new AbstractAction() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     setDialogResult(RESULT_CANCELLED);
                     setVisible(false);

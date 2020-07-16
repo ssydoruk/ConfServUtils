@@ -16,6 +16,9 @@ class StoredSettings {
 
     ArrayList<ConfServer> configServers = new ArrayList<>();
 
+    ArrayList<String> users = new ArrayList<>();
+    String password;
+
     public void setLastUsedConfigServer(int lastUsedConfigServer) {
         if (lastUsedConfigServer >= 0 && lastUsedConfigServer < configServers.size()) {
             ArrayList<ConfServer> configServers1 = new ArrayList<>();
@@ -29,8 +32,6 @@ class StoredSettings {
             configServers = configServers1;
         }
     }
-    ArrayList<String> users = new ArrayList<>();
-    String password;
 
     public String getPassword() {
         return password;
@@ -68,6 +69,11 @@ class StoredSettings {
 
     public static class ConfServer {
 
+        String profile;
+        String host;
+        String port;
+        String app;
+
         public ConfServer(Object profile, Object host, Object port, Object app) {
             this.profile = profile.toString();
             this.host = host.toString();
@@ -100,10 +106,6 @@ class StoredSettings {
             return app;
         }
 
-        String profile;
-        String host;
-        String port;
-        String app;
     }
 
 }

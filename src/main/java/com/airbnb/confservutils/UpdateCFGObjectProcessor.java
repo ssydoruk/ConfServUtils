@@ -9,7 +9,6 @@ import Utils.Pair;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaApplication;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.collections.ValueType;
@@ -17,16 +16,11 @@ import com.genesyslab.platform.commons.protocol.Message;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttribute;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeReference;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionClass;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionObject;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgTypeMask;
-import com.genesyslab.platform.configuration.protocol.metadata.ICfgClassOperationalInfo;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,34 +34,14 @@ import org.apache.logging.log4j.Logger;
  */
 public class UpdateCFGObjectProcessor {
 
+    private static final Logger logger = Main.getLogger();
+    public static final HashMap<CfgObjectType, String> deltaByType = createDeltaByType();
+    static final public String BACKUP_PREFIX = "#";
+
     public static String uncommented(String currentValue) {
 
         return StringUtils.stripStart(currentValue, BACKUP_PREFIX);
 
-    }
-
-    private final CfgObjectType objType;
-    private final ConfigServerManager cfgManager;
-    private final AppForm theForm;
-    private CfgObject cfgObjproperties;
-    private KVPUpdater annexUpdates;
-
-    UpdateCFGObjectProcessor(ConfigServerManager _configServerManager, CfgObjectType _objType, AppForm _theForm) {
-        this.cfgObjproperties = null;
-        this.cfgManager = _configServerManager;
-        this.objType = _objType;
-        theForm = _theForm;
-        annexUpdates = new KVPUpdater(true);
-    }
-
-    KeyValueCollection updateSections = new KeyValueCollection();
-    KeyValueCollection createSections = new KeyValueCollection();
-    KeyValueCollection deleteSections = new KeyValueCollection();
-
-    private void prepareUpdate() {
-        updateSections.clear();
-        createSections.clear();
-        deleteSections.clear();
     }
 
     public static KeyValueCollection getSection(KeyValueCollection sections, String section) {
@@ -80,12 +54,55 @@ public class UpdateCFGObjectProcessor {
 
     }
 
-    void addAddKey(String section, String key, String val) {
-        getSection(createSections, section).addString(cleanString(key), cleanString(val));
-    }
-
     private static String cleanString(String s) {
         return StringUtils.strip(StringUtils.trim(s));
+    }
+
+    private static HashMap<CfgObjectType, String> createDeltaByType() {
+        HashMap<CfgObjectType, String> ret = new HashMap<>();
+        ret.put(CfgObjectType.CFGDN, "deltaDN");
+        ret.put(CfgObjectType.CFGTransaction, "deltaTransaction");
+        ret.put(CfgObjectType.CFGScript, "deltaScript");
+        ret.put(CfgObjectType.CFGApplication, "deltaApplication");
+        ret.put(CfgObjectType.CFGAgentLogin, "deltaAgentLogin");
+
+        return ret;
+    }
+
+    public static String getCommentedKey(String key) {
+        return BACKUP_PREFIX + key;
+    }
+
+    private final CfgObjectType objType;
+    private final ConfigServerManager cfgManager;
+    private final AppForm theForm;
+    private CfgObject cfgObjproperties;
+    private final KVPUpdater annexUpdates;
+
+    KeyValueCollection updateSections = new KeyValueCollection();
+    KeyValueCollection createSections = new KeyValueCollection();
+    KeyValueCollection deleteSections = new KeyValueCollection();
+    private String changedPropsKey = "changedUserProperties";
+    private String deletedPropsKey = "deletedUserProperties";
+    private String createdPropsKey = "userProperties";
+    private ICustomKVP customKVPProc = null;
+
+    UpdateCFGObjectProcessor(ConfigServerManager _configServerManager, CfgObjectType _objType, AppForm _theForm) {
+        this.cfgObjproperties = null;
+        this.cfgManager = _configServerManager;
+        this.objType = _objType;
+        theForm = _theForm;
+        annexUpdates = new KVPUpdater(true);
+    }
+
+    private void prepareUpdate() {
+        updateSections.clear();
+        createSections.clear();
+        deleteSections.clear();
+    }
+
+    void addAddKey(String section, String key, String val) {
+        getSection(createSections, section).addString(cleanString(key), cleanString(val));
     }
 
     void addUpdateKey(String section, String key, String val) {
@@ -129,12 +146,6 @@ public class UpdateCFGObjectProcessor {
 
     }
 
-    private static final Logger logger = Main.getLogger();
-
-    private String changedPropsKey = "changedUserProperties";
-    private String deletedPropsKey = "deletedUserProperties";
-    private String createdPropsKey = "userProperties";
-
     public void setPropKeys(String _changedPropsKey, String _deletedPropsKey, String _createdPropsKey) {
         changedPropsKey = _changedPropsKey;
         deletedPropsKey = _deletedPropsKey;
@@ -144,33 +155,6 @@ public class UpdateCFGObjectProcessor {
     String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager, CfgApplication appNew) {
         cfgObjproperties = appNew;
         return estimateUpdateObj(us, obj, kv, configServerManager);
-    }
-
-    class KVPUpdater {
-
-        private KeyValueCollection updateSections = new KeyValueCollection();
-        private KeyValueCollection createSections = new KeyValueCollection();
-        private KeyValueCollection deleteSections = new KeyValueCollection();
-
-        private String changedPropsKey;
-        private String deletedPropsKey;
-        private String createdPropsKey;
-
-        public KVPUpdater(boolean isUserProperties) {
-            if (isUserProperties) {
-                initKeys("changedUserProperties", "deletedUserProperties", "userProperties");
-            } else {
-                initKeys("changedOptions", "deletedOptions", "options");
-            }
-
-        }
-
-        private void initKeys(String changedPropsKey, String deletedPropsKey, String createdPropsKey) {
-            this.changedPropsKey = changedPropsKey;
-            this.deletedPropsKey = deletedPropsKey;
-            this.createdPropsKey = createdPropsKey;
-        }
-
     }
 
     Message commitUpdate(CfgObject obj) throws ProtocolException {
@@ -239,26 +223,11 @@ public class UpdateCFGObjectProcessor {
         return null;
     }
 
-    public static final HashMap<CfgObjectType, String> deltaByType = createDeltaByType();
-
-    private static HashMap<CfgObjectType, String> createDeltaByType() {
-        HashMap<CfgObjectType, String> ret = new HashMap<>();
-        ret.put(CfgObjectType.CFGDN, "deltaDN");
-        ret.put(CfgObjectType.CFGTransaction, "deltaTransaction");
-        ret.put(CfgObjectType.CFGScript, "deltaScript");
-        ret.put(CfgObjectType.CFGApplication, "deltaApplication");
-        ret.put(CfgObjectType.CFGAgentLogin, "deltaAgentLogin");
-
-        return ret;
-    }
-
     void addDeleteKey(KeyValueCollection kv) {
         for (Object object : kv) {
             deleteSections.add(object);
         }
     }
-
-    static final public String BACKUP_PREFIX = "#";
 
     public void fillUpdate(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
         prepareUpdate();
@@ -389,10 +358,6 @@ public class UpdateCFGObjectProcessor {
         fillUpdate(us, obj, kv, configServerManager);
 
         return commitUpdate(obj);
-    }
-
-    public static String getCommentedKey(String key) {
-        return BACKUP_PREFIX + key;
     }
 
     private String getCurValue(CfgObject obj, String section, String origProperty) {
@@ -776,8 +741,6 @@ public class UpdateCFGObjectProcessor {
         }
     }
 
-    private ICustomKVP customKVPProc = null;
-
     public void setCustomKVPProc(ICustomKVP customKVPProc) {
         this.customKVPProc = customKVPProc;
     }
@@ -786,5 +749,32 @@ public class UpdateCFGObjectProcessor {
 
         public KeyValueCollection getCustomKVP(CfgObject obj);
     };
+
+    class KVPUpdater {
+
+        private final KeyValueCollection updateSections = new KeyValueCollection();
+        private final KeyValueCollection createSections = new KeyValueCollection();
+        private final KeyValueCollection deleteSections = new KeyValueCollection();
+
+        private String changedPropsKey;
+        private String deletedPropsKey;
+        private String createdPropsKey;
+
+        public KVPUpdater(boolean isUserProperties) {
+            if (isUserProperties) {
+                initKeys("changedUserProperties", "deletedUserProperties", "userProperties");
+            } else {
+                initKeys("changedOptions", "deletedOptions", "options");
+            }
+
+        }
+
+        private void initKeys(String changedPropsKey, String deletedPropsKey, String createdPropsKey) {
+            this.changedPropsKey = changedPropsKey;
+            this.deletedPropsKey = deletedPropsKey;
+            this.createdPropsKey = createdPropsKey;
+        }
+
+    }
 
 }

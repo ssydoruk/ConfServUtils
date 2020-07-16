@@ -37,8 +37,12 @@ import org.apache.logging.log4j.Logger;
  */
 public class ConfigServerManager {
 
+    public static final Logger logger = (Logger) Main.logger;
+
     private IConfService service = null;
     private final AppForm parentForm;
+    private final HashMap<String, Collection<? extends CfgObject>> prevQueries = new HashMap<>();
+    private final HashSet<CfgObjectType> lastUpdatedObjects = new HashSet<>();
 
     ConfigServerManager(AppForm aThis) {
         parentForm = aThis;
@@ -56,11 +60,7 @@ public class ConfigServerManager {
 
         try {
             disconnect();
-        } catch (ProtocolException ex) {
-            logger.fatal(ex);
-        } catch (IllegalStateException ex) {
-            logger.fatal(ex);
-        } catch (InterruptedException ex) {
+        } catch (ProtocolException | IllegalStateException | InterruptedException ex) {
             logger.fatal(ex);
         }
         parentForm.requestOutput("connecting...\n", false);
@@ -118,19 +118,16 @@ public class ConfigServerManager {
         }
     }
 
-    public static final Logger logger = (Logger) Main.logger;
-
     public IConfService getService() {
         return service;
     }
-    private final HashMap<String, Collection<? extends CfgObject>> prevQueries = new HashMap<>();
 
     <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls) throws ConfigException, InterruptedException {
         Main.logger.debug("query " + q + " for object type " + cls);
         String qToString = q.toString();
         checkQueryNeedsUpdate();
 
-        Collection<T> cfgObjs = null;
+        Collection<T> cfgObjs;
         if (prevQueries.containsKey(qToString) && prevQueries.get(qToString) != null) {
             cfgObjs = (Collection<T>) prevQueries.get(qToString);
         } else {
@@ -219,45 +216,47 @@ public class ConfigServerManager {
                             } else {
                                 KeyValueCollection addedValues = new KeyValueCollection();
                                 Object value = el.getValue();
-                                if (value instanceof KeyValueCollection) {
-                                    KeyValueCollection sectionValues = (KeyValueCollection) value;
-                                    Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
-                                    KeyValuePair theOpt;
-                                    while (optVal.hasMoreElements()) {
-                                        theOpt = optVal.nextElement();
-                                        boolean isOptFound = false;
-                                        boolean isValFound = false;
+                                if (value != null) {
+                                    if (value instanceof KeyValueCollection) {
+                                        KeyValueCollection sectionValues = (KeyValueCollection) value;
+                                        Enumeration<KeyValuePair> optVal = sectionValues.getEnumeration();
+                                        KeyValuePair theOpt;
+                                        while (optVal.hasMoreElements()) {
+                                            theOpt = optVal.nextElement();
+                                            boolean isOptFound = false;
+                                            boolean isValFound = false;
 
-                                        if (ptAll != null) {
-                                            if (matching(ptAll, theOpt.getStringKey())) {
-                                                isOptFound = true;
-                                            }
-                                            if (matching(ptAll, theOpt.getStringValue())) {
-                                                isValFound = true;
-                                            }
-                                        } else {
-                                            if (ptOption != null) {
-                                                if (matching(ptOption, theOpt.getStringKey())) {
+                                            if (ptAll != null) {
+                                                if (matching(ptAll, theOpt.getStringKey())) {
                                                     isOptFound = true;
                                                 }
-                                            }
-                                            if (ptVal != null) {
-                                                if (matching(ptVal, theOpt.getStringValue())) {
+                                                if (matching(ptAll, theOpt.getStringValue())) {
                                                     isValFound = true;
                                                 }
+                                            } else {
+                                                if (ptOption != null) {
+                                                    if (matching(ptOption, theOpt.getStringKey())) {
+                                                        isOptFound = true;
+                                                    }
+                                                }
+                                                if (ptVal != null) {
+                                                    if (matching(ptVal, theOpt.getStringValue())) {
+                                                        isValFound = true;
+                                                    }
+                                                }
+                                            }
+                                            if (isOptFound || isValFound) {
+                                                addedValues.addPair(theOpt);
+
                                             }
                                         }
-                                        if (isOptFound || isValFound) {
-                                            addedValues.addPair(theOpt);
+                                    } else {
+                                        logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
+                                        if (ptVal != null) {
+                                            if (matching(ptVal, value.toString())) {
+                                                addedValues.addPair(el);
 
-                                        }
-                                    }
-                                } else {
-                                    logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
-                                    if (ptVal != null) {
-                                        if (matching(ptVal, value.toString())) {
-                                            addedValues.addPair(el);
-
+                                            }
                                         }
                                     }
                                 }
@@ -334,17 +333,12 @@ public class ConfigServerManager {
             }
             return resp;
 
-        } catch (ProtocolException ex) {
-            logger.fatal(ex);
-            throw ex;
-        } catch (IllegalStateException ex) {
+        } catch (ProtocolException | IllegalStateException ex) {
             logger.fatal(ex);
             throw ex;
         }
 
     }
-
-    private HashSet<CfgObjectType> lastUpdatedObjects = new HashSet<CfgObjectType>();
 
     private void checkQueryNeedsUpdate() {
         for (CfgObjectType lastUpdatedObject : lastUpdatedObjects) {

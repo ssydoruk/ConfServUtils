@@ -5,7 +5,6 @@
  */
 package com.airbnb.confservutils;
 
-import Utils.GridEditor;
 import Utils.Pair;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
@@ -89,7 +88,6 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
             return ((CfgObjectTypeMenu) o).getType();
         }
     }
-    private GridEditor kvpEditor;
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -162,7 +160,6 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
     public ArrayList<UserProperties> getUpdateProperties() {
         return updateProperties;
     }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup bgReplaceAction;
@@ -340,11 +337,9 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
                 if (shouldStop) {
                     break;
                 }
-            } catch (ProtocolException protocolException) {
+            } catch (ProtocolException | HeadlessException protocolException) {
                 theForm.showError("Exception while updating: " + protocolException.getMessage());
 
-            } catch (HeadlessException headlessException) {
-                theForm.showError("Exception while updating: " + headlessException.getMessage());
             }
         }
 
@@ -453,9 +448,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
             }
 
-        } catch (ConfigException ex) {
-            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
+        } catch (ConfigException | InterruptedException ex) {
             java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
         }
         return ret;
@@ -563,9 +556,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
             }
 
-        } catch (ConfigException ex) {
-            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
+        } catch (ConfigException | InterruptedException ex) {
             java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
         }
         return ret;

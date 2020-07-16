@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import javax.swing.AbstractButton;
-import javax.swing.ButtonModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import org.apache.commons.lang3.StringUtils;
@@ -577,6 +576,5 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         return updateProperties;
 
     }
-
 
 }
