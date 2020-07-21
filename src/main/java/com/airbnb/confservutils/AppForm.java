@@ -684,7 +684,7 @@ public class AppForm extends javax.swing.JFrame {
         // for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
         // values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
         // }
-        confServEditor.setData(new Object[]{"Profile", "CS host", "CS port", "CME application"}, values);
+        confServEditor.setData(new Object[] { "Profile", "CS host", "CS port", "CME application" }, values);
         confServEditor.doShow();
         ds.loadConfServs(confServEditor.getData());
         loadConfigServers();
@@ -1338,8 +1338,8 @@ public class AppForm extends javax.swing.JFrame {
                                                 configServerManager);
                                         switch (showYesNoPanel(pn.getSearchSummaryHTML(),
                                                 "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                             case YES_TO_ALL:
                                                 if (JOptionPane.showConfirmDialog(theForm,
                                                         "Are you sure you want to modify this and all following found objects?",
@@ -1544,8 +1544,8 @@ public class AppForm extends javax.swing.JFrame {
                             final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
                             switch (showYesNoPanel(seearchSettings.toString(),
                                     "Object " + current + " of matched " + total
-                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
-                                    + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
+                                            + obj.toString() + "\n\t kv: " + kv.toString())) {
                                 case YES_TO_ALL:
                                     if (JOptionPane.showConfirmDialog(theForm,
                                             "Are you sure you want to modify this and all following found objects?",
@@ -1683,8 +1683,8 @@ public class AppForm extends javax.swing.JFrame {
                                 {
                                     switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(),
                                             "Object " + current + " of matched " + total
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -2001,8 +2001,8 @@ public class AppForm extends javax.swing.JFrame {
                                 {
                                     switch (showYesNoPanel(panelRestartServices.getSearchSummaryHTML(),
                                             "Object " + current + " of matched " + total
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -2230,7 +2230,7 @@ public class AppForm extends javax.swing.JFrame {
         taOutput.append("\n");
         taOutput.setCaretPosition(taOutput.getDocument().getLength());
 
-//        logger.debug(toString);
+        // logger.debug(toString);
     }
 
     public void requestOutput(final String toString) {
@@ -2363,7 +2363,7 @@ public class AppForm extends javax.swing.JFrame {
                         // enableComponents(this, false);
                         final ArrayList<Record> hostNames = new ArrayList<>();
 
-                        for (final int t1 : new int[]{org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A}) {
+                        for (final int t1 : new int[] { org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A }) {
                             final Lookup l = new Lookup(ReverseMap.fromAddress(ip1), t1);
                             final Record[] hosts = l.run();
                             if (ArrayUtils.isNotEmpty(hosts)) {
@@ -2658,7 +2658,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
         else if (t == CfgObjectType.CFGSwitch) {
             final CfgSwitchQuery query = new CfgSwitchQuery();
             // String n = pn.getObjName();
@@ -2688,7 +2688,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
         else if (t == CfgObjectType.CFGAgentLogin) {
             final CfgAgentLoginQuery query = new CfgAgentLoginQuery();
             // String n = pn.getObjName();
@@ -2718,7 +2718,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlace">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlace">
         else if (t == CfgObjectType.CFGPlace) {
             final CfgPlaceQuery query = new CfgPlaceQuery();
             // String n = pn.getObjName();
@@ -2748,7 +2748,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPerson">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPerson">
         else if (t == CfgObjectType.CFGPerson) {
             final CfgPersonQuery query = new CfgPersonQuery();
             // String n = pn.getObjName();
@@ -2786,7 +2786,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
         else if (t == CfgObjectType.CFGAgentGroup) {
             final CfgAgentGroupQuery query = new CfgAgentGroupQuery();
             // String n = pn.getObjName();
@@ -2811,7 +2811,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDNGroup">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDNGroup">
         else if (t == CfgObjectType.CFGDNGroup) {
             final CfgDNGroupQuery query = new CfgDNGroupQuery();
             // String n = pn.getObjName();
@@ -2836,7 +2836,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlaceGroup">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlaceGroup">
         else if (t == CfgObjectType.CFGPlaceGroup) {
             final CfgPlaceGroupQuery query = new CfgPlaceGroupQuery();
             // String n = pn.getObjName();
@@ -2861,7 +2861,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
         else if (t == CfgObjectType.CFGScript) {
             final CfgScriptQuery query = new CfgScriptQuery();
             // String n = pn.getObjName();
@@ -2918,7 +2918,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
         else if (t == CfgObjectType.CFGEnumerator) {
             final CfgEnumeratorQuery query = new CfgEnumeratorQuery();
             // String n = pn.getObjName();
@@ -2945,8 +2945,8 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed"
-        // desc="CfgObjectType.CFGEnumeratorValue">
+          // <editor-fold defaultstate="collapsed"
+          // desc="CfgObjectType.CFGEnumeratorValue">
         else if (t == CfgObjectType.CFGEnumeratorValue) {
             final CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery();
             // String n = pn.getObjName();
@@ -2974,7 +2974,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGGVPIVRProfile">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGGVPIVRProfile">
         else if (t == CfgObjectType.CFGGVPIVRProfile) {
             final CfgGVPIVRProfileQuery query = new CfgGVPIVRProfileQuery();
             // String n = pn.getObjName();
@@ -3005,7 +3005,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAccessGroup">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAccessGroup">
         else if (t == CfgObjectType.CFGAccessGroup) {
             final CfgAccessGroupQuery query = new CfgAccessGroupQuery();
             // String n = pn.getObjName();
@@ -3031,7 +3031,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGActionCode">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGActionCode">
         else if (t == CfgObjectType.CFGActionCode) {
             final CfgActionCodeQuery query = new CfgActionCodeQuery();
             // String n = pn.getObjName();
@@ -3059,7 +3059,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAlarmCondition">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAlarmCondition">
         else if (t == CfgObjectType.CFGAlarmCondition) {
             final CfgAlarmConditionQuery query = new CfgAlarmConditionQuery();
             // String n = pn.getObjName();
@@ -3086,7 +3086,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGApplication">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGApplication">
         else if (t == CfgObjectType.CFGApplication) {
             final CfgApplicationQuery query = new CfgApplicationQuery();
             // String n = pn.getObjName();
@@ -3116,7 +3116,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGFolder">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGFolder">
         else if (t == CfgObjectType.CFGFolder) {
             final CfgFolderQuery query = new CfgFolderQuery();
             // String n = pn.getObjName();
@@ -3144,7 +3144,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGHost">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGHost">
         else if (t == CfgObjectType.CFGHost) {
             final CfgHostQuery query = new CfgHostQuery();
             // String n = pn.getObjName();
@@ -3171,7 +3171,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTenant">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTenant">
         else if (t == CfgObjectType.CFGTenant) {
             final CfgTenantQuery query = new CfgTenantQuery();
             // String n = pn.getObjName();
@@ -3198,7 +3198,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVRPort">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVRPort">
         else if (t == CfgObjectType.CFGIVRPort) {
             final CfgIVRPortQuery query = new CfgIVRPortQuery();
             // String n = pn.getObjName();
@@ -3225,7 +3225,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVR">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVR">
         else if (t == CfgObjectType.CFGIVR) {
             final CfgIVRQuery query = new CfgIVRQuery();
             // String n = pn.getObjName();
@@ -3252,7 +3252,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGObjectiveTable">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGObjectiveTable">
         else if (t == CfgObjectType.CFGObjectiveTable) {
             final CfgObjectiveTableQuery query = new CfgObjectiveTableQuery();
             // String n = pn.getObjName();
@@ -3279,7 +3279,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGService">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGService">
         else if (t == CfgObjectType.CFGService) {
             final CfgServiceQuery query = new CfgServiceQuery();
             // String n = pn.getObjName();
@@ -3306,7 +3306,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSkill">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSkill">
         else if (t == CfgObjectType.CFGSkill) {
             final CfgSkillQuery query = new CfgSkillQuery();
             // String n = pn.getObjName();
@@ -3332,7 +3332,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatDay">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatDay">
         else if (t == CfgObjectType.CFGStatDay) {
             final CfgStatDayQuery query = new CfgStatDayQuery();
             // String n = pn.getObjName();
@@ -3358,7 +3358,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatTable">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatTable">
         else if (t == CfgObjectType.CFGStatTable) {
             final CfgStatTableQuery query = new CfgStatTableQuery();
             // String n = pn.getObjName();
@@ -3384,7 +3384,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTimeZone">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTimeZone">
         else if (t == CfgObjectType.CFGTimeZone) {
             final CfgTimeZoneQuery query = new CfgTimeZoneQuery();
             // String n = pn.getObjName();
@@ -3413,7 +3413,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTreatment">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTreatment">
         else if (t == CfgObjectType.CFGTreatment) {
             final CfgTreatmentQuery query = new CfgTreatmentQuery();
             // String n = pn.getObjName();
@@ -3441,7 +3441,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGVoicePrompt">
+          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGVoicePrompt">
         else if (t == CfgObjectType.CFGVoicePrompt) {
             final CfgVoicePromptQuery query = new CfgVoicePromptQuery();
             // String n = pn.getObjName();
@@ -3552,7 +3552,7 @@ public class AppForm extends javax.swing.JFrame {
     /**
      *
      * @param turnOn - turn on buffering; if true, means add cache parameters,
-     * remove them
+     *               remove them
      */
     private void strategyBuffering(final boolean turnOn, final ActionEvent evt) {
         upd = null;
@@ -3772,8 +3772,8 @@ public class AppForm extends javax.swing.JFrame {
                             {
                                 switch (showYesNoPanel(searchSettings.toString(),
                                         "Object " + current + " of matched " + total
-                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -4000,26 +4000,25 @@ public class AppForm extends javax.swing.JFrame {
 
     private boolean shouldImportCSV(final HashMap<String, String> placeDN) {
 
-        DefaultTableModel infoTableModel = new DefaultTableModel(){
+        DefaultTableModel infoTableModel = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; //To change body of generated methods, choose Tools | Templates.
+                return false; // To change body of generated methods, choose Tools | Templates.
             }
-            
+
         };
-        
+
         infoTableModel.addColumn("Place");
         infoTableModel.addColumn("DN");
         for (Map.Entry<String, String> entry : placeDN.entrySet()) {
             String place = entry.getKey();
             String dn = entry.getValue();
-            infoTableModel.addRow(new Object[]{place, dn});
+            infoTableModel.addRow(new Object[] { place, dn });
         }
 
         JTable tab = new JTable(infoTableModel);
         tab.getTableHeader().setVisible(true);
         tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        
 
         TableColumnAdjuster tca = new TableColumnAdjuster(tab);
         tca.setColumnDataIncluded(true);
@@ -4033,10 +4032,11 @@ public class AppForm extends javax.swing.JFrame {
 
         jp.setPreferredSize(preferredSize);
 
-        Utils.InfoPanel dlg = new Utils.InfoPanel(this, "Do you want to import following Place/DN", jp, JOptionPane.OK_CANCEL_OPTION);
+        Utils.InfoPanel dlg = new Utils.InfoPanel(this, "Do you want to import following Place/DN", jp,
+                JOptionPane.OK_CANCEL_OPTION);
         dlg.showModal();
 
-        return dlg.getDialogResult()==JOptionPane.OK_OPTION;
+        return dlg.getDialogResult() == JOptionPane.OK_OPTION;
 
     }
 
@@ -4112,7 +4112,7 @@ public class AppForm extends javax.swing.JFrame {
             buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             buttonPanel.setSizeConstraint(ButtonPanel.NO_LESS_THAN); // since the checkbox is quite wide, we don't want
             // all of them have the same size.
-            return buttonPanel;
+                      return buttonPanel;
         }
 
         public boolean doShow(final String title, final IConfigPanel onShow) {
