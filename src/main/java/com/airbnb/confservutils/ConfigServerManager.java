@@ -9,8 +9,15 @@ import static Utils.StringUtils.matching;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.CfgQuery;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
+import com.genesyslab.platform.applicationblocks.com.ConfigServerException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
+import com.genesyslab.platform.applicationblocks.com.WellKnownDBIDs;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.protocol.ChannelState;
@@ -20,8 +27,14 @@ import com.genesyslab.platform.configuration.protocol.confserver.events.EventErr
 import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectCreated;
 import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
+import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
+import com.genesyslab.platform.configuration.protocol.types.CfgErrorType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
+import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
+import confserverbatch.ObjectExistAction;
+import confserverbatch.SwitchLookup;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -364,4 +377,171 @@ public class ConfigServerManager {
         lastUpdatedObjects.add(objType);
     }
 
+    private CfgPlace doCreatePlace(IConfService service,
+            String pl, ArrayList<CfgDN> cfgDNs) throws ConfigException {
+        CfgPlace cfgPlace = new CfgPlace(service);
+
+        cfgPlace.setDNs(cfgDNs);
+        cfgPlace.setName(pl);
+        cfgPlace.setTenantDBID(WellKnownDBIDs.EnvironmentDBID);
+        parentForm.requestOutput("Creating Place [" + cfgPlace + "]");
+
+        cfgPlace.save();
+        if (cfgPlace.isSaved()) {
+            parentForm.requestOutput("Created place DBID: " + cfgPlace.getDBID());
+            return cfgPlace;
+        } else {
+            return null;
+        }
+    }
+
+    private CfgPlace findPlace(
+            final IConfService service,
+            final String placeName, boolean mastExist
+    ) throws ConfigException {
+        CfgPlaceQuery cfgPlaceQuery = new CfgPlaceQuery();
+
+        cfgPlaceQuery.setName(placeName);
+        cfgPlaceQuery.setTenantDbid(WellKnownDBIDs.EnvironmentDBID);
+
+        parentForm.requestOutput("searching " + "Place [" + placeName + "]");
+        CfgPlace cfgPlace = service.retrieveObject(CfgPlace.class, cfgPlaceQuery);
+        if (mastExist && cfgPlace == null) {
+            throw new ConfigException("Place [" + placeName + "]");
+        }
+        parentForm.requestOutput("Found " + "Place [" + placeName + "] DBID=" + cfgPlace.getDBID());
+
+        return cfgPlace;
+
+    }
+
+    private boolean placeDNsEqual(Collection<CfgDN> placeDNs, ArrayList<CfgDN> cfgDNs) {
+        if (placeDNs.size() == cfgDNs.size() && placeDNs.size() > 0) {
+            for (CfgDN dn : placeDNs) {
+                int i = 0;
+                for (; i < cfgDNs.size(); i++) {
+                    if (dn.getDBID() == cfgDNs.get(i).getDBID()) {
+                        break;
+                    }
+                }
+                if (i == cfgDNs.size()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private CfgPlace createPlace(String pl, ArrayList<CfgDN> cfgDNs, ObjectExistAction objExistAction) throws ConfigException {
+        try {
+            return doCreatePlace(service, pl, cfgDNs);
+        } catch (ConfigException ex) {
+//            switch(objExistaction)
+            logger.info("DN exists; " + objExistAction);
+            if (ex instanceof ConfigServerException
+                    && ((ConfigServerException) ex).getErrorType() == CfgErrorType.CFGUniquenessViolation) {
+                switch (objExistAction) {
+                    case RECREATE:
+                        CfgPlace cfgPlace = findPlace(service, pl, true);
+                        cfgPlace.delete();
+                        return doCreatePlace(service, pl, cfgDNs);
+
+                    case REUSE:
+                        CfgPlace ret = findPlace(service, pl, true);
+                        if (ret != null) {
+                            if (!placeDNsEqual(ret.getDNs(), cfgDNs)) {
+                                parentForm.requestOutput("Place found but DNs are different. Cannot reuse");
+                                break; //this will ensure exception thrown
+
+                            }
+
+                        }
+                        return ret;
+
+                    default:
+                        break;//fails
+                }
+            }
+            throw ex;
+        }
+
+    }
+
+    public void createPlace(String pl, HashMap<SwitchLookup, String> theDNs, ObjectExistAction objectExistAction) throws ConfigException {
+        ArrayList<CfgDN> cfgDNs = new ArrayList<>();
+        for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
+            cfgDNs.add(createExtDN(entry.getKey(),
+                    entry.getValue(), objectExistAction));
+        }
+
+        CfgPlace cfgPlace = createPlace(pl, cfgDNs, objectExistAction);
+    }
+
+    private CfgDN doCreateDN(IConfService service,
+            String Number,
+            String name,
+            CfgDNType type,
+            CfgSwitch sw) throws ConfigException {
+        CfgDN dn = new CfgDN(service);
+
+        parentForm.requestOutput("Creating DN [" + name + "] switch [" + sw.getName() + "]");
+        dn.setName(name);
+        dn.setSwitch(sw);
+        dn.setType(type);
+        dn.setNumber(Number);
+        dn.setRouteType(CfgRouteType.CFGDefault);
+        dn.save();
+        if (dn.isSaved()) {
+            parentForm.requestOutput("DN created, DBID: " + dn.getDBID());
+            return dn;
+        } else {
+            return null;
+        }
+    }
+
+    private CfgDN findDN(
+            final IConfService service,
+            final String dn, final CfgSwitch sw, boolean mastExist
+    ) throws ConfigException {
+        CfgDNQuery dnQuery = new CfgDNQuery();
+
+        dnQuery.setName(dn);
+        dnQuery.setSwitchDbid(sw.getDBID());
+
+//        parentForm.requestOutput("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
+        CfgDN cfgDn = service.retrieveObject(CfgDN.class, dnQuery);
+        if (mastExist && cfgDn == null) {
+            throw new ConfigException("DN [" + dn + "] switch[" + sw.getName() + "]");
+        }
+        parentForm.requestOutput("found " + "DN [" + dn + "] switch[" + sw.getName() + "] DBID:" + cfgDn.getDBID());
+        return cfgDn;
+
+    }
+
+    private CfgDN createExtDN(SwitchLookup key, String value, ObjectExistAction objExistAction) throws ConfigException {
+        String name = key.getSw().getName() + "_" + value;
+        try {
+            return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw());
+        } catch (ConfigException ex) {
+//            switch(objExistaction)
+            parentForm.requestOutput("DN exists; " + objExistAction);
+            if (ex instanceof ConfigServerException
+                    && ((ConfigServerException) ex).getErrorType() == CfgErrorType.CFGUniquenessViolation) {
+                switch (objExistAction) {
+                    case RECREATE:
+                        CfgDN cfgDN = findDN(service, name, key.getSw(), true);
+                        cfgDN.delete();
+                        return doCreateDN(service, cfgDN.getNumber(), cfgDN.getName(), cfgDN.getType(),
+                                cfgDN.getSwitch());
+
+                    case REUSE:
+                        return findDN(service, name, key.getSw(), true);
+
+                    default:
+                        break;//fails
+                }
+            }
+            throw ex;
+        }
+    }
 }
