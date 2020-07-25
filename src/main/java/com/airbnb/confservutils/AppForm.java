@@ -9,9 +9,7 @@ import Utils.InfoPanel;
 import Utils.Pair;
 import static Utils.StringUtils.matching;
 import static Utils.Swing.checkBoxSelection;
-import static Utils.SystemClipboard.getSystemClipboard;
 import Utils.TableColumnAdjuster;
-import java.awt.datatransfer.Clipboard;
 import Utils.ValuesEditor;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.CfgQuery;
@@ -64,8 +62,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jidesoft.dialog.ButtonPanel;
 import com.jidesoft.dialog.StandardDialog;
-import com.jidesoft.swing.FolderChooser;
-import confserverbatch.AddPlace;
 import confserverbatch.ObjectExistAction;
 import confserverbatch.SwitchLookup;
 import java.awt.BorderLayout;
@@ -74,9 +70,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Window;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -91,7 +84,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -228,12 +220,8 @@ public class AppForm extends javax.swing.JFrame {
 
         cbUser.setEditable(true);
 
-        cbUser.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                userEdited(e);
-            }
+        cbUser.addActionListener((final ActionEvent e) -> {
+            userEdited(e);
         });
 
         addWindowListener(new WindowAdapter() {
@@ -249,11 +237,8 @@ public class AppForm extends javax.swing.JFrame {
         textEncryptor = new StrongTextEncryptor();
         textEncryptor.setPassword(ConfigConnection.class.getName());
         connectionStatusChanged();
-        jmExit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                System.out.println("-1-");
-            }
+        jmExit.addActionListener((final ActionEvent e) -> {
+            System.out.println("-1-");
         });
 
         jmExit.addMenuListener(new MenuListener() {
@@ -314,10 +299,9 @@ public class AppForm extends javax.swing.JFrame {
                 .setPrettyPrinting().setVersion(1.0).create();
 
         try {
-            final OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(profile));
-            gson.toJson(ds, writer);
-
-            writer.close();
+            try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(profile))) {
+                gson.toJson(ds, writer);
+            }
         } catch (final FileNotFoundException ex) {
             logger.log(org.apache.logging.log4j.Level.FATAL, ex);
         } catch (final IOException ex) {
@@ -333,7 +317,7 @@ public class AppForm extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated
-    // Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
@@ -379,7 +363,6 @@ public class AppForm extends javax.swing.JFrame {
         jmLoadStrategy = new javax.swing.JMenuItem();
         miRestartService = new javax.swing.JMenuItem();
         miImportCSV = new javax.swing.JMenuItem();
-        miCreateDNPlaces = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -396,10 +379,9 @@ public class AppForm extends javax.swing.JFrame {
 
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
 
-        cbConfigServer.setModel(
-                new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbConfigServer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbConfigServer.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbConfigServerActionPerformed(evt);
             }
         });
@@ -407,7 +389,7 @@ public class AppForm extends javax.swing.JFrame {
 
         btEditConfgServ.setText("...");
         btEditConfgServ.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btEditConfgServActionPerformed(evt);
             }
         });
@@ -422,8 +404,7 @@ public class AppForm extends javax.swing.JFrame {
         jLabel1.setText("CME user");
         jPanel6.add(jLabel1);
 
-        cbUser.setModel(
-                new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbUser.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jPanel6.add(cbUser);
 
         jPanel5.add(jPanel6);
@@ -435,7 +416,7 @@ public class AppForm extends javax.swing.JFrame {
 
         pfPassword.setText("jPasswordField1");
         pfPassword.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 pfPasswordActionPerformed(evt);
             }
         });
@@ -453,14 +434,22 @@ public class AppForm extends javax.swing.JFrame {
 
         jButton2.setText("jButton2");
 
-        final javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
-                        .addContainerGap(475, Short.MAX_VALUE).addComponent(jButton2).addGap(43, 43, 43)));
-        jPanel8Layout.setVerticalGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel8Layout.createSequentialGroup().addContainerGap().addComponent(jButton2)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                .addContainerGap(475, Short.MAX_VALUE)
+                .addComponent(jButton2)
+                .addGap(43, 43, 43))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         jPanel2.add(jPanel8);
 
@@ -468,7 +457,7 @@ public class AppForm extends javax.swing.JFrame {
 
         btCancel.setText("Cancel");
         btCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btCancelActionPerformed(evt);
             }
         });
@@ -476,7 +465,7 @@ public class AppForm extends javax.swing.JFrame {
 
         btDisconnect.setText("Disconnect");
         btDisconnect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btDisconnectActionPerformed(evt);
             }
         });
@@ -484,7 +473,7 @@ public class AppForm extends javax.swing.JFrame {
 
         btConnect.setText("Connect");
         btConnect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btConnectActionPerformed(evt);
             }
         });
@@ -492,7 +481,7 @@ public class AppForm extends javax.swing.JFrame {
 
         btClearOutput.setText("Clear output");
         btClearOutput.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btClearOutputActionPerformed(evt);
             }
         });
@@ -520,7 +509,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miObjByDBID.setText("Object by DBID");
         miObjByDBID.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miObjByDBIDActionPerformed(evt);
             }
         });
@@ -528,7 +517,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miAppByIP.setText("application by IP");
         miAppByIP.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miAppByIPActionPerformed(evt);
             }
         });
@@ -536,7 +525,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miAppByOption.setText("Applications by option value");
         miAppByOption.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miAppByOptionActionPerformed(evt);
             }
         });
@@ -544,7 +533,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miObjectByAnnex.setText("Object by Annex option");
         miObjectByAnnex.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miObjectByAnnexActionPerformed(evt);
             }
         });
@@ -552,7 +541,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miBusinessAttribute.setText("Business Attribute/Value");
         miBusinessAttribute.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miBusinessAttributeActionPerformed(evt);
             }
         });
@@ -562,9 +551,9 @@ public class AppForm extends javax.swing.JFrame {
 
         jMenu2.setText("Update");
 
-        miAnnexSearchReplace.setText("Annex search and replace");
+        miAnnexSearchReplace.setText("Object find and process");
         miAnnexSearchReplace.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miAnnexSearchReplaceActionPerformed(evt);
             }
         });
@@ -572,7 +561,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miAppOptionsReplace.setText("App options search and replace");
         miAppOptionsReplace.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miAppOptionsReplaceActionPerformed(evt);
             }
         });
@@ -582,7 +571,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miOneORS.setText("Leave 1 ORS");
         miOneORS.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miOneORSActionPerformed(evt);
             }
         });
@@ -590,7 +579,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miAllORSs.setText("Restore all ORSs");
         miAllORSs.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miAllORSsActionPerformed(evt);
             }
         });
@@ -602,7 +591,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miBufferingOff.setText("Turn buffering off");
         miBufferingOff.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miBufferingOffActionPerformed(evt);
             }
         });
@@ -610,7 +599,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miBufferingOn.setText("Turn buffering on");
         miBufferingOn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miBufferingOnActionPerformed(evt);
             }
         });
@@ -620,7 +609,7 @@ public class AppForm extends javax.swing.JFrame {
 
         jmLoadStrategy.setText("Load ORS strategy");
         jmLoadStrategy.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jmLoadStrategyActionPerformed(evt);
             }
         });
@@ -628,7 +617,7 @@ public class AppForm extends javax.swing.JFrame {
 
         miRestartService.setText("Restart service");
         miRestartService.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miRestartServiceActionPerformed(evt);
             }
         });
@@ -636,25 +625,17 @@ public class AppForm extends javax.swing.JFrame {
 
         miImportCSV.setText("Import Place / DN");
         miImportCSV.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miImportCSVActionPerformed(evt);
             }
         });
         jMenu2.add(miImportCSV);
 
-        miCreateDNPlaces.setText("Paste and create Place/DN");
-        miCreateDNPlaces.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                miCreateDNPlacesActionPerformed(evt);
-            }
-        });
-        jMenu2.add(miCreateDNPlaces);
-
         jMenuBar1.add(jMenu2);
 
         jmExit.setText("Exit");
         jmExit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jmExitActionPerformed(evt);
             }
         });
@@ -684,7 +665,7 @@ public class AppForm extends javax.swing.JFrame {
         // for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
         // values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
         // }
-        confServEditor.setData(new Object[] { "Profile", "CS host", "CS port", "CME application" }, values);
+        confServEditor.setData(new Object[]{"Profile", "CS host", "CS port", "CME application"}, values);
         confServEditor.doShow();
         ds.loadConfServs(confServEditor.getData());
         loadConfigServers();
@@ -1308,80 +1289,123 @@ public class AppForm extends javax.swing.JFrame {
             if (connectToConfigServer()) {
 
                 final AnnexReplace pn = (AnnexReplace) annexReplace.getContentPanel();
-                // showYesNoPanel(pn.getSearchSummary(2), "something" + "\n kv: " +
-                // "something");
-                // if(0==1)
-                // return;
-                // requestOutput("Request: " + pn.getSearchSummary());
 
-                // showYesNoPanel(pn.getSearchSummary());
-                for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
-                    try {
-                        if (!doTheSearch(value, pn, false, true, new ICfgObjectFoundProc() {
-                            @Override
-                            public boolean proc(final CfgObject obj, final KeyValueCollection kv, final int current,
-                                    final int total) {
-                                logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
-                                // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
-                                // "\n kv: " + kv.toString());
+                ICfgObjectFoundProc foundProc;
+                if (pn.isActionUpdateKVP()) {
+                    foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current, final int total) -> {
+                        logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+                        // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
+                        // "\n kv: " + kv.toString());
 
-                                try {
-                                    if (yesToAll) {
-                                        if (upd != null) {
-                                            upd.updateObj(pn, obj, kv, configServerManager);
-                                        }
-
-                                    } else {
-                                        upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(),
-                                                theForm);
-                                        final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv,
-                                                configServerManager);
-                                        switch (showYesNoPanel(pn.getSearchSummaryHTML(),
-                                                "Object " + current + " of matched " + total
-                                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
-                                            case YES_TO_ALL:
-                                                if (JOptionPane.showConfirmDialog(theForm,
-                                                        "Are you sure you want to modify this and all following found objects?",
-                                                        "Please confirm", JOptionPane.YES_NO_OPTION,
-                                                        JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                                                    yesToAll = true;
-                                                    upd.updateObj(pn, obj, kv, configServerManager);
-                                                    break;
-                                                }
-                                                break;
-
-                                            case JOptionPane.YES_OPTION:
-                                                upd.updateObj(pn, obj, kv, configServerManager);
-                                                break;
-
-                                            case JOptionPane.NO_OPTION:
-                                                break;
-
-                                            case JOptionPane.CANCEL_OPTION:
-                                                return false;
-                                        }
-                                    }
-                                } catch (final ProtocolException protocolException) {
-                                    showError("Exception while updating: " + protocolException.getMessage());
-                                } catch (final HeadlessException headlessException) {
-                                    showError("Exception while updating: " + headlessException.getMessage());
+                        try {
+                            if (yesToAll) {
+                                if (upd != null) {
+                                    upd.updateObj(pn, obj, kv);
                                 }
 
-                                return true;
-                            }
-                        })) {
+                            } else {
+                                upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(),
+                                        theForm);
+                                final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
+                                switch (showYesNoPanel(pn.getSearchSummaryHTML(),
+                                        "Object " + current + " of matched " + total
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                    case YES_TO_ALL:
+                                        if (JOptionPane.showConfirmDialog(theForm,
+                                                "Are you sure you want to modify this and all following found objects?",
+                                                "Please confirm", JOptionPane.YES_NO_OPTION,
+                                                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
+                                            yesToAll = true;
+                                            upd.updateObj(pn, obj, kv);
+                                            break;
+                                        }
+                                        break;
+
+                                    case JOptionPane.YES_OPTION:
+                                        upd.updateObj(pn, obj, kv);
+                                        break;
+
+                                    case JOptionPane.NO_OPTION:
+                                        break;
+
+                                    case JOptionPane.CANCEL_OPTION:
+                                        return false;
+                                }
+                            }
+                        } catch (final ProtocolException protocolException) {
+                            showError("Exception while updating: " + protocolException.getMessage());
+                        } catch (final HeadlessException headlessException) {
+                            showError("Exception while updating: " + headlessException.getMessage());
+                        }
+
+                        return true;
+                    };
+                } else { // delete object
+                    foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current, final int total) -> {
+                        logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+                        // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
+                        // "\n kv: " + kv.toString());
+
+                        try {
+                            if (yesToAll) {
+                                if (upd != null) {
+                                    upd.updateObj(pn, obj, kv);
+                                }
+
+                            } else {
+                                upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(),
+                                        theForm);
+                                final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
+                                switch (showYesNoPanel(pn.getSearchSummaryHTML(),
+                                        "Object " + current + " of matched " + total
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+                                    case YES_TO_ALL:
+                                        if (JOptionPane.showConfirmDialog(theForm,
+                                                "Are you sure you want to modify this and all following found objects?",
+                                                "Please confirm", JOptionPane.YES_NO_OPTION,
+                                                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                            yesToAll = true;
+                                            upd.updateObj(pn, obj, kv);
+                                            break;
+                                        }
+                                        break;
+
+                                    case JOptionPane.YES_OPTION:
+                                        upd.updateObj(pn, obj, kv);
+                                        break;
+
+                                    case JOptionPane.NO_OPTION:
+                                        break;
+
+                                    case JOptionPane.CANCEL_OPTION:
+                                        return false;
+                                }
+                            }
+                        } catch (final ProtocolException protocolException) {
+                            showError("Exception while updating: " + protocolException.getMessage());
+                        } catch (final HeadlessException headlessException) {
+                            showError("Exception while updating: " + headlessException.getMessage());
+                        }
+                        return true;
+                    };
+                }
+
+                for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
+                    try {
+                        if (!doTheSearch(value, pn, false, true, foundProc)) {
                             break;
                         }
-                    } catch (final ConfigException ex) {
-                        java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (final InterruptedException ex) {
+                    } catch (final ConfigException | InterruptedException ex) {
                         java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-
+                if (upd != null && upd.isObjectsUpdated()) {
+                    configServerManager.clearCache();
+                }
             }
 
         }
@@ -1469,12 +1493,12 @@ public class AppForm extends javax.swing.JFrame {
                 }
 
                 @Override
-                public IUpdateSettings.UpdateAction getUpdateAction() {
-                    return IUpdateSettings.UpdateAction.RENAME_SECTION;
+                public IUpdateSettings.KVPUpdateAction getKVPUpdateAction() {
+                    return IUpdateSettings.KVPUpdateAction.RENAME_SECTION;
                 }
 
                 @Override
-                public String replaceWith(final String currentValue) {
+                public String KVPreplaceWith(final String currentValue) {
                     if (oneORS) {
                         if (!oneActive) {
                             oneActive = true;
@@ -1517,6 +1541,16 @@ public class AppForm extends javax.swing.JFrame {
                     throw new UnsupportedOperationException("Not supported yet."); // To change body of generated
                     // methods, choose Tools | Templates.
                 }
+
+                @Override
+                public ObjectUpdateAction getObjectUpdateAction() {
+                    return ObjectUpdateAction.KVP_CHANGE;
+                }
+
+                @Override
+                public boolean isDeleteDependendObjects() {
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                }
             }
 
             final AUpdateSettings us = new AUpdateSettings();
@@ -1537,15 +1571,15 @@ public class AppForm extends javax.swing.JFrame {
                     try {
                         if (yesToAll) {
                             us.setOneActive(false);
-                            upd.updateObj(us, obj, kv, configServerManager);
+                            upd.updateObj(us, obj, kv);
                         } else {
                             us.setOneActive(false);
                             upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
-                            final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
+                            final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv);
                             switch (showYesNoPanel(seearchSettings.toString(),
                                     "Object " + current + " of matched " + total
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
-                                            + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
+                                    + obj.toString() + "\n\t kv: " + kv.toString())) {
                                 case YES_TO_ALL:
                                     if (JOptionPane.showConfirmDialog(theForm,
                                             "Are you sure you want to modify this and all following found objects?",
@@ -1554,14 +1588,14 @@ public class AppForm extends javax.swing.JFrame {
 
                                         yesToAll = true;
                                         us.setOneActive(false);
-                                        upd.updateObj(us, obj, kv, configServerManager);
+                                        upd.updateObj(us, obj, kv);
                                         break;
                                     }
                                     break;
 
                                 case JOptionPane.YES_OPTION:
                                     us.setOneActive(false);
-                                    upd.updateObj(us, obj, kv, configServerManager);
+                                    upd.updateObj(us, obj, kv);
                                     break;
 
                                 case JOptionPane.NO_OPTION:
@@ -1611,7 +1645,9 @@ public class AppForm extends javax.swing.JFrame {
             } catch (final InterruptedException ex) {
                 java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+            if (upd != null && upd.isObjectsUpdated()) {
+                configServerManager.clearCache();
+            }
         }
     }
 
@@ -1667,7 +1703,7 @@ public class AppForm extends javax.swing.JFrame {
                         // "\n kv: " + kv.toString());
                         try {
                             if (yesToAll) {
-                                upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                                upd.updateObj(panelAppOptionsChange, obj, kv);
                             } else {
                                 upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
                                 upd.setCustomKVPProc(new UpdateCFGObjectProcessor.ICustomKVP() {
@@ -1677,14 +1713,13 @@ public class AppForm extends javax.swing.JFrame {
                                     }
                                 });
                                 upd.setPropKeys("changedOptions", "deletedOptions", "options");
-                                final String estimateUpdateObj = upd.estimateUpdateObj(panelAppOptionsChange, obj, kv,
-                                        configServerManager);
+                                final String estimateUpdateObj = upd.estimateUpdateObj(panelAppOptionsChange, obj, kv);
                                 if (estimateUpdateObj != null) //
                                 {
                                     switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(),
                                             "Object " + current + " of matched " + total
-                                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -1692,13 +1727,13 @@ public class AppForm extends javax.swing.JFrame {
                                                     JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
                                                 yesToAll = true;
-                                                upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                                                upd.updateObj(panelAppOptionsChange, obj, kv);
                                                 break;
                                             }
                                             break;
 
                                         case JOptionPane.YES_OPTION:
-                                            upd.updateObj(panelAppOptionsChange, obj, kv, configServerManager);
+                                            upd.updateObj(panelAppOptionsChange, obj, kv);
                                             break;
 
                                         case JOptionPane.NO_OPTION:
@@ -1753,7 +1788,9 @@ public class AppForm extends javax.swing.JFrame {
                 } catch (final InterruptedException ex) {
                     java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
+                if (upd != null && upd.isObjectsUpdated()) {
+                    configServerManager.clearCache();
+                }
             }
         }
     }// GEN-LAST:event_miAppOptionsReplaceActionPerformed
@@ -1883,12 +1920,12 @@ public class AppForm extends javax.swing.JFrame {
                     }
 
                     @Override
-                    public IUpdateSettings.UpdateAction getUpdateAction() {
-                        return IUpdateSettings.UpdateAction.RENAME_SECTION;
+                    public IUpdateSettings.KVPUpdateAction getKVPUpdateAction() {
+                        return IUpdateSettings.KVPUpdateAction.RENAME_SECTION;
                     }
 
                     @Override
-                    public String replaceWith(final String currentValue) {
+                    public String KVPreplaceWith(final String currentValue) {
                         return currentValue + "1";
                     }
 
@@ -1903,6 +1940,16 @@ public class AppForm extends javax.swing.JFrame {
                         ret.add(new UserProperties("a", "b", "c"));
                         return ret;
                     }
+
+                    @Override
+                    public IUpdateSettings.ObjectUpdateAction getObjectUpdateAction() {
+                        return ObjectUpdateAction.KVP_CHANGE;
+                    }
+
+                    @Override
+                    public boolean isDeleteDependendObjects() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
                 };
 
                 class RestoreSettings implements IUpdateSettings {
@@ -1915,12 +1962,12 @@ public class AppForm extends javax.swing.JFrame {
                     }
 
                     @Override
-                    public IUpdateSettings.UpdateAction getUpdateAction() {
-                        return IUpdateSettings.UpdateAction.ADD_OPTION_FORCE;
+                    public IUpdateSettings.KVPUpdateAction getKVPUpdateAction() {
+                        return IUpdateSettings.KVPUpdateAction.ADD_OPTION_FORCE;
                     }
 
                     @Override
-                    public String replaceWith(final String currentValue) {
+                    public String KVPreplaceWith(final String currentValue) {
                         return UpdateCFGObjectProcessor.uncommented(currentValue);
                     }
 
@@ -1964,6 +2011,16 @@ public class AppForm extends javax.swing.JFrame {
                             }
                         }
                     }
+
+                    @Override
+                    public ObjectUpdateAction getObjectUpdateAction() {
+                        return ObjectUpdateAction.KVP_CHANGE;
+                    }
+
+                    @Override
+                    public boolean isDeleteDependendObjects() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
                 }
                 ;
 
@@ -1992,17 +2049,17 @@ public class AppForm extends javax.swing.JFrame {
                         // "\n kv: " + kv.toString());
                         try {
                             if (yesToAll) {
-                                upd.updateObj(us, obj, kv, configServerManager, appNew);
+                                upd.updateObj(us, obj, kv, appNew);
                             } else {
 
-                                final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager,
+                                final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv,
                                         appNew);
                                 if (estimateUpdateObj != null) //
                                 {
                                     switch (showYesNoPanel(panelRestartServices.getSearchSummaryHTML(),
                                             "Object " + current + " of matched " + total
-                                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -2010,7 +2067,7 @@ public class AppForm extends javax.swing.JFrame {
                                                     JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
                                                 yesToAll = true;
-                                                upd.updateObj(us, obj, kv, configServerManager, appNew);
+                                                upd.updateObj(us, obj, kv, appNew);
                                                 break;
                                             }
                                             break;
@@ -2020,7 +2077,7 @@ public class AppForm extends javax.swing.JFrame {
                                             appSaved.setCommandLineArguments(
                                                     ((CfgApplication) obj).getCommandLineArguments());
                                             usRestore.replaceKVP(kv);
-                                            Message updateObj = upd.updateObj(us, obj, kv, configServerManager, appNew);
+                                            Message updateObj = upd.updateObj(us, obj, kv, appNew);
                                             if (updateObj != null && updateObj.messageId() == EventObjectUpdated.ID) {
                                                 logger.debug("object updated");
 
@@ -2046,7 +2103,7 @@ public class AppForm extends javax.swing.JFrame {
                                                     java.util.logging.Logger.getLogger(AppForm.class.getName())
                                                             .log(Level.SEVERE, null, ex);
                                                 }
-                                                updateObj = upd.updateObj(usRestore, obj, kv, configServerManager,
+                                                updateObj = upd.updateObj(usRestore, obj, kv,
                                                         appSaved);
                                                 if (updateObj != null
                                                         && updateObj.messageId() == EventObjectUpdated.ID) {
@@ -2117,7 +2174,9 @@ public class AppForm extends javax.swing.JFrame {
                 } catch (final InterruptedException ex) {
                     java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
+                if (upd != null && upd.isObjectsUpdated()) {
+                    configServerManager.clearCache();
+                }
             }
         }
     }// GEN-LAST:event_miRestartServiceActionPerformed
@@ -2168,7 +2227,6 @@ public class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miBufferingOff;
     private javax.swing.JMenuItem miBufferingOn;
     private javax.swing.JMenuItem miBusinessAttribute;
-    private javax.swing.JMenuItem miCreateDNPlaces;
     private javax.swing.JMenuItem miImportCSV;
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
@@ -2363,7 +2421,7 @@ public class AppForm extends javax.swing.JFrame {
                         // enableComponents(this, false);
                         final ArrayList<Record> hostNames = new ArrayList<>();
 
-                        for (final int t1 : new int[] { org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A }) {
+                        for (final int t1 : new int[]{org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A}) {
                             final Lookup l = new Lookup(ReverseMap.fromAddress(ip1), t1);
                             final Record[] hosts = l.run();
                             if (ArrayUtils.isNotEmpty(hosts)) {
@@ -2550,6 +2608,10 @@ public class AppForm extends javax.swing.JFrame {
     }
 
     private void runInThread(final IThreadedFun fun) {
+        runInThread(fun, null);
+    }
+
+    private void runInThread(final IThreadedFun fun, final IThreadedFun endFun) {
         final SwingWorker theWorker = new SwingWorker() {
             private Exception ex = null;
 
@@ -2577,6 +2639,13 @@ public class AppForm extends javax.swing.JFrame {
                                 + StringUtils.join(ex.getStackTrace(), "\n"), false);
                     }
                 } else {
+                    if (endFun != null) {
+                        try {
+                            endFun.fun();
+                        } catch (Exception ex) {
+                            requestOutput("Exception running endfun: " + ex.getMessage());
+                        }
+                    }
                     requestOutput("All done", false);
                 }
                 workStarted(false);
@@ -2658,7 +2727,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSwitch">
         else if (t == CfgObjectType.CFGSwitch) {
             final CfgSwitchQuery query = new CfgSwitchQuery();
             // String n = pn.getObjName();
@@ -2688,7 +2757,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentLogin">
         else if (t == CfgObjectType.CFGAgentLogin) {
             final CfgAgentLoginQuery query = new CfgAgentLoginQuery();
             // String n = pn.getObjName();
@@ -2718,7 +2787,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlace">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlace">
         else if (t == CfgObjectType.CFGPlace) {
             final CfgPlaceQuery query = new CfgPlaceQuery();
             // String n = pn.getObjName();
@@ -2748,7 +2817,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPerson">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPerson">
         else if (t == CfgObjectType.CFGPerson) {
             final CfgPersonQuery query = new CfgPersonQuery();
             // String n = pn.getObjName();
@@ -2786,7 +2855,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAgentGroup">
         else if (t == CfgObjectType.CFGAgentGroup) {
             final CfgAgentGroupQuery query = new CfgAgentGroupQuery();
             // String n = pn.getObjName();
@@ -2811,7 +2880,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDNGroup">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDNGroup">
         else if (t == CfgObjectType.CFGDNGroup) {
             final CfgDNGroupQuery query = new CfgDNGroupQuery();
             // String n = pn.getObjName();
@@ -2836,7 +2905,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlaceGroup">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGPlaceGroup">
         else if (t == CfgObjectType.CFGPlaceGroup) {
             final CfgPlaceGroupQuery query = new CfgPlaceGroupQuery();
             // String n = pn.getObjName();
@@ -2861,7 +2930,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGScript">
         else if (t == CfgObjectType.CFGScript) {
             final CfgScriptQuery query = new CfgScriptQuery();
             // String n = pn.getObjName();
@@ -2918,7 +2987,7 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGEnumerator">
         else if (t == CfgObjectType.CFGEnumerator) {
             final CfgEnumeratorQuery query = new CfgEnumeratorQuery();
             // String n = pn.getObjName();
@@ -2945,8 +3014,8 @@ public class AppForm extends javax.swing.JFrame {
                 return false;
             }
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed"
-          // desc="CfgObjectType.CFGEnumeratorValue">
+        // <editor-fold defaultstate="collapsed"
+        // desc="CfgObjectType.CFGEnumeratorValue">
         else if (t == CfgObjectType.CFGEnumeratorValue) {
             final CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery();
             // String n = pn.getObjName();
@@ -2974,7 +3043,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGGVPIVRProfile">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGGVPIVRProfile">
         else if (t == CfgObjectType.CFGGVPIVRProfile) {
             final CfgGVPIVRProfileQuery query = new CfgGVPIVRProfileQuery();
             // String n = pn.getObjName();
@@ -3005,7 +3074,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAccessGroup">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAccessGroup">
         else if (t == CfgObjectType.CFGAccessGroup) {
             final CfgAccessGroupQuery query = new CfgAccessGroupQuery();
             // String n = pn.getObjName();
@@ -3031,7 +3100,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGActionCode">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGActionCode">
         else if (t == CfgObjectType.CFGActionCode) {
             final CfgActionCodeQuery query = new CfgActionCodeQuery();
             // String n = pn.getObjName();
@@ -3059,7 +3128,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAlarmCondition">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGAlarmCondition">
         else if (t == CfgObjectType.CFGAlarmCondition) {
             final CfgAlarmConditionQuery query = new CfgAlarmConditionQuery();
             // String n = pn.getObjName();
@@ -3086,7 +3155,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGApplication">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGApplication">
         else if (t == CfgObjectType.CFGApplication) {
             final CfgApplicationQuery query = new CfgApplicationQuery();
             // String n = pn.getObjName();
@@ -3116,7 +3185,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGFolder">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGFolder">
         else if (t == CfgObjectType.CFGFolder) {
             final CfgFolderQuery query = new CfgFolderQuery();
             // String n = pn.getObjName();
@@ -3144,7 +3213,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGHost">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGHost">
         else if (t == CfgObjectType.CFGHost) {
             final CfgHostQuery query = new CfgHostQuery();
             // String n = pn.getObjName();
@@ -3171,7 +3240,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTenant">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTenant">
         else if (t == CfgObjectType.CFGTenant) {
             final CfgTenantQuery query = new CfgTenantQuery();
             // String n = pn.getObjName();
@@ -3198,7 +3267,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVRPort">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVRPort">
         else if (t == CfgObjectType.CFGIVRPort) {
             final CfgIVRPortQuery query = new CfgIVRPortQuery();
             // String n = pn.getObjName();
@@ -3225,7 +3294,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVR">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGIVR">
         else if (t == CfgObjectType.CFGIVR) {
             final CfgIVRQuery query = new CfgIVRQuery();
             // String n = pn.getObjName();
@@ -3252,7 +3321,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGObjectiveTable">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGObjectiveTable">
         else if (t == CfgObjectType.CFGObjectiveTable) {
             final CfgObjectiveTableQuery query = new CfgObjectiveTableQuery();
             // String n = pn.getObjName();
@@ -3279,7 +3348,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGService">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGService">
         else if (t == CfgObjectType.CFGService) {
             final CfgServiceQuery query = new CfgServiceQuery();
             // String n = pn.getObjName();
@@ -3306,7 +3375,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSkill">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGSkill">
         else if (t == CfgObjectType.CFGSkill) {
             final CfgSkillQuery query = new CfgSkillQuery();
             // String n = pn.getObjName();
@@ -3332,7 +3401,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatDay">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatDay">
         else if (t == CfgObjectType.CFGStatDay) {
             final CfgStatDayQuery query = new CfgStatDayQuery();
             // String n = pn.getObjName();
@@ -3358,7 +3427,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatTable">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGStatTable">
         else if (t == CfgObjectType.CFGStatTable) {
             final CfgStatTableQuery query = new CfgStatTableQuery();
             // String n = pn.getObjName();
@@ -3384,7 +3453,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTimeZone">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTimeZone">
         else if (t == CfgObjectType.CFGTimeZone) {
             final CfgTimeZoneQuery query = new CfgTimeZoneQuery();
             // String n = pn.getObjName();
@@ -3413,7 +3482,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTreatment">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTreatment">
         else if (t == CfgObjectType.CFGTreatment) {
             final CfgTreatmentQuery query = new CfgTreatmentQuery();
             // String n = pn.getObjName();
@@ -3441,7 +3510,7 @@ public class AppForm extends javax.swing.JFrame {
             }
 
         } // </editor-fold>
-          // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGVoicePrompt">
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGVoicePrompt">
         else if (t == CfgObjectType.CFGVoicePrompt) {
             final CfgVoicePromptQuery query = new CfgVoicePromptQuery();
             // String n = pn.getObjName();
@@ -3552,7 +3621,7 @@ public class AppForm extends javax.swing.JFrame {
     /**
      *
      * @param turnOn - turn on buffering; if true, means add cache parameters,
-     *               remove them
+     * remove them
      */
     private void strategyBuffering(final boolean turnOn, final ActionEvent evt) {
         upd = null;
@@ -3632,12 +3701,12 @@ public class AppForm extends javax.swing.JFrame {
                     }
 
                     @Override
-                    public IUpdateSettings.UpdateAction getUpdateAction() {
-                        return IUpdateSettings.UpdateAction.ADD_SECTION;
+                    public IUpdateSettings.KVPUpdateAction getKVPUpdateAction() {
+                        return IUpdateSettings.KVPUpdateAction.ADD_SECTION;
                     }
 
                     @Override
-                    public String replaceWith(final String currentValue) {
+                    public String KVPreplaceWith(final String currentValue) {
 
                         return null;
 
@@ -3656,6 +3725,16 @@ public class AppForm extends javax.swing.JFrame {
 
                         }
                         return ret;
+                    }
+
+                    @Override
+                    public IUpdateSettings.ObjectUpdateAction getObjectUpdateAction() {
+                        return ObjectUpdateAction.KVP_CHANGE;
+                    }
+
+                    @Override
+                    public boolean isDeleteDependendObjects() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                     }
                 };
                 // </editor-fold>
@@ -3720,12 +3799,12 @@ public class AppForm extends javax.swing.JFrame {
                     }
 
                     @Override
-                    public IUpdateSettings.UpdateAction getUpdateAction() {
-                        return IUpdateSettings.UpdateAction.REMOVE;
+                    public IUpdateSettings.KVPUpdateAction getKVPUpdateAction() {
+                        return IUpdateSettings.KVPUpdateAction.REMOVE;
                     }
 
                     @Override
-                    public String replaceWith(final String currentValue) {
+                    public String KVPreplaceWith(final String currentValue) {
                         return null;
                     }
 
@@ -3742,6 +3821,16 @@ public class AppForm extends javax.swing.JFrame {
 
                         }
                         return ret;
+                    }
+
+                    @Override
+                    public IUpdateSettings.ObjectUpdateAction getObjectUpdateAction() {
+                        return ObjectUpdateAction.KVP_CHANGE;
+                    }
+
+                    @Override
+                    public boolean isDeleteDependendObjects() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                     }
                 };
                 // </editor-fold>
@@ -3764,16 +3853,16 @@ public class AppForm extends javax.swing.JFrame {
                     // "\n kv: " + kv.toString());
                     try {
                         if (yesToAll) {
-                            upd.updateObj(us, obj, kv, configServerManager);
+                            upd.updateObj(us, obj, kv);
                         } else {
                             upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
-                            final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, configServerManager);
+                            final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv);
                             if (estimateUpdateObj != null) //
                             {
                                 switch (showYesNoPanel(searchSettings.toString(),
                                         "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -3781,13 +3870,13 @@ public class AppForm extends javax.swing.JFrame {
                                                 JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 
                                             yesToAll = true;
-                                            upd.updateObj(us, obj, kv, configServerManager);
+                                            upd.updateObj(us, obj, kv);
                                             break;
                                         }
                                         break;
 
                                     case JOptionPane.YES_OPTION:
-                                        upd.updateObj(us, obj, kv, configServerManager);
+                                        upd.updateObj(us, obj, kv);
                                         break;
 
                                     case JOptionPane.NO_OPTION:
@@ -3835,7 +3924,9 @@ public class AppForm extends javax.swing.JFrame {
             } catch (final InterruptedException ex) {
                 java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+            if (upd != null && upd.isObjectsUpdated()) {
+                configServerManager.clearCache();
+            }
         }
         logger.info("Done buffering update");
     }
@@ -3987,11 +4078,17 @@ public class AppForm extends javax.swing.JFrame {
                                 for (final SwitchLookup switchLookup : DNs.keySet()) {
                                     DNs.put(switchLookup, theDN);
                                 }
-                                configServerManager.createPlace(thePlace, DNs, ObjectExistAction.RECREATE);
+                                configServerManager.createPlace(thePlace, DNs, ObjectExistAction.REUSE);
                             }
                         }
                     }
 
+                },
+                        new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        configServerManager.clearCache();
+                    }
                 });
             }
 
@@ -4013,7 +4110,7 @@ public class AppForm extends javax.swing.JFrame {
         for (Map.Entry<String, String> entry : placeDN.entrySet()) {
             String place = entry.getKey();
             String dn = entry.getValue();
-            infoTableModel.addRow(new Object[] { place, dn });
+            infoTableModel.addRow(new Object[]{place, dn});
         }
 
         JTable tab = new JTable(infoTableModel);
@@ -4112,7 +4209,7 @@ public class AppForm extends javax.swing.JFrame {
             buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             buttonPanel.setSizeConstraint(ButtonPanel.NO_LESS_THAN); // since the checkbox is quite wide, we don't want
             // all of them have the same size.
-                      return buttonPanel;
+            return buttonPanel;
         }
 
         public boolean doShow(final String title, final IConfigPanel onShow) {

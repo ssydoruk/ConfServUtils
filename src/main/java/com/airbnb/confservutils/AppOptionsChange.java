@@ -548,20 +548,20 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
     }
 
     @Override
-    public UpdateAction getUpdateAction() {
+    public KVPUpdateAction getKVPUpdateAction() {
         if (rbAddSection.isSelected()) {
-            return UpdateAction.ADD_SECTION;
+            return KVPUpdateAction.ADD_SECTION;
         } else if (rbRemove.isSelected()) {
-            return UpdateAction.REMOVE;
+            return KVPUpdateAction.REMOVE;
         } else if (rbReplaceWith.isSelected()) {
-            return UpdateAction.REPLACE_WITH;
+            return KVPUpdateAction.REPLACE_WITH;
         } else {
-            return UpdateAction.RESTORE_FROM_BACKUP;
+            return KVPUpdateAction.RESTORE_FROM_BACKUP;
         }
     }
 
     @Override
-    public String replaceWith(String currentValue) {
+    public String KVPreplaceWith(String currentValue) {
         return checkBoxSelection(tfReplaceWith);
 
     }
@@ -575,6 +575,16 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
     public Collection<UserProperties> getAddedKVP() {
         return updateProperties;
 
+    }
+
+    @Override
+    public ObjectUpdateAction getObjectUpdateAction() {
+        return ObjectUpdateAction.KVP_CHANGE;
+    }
+
+    @Override
+    public boolean isDeleteDependendObjects() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

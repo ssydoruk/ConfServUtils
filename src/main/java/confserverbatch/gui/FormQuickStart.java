@@ -27,21 +27,18 @@
 //===============================================================================
 package confserverbatch.gui;
 
+import com.genesyslab.platform.applicationblocks.com.ConfEvent;
+import com.genesyslab.platform.applicationblocks.com.ConfigException;
+import com.genesyslab.platform.applicationblocks.com.ICfgDelta;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgConnInfo;
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.ConfEvent;
-import com.genesyslab.platform.applicationblocks.com.ICfgDelta;
-
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import javax.swing.border.EmptyBorder;
-
-import java.awt.event.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.net.URI;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 
 
 public class FormQuickStart extends JFrame {

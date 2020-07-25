@@ -28,16 +28,13 @@
 package confserverbatch.gui;
 
 import com.genesyslab.platform.applicationblocks.com.ConfigServerException;
-
+import java.awt.*;
+import java.awt.event.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-
-import java.awt.event.*;
-import java.awt.*;
-
-import java.io.StringWriter;
-import java.io.PrintWriter;
 
 
 class MessageDialog extends JDialog {

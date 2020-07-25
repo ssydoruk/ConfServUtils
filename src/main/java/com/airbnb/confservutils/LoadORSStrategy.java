@@ -221,12 +221,12 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
     }
 
     @Override
-    public UpdateAction getUpdateAction() {
+    public KVPUpdateAction getKVPUpdateAction() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String replaceWith(String currentValue) {
+    public String KVPreplaceWith(String currentValue) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -251,12 +251,12 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
             }
 
             @Override
-            public IUpdateSettings.UpdateAction getUpdateAction() {
-                return IUpdateSettings.UpdateAction.ADD_SECTION;
+            public IUpdateSettings.KVPUpdateAction getKVPUpdateAction() {
+                return IUpdateSettings.KVPUpdateAction.ADD_SECTION;
             }
 
             @Override
-            public String replaceWith(String currentValue) {
+            public String KVPreplaceWith(String currentValue) {
                 return "bb";
 
             }
@@ -275,6 +275,16 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
                 ArrayList<UserProperties> prop = new ArrayList<>();
                 prop.add(new UserProperties("Orchestration", "application", "script:" + selApp));
                 return prop;
+            }
+
+            @Override
+            public ObjectUpdateAction getObjectUpdateAction() {
+                return ObjectUpdateAction.KVP_CHANGE;
+            }
+
+            @Override
+            public boolean isDeleteDependendObjects() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         }
 
@@ -299,11 +309,11 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
             try {
                 if (yesToAll) {
                     us.setOneActive(false);
-                    upd.updateObj(us, (CfgObject) selDN.getObj(), null, configServerManager);
+                    upd.updateObj(us, (CfgObject) selDN.getObj(), null);
                 } else {
                     us.setOneActive(false);
 //                upd = new UpdateUserProperties(configServerManager, CfgObjectType.CFGDN, theForm);
-                    String estimateUpdateObj = upd.estimateUpdateObj(us, obj, null, configServerManager);
+                    String estimateUpdateObj = upd.estimateUpdateObj(us, obj, null);
                     switch (theForm.showYesNoPanel("Load ORS strategy on DN", "Object " + (i + 1) + " of matched " + selectedIndices.length
                             + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
                             + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
@@ -316,14 +326,14 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
                                 yesToAll = true;
                                 us.setOneActive(false);
-                                upd.updateObj(us, obj, kv, configServerManager);
+                                upd.updateObj(us, obj, kv);
                                 break;
                             }
                             break;
 
                         case JOptionPane.YES_OPTION:
                             us.setOneActive(false);
-                            upd.updateObj(us, obj, kv, configServerManager);
+                            upd.updateObj(us, obj, kv);
                             break;
 
                         case JOptionPane.NO_OPTION:
@@ -579,6 +589,16 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
             thePanel.repaint();
         }
 
+    }
+
+    @Override
+    public ObjectUpdateAction getObjectUpdateAction() {
+        return ObjectUpdateAction.KVP_CHANGE;
+    }
+
+    @Override
+    public boolean isDeleteDependendObjects() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private class ComboItem extends Pair<String, Object> implements Comparable<Object> {

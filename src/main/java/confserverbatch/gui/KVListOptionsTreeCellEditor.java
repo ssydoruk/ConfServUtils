@@ -27,19 +27,16 @@
 //===============================================================================
 package confserverbatch.gui;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.EventObject;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JTree;
 import javax.swing.UIManager;
-import javax.swing.DefaultCellEditor;
 import javax.swing.border.Border;
-
 import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
-
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-
-import java.util.EventObject;
 
 
 class KVListOptionsTreeCellEditor

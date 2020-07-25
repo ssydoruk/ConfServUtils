@@ -24,30 +24,23 @@
 package confserverbatch.gui;
 
 import com.genesyslab.platform.applicationblocks.com.*;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
-
+import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.commons.Action;
-
-import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.ConfServerProtocol;
-
-import com.genesyslab.platform.commons.protocol.Endpoint;
-import com.genesyslab.platform.commons.protocol.ChannelState;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.commons.protocol.Protocol;
-
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.connection.configuration.KeyValueConfiguration;
-
-import java.net.URI;
-
-import java.util.ResourceBundle;
-import java.util.PropertyResourceBundle;
-
+import com.genesyslab.platform.commons.protocol.ChannelState;
+import com.genesyslab.platform.commons.protocol.Endpoint;
+import com.genesyslab.platform.commons.protocol.Protocol;
+import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.ConfServerProtocol;
+import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
+import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import java.io.FileInputStream;
+import java.net.URI;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 /**
  * This class is used to access configuration server data.

@@ -15,21 +15,30 @@ public interface IUpdateSettings {
 
     public String getReplaceKey(String stringKey);
 
-    public enum UpdateAction {
+    public enum KVPUpdateAction {
         ADD_SECTION,
         REMOVE,
         REPLACE_WITH,
         RESTORE_FROM_BACKUP,
         ADD_OPTION_FORCE,
-        RENAME_SECTION
+        RENAME_SECTION,
     };
+
+    public enum ObjectUpdateAction {
+        KVP_CHANGE,
+        OBJECT_DELETE,
+    }
 
     public Collection<UserProperties> getAddedKVP();
 
     public boolean isMakeBackup();
 
-    public UpdateAction getUpdateAction();
+    public KVPUpdateAction getKVPUpdateAction();
 
-    public String replaceWith(String currentValue);
+    public ObjectUpdateAction getObjectUpdateAction();
+    
+    public boolean isDeleteDependendObjects();
+
+    public String KVPreplaceWith(String currentValue);
 
 };

@@ -61,11 +61,16 @@ public class ConfigServerManager {
         parentForm = aThis;
     }
 
+    public void clearCache() {
+        prevQueries.clear();
+
+    }
+
     void disconnect() throws ProtocolException, IllegalStateException, InterruptedException {
         if (isConnected()) {
             ConfigConnection.uninitializeConfigService(service);
             service = null;
-            prevQueries.clear();
+            clearCache();
         }
     }
 

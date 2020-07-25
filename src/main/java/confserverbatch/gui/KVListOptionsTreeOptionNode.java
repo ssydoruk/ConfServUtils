@@ -28,7 +28,6 @@
 package confserverbatch.gui;
 
 import com.genesyslab.platform.commons.collections.KeyValuePair;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
 

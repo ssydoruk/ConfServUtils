@@ -63,7 +63,7 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="miAnnexSearchReplace">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Annex search and replace"/>
+                <Property name="text" type="java.lang.String" value="Object find and process"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="miAnnexSearchReplaceActionPerformed"/>
@@ -145,14 +145,6 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="miImportCSVActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="miCreateDNPlaces">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Paste and create Place/DN"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="miCreateDNPlacesActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>

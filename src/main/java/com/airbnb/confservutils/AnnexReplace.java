@@ -87,6 +87,10 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     }
 
+    public boolean isActionUpdateKVP() {
+        return tpFoundAction.getSelectedIndex() == 0;
+    }
+
     public List<CfgObjectType> getSelectedObjectTypes() {
         ArrayList<CfgObjectType> ret = new ArrayList();
         for (Object checkBoxListSelectedValue : clb.getCheckBoxListSelectedValues()) {
@@ -164,6 +168,8 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         jPanel8 = new javax.swing.JPanel();
         cbIsRegex = new javax.swing.JCheckBox();
         cbCaseSensitive = new javax.swing.JCheckBox();
+        tpFoundAction = new javax.swing.JTabbedPane();
+        jPanel9 = new javax.swing.JPanel();
         jpActions = new javax.swing.JPanel();
         jPanel13 = new javax.swing.JPanel();
         jPanel14 = new javax.swing.JPanel();
@@ -178,6 +184,8 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         btEditKVPs = new javax.swing.JButton();
         rbRemove = new javax.swing.JRadioButton();
         rbRestoreFromBackup = new javax.swing.JRadioButton();
+        jPanel11 = new javax.swing.JPanel();
+        cbDeleteLinked = new javax.swing.JCheckBox();
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
@@ -252,6 +260,8 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
         add(jPanel2);
 
+        tpFoundAction.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED), "Action on the found"));
+
         jpActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Replace parameters"));
         jpActions.setLayout(new javax.swing.BoxLayout(jpActions, javax.swing.BoxLayout.PAGE_AXIS));
 
@@ -309,7 +319,16 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
         jpActions.add(jPanel13);
 
-        add(jpActions);
+        jPanel9.add(jpActions);
+
+        tpFoundAction.addTab("Update KVP", jPanel9);
+
+        cbDeleteLinked.setText("Including linked objects");
+        jPanel11.add(cbDeleteLinked);
+
+        tpFoundAction.addTab("Object remove", jPanel11);
+
+        add(tpFoundAction);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btEditKVPsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btEditKVPsActionPerformed
@@ -378,11 +397,13 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     private javax.swing.JButton btEditKVPs;
     private javax.swing.ButtonGroup buttonGroup2;
     private javax.swing.JCheckBox cbCaseSensitive;
+    private javax.swing.JCheckBox cbDeleteLinked;
     private javax.swing.JCheckBox cbIsRegex;
     private javax.swing.JCheckBox cbMakeBackup;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel14;
@@ -395,6 +416,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jpActions;
     private javax.swing.JPanel jpObjectTypes;
     private javax.swing.JLabel lbObjectName;
@@ -410,6 +432,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     private javax.swing.JComboBox<String> tfOptionValue;
     private javax.swing.JComboBox<String> tfReplaceWith;
     private javax.swing.JComboBox<String> tfSection;
+    private javax.swing.JTabbedPane tpFoundAction;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -469,11 +492,18 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         }
         buf.append(" rx[").append(isRegex() ? "yes" : "no").append("]");
         buf.append(" CaSe[").append(isCaseSensitive() ? "yes" : "no").append("]");
-        buf.append("\naction: ").append(rbReplaceWith.isSelected() ? getReplaceWith()
-                : rbAddSection.isSelected() ? getAddSection()
-                : rbRemove.isSelected() ? rbRemove.getText()
-                : rbRestoreFromBackup.isSelected() ? rbRestoreFromBackup.getText()
-                : "");
+        buf.append("\naction: ");
+        if (isActionUpdateKVP()) {
+
+            buf.append("KVP modify, params:")
+                    .append(rbReplaceWith.isSelected() ? getReplaceWith()
+                            : rbAddSection.isSelected() ? getAddSection()
+                            : rbRemove.isSelected() ? rbRemove.getText()
+                            : rbRestoreFromBackup.isSelected() ? rbRestoreFromBackup.getText()
+                            : "");
+        } else {
+            buf.append("delete object").append((isDeleteDependendObjects()) ? ", including dependent objects" : "");
+        }
 
         return buf.toString();
     }
@@ -543,15 +573,17 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     private final ArrayList<UserProperties> updateProperties = new ArrayList<>();
 
     boolean checkParameters() {
-        if (rbAddSection.isSelected()) {
-            if (updateProperties.isEmpty()) {
-                JOptionPane.showMessageDialog(theForm, "To create an option all of the section, key and value needs to be specified", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
-        } else if (rbReplaceWith.isSelected()) {
-            if (StringUtils.isBlank(checkBoxSelection(tfReplaceWith))) {
-                JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
-                return false;
+        if (isActionUpdateKVP()) {
+            if (rbAddSection.isSelected()) {
+                if (updateProperties.isEmpty()) {
+                    JOptionPane.showMessageDialog(theForm, "To create an option all of the section, key and value needs to be specified", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            } else if (rbReplaceWith.isSelected()) {
+                if (StringUtils.isBlank(checkBoxSelection(tfReplaceWith))) {
+                    JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
             }
         }
         return true;
@@ -570,20 +602,20 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     }
 
     @Override
-    public UpdateAction getUpdateAction() {
+    public KVPUpdateAction getKVPUpdateAction() {
         if (rbAddSection.isSelected()) {
-            return UpdateAction.ADD_SECTION;
+            return KVPUpdateAction.ADD_SECTION;
         } else if (rbRemove.isSelected()) {
-            return UpdateAction.REMOVE;
+            return KVPUpdateAction.REMOVE;
         } else if (rbReplaceWith.isSelected()) {
-            return UpdateAction.REPLACE_WITH;
+            return KVPUpdateAction.REPLACE_WITH;
         } else {
-            return UpdateAction.RESTORE_FROM_BACKUP;
+            return KVPUpdateAction.RESTORE_FROM_BACKUP;
         }
     }
 
     @Override
-    public String replaceWith(String currentValue) {
+    public String KVPreplaceWith(String currentValue) {
         return checkBoxSelection(tfReplaceWith);
 
     }
@@ -596,6 +628,16 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     @Override
     public Collection<UserProperties> getAddedKVP() {
         return updateProperties;
+    }
+
+    @Override
+    public ObjectUpdateAction getObjectUpdateAction() {
+        return (isActionUpdateKVP()) ? ObjectUpdateAction.KVP_CHANGE : ObjectUpdateAction.OBJECT_DELETE;
+    }
+
+    @Override
+    public boolean isDeleteDependendObjects() {
+        return cbDeleteLinked.isSelected();
     }
 
 }

@@ -8,22 +8,32 @@ package com.airbnb.confservutils;
 import Utils.Pair;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentInfo;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLoginInfo;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.collections.ValueType;
 import com.genesyslab.platform.commons.protocol.Message;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectDeleted;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestDeleteObject;
 import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttribute;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
 import com.genesyslab.platform.configuration.protocol.metadata.CfgTypeMask;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
+import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -86,6 +96,8 @@ public class UpdateCFGObjectProcessor {
     private String deletedPropsKey = "deletedUserProperties";
     private String createdPropsKey = "userProperties";
     private ICustomKVP customKVPProc = null;
+    ArrayList<CfgObject> deleteObjects = new ArrayList<>();
+    private boolean objectsUpdated;
 
     UpdateCFGObjectProcessor(ConfigServerManager _configServerManager, CfgObjectType _objType, AppForm _theForm) {
         this.cfgObjproperties = null;
@@ -99,6 +111,13 @@ public class UpdateCFGObjectProcessor {
         updateSections.clear();
         createSections.clear();
         deleteSections.clear();
+        objectsUpdated = false;
+    }
+
+    private void prepareDelete() {
+        deleteObjects.clear();
+        objectsUpdated = false;
+
     }
 
     void addAddKey(String section, String key, String val) {
@@ -152,12 +171,12 @@ public class UpdateCFGObjectProcessor {
         createdPropsKey = _createdPropsKey;
     }
 
-    String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager, CfgApplication appNew) {
+    String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, CfgApplication appNew) {
         cfgObjproperties = appNew;
-        return estimateUpdateObj(us, obj, kv, configServerManager);
+        return estimateUpdateObj(us, obj, kv);
     }
 
-    Message commitUpdate(CfgObject obj) throws ProtocolException {
+    private Message commitUpdateKVP(CfgObject obj) throws ProtocolException {
         if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty() || cfgObjproperties != null) {
             IConfService service = cfgManager.getService();
             CfgMetadata metaData = service.getMetaData();
@@ -214,6 +233,7 @@ public class UpdateCFGObjectProcessor {
 
                 Message ret = cfgManager.execRequest(reqUpdate, objType);
                 logger.info("++ ret: " + ret.toString());
+                objectsUpdated = true;
 
                 return ret;
 
@@ -223,15 +243,19 @@ public class UpdateCFGObjectProcessor {
         return null;
     }
 
+    public boolean isObjectsUpdated() {
+        return objectsUpdated;
+    }
+
     void addDeleteKey(KeyValueCollection kv) {
         for (Object object : kv) {
             deleteSections.add(object);
         }
     }
 
-    public void fillUpdate(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
+    private void fillUpdateKVP(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
         prepareUpdate();
-        switch (us.getUpdateAction()) {
+        switch (us.getKVPUpdateAction()) {
             case RENAME_SECTION:
                 for (Object object : kv) {
                     if (object instanceof KeyValuePair) {
@@ -307,7 +331,7 @@ public class UpdateCFGObjectProcessor {
                         if (valueType == ValueType.TKV_LIST) {
                             for (Object _kvInstance : (KeyValueCollection) value) {
                                 KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                                addUpdateKey(section, kvInstance.getStringKey(), us.replaceWith(kvInstance.getStringValue()));
+                                addUpdateKey(section, kvInstance.getStringKey(), us.KVPreplaceWith(kvInstance.getStringValue()));
                                 if (us.isMakeBackup()) {
                                     String backupKey = BACKUP_PREFIX + kvInstance.getStringKey();
                                     if (updateExisted(obj, section, backupKey, kvInstance.getStringValue())) {
@@ -345,19 +369,26 @@ public class UpdateCFGObjectProcessor {
                 }
                 break;
         }
-
     }
 
-    public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager, CfgObject newObjectProperties) throws ProtocolException {
+    public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, CfgObject newObjectProperties) throws ProtocolException {
         cfgObjproperties = newObjectProperties;
-        return updateObj(us, obj, kv, configServerManager);
+        return updateObj(us, obj, kv);
     }
 
-    public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) throws ProtocolException {
+    public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) throws ProtocolException {
 
-        fillUpdate(us, obj, kv, configServerManager);
+        switch (us.getObjectUpdateAction()) {
+            case KVP_CHANGE:
+                fillUpdateKVP(us, obj, kv);
+                return commitUpdateKVP(obj);
 
-        return commitUpdate(obj);
+            case OBJECT_DELETE:
+                fillUpdateDelete(us, obj, kv);
+                commitUpdateDelete(obj);
+                return null;
+        }
+        return null;
     }
 
     private String getCurValue(CfgObject obj, String section, String origProperty) {
@@ -388,16 +419,8 @@ public class UpdateCFGObjectProcessor {
         return null;
     }
 
-    /**
-     *
-     * @param us
-     * @param obj
-     * @param kv
-     * @param configServerManager
-     * @return null if there is nothing to update or string with all updates
-     */
-    public String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, ConfigServerManager configServerManager) {
-        fillUpdate(us, obj, kv, configServerManager);
+    public String estimateUpdateObjKVP(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
+        fillUpdateKVP(us, obj, kv);
 
         StringBuilder ret = new StringBuilder();
         if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty() || cfgObjproperties != null) {
@@ -471,146 +494,29 @@ public class UpdateCFGObjectProcessor {
         } else {
             return null;
         }
-        /*
-        switch (us.getUpdateAction()) {
-            case RENAME_SECTION:
-                for (Object object : kv) {
-                    if (object instanceof KeyValuePair) {
-                        KeyValuePair kvp = (KeyValuePair) object;
-                        String section = kvp.getStringKey();
-                        Object value = kvp.getValue();
-                        ValueType valueType = kvp.getValueType();
-                        if (valueType == ValueType.TKV_LIST) {
-                            for (Object _kvInstance : (KeyValueCollection) value) {
-                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-                                String newKey = us.getReplaceKey(kvInstance.getStringKey());
-                                ret.append(">> " + kvpToString(section, kvInstance.getStringKey(), kvInstance.getStringValue()) + "\n");
-                                if (newKey.equals(kvInstance.getStringKey())) {
-                                    ret.append("\t!! skipping, no change in key\n");
-                                } else {
-                                    if (updateExisted(obj, section, newKey, kvInstance.getStringValue())) {
-                                        ret.append("\tdeleting1: " + kvpToString(section, newKey, kvInstance.getStringValue()) + "\n");
-
-                                    }
-                                    ret.append("\tadding: " + kvpToString(section, newKey, kvInstance.getStringValue()) + "\n");
-                                    ret.append("\tdeleting: " + kvpToString(section, kvInstance.getStringKey(), kvInstance.getStringValue()) + "\n");
-                                }
-                            }
-                        } else {
-                            logger.error("Unsupport value type: " + valueType + " obj: " + obj.toString());
-                        }
-                        logger.info(kvp);
-                    }
-                }
-
-                break;
-
-            case ADD_SECTION:
-                Collection<UserProperties> addedKVP = us.getAddedKVP();
-                if (addedKVP != null) {
-                    for (UserProperties userProperties : addedKVP) {
-//                        addAddKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue());
-                        ret.append("adding option: [")
-                                .append(userProperties.getSection())
-                                .append("]/\"")
-                                .append(userProperties.getKey())
-                                .append("\"=\"")
-                                .append(userProperties.getValue())
-                                .append("\"\n");
-
-                    }
-                }
-                break;
-
-            case REMOVE: {
-                addedKVP = us.getAddedKVP();
-                if (addedKVP != null) {
-                    for (UserProperties userProperties : addedKVP) {
-
-                        ret.append("deleting kvp ")
-                                .append(userProperties.toString())
-                                .append("\n");
-
-                    }
-                }
-
-                break;
-            }
-
-            case REPLACE_WITH:
-                for (Object object : kv) {
-                    if (object instanceof KeyValuePair) {
-                        KeyValuePair kvp = (KeyValuePair) object;
-                        String section = kvp.getStringKey();
-                        Object value = kvp.getValue();
-                        ValueType valueType = kvp.getValueType();
-                        if (valueType == ValueType.TKV_LIST) {
-                            for (Object _kvInstance : (KeyValueCollection) value) {
-                                KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
-//                            upd.addUpdateKey(section, kvInstance.getStringKey(), checkBoxSelection(tfReplaceWith));
-                                ret.append("updating option value in [")
-                                        .append(section)
-                                        .append("]/\"")
-                                        .append(kvInstance.getStringKey())
-                                        .append("\" from \"")
-                                        .append(kvInstance.getStringValue())
-                                        .append("\" to \"")
-                                        .append(us.replaceWith(kvInstance.getStringValue()))
-                                        .append("\"\n");
-                                if (us.isMakeBackup()) {
-                                    String backupKey = BACKUP_PREFIX + kvInstance.getStringKey();
-                                    if (updateExisted(obj, section, backupKey, kvInstance.getStringValue())) {
-//                                    upd.addUpdateKey(section, backupKey, kvInstance.getStringValue());
-                                        ret.append("updating option value [")
-                                                .append(section)
-                                                .append("]/\"")
-                                                .append(backupKey)
-                                                .append("\" with value \"")
-                                                .append(kvInstance.getStringValue())
-                                                .append("\"\n");
-                                    } else {
-//                                    upd.addAddKey(section, backupKey, kvInstance.getStringValue());
-                                        ret.append("adding option: [")
-                                                .append(section)
-                                                .append("]/\"")
-                                                .append(backupKey)
-                                                .append("\"=\"")
-                                                .append(kvInstance.getStringValue())
-                                                .append("\"\n");
-                                    }
-                                }
-                            }
-                        } else {
-                            logger.error("Unsupport value type: " + valueType + " obj: " + obj.toString());
-                        }
-                        logger.info(kvp);
-
-                    }
-
-                }
-                break;
-
-            case RESTORE_FROM_BACKUP:
-                ArrayList<UserProperties> allBackup = getAllBackup(obj);
-                if (allBackup.isEmpty()) {
-                    theForm.requestOutput("No backup user properties");
-                } else {
-                    for (UserProperties userProperties : allBackup) {
-                        String origProperty = userProperties.getKey().substring(BACKUP_PREFIX.length());
-                        setProperty(obj, ret, userProperties.getSection(), origProperty, userProperties.getValue());
-                        if (us.isMakeBackup()) {
-                            String curValue = getCurValue(obj, userProperties.getSection(), origProperty);
-                            if (curValue != null) {
-                                setProperty(obj, ret, userProperties.getSection(), userProperties.getKey(), curValue);
-                            }
-                        }
-                    }
-                }
-                break;
-        }
-         */
 
         return ret.toString();
+    }
+
+    /**
+     *
+     * @param us
+     * @param obj
+     * @param kv
+     * @param configServerManager
+     * @return null if there is nothing to update or string with all updates
+     */
+    public String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
+        switch (us.getObjectUpdateAction()) {
+            case KVP_CHANGE:
+                return estimateUpdateObjKVP(us, obj, kv);
+
+            case OBJECT_DELETE:
+                return estimateUpdateObjDelete(us, obj, kv);
+
+        }
+        return null;
+
     }
 
     /**
@@ -743,6 +649,94 @@ public class UpdateCFGObjectProcessor {
 
     public void setCustomKVPProc(ICustomKVP customKVPProc) {
         this.customKVPProc = customKVPProc;
+    }
+
+    private void fillUpdateDelete(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
+        prepareDelete();
+        try {
+            CfgObject delObj = obj.clone();
+            deleteObjects.add(delObj);
+            if (us.isDeleteDependendObjects()) {
+                if (obj.getObjectType() == CfgObjectType.CFGPlace) {
+                    CfgPlace pl = (CfgPlace) obj;
+                    for (Integer dnDBID : pl.getDNDBIDs()) {
+                        CfgDN dn = new CfgDN(cfgManager.getService());
+                        dn.setDBID(dnDBID);
+                        deleteObjects.add(dn);
+                    }
+                } else if (obj.getObjectType() == CfgObjectType.CFGPerson) {
+                    CfgPerson ag = (CfgPerson) obj;
+                    if (ag.getIsAgent() == CfgFlag.CFGTrue) {
+                        CfgAgentInfo agentInfo = ag.getAgentInfo();
+                        for (CfgAgentLoginInfo dnDBID : agentInfo.getAgentLogins()) {
+                            CfgAgentLogin agentLogin = new CfgAgentLogin(cfgManager.getService());
+                            agentLogin.setDBID(dnDBID.getAgentLogin().getDBID());
+                            deleteObjects.add(agentLogin);
+                        }
+                        CfgPlace place = agentInfo.getPlace();
+                        if (place != null) {
+                            CfgPlace pl = new CfgPlace(cfgManager.getService());
+                            pl.setDBID(place.getDBID());
+                            deleteObjects.add(pl);
+                            for (Integer dnDBID : place.getDNDBIDs()) {
+                                CfgDN dn = new CfgDN(cfgManager.getService());
+                                dn.setDBID(dnDBID);
+                                deleteObjects.add(dn);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (CloneNotSupportedException ex) {
+            java.util.logging.Logger.getLogger(UpdateCFGObjectProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    private String getObjDescr(CfgObject obj) {
+        return "Type: " + obj.getObjectType() + " DBID:" + obj.getObjectDbid();
+    }
+
+    private String estimateUpdateObjDelete(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
+        fillUpdateDelete(us, obj, kv);
+        StringBuilder ret = new StringBuilder("Deleting object(s):-->\n");
+        for (CfgObject deleteObject : deleteObjects) {
+            ret.append(getObjDescr(deleteObject)).append("\n");
+        }
+        ret.append("<--\n");
+        return ret.toString();
+    }
+
+    private void commitUpdateDelete(CfgObject obj) {
+        for (CfgObject deleteObject : deleteObjects) {
+            try {
+                RequestDeleteObject reqDel = RequestDeleteObject.create();
+                reqDel.setDbid(deleteObject.getObjectDbid());
+                reqDel.setObjectType(deleteObject.getObjectType().asInteger());
+
+                theForm.requestOutput("++ deleting object type:" + CfgObjectType.valueOf(reqDel.getObjectType()) + " dbid: " + reqDel.getDbid());
+
+                Message ret = cfgManager.execRequest(reqDel, objType);
+                if (ret instanceof EventObjectDeleted) {
+                    EventObjectDeleted o = (EventObjectDeleted) ret;
+                    theForm.requestOutput("Object type:" + CfgObjectType.valueOf(o.getObjectType()) + " dbid: " + o.getDbid() + " deleted!");
+                } else {
+                    logger.info("++ ret: " + ret.toString());
+                }
+                objectsUpdated = true;
+
+//                deleteObject.delete();
+//                theForm.requestOutput(getObjDescr(deleteObject) + ((deleteObject.isSaved()) ? " deleted " : " not deleted"));
+                objectsUpdated = true;
+//            } catch (ConfigException ex) {
+//                theForm.requestOutput("Not able to delete object " + getObjDescr(deleteObject)
+//                        + ": " + ex.getMessage());
+            } catch (ProtocolException ex) {
+                theForm.requestOutput("Not able to delete object " + getObjDescr(deleteObject)
+                        + ": " + ex.getMessage());
+            }
+        }
+
     }
 
     public static interface ICustomKVP {

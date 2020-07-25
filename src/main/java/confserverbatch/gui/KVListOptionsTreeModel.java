@@ -30,13 +30,10 @@ package confserverbatch.gui;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.collections.ValueType;
-
-import javax.swing.tree.*;
-
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeModelEvent;
-
 import java.util.LinkedList;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.*;
 
 
 class KVListOptionsTreeModel
