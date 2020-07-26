@@ -3,5 +3,8 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings": {
+		"java.dependency.packagePresentation": "flat"
+	}
 }

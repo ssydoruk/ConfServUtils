@@ -40,14 +40,6 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
         nameTitle.setText(s);
     }
 
-    private GEnum cfgObjType(Object o) {
-        if (o instanceof String) {
-            return null;
-        } else {
-            return ((CfgObjectTypeMenu) o).getType();
-        }
-    }
-
     public void setCaseSensitive(boolean isCase) {
         cbCaseSensitive.setSelected(isCase);
     }

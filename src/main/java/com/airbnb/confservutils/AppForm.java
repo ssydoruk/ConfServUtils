@@ -125,7 +125,7 @@ import org.xbill.DNS.ReverseMap;
  *
  * @author stepan_sydoruk
  */
-public class AppForm extends javax.swing.JFrame {
+public final class AppForm extends javax.swing.JFrame {
 
     StoredSettings ds = null;
     private static final Logger logger = LogManager.getLogger();
@@ -685,11 +685,7 @@ public class AppForm extends javax.swing.JFrame {
     private void btDisconnectActionPerformed(final java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btDisconnectActionPerformed
         try {
             configServerManager.disconnect();
-        } catch (final ProtocolException ex) {
-            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (final IllegalStateException ex) {
-            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (final InterruptedException ex) {
+        } catch (final ProtocolException | IllegalStateException | InterruptedException ex) {
             java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
         }
         connectionStatusChanged();
@@ -704,36 +700,32 @@ public class AppForm extends javax.swing.JFrame {
         if (objByDBID.doShow()) {
 
             // enableComponents(this, false);
-            runInThread(new IThreadedFun() {
-                @Override
-                public void fun() {
-                    if (connectToConfigServer()) {
-                        final ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
-                        try {
-                            requestOutput("Request: " + pn.getSearchSummary());
-                            final CfgObjectType t = pn.getSelectedItem();
-                            final int dbid = pn.getValue();
-                            final ICfgObject retrieveObject = configServerManager.retrieveObject(t, dbid);
-                            if (retrieveObject != null) {
-                                if (pn.isFullOutput()) {
-                                    requestOutput(retrieveObject.toString());
-                                } else {
-                                    final StringBuilder buf = new StringBuilder();
-
-                                    buf.append("Object type:").append(retrieveObject.getObjectType()).append(" DBID:")
-                                            .append(retrieveObject.getObjectDbid()).append(" name: ")
-                                            .append(getObjName(retrieveObject));
-                                    requestOutput(buf.toString());
-                                }
+            runInThread(() -> {
+                if (connectToConfigServer()) {
+                    final ObjByDBID pn = (ObjByDBID) objByDBID.getContentPanel();
+                    try {
+                        requestOutput("Request: " + pn.getSearchSummary());
+                        final CfgObjectType t = pn.getSelectedItem();
+                        final int dbid = pn.getValue();
+                        final ICfgObject retrieveObject = configServerManager.retrieveObject(t, dbid);
+                        if (retrieveObject != null) {
+                            if (pn.isFullOutput()) {
+                                requestOutput(retrieveObject.toString());
                             } else {
-                                requestOutput("Not found object DBID:" + dbid + " type:" + t);
+                                final StringBuilder buf = new StringBuilder();
+                                
+                                buf.append("Object type:").append(retrieveObject.getObjectType()).append(" DBID:")
+                                        .append(retrieveObject.getObjectDbid()).append(" name: ")
+                                        .append(getObjName(retrieveObject));
+                                requestOutput(buf.toString());
                             }
-                        } catch (final ConfigException ex) {
-                            showException("Error", ex);
+                        } else {
+                            requestOutput("Not found object DBID:" + dbid + " type:" + t);
                         }
+                    } catch (final ConfigException ex) {
+                        showException("Error", ex);
                     }
                 }
-
             });
 
         }
@@ -1276,13 +1268,6 @@ public class AppForm extends javax.swing.JFrame {
 
         if (annexReplace.doShow()) {
 
-            // showYesNoPanel(pn1.getSearchSummaryHTML(), "something" + "\n kv: " +
-            // "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv: "
-            // + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n kv:
-            // " + "something"+"\nsomething" + "\n kv: " + "something"+"\nsomething" + "\n
-            // kv: " + "something"+"\nsomething" + "\n kv: " + "something");
-            // if(0==1)
-            // return;
             if (!panelAnnexReplace.checkParameters()) {
                 return;
             }
@@ -1334,10 +1319,8 @@ public class AppForm extends javax.swing.JFrame {
                                         return false;
                                 }
                             }
-                        } catch (final ProtocolException protocolException) {
+                        } catch (final ProtocolException | HeadlessException protocolException) {
                             showError("Exception while updating: " + protocolException.getMessage());
-                        } catch (final HeadlessException headlessException) {
-                            showError("Exception while updating: " + headlessException.getMessage());
                         }
 
                         return true;
@@ -1385,10 +1368,8 @@ public class AppForm extends javax.swing.JFrame {
                                         return false;
                                 }
                             }
-                        } catch (final ProtocolException protocolException) {
+                        } catch (final ProtocolException | HeadlessException protocolException) {
                             showError("Exception while updating: " + protocolException.getMessage());
-                        } catch (final HeadlessException headlessException) {
-                            showError("Exception while updating: " + headlessException.getMessage());
                         }
                         return true;
                     };
@@ -1605,10 +1586,8 @@ public class AppForm extends javax.swing.JFrame {
                                     return false;
                             }
                         }
-                    } catch (final ProtocolException protocolException) {
+                    } catch (final ProtocolException | HeadlessException protocolException) {
                         showError("Exception while updating: " + protocolException.getMessage());
-                    } catch (final HeadlessException headlessException) {
-                        showError("Exception while updating: " + headlessException.getMessage());
                     }
 
                     return true;
@@ -1640,9 +1619,7 @@ public class AppForm extends javax.swing.JFrame {
 
                 }
 
-            } catch (final ConfigException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (final InterruptedException ex) {
+            } catch (final ConfigException | InterruptedException ex) {
                 java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (upd != null && upd.isObjectsUpdated()) {
@@ -1744,10 +1721,8 @@ public class AppForm extends javax.swing.JFrame {
                                     }
                                 }
                             }
-                        } catch (final ProtocolException protocolException) {
+                        } catch (final ProtocolException | HeadlessException protocolException) {
                             showError("Exception while updating: " + protocolException.getMessage());
-                        } catch (final HeadlessException headlessException) {
-                            showError("Exception while updating: " + headlessException.getMessage());
                         }
 
                         return true;
@@ -1783,9 +1758,7 @@ public class AppForm extends javax.swing.JFrame {
 
                     }
 
-                } catch (final ConfigException ex) {
-                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (final InterruptedException ex) {
+                } catch (final ConfigException | InterruptedException ex) {
                     java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 if (upd != null && upd.isObjectsUpdated()) {
@@ -2096,10 +2069,7 @@ public class AppForm extends javax.swing.JFrame {
                                                             requestOutput("Stderr: " + StringUtils.join(lines));
                                                         }
                                                     }
-                                                } catch (final IOException ex) {
-                                                    java.util.logging.Logger.getLogger(AppForm.class.getName())
-                                                            .log(Level.SEVERE, null, ex);
-                                                } catch (final InterruptedException ex) {
+                                                } catch (final IOException | InterruptedException ex) {
                                                     java.util.logging.Logger.getLogger(AppForm.class.getName())
                                                             .log(Level.SEVERE, null, ex);
                                                 }
@@ -2128,11 +2098,8 @@ public class AppForm extends javax.swing.JFrame {
                                     }
                                 }
                             }
-                        } catch (final ProtocolException protocolException) {
+                        } catch (final ProtocolException | HeadlessException protocolException) {
                             showError("Exception while updating: " + protocolException.getMessage());
-                            return false;
-                        } catch (final HeadlessException headlessException) {
-                            showError("Exception while updating: " + headlessException.getMessage());
                             return false;
                         }
 
@@ -2169,9 +2136,7 @@ public class AppForm extends javax.swing.JFrame {
 
                     }
 
-                } catch (final ConfigException ex) {
-                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (final InterruptedException ex) {
+                } catch (final ConfigException | InterruptedException ex) {
                     java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 if (upd != null && upd.isObjectsUpdated()) {
@@ -2537,11 +2502,9 @@ public class AppForm extends javax.swing.JFrame {
                         java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE,
                                 null, ex);
 
-                    } catch (final ConfigException ex) {
+                    } catch (final ConfigException | InterruptedException ex) {
                         java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
 
-                    } catch (final InterruptedException ex) {
-                        java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     requestOutput(buf.toString());
                 } finally {
@@ -3887,10 +3850,8 @@ public class AppForm extends javax.swing.JFrame {
                                 }
                             }
                         }
-                    } catch (final ProtocolException protocolException) {
+                    } catch (final ProtocolException | HeadlessException protocolException) {
                         showError("Exception while updating: " + protocolException.getMessage());
-                    } catch (final HeadlessException headlessException) {
-                        showError("Exception while updating: " + headlessException.getMessage());
                     }
 
                     return true;
@@ -3919,9 +3880,7 @@ public class AppForm extends javax.swing.JFrame {
 
                 }
 
-            } catch (final ConfigException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (final InterruptedException ex) {
+            } catch (final ConfigException | InterruptedException ex) {
                 java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (upd != null && upd.isObjectsUpdated()) {
