@@ -4037,7 +4037,7 @@ public final class AppForm extends javax.swing.JFrame {
                                 for (final SwitchLookup switchLookup : DNs.keySet()) {
                                     DNs.put(switchLookup, theDN);
                                 }
-                                configServerManager.createPlace(thePlace, DNs, ObjectExistAction.REUSE);
+                                configServerManager.createPlace(thePlace, DNs, ObjectExistAction.RECREATE);
                             }
                         }
                     }

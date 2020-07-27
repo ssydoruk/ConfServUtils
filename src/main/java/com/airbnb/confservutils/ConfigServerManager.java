@@ -494,6 +494,7 @@ public class ConfigServerManager {
         dn.setSwitch(sw);
         dn.setType(type);
         dn.setNumber(Number);
+        dn.setSwitchSpecificType(1);
         dn.setRouteType(CfgRouteType.CFGDefault);
         dn.save();
         if (dn.isSaved()) {
