@@ -713,7 +713,7 @@ public final class AppForm extends javax.swing.JFrame {
                                 requestOutput(retrieveObject.toString());
                             } else {
                                 final StringBuilder buf = new StringBuilder();
-                                
+
                                 buf.append("Object type:").append(retrieveObject.getObjectType()).append(" DBID:")
                                         .append(retrieveObject.getObjectDbid()).append(" name: ")
                                         .append(getObjName(retrieveObject));
@@ -1278,7 +1278,7 @@ public final class AppForm extends javax.swing.JFrame {
                 ICfgObjectFoundProc foundProc;
                 if (pn.isActionUpdateKVP()) {
                     foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current, final int total) -> {
-                        logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+                        requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: " + kv.toString());
                         // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
                         // "\n kv: " + kv.toString());
 
@@ -1327,7 +1327,7 @@ public final class AppForm extends javax.swing.JFrame {
                     };
                 } else { // delete object
                     foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current, final int total) -> {
-                        logger.info("found " + obj.toString() + "\n kv: " + kv.toString());
+                        requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: " + kv.toString());
                         // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
                         // "\n kv: " + kv.toString());
 
@@ -1375,15 +1375,18 @@ public final class AppForm extends javax.swing.JFrame {
                     };
                 }
 
-                for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
-                    try {
-                        if (!doTheSearch(value, pn, false, true, foundProc)) {
-                            break;
+                runInThread(() -> {
+                    for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
+                        try {
+                            if (!doTheSearch(value, pn, false, true, foundProc)) {
+                                break;
+                            }
+                        } catch (final ConfigException | InterruptedException ex) {
+                            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    } catch (final ConfigException | InterruptedException ex) {
-                        java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }
+                });
+
                 if (upd != null && upd.isObjectsUpdated()) {
                     configServerManager.clearCache();
                 }
@@ -2245,25 +2248,28 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     public void requestOutput(final String toString, final boolean printBlock) {
+        boolean shouldChangeCaret = taOutput.getCaretPosition() == taOutput.getDocument().getLength();
         logger.info(toString);
         if (printBlock) {
             taOutput.append("------------------------------------\n");
         }
         taOutput.append(toString);
         taOutput.append("\n");
-        taOutput.setCaretPosition(taOutput.getDocument().getLength());
+        if (shouldChangeCaret) {
+            taOutput.setCaretPosition(taOutput.getDocument().getLength());
+        }
 
         // logger.debug(toString);
     }
 
     public void requestOutput(final String toString) {
-        requestOutput(toString, true);
+        requestOutput(toString, false);
 
     }
 
     public void showError(final String msg) {
         logger.error(msg);
-        requestOutput("!!! Error: " + msg, false);
+        requestOutput("!!! Error: " + msg, true);
     }
 
     public void showException(final String cannot_connect_to_ConfigServer, final Exception ex) {
