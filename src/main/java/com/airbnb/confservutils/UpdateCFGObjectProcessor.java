@@ -720,8 +720,10 @@ public class UpdateCFGObjectProcessor {
                 if (ret instanceof EventObjectDeleted) {
                     EventObjectDeleted o = (EventObjectDeleted) ret;
                     theForm.requestOutput("Object type:" + CfgObjectType.valueOf(o.getObjectType()) + " dbid: " + o.getDbid() + " deleted!");
-                } else {
+                } else if (ret != null) {
                     logger.info("++ ret: " + ret.toString());
+                } else {
+                    logger.error("++ ret is null! ");
                 }
                 objectsUpdated = true;
 
