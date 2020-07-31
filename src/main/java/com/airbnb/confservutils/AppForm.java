@@ -342,7 +342,7 @@ public final class AppForm extends javax.swing.JFrame {
         btConnect = new javax.swing.JButton();
         btClearOutput = new javax.swing.JButton();
         jpOutput = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        spOutputScroll = new javax.swing.JScrollPane();
         taOutput = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
@@ -499,9 +499,9 @@ public final class AppForm extends javax.swing.JFrame {
         taOutput.setEditable(false);
         taOutput.setColumns(20);
         taOutput.setRows(5);
-        jScrollPane1.setViewportView(taOutput);
+        spOutputScroll.setViewportView(taOutput);
 
-        jpOutput.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        jpOutput.add(spOutputScroll, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(jpOutput);
 
@@ -2182,7 +2182,6 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JMenu jmExit;
     private javax.swing.JMenuItem jmLoadStrategy;
     private javax.swing.JPanel jpConfServ;
@@ -2201,6 +2200,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miOneORS;
     private javax.swing.JMenuItem miRestartService;
     private javax.swing.JPasswordField pfPassword;
+    private javax.swing.JScrollPane spOutputScroll;
     private javax.swing.JTextArea taOutput;
     // End of variables declaration//GEN-END:variables
 
@@ -2248,7 +2248,8 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     public void requestOutput(final String toString, final boolean printBlock) {
-        boolean shouldChangeCaret = taOutput.getCaretPosition() == taOutput.getDocument().getLength();
+        boolean shouldChangeCaret = taOutput.getCaretPosition() == taOutput.getDocument().getLength()
+                && lastLineVisible();
         logger.info(toString);
         if (printBlock) {
             taOutput.append("------------------------------------\n");
@@ -4099,6 +4100,15 @@ public final class AppForm extends javax.swing.JFrame {
         dlg.showModal();
 
         return dlg.getDialogResult() == JOptionPane.OK_OPTION;
+
+    }
+
+    private boolean lastLineVisible() {
+        int y1 = taOutput.getVisibleRect().y;
+        int y2 = y1 + taOutput.getVisibleRect().height;
+        int lineHeight = taOutput.getFontMetrics(taOutput.getFont()).getHeight();
+        int endRow = (int) Math.floor((double) y2 / lineHeight);
+        return (endRow > 0) ? endRow == taOutput.getRows() : true;
 
     }
 
