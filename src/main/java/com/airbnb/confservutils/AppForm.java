@@ -64,7 +64,6 @@ import com.jidesoft.dialog.ButtonPanel;
 import com.jidesoft.dialog.StandardDialog;
 import confserverbatch.ObjectExistAction;
 import confserverbatch.SwitchLookup;
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -105,6 +104,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.event.MenuEvent;
@@ -2248,8 +2248,7 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     public void requestOutput(final String toString, final boolean printBlock) {
-        boolean shouldChangeCaret = taOutput.getCaretPosition() == taOutput.getDocument().getLength()
-                && lastLineVisible();
+        boolean shouldChangeCaret = lastLineVisible();
         logger.info(toString);
         if (printBlock) {
             taOutput.append("------------------------------------\n");
@@ -4008,13 +4007,13 @@ public final class AppForm extends javax.swing.JFrame {
         final int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            final HashMap<String, String> placeDN = new HashMap<>();
+            final ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
             try (BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile()))) {
                 String l;
                 while ((l = reader.readLine()) != null) {
                     final String[] split = StringUtils.split(l, ",");
                     if (ArrayUtils.isNotEmpty(split) && split.length >= 2) {
-                        placeDN.put(split[0], split[1]);
+                        placeDN.add(new Pair(split[0], split[1]));
                     } else {
                         requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
                     }
@@ -4033,7 +4032,7 @@ public final class AppForm extends javax.swing.JFrame {
                             switches.add(new SwitchLookup(configServerManager.getService(), "esv1_sipa1"));
                             switches.add(new SwitchLookup(configServerManager.getService(), "edn1_sipa1"));
                             switches.add(new SwitchLookup(configServerManager.getService(), "esg3_sipa1"));
-                            for (Map.Entry<String, String> entry : placeDN.entrySet()) {
+                            for (Pair<String, String> entry : placeDN) {
                                 String thePlace = entry.getKey();
                                 String theDN = entry.getValue();
                                 final HashMap<SwitchLookup, String> DNs = new HashMap<>();
@@ -4061,7 +4060,7 @@ public final class AppForm extends javax.swing.JFrame {
         }
     }
 
-    private boolean shouldImportCSV(final HashMap<String, String> placeDN) {
+    private boolean shouldImportCSV(final ArrayList<Pair<String, String>> placeDN) {
 
         DefaultTableModel infoTableModel = new DefaultTableModel() {
             @Override
@@ -4073,7 +4072,7 @@ public final class AppForm extends javax.swing.JFrame {
 
         infoTableModel.addColumn("Place");
         infoTableModel.addColumn("DN");
-        for (Map.Entry<String, String> entry : placeDN.entrySet()) {
+        for (Pair<String, String> entry : placeDN) {
             String place = entry.getKey();
             String dn = entry.getValue();
             infoTableModel.addRow(new Object[]{place, dn});
@@ -4089,14 +4088,15 @@ public final class AppForm extends javax.swing.JFrame {
         tca.setDynamicAdjustment(true);
         tca.adjustColumns();
 
-        JPanel jp = new JPanel(new BorderLayout());
-        jp.add(tab);
-        Dimension preferredSize = tab.getPreferredSize();
+        JScrollPane jp = new JScrollPane(tab);
+//        jp.add(tab);
 
+        Dimension preferredSize = new Dimension(600, 200);
         jp.setPreferredSize(preferredSize);
 
-        Utils.InfoPanel dlg = new Utils.InfoPanel(this, "Do you want to import following Place/DN", jp,
+        Utils.InfoPanel dlg = new Utils.InfoPanel(this, "Do you want to import following Place/DN (total "+placeDN.size()+")", jp,
                 JOptionPane.OK_CANCEL_OPTION);
+        Utils.ScreenInfo.CenterWindow(dlg);
         dlg.showModal();
 
         return dlg.getDialogResult() == JOptionPane.OK_OPTION;
