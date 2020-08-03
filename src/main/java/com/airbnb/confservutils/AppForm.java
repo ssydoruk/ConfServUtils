@@ -2590,7 +2590,8 @@ public final class AppForm extends javax.swing.JFrame {
                 workStarted(true);
                 try {
                     fun.fun();
-                } catch (ConfigException | InterruptedException e) {
+                } catch (Exception e) {
+                    requestOutput("----Exception while in thread: " + e.getMessage() + "\n\t" + StringUtils.join(e.getStackTrace(), "\n\t")+"\n-------\n");
                     ex = e;
                 }
                 return null;
@@ -2603,10 +2604,7 @@ public final class AppForm extends javax.swing.JFrame {
                 if (ex != null) {
                     if (ex instanceof InterruptedException) {
                         requestOutput("Interrupted", false);
-                    } else {
-                        requestOutput("Exception processing: " + ex.toString() + "\n"
-                                + StringUtils.join(ex.getStackTrace(), "\n"), false);
-                    }
+                    } 
                 } else {
                     if (endFun != null) {
                         try {
@@ -4032,6 +4030,10 @@ public final class AppForm extends javax.swing.JFrame {
                             switches.add(new SwitchLookup(configServerManager.getService(), "esv1_sipa1"));
                             switches.add(new SwitchLookup(configServerManager.getService(), "edn1_sipa1"));
                             switches.add(new SwitchLookup(configServerManager.getService(), "esg3_sipa1"));
+
+                            ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+
+                            eod.init(ObjectExistAction.UNKNOWN, theForm);
                             for (Pair<String, String> entry : placeDN) {
                                 String thePlace = entry.getKey();
                                 String theDN = entry.getValue();
@@ -4043,7 +4045,11 @@ public final class AppForm extends javax.swing.JFrame {
                                 for (final SwitchLookup switchLookup : DNs.keySet()) {
                                     DNs.put(switchLookup, theDN);
                                 }
-                                configServerManager.createPlace(thePlace, DNs, ObjectExistAction.RECREATE);
+                                if (configServerManager.createPlace(thePlace, DNs, eod) == null) // stop creating
+                                {
+                                    requestOutput("****** Import aborted *******");
+                                    break;
+                                }
                             }
                         }
                     }
@@ -4094,7 +4100,7 @@ public final class AppForm extends javax.swing.JFrame {
         Dimension preferredSize = new Dimension(600, 200);
         jp.setPreferredSize(preferredSize);
 
-        Utils.InfoPanel dlg = new Utils.InfoPanel(this, "Do you want to import following Place/DN (total "+placeDN.size()+")", jp,
+        Utils.InfoPanel dlg = new Utils.InfoPanel(this, "Do you want to import following Place/DN (total " + placeDN.size() + ")", jp,
                 JOptionPane.OK_CANCEL_OPTION);
         Utils.ScreenInfo.CenterWindow(dlg);
         dlg.showModal();

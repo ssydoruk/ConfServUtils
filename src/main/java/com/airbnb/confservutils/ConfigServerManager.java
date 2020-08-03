@@ -32,7 +32,6 @@ import com.genesyslab.platform.configuration.protocol.types.CfgErrorType;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
-import confserverbatch.ObjectExistAction;
 import confserverbatch.SwitchLookup;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -421,65 +421,80 @@ public class ConfigServerManager {
     }
 
     private boolean placeDNsEqual(Collection<CfgDN> placeDNs, ArrayList<CfgDN> cfgDNs) {
-        if (placeDNs.size() == cfgDNs.size() && placeDNs.size() > 0) {
-            for (CfgDN dn : placeDNs) {
-                int i = 0;
-                for (; i < cfgDNs.size(); i++) {
-                    if (dn.getDBID() == cfgDNs.get(i).getDBID()) {
-                        break;
+        logger.info("placeDNsEqual: placeDNs: " + StringUtils.join(placeDNs, ",") + "; DNs: " + StringUtils.join(cfgDNs, ","));
+        if (placeDNs.size() > 0) {
+            if (placeDNs.size() == cfgDNs.size()) {
+                for (CfgDN placeDN : placeDNs) {
+                    int i = 0;
+                    for (; i < cfgDNs.size(); i++) {
+                        logger.debug("comparing " + placeDN.getDBID() + " vs " + cfgDNs.get(i).getDBID());
+                        if (placeDN.getDBID().intValue() == cfgDNs.get(i).getDBID().intValue()) {
+                            break;
+                        }
+                    }
+                    if (i == cfgDNs.size()) {
+                        return false;
                     }
                 }
-                if (i == cfgDNs.size()) {
-                    return false;
-                }
+            } else {
+                return false;
             }
         }
         return true;
     }
 
-    private CfgPlace createPlace(String pl, ArrayList<CfgDN> cfgDNs, ObjectExistAction objExistAction) throws ConfigException {
+    private CfgPlace createPlace(String plName, ArrayList<CfgDN> cfgDNs, ExistingObjectDecider eod) throws ConfigException {
         try {
-            return doCreatePlace(service, pl, cfgDNs);
+            return doCreatePlace(service, plName, cfgDNs);
         } catch (ConfigException ex) {
 //            switch(objExistaction)
-            logger.info("DN exists; " + objExistAction);
-            if (ex instanceof ConfigServerException
-                    && ((ConfigServerException) ex).getErrorType() == CfgErrorType.CFGUniquenessViolation) {
-                switch (objExistAction) {
+            if (ex instanceof ConfigServerException) {
+                CfgPlace cfgPlace = findPlace(service, plName, true);
+                parentForm.requestOutput("Place exists ");
+                switch (eod.getCurrentAction(makeString(cfgPlace), makeString(getDependend(cfgPlace)))) {
                     case RECREATE:
-                        CfgPlace cfgPlace = findPlace(service, pl, true);
+                        parentForm.requestOutput("Recreating place");
                         cfgPlace.delete();
-                        return doCreatePlace(service, pl, cfgDNs);
+                        parentForm.requestOutput(cfgPlace.getName() + " deleted");
+                        return doCreatePlace(service, plName, cfgDNs);
 
                     case REUSE:
-                        CfgPlace ret = findPlace(service, pl, true);
-                        if (ret != null) {
-                            if (!placeDNsEqual(ret.getDNs(), cfgDNs)) {
+                        parentForm.requestOutput("Reusing place " + cfgPlace.getName());
+                        if (cfgPlace != null) {
+                            if (!placeDNsEqual(cfgPlace.getDNs(), cfgDNs)) {
                                 parentForm.requestOutput("Place found but DNs are different. Cannot reuse");
-                                break; //this will ensure exception thrown
+                                return null; //this will ensure exception thrown
 
                             }
 
                         }
-                        return ret;
+                        return cfgPlace;
+
+                    case FAIL:
+                        return null;
 
                     default:
                         break;//fails
                 }
+            } else {
+                logger.error("Unexpected exception " + ex);
             }
             throw ex;
         }
 
     }
 
-    public void createPlace(String pl, HashMap<SwitchLookup, String> theDNs, ObjectExistAction objectExistAction) throws ConfigException {
+    public CfgPlace createPlace(String pl, HashMap<SwitchLookup, String> theDNs, ExistingObjectDecider eod) throws ConfigException {
         ArrayList<CfgDN> cfgDNs = new ArrayList<>();
         for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
-            cfgDNs.add(createExtDN(entry.getKey(),
-                    entry.getValue(), objectExistAction));
+            CfgDN newDN = createExtDN(entry.getKey(), entry.getValue(), eod);
+            if (newDN == null) {
+                return null;
+            }
+            cfgDNs.add(newDN);
         }
 
-        CfgPlace cfgPlace = createPlace(pl, cfgDNs, objectExistAction);
+        return createPlace(pl, cfgDNs, eod);
     }
 
     private CfgDN doCreateDN(IConfService service,
@@ -524,30 +539,74 @@ public class ConfigServerManager {
 
     }
 
-    private CfgDN createExtDN(SwitchLookup key, String value, ObjectExistAction objExistAction) throws ConfigException {
+    private CfgDN createExtDN(SwitchLookup key, String value, ExistingObjectDecider eod) throws ConfigException {
         String name = key.getSw().getName() + "_" + value;
         try {
             return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw());
         } catch (ConfigException ex) {
 //            switch(objExistaction)
-            parentForm.requestOutput("DN exists; " + objExistAction);
             if (ex instanceof ConfigServerException
                     && ((ConfigServerException) ex).getErrorType() == CfgErrorType.CFGUniquenessViolation) {
-                switch (objExistAction) {
+                CfgDN cfgDN = findDN(service, name, key.getSw(), true);
+                parentForm.requestOutput("DN exists: " + cfgDN.getNumber());
+                switch (eod.getCurrentAction(makeString(cfgDN), makeString(getDependend(cfgDN)))) {
                     case RECREATE:
-                        CfgDN cfgDN = findDN(service, name, key.getSw(), true);
+                        parentForm.requestOutput("Recreating");
                         cfgDN.delete();
+                        parentForm.requestOutput(cfgDN.getNumber() + " deleted");
                         return doCreateDN(service, cfgDN.getNumber(), cfgDN.getName(), cfgDN.getType(),
                                 cfgDN.getSwitch());
 
                     case REUSE:
-                        return findDN(service, name, key.getSw(), true);
+                        parentForm.requestOutput("Reusing DN " + cfgDN.getNumber());
+                        return cfgDN;
 
-                    default:
-                        break;//fails
+                    case FAIL:
+                        return null;
                 }
+            } else {
+
+                parentForm.requestOutput(ex.getMessage());
             }
             throw ex;
         }
+    }
+
+    private CfgObject getDependend(CfgObject cfgObj) {
+        if (cfgObj instanceof CfgDN) {
+            CfgDN dn = (CfgDN) cfgObj;
+
+            CfgPlaceQuery plQuery = new CfgPlaceQuery();
+            plQuery.setDnDbid(dn.getDBID());
+
+            try {
+                //        parentForm.requestOutput("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
+                return service.retrieveObject(CfgPlace.class, plQuery);
+            } catch (ConfigException ex) {
+                logger.error(ex);
+                return null;
+            }
+//        } else if (cfgObj instanceof CfgPlace) {
+//            CfgPlace pl = (CfgPlace) cfgObj;
+//
+//            CfgPersonQuery personQuery = new CfgPersonQuery();
+//            CfgAg
+//            personQuery.set(pl.getDBID());
+//
+//            try {
+//                //        parentForm.requestOutput("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
+//                return service.retrieveObject(CfgPlace.class, personQuery);
+//            } catch (ConfigException ex) {
+//                logger.error(ex);
+//                return null;
+//            }
+        } else {
+            return null;
+        }
+    }
+
+    private String makeString(CfgObject cfgObj) {
+        return (cfgObj == null) ? ""
+                : cfgObj.getObjectPath() + "\n" + cfgObj.toString();
     }
 }
