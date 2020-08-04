@@ -13,11 +13,66 @@ import com.genesyslab.platform.applicationblocks.com.ConfigServerException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.WellKnownDBIDs;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgActionCode;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAlarmCondition;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDNGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumerator;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumeratorValue;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgFolder;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgGVPIVRProfile;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgIVR;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgIVRPort;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectiveTable;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPlaceGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgService;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSkill;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgStatDay;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgStatTable;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgTenant;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgTimeZone;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgTreatment;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgVoicePrompt;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAccessGroupQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgActionCodeQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentLoginQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgAlarmConditionQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgDNGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorValueQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgFolderQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgGVPIVRProfileQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgIVRPortQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgIVRQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgObjectiveTableQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgPersonQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgServiceQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgSkillQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgStatDayQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgStatTableQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTenantQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTimeZoneQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgTreatmentQuery;
+import com.genesyslab.platform.applicationblocks.com.queries.CfgVoicePromptQuery;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.protocol.ChannelState;
@@ -498,7 +553,7 @@ public class ConfigServerManager {
     }
 
     private CfgDN doCreateDN(IConfService service,
-            String Number,
+            String theNumber,
             String name,
             CfgDNType type,
             CfgSwitch sw) throws ConfigException {
@@ -508,7 +563,7 @@ public class ConfigServerManager {
         dn.setName(name);
         dn.setSwitch(sw);
         dn.setType(type);
-        dn.setNumber(Number);
+        dn.setNumber(theNumber);
         dn.setSwitchSpecificType(1);
         dn.setRouteType(CfgRouteType.CFGDefault);
         dn.save();
@@ -608,5 +663,877 @@ public class ConfigServerManager {
     private String makeString(CfgObject cfgObj) {
         return (cfgObj == null) ? ""
                 : cfgObj.getObjectPath() + "\n" + cfgObj.toString();
+    }
+
+    /**
+     *
+     * @param <T>
+     * @param q
+     * @param cls
+     * @param props
+     * @param ss
+     * @param checkNames
+     * @param foundProc
+     * @return true if interrupted
+     * @throws ConfigException
+     * @throws InterruptedException
+     */
+    public <T extends CfgObject> boolean findObjects(final CfgQuery q, final Class<T> cls, final IKeyValueProperties props, final FindWorker ss, final boolean checkNames, final ICfgObjectFoundProc foundProc) throws ConfigException, InterruptedException {
+        int cnt = 0;
+        final HashMap<CfgObject, KeyValueCollection> matchedObjects = new HashMap<>();
+        final StringBuilder buf = new StringBuilder();
+        final Collection<T> cfgObjs = getResults(q, cls);
+        if (cfgObjs != null && !cfgObjs.isEmpty()) {
+            for (final CfgObject cfgObj : cfgObjs) {
+                final KeyValueCollection kv = ss.matchConfigObject(cfgObj, props, checkNames);
+                if (kv != null) {
+                    cnt++;
+                    if (foundProc == null) {
+                        if (ss.isFullOutputSelected()) {
+                            buf.append("----> path: ").append(cfgObj.getObjectPath()).append(" ").append(cfgObj.toString()).append("\n");
+                        } else {
+                            final Object[] names = props.getName(cfgObj).toArray();
+                            buf.append("----> \"").append(names[0]).append("\"").append(" path: ").append(cfgObj.getObjectPath()).append(", type:").append(cfgObj.getObjectType()).append(", DBID: ").append(cfgObj.getObjectDbid());
+                            if (names.length > 1) {
+                                buf.append("\n\t");
+                                int added = 1;
+                                for (int i = 1; i < names.length; i++) {
+                                    if (added > 1) {
+                                        buf.append(", ");
+                                    }
+                                    final Object obj = names[i];
+                                    if (obj != null) {
+                                        final String s = obj.toString();
+                                        if (StringUtils.isNotBlank(s)) {
+                                            buf.append(s);
+                                            added++;
+                                        }
+                                    }
+                                }
+                            }
+                            buf.append("\n");
+                            if (!kv.isEmpty()) {
+                                buf.append("\t").append(kv.toString()).append("\n\n");
+                            }
+                        }
+                    } else {
+                        matchedObjects.put(cfgObj, kv);
+                    }
+                }
+            }
+            if (foundProc != null) {
+                int i = 0;
+                parentForm.requestOutput("Search done, located " + cnt + " objects type " + cls.getSimpleName() + "\n");
+                for (final Map.Entry<CfgObject, KeyValueCollection> entry : matchedObjects.entrySet()) {
+                    if (!foundProc.proc(entry.getKey(), entry.getValue(), ++i, matchedObjects.size())) {
+                        return true;
+                    }
+                }
+            } else if (cnt > 0) {
+                parentForm.requestOutput("Search done, located " + cnt + " objects type " + cls.getSimpleName() + " -->\n" + buf + "<--\n");
+            }
+        }
+        return false;
+    }
+
+    boolean doTheSearch(final CfgObjectType t, final ISearchSettings pn, final boolean warnNotFound, final boolean checkNames, final ICfgObjectFoundProc foundProc) throws ConfigException, InterruptedException {
+        final IConfService service = parentForm.configServerManager.getService();
+        // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGDN">
+        if (t == CfgObjectType.CFGDN) {
+            final CfgDNQuery query = new CfgDNQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setDnNumber(n);
+            //
+            // }
+            if (findObjects(query, CfgDN.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgDN) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgDN) obj).getNumber());
+                    ret.add(((CfgDN) obj).getDNLoginID());
+                    ret.add(((CfgDN) obj).getName());
+                    ret.add(((CfgDN) obj).getOverride());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGSwitch) {
+            final CfgSwitchQuery query = new CfgSwitchQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            // CfgSwitchType selectedObjSubType = (CfgSwitchType)
+            // pn.getSelectedObjSubType();
+            // if (selectedObjSubType != null) {
+            // query.(selectedObjSubType);
+            // }
+            if (findObjects(query, CfgSwitch.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgSwitch) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgSwitch) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGAgentLogin) {
+            final CfgAgentLoginQuery query = new CfgAgentLoginQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setLoginCode(n);
+            //
+            // }
+            // CfgSwitchType selectedObjSubType = (CfgSwitchType)
+            // pn.getSelectedObjSubType();
+            // if (selectedObjSubType != null) {
+            // query.(selectedObjSubType);
+            // }
+            if (findObjects(query, CfgAgentLogin.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgAgentLogin) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgAgentLogin) obj).getLoginCode());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGPlace) {
+            final CfgPlaceQuery query = new CfgPlaceQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            // CfgSwitchType selectedObjSubType = (CfgSwitchType)
+            // pn.getSelectedObjSubType();
+            // if (selectedObjSubType != null) {
+            // query.(selectedObjSubType);
+            // }
+            if (findObjects(query, CfgPlace.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgPlace) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgPlace) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGPerson) {
+            final CfgPersonQuery query = new CfgPersonQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setUserName(n);
+            //
+            // }
+            // CfgSwitchType selectedObjSubType = (CfgSwitchType)
+            // pn.getSelectedObjSubType();
+            // if (selectedObjSubType != null) {
+            // query.(selectedObjSubType);
+            // }
+            if (findObjects(query, CfgPerson.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgPerson) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgPerson) obj).getUserName());
+                    ret.add(((CfgPerson) obj).getEmailAddress());
+                    ret.add(((CfgPerson) obj).getEmployeeID());
+                    ret.add(((CfgPerson) obj).getExternalID());
+                    ret.add(((CfgPerson) obj).getFirstName());
+                    ret.add(((CfgPerson) obj).getLastName());
+                    ret.add(((CfgPerson) obj).getPassword());
+                    ret.add(((CfgPerson) obj).getUserName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGAgentGroup) {
+            final CfgAgentGroupQuery query = new CfgAgentGroupQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgAgentGroup.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgAgentGroup) obj).getGroupInfo().getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgAgentGroup) obj).getGroupInfo().getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGDNGroup) {
+            final CfgDNGroupQuery query = new CfgDNGroupQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgDNGroup.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgDNGroup) obj).getGroupInfo().getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgDNGroup) obj).getGroupInfo().getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGPlaceGroup) {
+            final CfgPlaceGroupQuery query = new CfgPlaceGroupQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgPlaceGroup.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgPlaceGroup) obj).getGroupInfo().getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgPlaceGroup) obj).getGroupInfo().getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGScript) {
+            final CfgScriptQuery query = new CfgScriptQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            // CfgSwitchType selectedObjSubType = (CfgSwitchType)
+            // pn.getSelectedObjSubType();
+            // if (selectedObjSubType != null) {
+            // query.(selectedObjSubType);
+            // }
+            if (findObjects(query, CfgScript.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgScript) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgScript) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+            // </editor-fold>
+            // <editor-fold defaultstate="collapsed" desc="CfgObjectType.CFGTransaction">
+        } else if (t == CfgObjectType.CFGTransaction) {
+            final CfgTransactionQuery query = new CfgTransactionQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgTransaction.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgTransaction) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTransaction) obj).getName());
+                    ret.add(((CfgTransaction) obj).getAlias());
+                    ret.add(((CfgTransaction) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGEnumerator) {
+            final CfgEnumeratorQuery query = new CfgEnumeratorQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgEnumerator.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgEnumerator) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgEnumerator) obj).getName());
+                    ret.add(((CfgEnumerator) obj).getDescription());
+                    ret.add(((CfgEnumerator) obj).getDisplayName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGEnumeratorValue) {
+            final CfgEnumeratorValueQuery query = new CfgEnumeratorValueQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgEnumeratorValue.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgEnumeratorValue) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgEnumeratorValue) obj).getName());
+                    ret.add(((CfgEnumeratorValue) obj).getDescription());
+                    ret.add(((CfgEnumeratorValue) obj).getDisplayName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGGVPIVRProfile) {
+            final CfgGVPIVRProfileQuery query = new CfgGVPIVRProfileQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgGVPIVRProfile.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgGVPIVRProfile) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgGVPIVRProfile) obj).getName());
+                    ret.add(((CfgGVPIVRProfile) obj).getDescription());
+                    ret.add(((CfgGVPIVRProfile) obj).getDisplayName());
+                    ret.add(((CfgGVPIVRProfile) obj).getNotes());
+                    ret.add(((CfgGVPIVRProfile) obj).getStatus());
+                    ret.add(((CfgGVPIVRProfile) obj).getTfn());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGAccessGroup) {
+            final CfgAccessGroupQuery query = new CfgAccessGroupQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgAccessGroup.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return null;
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGActionCode) {
+            final CfgActionCodeQuery query = new CfgActionCodeQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgActionCode.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgActionCode) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgActionCode) obj).getName());
+                    ret.add(((CfgActionCode) obj).getCode());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGAlarmCondition) {
+            final CfgAlarmConditionQuery query = new CfgAlarmConditionQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgAlarmCondition.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgAlarmCondition) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgAlarmCondition) obj).getName());
+                    ret.add(((CfgAlarmCondition) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGApplication) {
+            final CfgApplicationQuery query = new CfgApplicationQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgApplication.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgApplication) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgApplication) obj).getName());
+                    ret.add(((CfgApplication) obj).getCommandLine());
+                    ret.add(((CfgApplication) obj).getCommandLineArguments());
+                    ret.add(((CfgApplication) obj).getWorkDirectory());
+                    ret.add(((CfgApplication) obj).getVersion());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGFolder) {
+            final CfgFolderQuery query = new CfgFolderQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgFolder.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgFolder) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgFolder) obj).getName());
+                    ret.add(((CfgFolder) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGHost) {
+            final CfgHostQuery query = new CfgHostQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgHost.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgHost) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgHost) obj).getName());
+                    ret.add(((CfgHost) obj).getIPaddress());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGTenant) {
+            final CfgTenantQuery query = new CfgTenantQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgTenant.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgTenant) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTenant) obj).getName());
+                    ret.add(((CfgTenant) obj).getChargeableNumber());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGIVRPort) {
+            final CfgIVRPortQuery query = new CfgIVRPortQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setPortNumber(n);
+            //
+            // }
+            if (findObjects(query, CfgIVRPort.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgIVRPort) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgIVRPort) obj).getDescription());
+                    ret.add(((CfgIVRPort) obj).getPortNumber());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGIVR) {
+            final CfgIVRQuery query = new CfgIVRQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgIVR.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgIVR) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgIVR) obj).getDescription());
+                    ret.add(((CfgIVR) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGObjectiveTable) {
+            final CfgObjectiveTableQuery query = new CfgObjectiveTableQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgObjectiveTable.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgObjectiveTable) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgObjectiveTable) obj).getDescription());
+                    ret.add(((CfgObjectiveTable) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGService) {
+            final CfgServiceQuery query = new CfgServiceQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgService.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgService) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgService) obj).getName());
+                    ret.add(((CfgService) obj).getVersion());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGSkill) {
+            final CfgSkillQuery query = new CfgSkillQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgSkill.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgSkill) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgSkill) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGStatDay) {
+            final CfgStatDayQuery query = new CfgStatDayQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgStatDay.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgStatDay) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgStatDay) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGStatTable) {
+            final CfgStatTableQuery query = new CfgStatTableQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgStatTable.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgStatTable) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgStatTable) obj).getName());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGTimeZone) {
+            final CfgTimeZoneQuery query = new CfgTimeZoneQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgTimeZone.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgTimeZone) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTimeZone) obj).getName());
+                    ret.add(((CfgTimeZone) obj).getDescription());
+                    ret.add(((CfgTimeZone) obj).getNameMSExplorer());
+                    ret.add(((CfgTimeZone) obj).getNameNetscape());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGTreatment) {
+            final CfgTreatmentQuery query = new CfgTreatmentQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgTreatment.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgTreatment) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgTreatment) obj).getName());
+                    ret.add(((CfgTreatment) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGVoicePrompt) {
+            final CfgVoicePromptQuery query = new CfgVoicePromptQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgVoicePrompt.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return ((CfgVoicePrompt) obj).getUserProperties();
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgVoicePrompt) obj).getName());
+                    ret.add(((CfgVoicePrompt) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else {
+            if (warnNotFound) {
+                logger.info("Searching for type " + t + " not implemented yet");
+            }
+        }
+        return true;
+    }
+
+    private void execQuery(final CfgQuery query, final ISearchNamedProperties objProperties, final BussAttr searchParams) throws ConfigException, InterruptedException {
+        final Collection<CfgObject> cfgObjs = query.execute();
+        final StringBuilder buf = new StringBuilder();
+        if (cfgObjs == null || cfgObjs.isEmpty()) {
+            logger.debug("no objects found\n", false);
+        } else {
+            logger.debug("retrieved " + cfgObjs.size() + " total objects");
+            final int flags = ((searchParams.isRegex()) ? Pattern.LITERAL : 0) | ((searchParams.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
+            final String val = searchParams.getName();
+            final Pattern ptVal = (val == null) ? null : Pattern.compile(val, flags);
+            int cnt = 0;
+            for (final CfgObject cfgObj : cfgObjs) {
+                final String[] namedProperties = objProperties.getNamedProperties(cfgObj);
+                boolean found = false;
+                for (final String namedProperty : namedProperties) {
+                    if (matching(ptVal, namedProperty)) {
+                        found = true;
+                        cnt++;
+                        break;
+                    }
+                }
+                if (found) {
+                    if (searchParams.isFullOutputSelected()) {
+                        buf.append(cfgObj.toString());
+                    } else {
+                        buf.append(objProperties.getShortPrint(cfgObj));
+                    }
+                    buf.append("\n");
+                }
+            }
+            if (cnt > 0) {
+                parentForm.requestOutput("Filtering done\n" + buf);
+            }
+        }
     }
 }

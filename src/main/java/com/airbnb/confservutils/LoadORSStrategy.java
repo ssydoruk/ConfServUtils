@@ -438,7 +438,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 //                setQueryNameFilter(query, objName.getName(), objName.isRegex());
             query.setScriptType(CfgScriptType.CFGEnhancedRouting);
 
-            if (theForm.findObjects(
+            if (configServerManager.findObjects(
                     query,
                     CfgScript.class,
                     new IKeyValueProperties() {
@@ -546,7 +546,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 //                setQueryNameFilter(query, objName.getName(), objName.isRegex());
             query.setDnType(CfgDNType.CFGRoutingPoint);
 
-            if (theForm.findObjects(
+            if (configServerManager.findObjects(
                     query,
                     CfgDN.class,
                     new IKeyValueProperties() {
