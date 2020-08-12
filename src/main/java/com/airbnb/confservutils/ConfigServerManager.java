@@ -576,7 +576,7 @@ public class ConfigServerManager {
                 throw new ConfigException("Place [" + placeName + "]");
             }
         } else {
-            parentForm.requestOutput("Found " + "Place [" + placeName + "] DBID=" + cfgPlace.getDBID());
+            logger.info("Found " + "Place [" + placeName + "] DBID=" + cfgPlace.getDBID());
         }
 
         return cfgPlace;
@@ -1020,7 +1020,7 @@ public class ConfigServerManager {
     ) throws ConfigException {
         CfgDNQuery dnQuery = new CfgDNQuery();
 
-        dnQuery.setName(dn);
+        dnQuery.setDnNumber(dn);
         dnQuery.setSwitchDbid(sw.getDBID());
 
         logger.info("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
@@ -1030,7 +1030,7 @@ public class ConfigServerManager {
                 throw new ConfigException("DN [" + dn + "] switch[" + sw.getName() + "]");
             }
         } else {
-            parentForm.requestOutput("found " + "DN [" + dn + "] switch[" + sw.getName() + "] DBID:" + cfgDn.getDBID());
+            logger.info("found " + "DN [" + dn + "] switch[" + sw.getName() + "] DBID:" + cfgDn.getDBID());
         }
         return cfgDn;
 
