@@ -52,9 +52,10 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
     /**
      * Creates new form AppByDBID
      */
-    public LoadORSStrategy(AppForm _theForm) {
+    public LoadORSStrategy(AppForm _theForm, ConfigServerManager _configServerManager) {
         initComponents();
         theForm = _theForm;
+        configServerManager=_configServerManager;
         Border b = jpRoutingPoints.getBorder();
         sRPsTitle = (b instanceof TitledBorder) ? ((TitledBorder) b).getTitle() : null;
         b = jpORSStrategies.getBorder();
@@ -233,8 +234,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
     boolean yesToAll;
     UpdateCFGObjectProcessor upd = null;
 
-    void doUpdate(ConfigServerManager configServerManager) {
-        this.configServerManager = configServerManager;
+    void doUpdate() {
         yesToAll = false;
         String selApp = (String) ((ComboItem) jcbORSStrategies.getSelectedItem()).getObj();
 

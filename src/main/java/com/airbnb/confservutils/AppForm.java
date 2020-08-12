@@ -724,8 +724,6 @@ public final class AppForm extends javax.swing.JFrame {
         }
     }// GEN-LAST:event_miObjByDBIDActionPerformed
 
-    
-
     RequestDialog appByIP = null;
 
     private boolean componentsEnabled;
@@ -1504,13 +1502,13 @@ public final class AppForm extends javax.swing.JFrame {
         upd = null;
 
         if (loadORSStrategy == null) {
-            panelLoadORSStrategy = new LoadORSStrategy(this);
+            panelLoadORSStrategy = new LoadORSStrategy(this, configServerManager);
             loadORSStrategy = new RequestDialog(this, panelLoadORSStrategy, (JMenuItem) evt.getSource());
         }
 
         if (connectToConfigServer()) {
             if (loadORSStrategy.doShow("Load ORS strategies on routing points", panelLoadORSStrategy)) {
-                panelLoadORSStrategy.doUpdate(configServerManager);
+                panelLoadORSStrategy.doUpdate();
             }
         }
     }// GEN-LAST:event_jmLoadStrategyActionPerformed
@@ -1938,25 +1936,7 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     private boolean connectToConfigServer() {
-        /*
-         * String configServerHost = "10.61.6.55"; // String
-         * configServerHost="esv1-c-ppe-46.ivr.airbnb.biz"; int configServerPort = 2025;
-         * String configServerUser = "stepan.sydoruk@ext.airbnb.com.admin"; String
-         * configServerPass = "CCbljher72~pAOk6NiP";
-         * 
-         * String tempAppName = "AppName4Test"; // Uniq name for temp app to be created,
-         * // changed and deleted. String tempAgentName = "AgentName4Test"; // Uniq name
-         * for temp agent to be created, // changed and deleted.
-         * 
-         * logger.info("ComJavaQuickStart started execution.");
-         * 
-         * String someAppName = "default"; // if (someAppName == null ||
-         * someAppName.equals("")) { // someAppName = "default"; // } //
-         * configServerHost = properties.getString("ConfServerHost"); //
-         * configServerPort = Integer.parseInt(properties.getString("ConfServerPort"));
-         * // configServerUser = properties.getString("ConfServerUser"); //
-         * configServerPass = properties.getString("ConfServerPassword");
-         */
+
         if (configServerManager.isConnected()) {
             return true;
         } else {
