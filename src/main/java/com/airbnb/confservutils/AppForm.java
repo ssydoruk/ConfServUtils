@@ -292,7 +292,7 @@ public final class AppForm extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
-    // Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
@@ -337,7 +337,9 @@ public final class AppForm extends javax.swing.JFrame {
         miBufferingOn = new javax.swing.JMenuItem();
         jmLoadStrategy = new javax.swing.JMenuItem();
         miRestartService = new javax.swing.JMenuItem();
+        jMenu5 = new javax.swing.JMenu();
         miImportCSV = new javax.swing.JMenuItem();
+        miCheckDNPlaceExists = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -354,8 +356,7 @@ public final class AppForm extends javax.swing.JFrame {
 
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
 
-        cbConfigServer.setModel(
-                new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbConfigServer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbConfigServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbConfigServerActionPerformed(evt);
@@ -380,8 +381,7 @@ public final class AppForm extends javax.swing.JFrame {
         jLabel1.setText("CME user");
         jPanel6.add(jLabel1);
 
-        cbUser.setModel(
-                new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbUser.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jPanel6.add(cbUser);
 
         jPanel5.add(jPanel6);
@@ -413,12 +413,20 @@ public final class AppForm extends javax.swing.JFrame {
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
-                        .addContainerGap(475, Short.MAX_VALUE).addComponent(jButton2).addGap(43, 43, 43)));
-        jPanel8Layout.setVerticalGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel8Layout.createSequentialGroup().addContainerGap().addComponent(jButton2)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                .addContainerGap(475, Short.MAX_VALUE)
+                .addComponent(jButton2)
+                .addGap(43, 43, 43))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         jPanel2.add(jPanel8);
 
@@ -592,13 +600,25 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu2.add(miRestartService);
 
+        jMenu5.setText("Process CSV");
+
         miImportCSV.setText("Import Place / DN");
         miImportCSV.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 miImportCSVActionPerformed(evt);
             }
         });
-        jMenu2.add(miImportCSV);
+        jMenu5.add(miImportCSV);
+
+        miCheckDNPlaceExists.setText("Check if Place /DN exists");
+        miCheckDNPlaceExists.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miCheckDNPlaceExistsActionPerformed(evt);
+            }
+        });
+        jMenu5.add(miCheckDNPlaceExists);
+
+        jMenu2.add(jMenu5);
 
         jMenuBar1.add(jMenu2);
 
@@ -614,6 +634,10 @@ public final class AppForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
+        verifyCSV();
+    }//GEN-LAST:event_miCheckDNPlaceExistsActionPerformed
 
     private void btEditConfgServActionPerformed(final java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btEditConfgServActionPerformed
 
@@ -634,7 +658,7 @@ public final class AppForm extends javax.swing.JFrame {
         // for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
         // values.add(new Object[]{hi.getHost(), hi.getInstance(), hi.getBaseDir()});
         // }
-        confServEditor.setData(new Object[] { "Profile", "CS host", "CS port", "CME application" }, values);
+        confServEditor.setData(new Object[]{"Profile", "CS host", "CS port", "CME application"}, values);
         confServEditor.doShow();
         ds.loadConfServs(confServEditor.getData());
         loadConfigServers();
@@ -685,7 +709,7 @@ public final class AppForm extends javax.swing.JFrame {
 
                                 buf.append("Object type:").append(retrieveObject.getObjectType()).append(" DBID:")
                                         .append(retrieveObject.getObjectDbid()).append(" name: ")
-                                        .append(getObjName(retrieveObject));
+                                        .append(ConfigServerManager.getObjName(retrieveObject));
                                 requestOutput(buf.toString());
                             }
                         } else {
@@ -700,278 +724,7 @@ public final class AppForm extends javax.swing.JFrame {
         }
     }// GEN-LAST:event_miObjByDBIDActionPerformed
 
-    private String getObjName(final ICfgObject retrieveObject) {
-        if (retrieveObject instanceof CfgAccessGroup) {
-            return ((CfgAccessGroup) retrieveObject).getObjectPath();
-        } else if (retrieveObject instanceof CfgAccessGroupBrief) {
-            return ((CfgAccessGroupBrief) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgACE) {
-            return ((CfgACE) retrieveObject).getID().toString();
-        } else if (retrieveObject instanceof CfgACEID) {
-            return ((CfgACEID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgACL) {
-            return ((CfgACL) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgACLID) {
-            return ((CfgACLID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgActionCode) {
-            return ((CfgActionCode) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgAddress) {
-            return ((CfgAddress) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgAgentGroup) {
-            return ((CfgAgentGroup) retrieveObject).getGroupInfo().toString();
-        } else if (retrieveObject instanceof CfgAgentInfo) {
-            return ((CfgAgentInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgAgentLogin) {
-            return ((CfgAgentLogin) retrieveObject).getLoginCode();
-        } else if (retrieveObject instanceof CfgAgentLoginInfo) {
-            return ((CfgAgentLoginInfo) retrieveObject).getAgentLogin().getLoginCode();
-        } else if (retrieveObject instanceof CfgAlarmCondition) {
-            return ((CfgAlarmCondition) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgApplication) {
-            return ((CfgApplication) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgAppPrototype) {
-            return ((CfgAppPrototype) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgAppRank) {
-            return ((CfgAppRank) retrieveObject).getAppRank().toString();
-        } else if (retrieveObject instanceof CfgAppServicePermission) {
-            return ((CfgAppServicePermission) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgCallingList) {
-            return ((CfgCallingList) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgCallingListInfo) {
-            return ((CfgCallingListInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgCampaign) {
-            return ((CfgCampaign) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgCampaignGroup) {
-            return ((CfgCampaignGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgCampaignGroupInfo) {
-            return ((CfgCampaignGroupInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgConnInfo) {
-            return ((CfgConnInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDelSwitchAccess) {
-            return ((CfgDelSwitchAccess) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAccessGroup) {
-            return ((CfgDeltaAccessGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaActionCode) {
-            return ((CfgDeltaActionCode) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaAgentGroup) {
-            return ((CfgDeltaAgentGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAgentInfo) {
-            return ((CfgDeltaAgentInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAgentLogin) {
-            return ((CfgDeltaAgentLogin) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAlarmCondition) {
-            return ((CfgDeltaAlarmCondition) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaApplication) {
-            return ((CfgDeltaApplication) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaAppPrototype) {
-            return ((CfgDeltaAppPrototype) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaCallingList) {
-            return ((CfgDeltaCallingList) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaCampaign) {
-            return ((CfgDeltaCampaign) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaCampaignGroup) {
-            return ((CfgDeltaCampaignGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaDN) {
-            return ((CfgDeltaDN) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaDNGroup) {
-            return ((CfgDeltaDNGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaEnumerator) {
-            return ((CfgDeltaEnumerator) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaEnumeratorValue) {
-            return ((CfgDeltaEnumeratorValue) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaField) {
-            return ((CfgDeltaField) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaFilter) {
-            return ((CfgDeltaFilter) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaFolder) {
-            return ((CfgDeltaFolder) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaFormat) {
-            return ((CfgDeltaFormat) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGroup) {
-            return ((CfgDeltaGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGVPCustomer) {
-            return ((CfgDeltaGVPCustomer) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGVPIVRProfile) {
-            return ((CfgDeltaGVPIVRProfile) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGVPReseller) {
-            return ((CfgDeltaGVPReseller) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaHost) {
-            return ((CfgDeltaHost) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaIVR) {
-            return ((CfgDeltaIVR) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaIVRPort) {
-            return ((CfgDeltaIVRPort) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaObjectiveTable) {
-            return ((CfgDeltaObjectiveTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaPerson) {
-            return ((CfgDeltaPerson) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaPersonLastLogin) {
-            return ((CfgDeltaPersonLastLogin) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaPhysicalSwitch) {
-            return ((CfgDeltaPhysicalSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaPlace) {
-            return ((CfgDeltaPlace) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaPlaceGroup) {
-            return ((CfgDeltaPlaceGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaRole) {
-            return ((CfgDeltaRole) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaScheduledTask) {
-            return ((CfgDeltaScheduledTask) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaScript) {
-            return ((CfgDeltaScript) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaService) {
-            return ((CfgDeltaService) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaSkill) {
-            return ((CfgDeltaSkill) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaStatDay) {
-            return ((CfgDeltaStatDay) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaStatTable) {
-            return ((CfgDeltaStatTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaSwitch) {
-            return ((CfgDeltaSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTableAccess) {
-            return ((CfgDeltaTableAccess) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTenant) {
-            return ((CfgDeltaTenant) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTimeZone) {
-            return ((CfgDeltaTimeZone) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTransaction) {
-            return ((CfgDeltaTransaction) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTreatment) {
-            return ((CfgDeltaTreatment) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaVoicePrompt) {
-            return ((CfgDeltaVoicePrompt) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDetectEvent) {
-            return ((CfgDetectEvent) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDN) {
-            return ((CfgDN) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDNAccessNumber) {
-            return ((CfgDNAccessNumber) retrieveObject).getNumber();
-        } else if (retrieveObject instanceof CfgDNGroup) {
-            return ((CfgDNGroup) retrieveObject).getType().toString();
-        } else if (retrieveObject instanceof CfgDNInfo) {
-            return ((CfgDNInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgEnumerator) {
-            return ((CfgEnumerator) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgEnumeratorValue) {
-            return ((CfgEnumeratorValue) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgField) {
-            return ((CfgField) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgFilter) {
-            return ((CfgFilter) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgFolder) {
-            return ((CfgFolder) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgFormat) {
-            return ((CfgFormat) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGroup) {
-            return ((CfgGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGVPCustomer) {
-            return ((CfgGVPCustomer) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGVPIVRProfile) {
-            return ((CfgGVPIVRProfile) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGVPReseller) {
-            return ((CfgGVPReseller) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgHost) {
-            return ((CfgHost) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgID) {
-            return ((CfgID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgIVR) {
-            return ((CfgIVR) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgIVRPort) {
-            return ((CfgIVRPort) retrieveObject).getPortNumber();
-        } else if (retrieveObject instanceof CfgMemberID) {
-            return ((CfgMemberID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgObjectID) {
-            return ((CfgObjectID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgObjectiveTable) {
-            return ((CfgObjectiveTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgObjectiveTableRecord) {
-            return ((CfgObjectiveTableRecord) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgObjectResource) {
-            return ((CfgObjectResource) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgOS) {
-            return ((CfgOS) retrieveObject).getOStype().toString();
-        } else if (retrieveObject instanceof CfgOwnerID) {
-            return ((CfgOwnerID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgParentID) {
-            return ((CfgParentID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPerson) {
-            return ((CfgPerson) retrieveObject).getUserName();
-        } else if (retrieveObject instanceof CfgPersonBrief) {
-            return ((CfgPersonBrief) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPersonLastLogin) {
-            return ((CfgPersonLastLogin) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPhones) {
-            return ((CfgPhones) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPhysicalSwitch) {
-            return ((CfgPhysicalSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgPlace) {
-            return ((CfgPlace) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgPlaceGroup) {
-            return ((CfgPlaceGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPortInfo) {
-            return ((CfgPortInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgRemovalEvent) {
-            return ((CfgRemovalEvent) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgResourceID) {
-            return ((CfgResourceID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgRole) {
-            return ((CfgRole) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgRoleMember) {
-            return ((CfgRoleMember) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgScheduledTask) {
-            return ((CfgScheduledTask) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgScript) {
-            return ((CfgScript) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgServer) {
-            return ((CfgServer) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgServerHostID) {
-            return ((CfgServerHostID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgServerVersion) {
-            return ((CfgServerVersion) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgService) {
-            return ((CfgService) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgServiceInfo) {
-            return ((CfgServiceInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgSkill) {
-            return ((CfgSkill) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSkillLevel) {
-            return ((CfgSkillLevel) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgSolutionComponent) {
-            return ((CfgSolutionComponent) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgSolutionComponentDefinition) {
-            return ((CfgSolutionComponentDefinition) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgStatDay) {
-            return ((CfgStatDay) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgStatInterval) {
-            return ((CfgStatInterval) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgStatTable) {
-            return ((CfgStatTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSubcode) {
-            return ((CfgSubcode) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSwitch) {
-            return ((CfgSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSwitchAccessCode) {
-            return ((CfgSwitchAccessCode) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgTableAccess) {
-            return ((CfgTableAccess) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTenant) {
-            return ((CfgTenant) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTenantBrief) {
-            return ((CfgTenantBrief) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTimeZone) {
-            return ((CfgTimeZone) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTransaction) {
-            return ((CfgTransaction) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTreatment) {
-            return ((CfgTreatment) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgUpdatePackageRecord) {
-            return ((CfgUpdatePackageRecord) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgVoicePrompt) {
-            return ((CfgVoicePrompt) retrieveObject).getName();
-        }
-        return null;
-    }
+    
 
     RequestDialog appByIP = null;
 
@@ -1264,8 +1017,8 @@ public final class AppForm extends javax.swing.JFrame {
                                 final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
                                 switch (showYesNoPanel(pn.getSearchSummaryHTML(),
                                         "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -1314,8 +1067,8 @@ public final class AppForm extends javax.swing.JFrame {
                                 final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
                                 switch (showYesNoPanel(pn.getSearchSummaryHTML(),
                                         "Object " + current + " of matched " + total + "\n-->\n" + obj.toString()
-                                                + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
-                                                + estimateUpdateObj)) {
+                                        + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
+                                        + estimateUpdateObj)) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -1505,7 +1258,7 @@ public final class AppForm extends javax.swing.JFrame {
                 @Override
                 public boolean isDeleteDependendObjects() {
                     throw new UnsupportedOperationException("Not supported yet."); // To change body of generated
-                                                                                   // methods, choose Tools | Templates.
+                    // methods, choose Tools | Templates.
                 }
             }
 
@@ -1534,8 +1287,8 @@ public final class AppForm extends javax.swing.JFrame {
                             final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv);
                             switch (showYesNoPanel(seearchSettings.toString(),
                                     "Object " + current + " of matched " + total
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
-                                            + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
+                                    + obj.toString() + "\n\t kv: " + kv.toString())) {
                                 case YES_TO_ALL:
                                     if (JOptionPane.showConfirmDialog(theForm,
                                             "Are you sure you want to modify this and all following found objects?",
@@ -1648,7 +1401,7 @@ public final class AppForm extends javax.swing.JFrame {
                         // obj).getUserProperties().getList(seearchSettings.getSection()));
                         // ((CfgTransaction)
                         // obj).getUserProperties().getList(seearchSettings.getSection());
-                        logger.info("found obj " + getObjName(obj) + " type " + obj.getObjectType() + " DBID:"
+                        logger.info("found obj " + ConfigServerManager.getObjName(obj) + " type " + obj.getObjectType() + " DBID:"
                                 + obj.getObjectDbid() + " at " + obj.getObjectPath());
 
                         // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
@@ -1670,8 +1423,8 @@ public final class AppForm extends javax.swing.JFrame {
                                 {
                                     switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(),
                                             "Object " + current + " of matched " + total
-                                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -1897,8 +1650,8 @@ public final class AppForm extends javax.swing.JFrame {
                     @Override
                     public boolean isDeleteDependendObjects() {
                         throw new UnsupportedOperationException("Not supported yet."); // To change body of generated
-                                                                                       // methods, choose Tools |
-                                                                                       // Templates.
+                        // methods, choose Tools |
+                        // Templates.
                     }
                 };
 
@@ -1970,8 +1723,8 @@ public final class AppForm extends javax.swing.JFrame {
                     @Override
                     public boolean isDeleteDependendObjects() {
                         throw new UnsupportedOperationException("Not supported yet."); // To change body of generated
-                                                                                       // methods, choose Tools |
-                                                                                       // Templates.
+                        // methods, choose Tools |
+                        // Templates.
                     }
                 }
                 ;
@@ -1994,7 +1747,7 @@ public final class AppForm extends javax.swing.JFrame {
                         // obj).getUserProperties().getList(seearchSettings.getSection()));
                         // ((CfgTransaction)
                         // obj).getUserProperties().getList(seearchSettings.getSection());
-                        logger.info("found obj " + getObjName(obj) + " type " + obj.getObjectType() + " DBID:"
+                        logger.info("found obj " + ConfigServerManager.getObjName(obj) + " type " + obj.getObjectType() + " DBID:"
                                 + obj.getObjectDbid() + " at " + obj.getObjectPath());
 
                         // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
@@ -2009,8 +1762,8 @@ public final class AppForm extends javax.swing.JFrame {
                                 {
                                     switch (showYesNoPanel(panelRestartServices.getSearchSummaryHTML(),
                                             "Object " + current + " of matched " + total
-                                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                         case YES_TO_ALL:
                                             if (JOptionPane.showConfirmDialog(theForm,
                                                     "Are you sure you want to modify this and all following found objects?",
@@ -2147,6 +1900,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenu jMenu5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -2168,6 +1922,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miBufferingOff;
     private javax.swing.JMenuItem miBufferingOn;
     private javax.swing.JMenuItem miBusinessAttribute;
+    private javax.swing.JMenuItem miCheckDNPlaceExists;
     private javax.swing.JMenuItem miImportCSV;
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
@@ -2280,7 +2035,7 @@ public final class AppForm extends javax.swing.JFrame {
                         // enableComponents(this, false);
                         final ArrayList<Record> hostNames = new ArrayList<>();
 
-                        for (final int t1 : new int[] { org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A }) {
+                        for (final int t1 : new int[]{org.xbill.DNS.Type.PTR, org.xbill.DNS.Type.A}) {
                             final Lookup l = new Lookup(ReverseMap.fromAddress(ip1), t1);
                             final Record[] hosts = l.run();
                             if (ArrayUtils.isNotEmpty(hosts)) {
@@ -2584,7 +2339,7 @@ public final class AppForm extends javax.swing.JFrame {
     /**
      *
      * @param turnOn - turn on buffering; if true, means add cache parameters,
-     *               remove them
+     * remove them
      */
     private void strategyBuffering(final boolean turnOn, final ActionEvent evt) {
         upd = null;
@@ -2698,8 +2453,8 @@ public final class AppForm extends javax.swing.JFrame {
                     @Override
                     public boolean isDeleteDependendObjects() {
                         throw new UnsupportedOperationException("Not supported yet."); // To change body of generated
-                                                                                       // methods, choose Tools |
-                                                                                       // Templates.
+                        // methods, choose Tools |
+                        // Templates.
                     }
                 };
                 // </editor-fold>
@@ -2796,8 +2551,8 @@ public final class AppForm extends javax.swing.JFrame {
                     @Override
                     public boolean isDeleteDependendObjects() {
                         throw new UnsupportedOperationException("Not supported yet."); // To change body of generated
-                                                                                       // methods, choose Tools |
-                                                                                       // Templates.
+                        // methods, choose Tools |
+                        // Templates.
                     }
                 };
                 // </editor-fold>
@@ -2828,8 +2583,8 @@ public final class AppForm extends javax.swing.JFrame {
                             {
                                 switch (showYesNoPanel(searchSettings.toString(),
                                         "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -2995,6 +2750,69 @@ public final class AppForm extends javax.swing.JFrame {
         // logger.debug(ftd);
     }
 
+    private void verifyCSV() {
+
+        final JFileChooser chooser = new JFileChooser();
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        final int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
+            final ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile()))) {
+                String l;
+                while ((l = reader.readLine()) != null) {
+                    final String[] split = StringUtils.split(l, ",");
+                    if (ArrayUtils.isNotEmpty(split) && split.length >= 2) {
+                        placeDN.add(new Pair(split[0], split[1]));
+                    } else {
+                        requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
+                    }
+                }
+            } catch (final FileNotFoundException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (final IOException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (shouldImportCSV(placeDN, false)) {
+                runInThread(new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        if (connectToConfigServer()) {
+                            final ArrayList<SwitchLookup> switches = new ArrayList<>();
+                            switches.add(new SwitchLookup(configServerManager.getService(), "esv1_sipa1"));
+                            switches.add(new SwitchLookup(configServerManager.getService(), "edn1_sipa1"));
+                            switches.add(new SwitchLookup(configServerManager.getService(), "esg3_sipa1"));
+
+                            for (Pair<String, String> entry : placeDN) {
+                                String thePlace = entry.getKey();
+                                String theDN = entry.getValue();
+                                final HashMap<SwitchLookup, String> DNs = new HashMap<>();
+                                for (final SwitchLookup switche : switches) {
+                                    DNs.put(switche, (String) null);
+
+                                }
+                                for (final SwitchLookup switchLookup : DNs.keySet()) {
+                                    DNs.put(switchLookup, theDN);
+                                }
+                                configServerManager.checkPlace(thePlace, DNs);
+                            }
+                        }
+                    }
+
+                }, new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        configServerManager.clearCache();
+                    }
+                });
+            }
+
+        }
+    }
+
     private void importCSV() {
 
         final JFileChooser chooser = new JFileChooser();
@@ -3021,7 +2839,7 @@ public final class AppForm extends javax.swing.JFrame {
             } catch (final IOException ex) {
                 java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (shouldImportCSV(placeDN)) {
+            if (shouldImportCSV(placeDN, true)) {
                 runInThread(new IThreadedFun() {
                     @Override
                     public void fun() throws ConfigException, InterruptedException {
@@ -3065,7 +2883,7 @@ public final class AppForm extends javax.swing.JFrame {
         }
     }
 
-    private boolean shouldImportCSV(final ArrayList<Pair<String, String>> placeDN) {
+    private boolean shouldImportCSV(final ArrayList<Pair<String, String>> placeDN, boolean isImport) {
 
         DefaultTableModel infoTableModel = new DefaultTableModel() {
             @Override
@@ -3080,7 +2898,7 @@ public final class AppForm extends javax.swing.JFrame {
         for (Pair<String, String> entry : placeDN) {
             String place = entry.getKey();
             String dn = entry.getValue();
-            infoTableModel.addRow(new Object[] { place, dn });
+            infoTableModel.addRow(new Object[]{place, dn});
         }
 
         JTable tab = new JTable(infoTableModel);
@@ -3099,8 +2917,15 @@ public final class AppForm extends javax.swing.JFrame {
         Dimension preferredSize = new Dimension(600, 200);
         jp.setPreferredSize(preferredSize);
 
-        Utils.InfoPanel dlg = new Utils.InfoPanel(this,
-                "Do you want to import following Place/DN (total " + placeDN.size() + ")", jp,
+        StringBuilder title = new StringBuilder();
+        if (isImport) {
+            title.append("Do you want to check existense Place/DN (total ").append(placeDN.size()).append(")");
+        } else {
+            title.append("Do you want to import following Place/DN (total ").append(placeDN.size()).append(")");
+        }
+
+        Utils.InfoPanel dlg = new Utils.InfoPanel(this, title.toString(),
+                jp,
                 JOptionPane.OK_CANCEL_OPTION);
         Utils.ScreenInfo.CenterWindow(dlg);
         dlg.showModal();

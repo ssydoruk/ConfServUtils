@@ -13,35 +13,139 @@ import com.genesyslab.platform.applicationblocks.com.ConfigServerException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.WellKnownDBIDs;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgACE;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgACEID;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgACL;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgACLID;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroupBrief;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgActionCode;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAddress;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentInfo;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLoginInfo;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgAlarmCondition;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAppPrototype;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAppRank;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgAppServicePermission;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgCallingList;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgCallingListInfo;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgCampaign;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgCampaignGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgCampaignGroupInfo;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgConnInfo;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDNAccessNumber;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgDNGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDNInfo;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDelSwitchAccess;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAccessGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaActionCode;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAgentGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAgentInfo;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAgentLogin;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAlarmCondition;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAppPrototype;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaApplication;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaCallingList;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaCampaign;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaCampaignGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaDN;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaDNGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaEnumerator;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaEnumeratorValue;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaField;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaFilter;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaFolder;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaFormat;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGVPCustomer;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGVPIVRProfile;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGVPReseller;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaHost;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaIVR;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaIVRPort;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaObjectiveTable;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPerson;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPersonLastLogin;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPhysicalSwitch;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPlace;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPlaceGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaRole;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaScheduledTask;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaScript;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaService;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaSkill;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaStatDay;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaStatTable;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaSwitch;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTableAccess;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTenant;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTimeZone;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTransaction;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTreatment;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaVoicePrompt;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgDetectEvent;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumerator;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumeratorValue;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgField;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgFilter;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgFolder;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgFormat;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgGVPCustomer;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgGVPIVRProfile;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgGVPReseller;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgGroup;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgID;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgIVR;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgIVRPort;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgMemberID;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgOS;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectID;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectResource;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectiveTable;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectiveTableRecord;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgOwnerID;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgParentID;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPersonBrief;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPersonLastLogin;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPhones;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPhysicalSwitch;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgPlaceGroup;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgPortInfo;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgRemovalEvent;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgResourceID;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgRole;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgRoleMember;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgScheduledTask;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgServer;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgServerHostID;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgServerVersion;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgService;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgServiceInfo;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSkill;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSkillLevel;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSolutionComponent;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSolutionComponentDefinition;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgStatDay;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgStatInterval;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgStatTable;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSubcode;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitchAccessCode;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgTableAccess;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTenant;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgTenantBrief;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTimeZone;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgTreatment;
+import com.genesyslab.platform.applicationblocks.com.objects.CfgUpdatePackageRecord;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgVoicePrompt;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgAccessGroupQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgActionCodeQuery;
@@ -95,6 +199,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -464,12 +569,15 @@ public class ConfigServerManager {
         cfgPlaceQuery.setName(placeName);
         cfgPlaceQuery.setTenantDbid(WellKnownDBIDs.EnvironmentDBID);
 
-        parentForm.requestOutput("searching " + "Place [" + placeName + "]");
+        logger.info("searching " + "Place [" + placeName + "]");
         CfgPlace cfgPlace = service.retrieveObject(CfgPlace.class, cfgPlaceQuery);
-        if (mastExist && cfgPlace == null) {
-            throw new ConfigException("Place [" + placeName + "]");
+        if (cfgPlace == null) {
+            if (mastExist) {
+                throw new ConfigException("Place [" + placeName + "]");
+            }
+        } else {
+            parentForm.requestOutput("Found " + "Place [" + placeName + "] DBID=" + cfgPlace.getDBID());
         }
-        parentForm.requestOutput("Found " + "Place [" + placeName + "] DBID=" + cfgPlace.getDBID());
 
         return cfgPlace;
 
@@ -536,7 +644,339 @@ public class ConfigServerManager {
             }
             throw ex;
         }
+    }
 
+    private String getDNs(Collection<Integer> dns) {
+        StringBuilder ret = new StringBuilder();
+        for (Integer dbid : dns) {
+            final ICfgObject retrieveObject;
+            try {
+                retrieveObject = retrieveObject(CfgObjectType.CFGDN, dbid);
+                if(ret.length()>0)
+                    ret.append("; ");
+                if (retrieveObject != null) {
+                    ret.append(nameDBID(retrieveObject));
+                }
+
+            } catch (ConfigException ex) {
+                java.util.logging.Logger.getLogger(ConfigServerManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return ret.toString();
+    }
+
+    private String nameDBID(ICfgObject obj) {
+        if (obj != null) {
+            String s  = getObjName(obj);
+            return s + "(DBID:" + obj.getObjectDbid() + ")";
+        } else {
+            return "";
+        }
+
+    }
+
+    public void checkPlace(String pl, HashMap<SwitchLookup, String> theDNs) throws ConfigException {
+
+        parentForm.requestOutput("*** Checking for place [" + pl + "]" + " DNs: " + dnsList(theDNs));
+        for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
+            CfgDN newDN = findDN(service, entry.getValue(), entry.getKey().getSw(), false);
+            if (newDN != null) {
+                String dn = nameDBID(newDN);
+                CfgObject dependend = getDependend(newDN);
+                if (dependend == null) {
+                    parentForm.requestOutput("Found DN " + dn + " no place ");
+                } else {
+                    parentForm.requestOutput("Found " + dn + " place: " + nameDBID(dependend) + "DNs: " + getDNs(((CfgPlace) dependend).getDNDBIDs()));
+                }
+
+            } else {
+                parentForm.requestOutput("! not found: " + dnEntry(entry));
+            }
+        }
+        CfgPlace cfgPlace = findPlace(service, pl, false);
+        if (cfgPlace != null) {
+            parentForm.requestOutput("Found place : " + nameDBID(cfgPlace) + ") DNs:" + getDNs(cfgPlace.getDNDBIDs()));
+
+        } else {
+            parentForm.requestOutput("! not found place");
+        }
+    }
+
+    public static String getObjName(final ICfgObject retrieveObject) {
+        if (retrieveObject == null) {
+            return null;
+        } else if (retrieveObject instanceof CfgDetectEvent) {
+            return ((CfgDetectEvent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDN) {
+            return ((CfgDN) retrieveObject).getNumber();
+        } else if (retrieveObject instanceof CfgDNAccessNumber) {
+            return ((CfgDNAccessNumber) retrieveObject).getNumber();
+        } else if (retrieveObject instanceof CfgDNGroup) {
+            return ((CfgDNGroup) retrieveObject).getType().toString();
+        } else if (retrieveObject instanceof CfgDNInfo) {
+            return ((CfgDNInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgEnumerator) {
+            return ((CfgEnumerator) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgEnumeratorValue) {
+            return ((CfgEnumeratorValue) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgField) {
+            return ((CfgField) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFilter) {
+            return ((CfgFilter) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFolder) {
+            return ((CfgFolder) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFormat) {
+            return ((CfgFormat) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGroup) {
+            return ((CfgGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPCustomer) {
+            return ((CfgGVPCustomer) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPIVRProfile) {
+            return ((CfgGVPIVRProfile) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPReseller) {
+            return ((CfgGVPReseller) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgHost) {
+            return ((CfgHost) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgID) {
+            return ((CfgID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgIVR) {
+            return ((CfgIVR) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgIVRPort) {
+            return ((CfgIVRPort) retrieveObject).getPortNumber();
+        } else if (retrieveObject instanceof CfgMemberID) {
+            return ((CfgMemberID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectID) {
+            return ((CfgObjectID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectiveTable) {
+            return ((CfgObjectiveTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgObjectiveTableRecord) {
+            return ((CfgObjectiveTableRecord) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectResource) {
+            return ((CfgObjectResource) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgOS) {
+            return ((CfgOS) retrieveObject).getOStype().toString();
+        } else if (retrieveObject instanceof CfgOwnerID) {
+            return ((CfgOwnerID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgParentID) {
+            return ((CfgParentID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPerson) {
+            return ((CfgPerson) retrieveObject).getUserName();
+        } else if (retrieveObject instanceof CfgPersonBrief) {
+            return ((CfgPersonBrief) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPersonLastLogin) {
+            return ((CfgPersonLastLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPhones) {
+            return ((CfgPhones) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPhysicalSwitch) {
+            return ((CfgPhysicalSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgPlace) {
+            return ((CfgPlace) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgPlaceGroup) {
+            return ((CfgPlaceGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPortInfo) {
+            return ((CfgPortInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgRemovalEvent) {
+            return ((CfgRemovalEvent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgResourceID) {
+            return ((CfgResourceID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgRole) {
+            return ((CfgRole) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgRoleMember) {
+            return ((CfgRoleMember) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgScheduledTask) {
+            return ((CfgScheduledTask) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgScript) {
+            return ((CfgScript) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgServer) {
+            return ((CfgServer) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgServerHostID) {
+            return ((CfgServerHostID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgServerVersion) {
+            return ((CfgServerVersion) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgService) {
+            return ((CfgService) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgServiceInfo) {
+            return ((CfgServiceInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSkill) {
+            return ((CfgSkill) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSkillLevel) {
+            return ((CfgSkillLevel) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSolutionComponent) {
+            return ((CfgSolutionComponent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSolutionComponentDefinition) {
+            return ((CfgSolutionComponentDefinition) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgStatDay) {
+            return ((CfgStatDay) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgStatInterval) {
+            return ((CfgStatInterval) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgStatTable) {
+            return ((CfgStatTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSubcode) {
+            return ((CfgSubcode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSwitch) {
+            return ((CfgSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSwitchAccessCode) {
+            return ((CfgSwitchAccessCode) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgTableAccess) {
+            return ((CfgTableAccess) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTenant) {
+            return ((CfgTenant) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTenantBrief) {
+            return ((CfgTenantBrief) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTimeZone) {
+            return ((CfgTimeZone) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTransaction) {
+            return ((CfgTransaction) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTreatment) {
+            return ((CfgTreatment) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgUpdatePackageRecord) {
+            return ((CfgUpdatePackageRecord) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgVoicePrompt) {
+            return ((CfgVoicePrompt) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAccessGroup) {
+            return ((CfgAccessGroup) retrieveObject).getObjectPath();
+        } else if (retrieveObject instanceof CfgAccessGroupBrief) {
+            return ((CfgAccessGroupBrief) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgACE) {
+            return ((CfgACE) retrieveObject).getID().toString();
+        } else if (retrieveObject instanceof CfgACEID) {
+            return ((CfgACEID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgACL) {
+            return ((CfgACL) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgACLID) {
+            return ((CfgACLID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgActionCode) {
+            return ((CfgActionCode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAddress) {
+            return ((CfgAddress) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgAgentGroup) {
+            return ((CfgAgentGroup) retrieveObject).getGroupInfo().toString();
+        } else if (retrieveObject instanceof CfgAgentInfo) {
+            return ((CfgAgentInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgAgentLogin) {
+            return ((CfgAgentLogin) retrieveObject).getLoginCode();
+        } else if (retrieveObject instanceof CfgAgentLoginInfo) {
+            return ((CfgAgentLoginInfo) retrieveObject).getAgentLogin().getLoginCode();
+        } else if (retrieveObject instanceof CfgAlarmCondition) {
+            return ((CfgAlarmCondition) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgApplication) {
+            return ((CfgApplication) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAppPrototype) {
+            return ((CfgAppPrototype) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAppRank) {
+            return ((CfgAppRank) retrieveObject).getAppRank().toString();
+        } else if (retrieveObject instanceof CfgAppServicePermission) {
+            return ((CfgAppServicePermission) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgCallingList) {
+            return ((CfgCallingList) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCallingListInfo) {
+            return ((CfgCallingListInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgCampaign) {
+            return ((CfgCampaign) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCampaignGroup) {
+            return ((CfgCampaignGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCampaignGroupInfo) {
+            return ((CfgCampaignGroupInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgConnInfo) {
+            return ((CfgConnInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDelSwitchAccess) {
+            return ((CfgDelSwitchAccess) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAccessGroup) {
+            return ((CfgDeltaAccessGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaActionCode) {
+            return ((CfgDeltaActionCode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaAgentGroup) {
+            return ((CfgDeltaAgentGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAgentInfo) {
+            return ((CfgDeltaAgentInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAgentLogin) {
+            return ((CfgDeltaAgentLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAlarmCondition) {
+            return ((CfgDeltaAlarmCondition) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaApplication) {
+            return ((CfgDeltaApplication) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaAppPrototype) {
+            return ((CfgDeltaAppPrototype) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCallingList) {
+            return ((CfgDeltaCallingList) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCampaign) {
+            return ((CfgDeltaCampaign) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCampaignGroup) {
+            return ((CfgDeltaCampaignGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaDN) {
+            return ((CfgDeltaDN) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaDNGroup) {
+            return ((CfgDeltaDNGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaEnumerator) {
+            return ((CfgDeltaEnumerator) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaEnumeratorValue) {
+            return ((CfgDeltaEnumeratorValue) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaField) {
+            return ((CfgDeltaField) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFilter) {
+            return ((CfgDeltaFilter) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFolder) {
+            return ((CfgDeltaFolder) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFormat) {
+            return ((CfgDeltaFormat) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGroup) {
+            return ((CfgDeltaGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPCustomer) {
+            return ((CfgDeltaGVPCustomer) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPIVRProfile) {
+            return ((CfgDeltaGVPIVRProfile) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPReseller) {
+            return ((CfgDeltaGVPReseller) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaHost) {
+            return ((CfgDeltaHost) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaIVR) {
+            return ((CfgDeltaIVR) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaIVRPort) {
+            return ((CfgDeltaIVRPort) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaObjectiveTable) {
+            return ((CfgDeltaObjectiveTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPerson) {
+            return ((CfgDeltaPerson) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaPersonLastLogin) {
+            return ((CfgDeltaPersonLastLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaPhysicalSwitch) {
+            return ((CfgDeltaPhysicalSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPlace) {
+            return ((CfgDeltaPlace) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPlaceGroup) {
+            return ((CfgDeltaPlaceGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaRole) {
+            return ((CfgDeltaRole) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaScheduledTask) {
+            return ((CfgDeltaScheduledTask) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaScript) {
+            return ((CfgDeltaScript) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaService) {
+            return ((CfgDeltaService) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaSkill) {
+            return ((CfgDeltaSkill) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaStatDay) {
+            return ((CfgDeltaStatDay) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaStatTable) {
+            return ((CfgDeltaStatTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaSwitch) {
+            return ((CfgDeltaSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTableAccess) {
+            return ((CfgDeltaTableAccess) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTenant) {
+            return ((CfgDeltaTenant) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTimeZone) {
+            return ((CfgDeltaTimeZone) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTransaction) {
+            return ((CfgDeltaTransaction) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTreatment) {
+            return ((CfgDeltaTreatment) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaVoicePrompt) {
+            return ((CfgDeltaVoicePrompt) retrieveObject).getName();
+
+        } else {
+            return null;
+        }
     }
 
     public CfgPlace createPlace(String pl, HashMap<SwitchLookup, String> theDNs, ExistingObjectDecider eod) throws ConfigException {
@@ -548,7 +988,6 @@ public class ConfigServerManager {
             }
             cfgDNs.add(newDN);
         }
-
         return createPlace(pl, cfgDNs, eod);
     }
 
@@ -577,19 +1016,22 @@ public class ConfigServerManager {
 
     private CfgDN findDN(
             final IConfService service,
-            final String dn, final CfgSwitch sw, boolean mastExist
+            final String dn, final CfgSwitch sw, boolean mustExist
     ) throws ConfigException {
         CfgDNQuery dnQuery = new CfgDNQuery();
 
         dnQuery.setName(dn);
         dnQuery.setSwitchDbid(sw.getDBID());
 
-//        parentForm.requestOutput("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
+        logger.info("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
         CfgDN cfgDn = service.retrieveObject(CfgDN.class, dnQuery);
-        if (mastExist && cfgDn == null) {
-            throw new ConfigException("DN [" + dn + "] switch[" + sw.getName() + "]");
+        if (cfgDn == null) {
+            if (mustExist) {
+                throw new ConfigException("DN [" + dn + "] switch[" + sw.getName() + "]");
+            }
+        } else {
+            parentForm.requestOutput("found " + "DN [" + dn + "] switch[" + sw.getName() + "] DBID:" + cfgDn.getDBID());
         }
-        parentForm.requestOutput("found " + "DN [" + dn + "] switch[" + sw.getName() + "] DBID:" + cfgDn.getDBID());
         return cfgDn;
 
     }
@@ -1536,4 +1978,25 @@ public class ConfigServerManager {
             }
         }
     }
+
+    private String dnEntry(Map.Entry<SwitchLookup, String> entry) {
+        StringBuilder ret = new StringBuilder();
+        SwitchLookup key = entry.getKey();
+        String val = entry.getValue();
+
+        ret.append("[").append(key.getSw().getName()).append("]").append("/").append(val);
+        return ret.toString();
+    }
+
+    private String dnsList(HashMap<SwitchLookup, String> theDNs) {
+        StringBuilder ret = new StringBuilder();
+        for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
+            if (ret.length() > 0) {
+                ret.append(" ;");
+            }
+            ret.append(dnEntry(entry));
+        }
+        return ret.toString();
+    }
+
 }
