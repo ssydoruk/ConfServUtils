@@ -649,19 +649,21 @@ public class ConfigServerManager {
 
     private String getDNs(Collection<Integer> dns) {
         StringBuilder ret = new StringBuilder();
-        for (Integer dbid : dns) {
-            final ICfgObject retrieveObject;
-            try {
-                retrieveObject = retrieveObject(CfgObjectType.CFGDN, dbid);
-                if (ret.length() > 0) {
-                    ret.append("; ");
-                }
-                if (retrieveObject != null) {
-                    ret.append(nameDBID(retrieveObject));
-                }
+        if (dns != null) {
+            for (Integer dbid : dns) {
+                final ICfgObject retrieveObject;
+                try {
+                    retrieveObject = retrieveObject(CfgObjectType.CFGDN, dbid);
+                    if (ret.length() > 0) {
+                        ret.append("; ");
+                    }
+                    if (retrieveObject != null) {
+                        ret.append(nameDBID(retrieveObject));
+                    }
 
-            } catch (ConfigException ex) {
-                java.util.logging.Logger.getLogger(ConfigServerManager.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ConfigException ex) {
+                    java.util.logging.Logger.getLogger(ConfigServerManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
         return ret.toString();
@@ -1046,7 +1048,7 @@ public class ConfigServerManager {
 //            switch(objExistaction)
             if (ex instanceof ConfigServerException
                     && ((ConfigServerException) ex).getErrorType() == CfgErrorType.CFGUniquenessViolation) {
-                CfgDN cfgDN = findDN(service, name, key.getSw(), true);
+                CfgDN cfgDN = findDN(service, value, key.getSw(), true);
                 parentForm.requestOutput("DN exists: " + cfgDN.getNumber());
                 switch (eod.getCurrentAction(makeString(cfgDN), makeString(getDependend(cfgDN)))) {
                     case RECREATE:
@@ -2001,14 +2003,24 @@ public class ConfigServerManager {
         return ret.toString();
     }
 
-    public HashMap<Integer, CfgObject> getAllAgentLogins() {
-        HashMap<Integer, CfgObject> agentLogins = new HashMap<>();
+    public HashMap<Integer, CfgObject> getAllDBID_AgentLogin() {
+        HashMap<Integer, CfgObject> ret = new HashMap<>();
+        for (CfgObject obj : getAllAgentLogins()) {
+            ret.put(obj.getObjectDbid(), obj);
+
+        }
+        return ret;
+
+    }
+
+    public ArrayList<CfgObject> getAllAgentLogins() {
+        ArrayList<CfgObject> agentLogins = new ArrayList<>();
 
         final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
             @Override
             public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
                     final int total) {
-                agentLogins.put(obj.getObjectDbid(), obj);
+                agentLogins.add(obj);
                 return true;
             }
         };
@@ -2037,34 +2049,31 @@ public class ConfigServerManager {
 
     }
 
-    public HashMap<Integer, CfgObject> getAllAgents() {
-        HashMap<Integer, CfgObject> agent = new HashMap<>();
+    public HashMap<Integer, CfgObject> getAllExtDBID_Extension() {
+        ArrayList<CfgDN> allExtensions = getAllExtensions();
+        HashMap<Integer, CfgObject> ret = new HashMap<>();
+        for (CfgDN ext : allExtensions) {
+            if (ext.getType() == CfgDNType.CFGExtension) {
+                ret.put(ext.getDBID(), ext);
+            }
+        }
+        return ret;
+    }
+
+    private <T extends CfgObject> ArrayList<T> getAll(final CfgQuery q, final Class<T> cls) {
+        ArrayList< T> exts = new ArrayList<>();
 
         final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
             @Override
             public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
                     final int total) {
-//                logger.debug(obj);
-                if (obj instanceof CfgPerson) {
-                    CfgPerson o = (CfgPerson) obj;
-                    if (o.getIsAgent() == CfgFlag.CFGTrue) {
-                        CfgAgentInfo agentInfo = o.getAgentInfo();
-                        for (CfgAgentLoginInfo ali : agentInfo.getAgentLogins()) {
-                            if (agent.containsKey(ali.getAgentLoginDBID())) {
-                                parentForm.showError("loginID assigned to more than one agent: " + ali.getAgentLoginDBID());
-                            } else {
-                                agent.put(ali.getAgentLoginDBID(), obj);
-                            }
-                        }
-                    }
-                }
+                exts.add((T) obj);
                 return true;
             }
         };
         try {
-            final CfgPersonQuery query = new CfgPersonQuery();
 
-            if (findObjects(query, CfgPerson.class, new IKeyValueProperties() {
+            if (findObjects(q, cls, new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(final CfgObject obj) {
                     return null;
@@ -2072,7 +2081,6 @@ public class ConfigServerManager {
 
                 @Override
                 public Collection<String> getName(final CfgObject obj) {
-
                     return null;
                 }
             }, new FindWorker(FIND_ALL), true, foundProc)) {
@@ -2082,7 +2090,56 @@ public class ConfigServerManager {
         } catch (final ConfigException | InterruptedException ex) {
             java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return exts;
+    }
+
+    public ArrayList< CfgDN> getAllExtensions() {
+        final CfgDNQuery query = new CfgDNQuery();
+        query.setDnType(CfgDNType.CFGExtension);
+        ArrayList<CfgDN> all = getAll(query, CfgDN.class);
+        return all;
+    }
+
+    public HashMap<Integer, CfgObject> getAllExtDBID_Place() {
+        HashMap<Integer, CfgObject> extPlace = new HashMap<>();
+
+        for (CfgPlace pl : getAll(new CfgPlaceQuery(), CfgPlace.class)) {
+            Collection<Integer> dndbiDs = pl.getDNDBIDs();
+            if (dndbiDs != null) {
+                for (Integer dnDBID : dndbiDs) {
+                    extPlace.put(dnDBID, pl);
+                }
+            }
+        }
+
+        return extPlace;
+
+    }
+
+    public HashMap<Integer, CfgObject> getAllLoginID_Agents() {
+        HashMap<Integer, CfgObject> agent = new HashMap<>();
+        for (CfgObject obj : getAllAgents()) {
+            if (obj instanceof CfgPerson) {
+                CfgPerson o = (CfgPerson) obj;
+                if (o.getIsAgent() == CfgFlag.CFGTrue) {
+                    CfgAgentInfo agentInfo = o.getAgentInfo();
+                    for (CfgAgentLoginInfo ali : agentInfo.getAgentLogins()) {
+                        if (agent.containsKey(ali.getAgentLoginDBID())) {
+                            parentForm.showError("loginID assigned to more than one agent: " + ali.getAgentLoginDBID());
+                        } else {
+                            agent.put(ali.getAgentLoginDBID(), obj);
+                        }
+                    }
+                }
+            }
+        }
         return agent;
+    }
+
+    private ArrayList< CfgPerson> getAllAgents() {
+        final CfgPersonQuery query = new CfgPersonQuery();
+        query.setIsAgent(CfgFlag.CFGTrue.asInteger());
+        return getAll(query, CfgPerson.class);
 
     }
 
