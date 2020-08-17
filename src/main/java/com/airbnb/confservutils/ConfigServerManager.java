@@ -188,6 +188,7 @@ import com.genesyslab.platform.configuration.protocol.confserver.events.EventObj
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgErrorType;
+import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
@@ -652,8 +653,9 @@ public class ConfigServerManager {
             final ICfgObject retrieveObject;
             try {
                 retrieveObject = retrieveObject(CfgObjectType.CFGDN, dbid);
-                if(ret.length()>0)
+                if (ret.length() > 0) {
                     ret.append("; ");
+                }
                 if (retrieveObject != null) {
                     ret.append(nameDBID(retrieveObject));
                 }
@@ -667,7 +669,7 @@ public class ConfigServerManager {
 
     private String nameDBID(ICfgObject obj) {
         if (obj != null) {
-            String s  = getObjName(obj);
+            String s = getObjName(obj);
             return s + "(DBID:" + obj.getObjectDbid() + ")";
         } else {
             return "";
@@ -1999,4 +2001,136 @@ public class ConfigServerManager {
         return ret.toString();
     }
 
+    public HashMap<Integer, CfgObject> getAllAgentLogins() {
+        HashMap<Integer, CfgObject> agentLogins = new HashMap<>();
+
+        final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+            @Override
+            public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
+                    final int total) {
+                agentLogins.put(obj.getObjectDbid(), obj);
+                return true;
+            }
+        };
+        try {
+            final CfgAgentLoginQuery query = new CfgAgentLoginQuery();
+
+            if (findObjects(query, CfgAgentLogin.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return null;
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+
+                    return null;
+                }
+            }, new FindWorker(FIND_ALL), true, foundProc)) {
+
+            }
+
+        } catch (final ConfigException | InterruptedException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return agentLogins;
+
+    }
+
+    public HashMap<Integer, CfgObject> getAllAgents() {
+        HashMap<Integer, CfgObject> agent = new HashMap<>();
+
+        final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+            @Override
+            public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
+                    final int total) {
+//                logger.debug(obj);
+                if (obj instanceof CfgPerson) {
+                    CfgPerson o = (CfgPerson) obj;
+                    if (o.getIsAgent() == CfgFlag.CFGTrue) {
+                        CfgAgentInfo agentInfo = o.getAgentInfo();
+                        for (CfgAgentLoginInfo ali : agentInfo.getAgentLogins()) {
+                            if (agent.containsKey(ali.getAgentLoginDBID())) {
+                                parentForm.showError("loginID assigned to more than one agent: " + ali.getAgentLoginDBID());
+                            } else {
+                                agent.put(ali.getAgentLoginDBID(), obj);
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+        };
+        try {
+            final CfgPersonQuery query = new CfgPersonQuery();
+
+            if (findObjects(query, CfgPerson.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    return null;
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+
+                    return null;
+                }
+            }, new FindWorker(FIND_ALL), true, foundProc)) {
+
+            }
+
+        } catch (final ConfigException | InterruptedException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return agent;
+
+    }
+
+    private final static ISearchSettings FIND_ALL = new ISearchSettings() {
+        @Override
+        public boolean isCaseSensitive() {
+            return false;
+        }
+
+        @Override
+        public boolean isRegex() {
+            return false;
+        }
+
+        @Override
+        public boolean isFullOutputSelected() {
+            return false;
+        }
+
+        @Override
+        public boolean isSearchAll() {
+            return false;
+        }
+
+        @Override
+        public String getAllSearch() {
+            return null;
+        }
+
+        @Override
+        public String getSection() {
+            return null;
+        }
+
+        @Override
+        public String getObjName() {
+            return null;
+        }
+
+        @Override
+        public String getOption() {
+            return null;
+        }
+
+        @Override
+        public String getValue() {
+            return null;
+        }
+
+    };
 }
