@@ -294,7 +294,7 @@ public final class AppForm extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated
-    // Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
@@ -331,6 +331,9 @@ public final class AppForm extends javax.swing.JFrame {
         jMenu6 = new javax.swing.JMenu();
         miLoginsWithoutAgent = new javax.swing.JMenuItem();
         miExtensionWithoutPlace = new javax.swing.JMenuItem();
+        jMenu7 = new javax.swing.JMenu();
+        miCheckDNPlaceExists = new javax.swing.JMenuItem();
+        miFindLDAPs = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
         miAppOptionsReplace = new javax.swing.JMenuItem();
@@ -344,7 +347,6 @@ public final class AppForm extends javax.swing.JFrame {
         miRestartService = new javax.swing.JMenuItem();
         jMenu5 = new javax.swing.JMenu();
         miImportCSV = new javax.swing.JMenuItem();
-        miCheckDNPlaceExists = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -361,8 +363,7 @@ public final class AppForm extends javax.swing.JFrame {
 
         jPanel4.setLayout(new javax.swing.BoxLayout(jPanel4, javax.swing.BoxLayout.LINE_AXIS));
 
-        cbConfigServer.setModel(
-                new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbConfigServer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbConfigServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbConfigServerActionPerformed(evt);
@@ -387,8 +388,7 @@ public final class AppForm extends javax.swing.JFrame {
         jLabel1.setText("CME user");
         jPanel6.add(jLabel1);
 
-        cbUser.setModel(
-                new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbUser.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jPanel6.add(cbUser);
 
         jPanel5.add(jPanel6);
@@ -420,12 +420,20 @@ public final class AppForm extends javax.swing.JFrame {
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
-                        .addContainerGap(475, Short.MAX_VALUE).addComponent(jButton2).addGap(43, 43, 43)));
-        jPanel8Layout.setVerticalGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel8Layout.createSequentialGroup().addContainerGap().addComponent(jButton2)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
+                .addContainerGap(475, Short.MAX_VALUE)
+                .addComponent(jButton2)
+                .addGap(43, 43, 43))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         jPanel2.add(jPanel8);
 
@@ -543,6 +551,26 @@ public final class AppForm extends javax.swing.JFrame {
 
         jMenu1.add(jMenu6);
 
+        jMenu7.setText("CSV operations");
+
+        miCheckDNPlaceExists.setText("Check if Place /DN exists");
+        miCheckDNPlaceExists.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miCheckDNPlaceExistsActionPerformed(evt);
+            }
+        });
+        jMenu7.add(miCheckDNPlaceExists);
+
+        miFindLDAPs.setText("Find users with LDAPs");
+        miFindLDAPs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miFindLDAPsActionPerformed(evt);
+            }
+        });
+        jMenu7.add(miFindLDAPs);
+
+        jMenu1.add(jMenu7);
+
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Update");
@@ -619,7 +647,7 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu2.add(miRestartService);
 
-        jMenu5.setText("Process CSV");
+        jMenu5.setText("CSV operations");
 
         miImportCSV.setText("Import Place / DN");
         miImportCSV.addActionListener(new java.awt.event.ActionListener() {
@@ -628,14 +656,6 @@ public final class AppForm extends javax.swing.JFrame {
             }
         });
         jMenu5.add(miImportCSV);
-
-        miCheckDNPlaceExists.setText("Check if Place /DN exists");
-        miCheckDNPlaceExists.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miCheckDNPlaceExistsActionPerformed(evt);
-            }
-        });
-        jMenu5.add(miCheckDNPlaceExists);
 
         jMenu2.add(jMenu5);
 
@@ -653,6 +673,10 @@ public final class AppForm extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void miFindLDAPsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFindLDAPsActionPerformed
+        verifyLDAP();
+    }//GEN-LAST:event_miFindLDAPsActionPerformed
 
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyCSV();
@@ -1925,6 +1949,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
     private javax.swing.JMenu jMenu6;
+    private javax.swing.JMenu jMenu7;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -1947,6 +1972,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miBusinessAttribute;
     private javax.swing.JMenuItem miCheckDNPlaceExists;
     private javax.swing.JMenuItem miExtensionWithoutPlace;
+    private javax.swing.JMenuItem miFindLDAPs;
     private javax.swing.JMenuItem miImportCSV;
     private javax.swing.JMenuItem miLoadStrategy;
     private javax.swing.JMenuItem miLoginsWithoutAgent;
@@ -2758,6 +2784,96 @@ public final class AppForm extends javax.swing.JFrame {
         // logger.debug(ftd);
     }
 
+    private void verifyLDAP() {
+
+        final JFileChooser chooser = new JFileChooser();
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        final int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
+            final ArrayList<String> ldapIDs = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile()))) {
+                String l;
+                while ((l = reader.readLine()) != null) {
+                    final String[] split = StringUtils.split(l, ",;");
+                    if (ArrayUtils.isNotEmpty(split) && split.length >= 1) {
+                        String trimToNull = StringUtils.trimToNull(split[0]);
+                        if (trimToNull != null) {
+                            ldapIDs.add(trimToNull);
+                        }
+                    } else {
+                        requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
+                    }
+                }
+            } catch (final FileNotFoundException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (final IOException ex) {
+                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (shouldCheckLDAPCSV(ldapIDs)) {
+                runInThread(new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        if (connectToConfigServer()) {
+
+                            requestOutput("Searching for LDAPs");
+                            ArrayList<CfgPerson> allPersons = configServerManager.getAllPersons();
+                            for (String ldapID : ldapIDs) {
+                                boolean ldapFound = false;
+                                for (CfgPerson cfgPerson : allPersons) {
+                                    if (StringUtils.compareIgnoreCase(ldapID, cfgPerson.getExternalID()) == 0) {
+                                        requestOutput(ldapID + " used by " + cfgPerson.getUserName() + "(path: " + cfgPerson.getObjectPath() + ")");
+                                        ldapFound = true;
+                                    }
+                                }
+                                if (!ldapFound) {
+
+                                    requestOutput(" * LDAP [" + ldapID + "] not found ");
+                                }
+
+                            }
+
+                        }
+                    }
+
+                }, new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        configServerManager.clearCache();
+                    }
+                });
+            }
+
+        }
+    }
+
+    private ArrayList<Pair<String, String>> readPlaceDN(File f) {
+        final ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
+            String l;
+            while ((l = reader.readLine()) != null) {
+                final String[] split = StringUtils.split(l, ",");
+                if (ArrayUtils.isNotEmpty(split) && split.length >= 2) {
+                    String trimToNull0 = StringUtils.trimToNull(split[0]);
+                    String trimToNull1 = StringUtils.trimToNull(split[1]);
+                    if (trimToNull0 != null && trimToNull1 != null) {
+                        placeDN.add(new Pair(trimToNull0, trimToNull1));
+                    }
+                } else {
+                    requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
+                }
+            }
+        } catch (final FileNotFoundException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (final IOException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return placeDN;
+    }
+
     private void verifyCSV() {
 
         final JFileChooser chooser = new JFileChooser();
@@ -2768,22 +2884,8 @@ public final class AppForm extends javax.swing.JFrame {
         final int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            final ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile()))) {
-                String l;
-                while ((l = reader.readLine()) != null) {
-                    final String[] split = StringUtils.split(l, ",");
-                    if (ArrayUtils.isNotEmpty(split) && split.length >= 2) {
-                        placeDN.add(new Pair(split[0], split[1]));
-                    } else {
-                        requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
-                    }
-                }
-            } catch (final FileNotFoundException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (final IOException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            final ArrayList<Pair<String, String>> placeDN = readPlaceDN(chooser.getSelectedFile());
+
             if (shouldImportCSV(placeDN, false)) {
                 runInThread(new IThreadedFun() {
                     @Override
@@ -2830,23 +2932,9 @@ public final class AppForm extends javax.swing.JFrame {
         chooser.setMultiSelectionEnabled(false);
         final int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            final ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile()))) {
-                String l;
-                while ((l = reader.readLine()) != null) {
-                    final String[] split = StringUtils.split(l, ",");
-                    if (ArrayUtils.isNotEmpty(split) && split.length >= 2) {
-                        placeDN.add(new Pair(split[0], split[1]));
-                    } else {
-                        requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
-                    }
-                }
-            } catch (final FileNotFoundException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (final IOException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
+            final ArrayList<Pair<String, String>> placeDN = readPlaceDN(chooser.getSelectedFile());
+
             if (shouldImportCSV(placeDN, true)) {
                 runInThread(new IThreadedFun() {
                     @Override
@@ -2889,6 +2977,64 @@ public final class AppForm extends javax.swing.JFrame {
             }
 
         }
+    }
+
+    private class LDAP_Dialog extends Utils.InfoPanel {
+
+        DefaultTableModel infoTableModel;
+        TableColumnAdjuster tca;
+
+        public LDAP_Dialog(Window parent, int buttonOptions) throws HeadlessException {
+            super(parent, buttonOptions);
+
+            infoTableModel = new DefaultTableModel() {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false; // To change body of generated methods, choose Tools | Templates.
+                }
+
+            };
+
+            infoTableModel.addColumn("LDAP");
+
+            JTable tab = new JTable(infoTableModel);
+            tab.getTableHeader().setVisible(true);
+            tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+            JScrollPane jp = new JScrollPane(tab);
+            super.setMainPanel(jp);
+
+            tca = new TableColumnAdjuster(tab);
+            tca.setColumnDataIncluded(true);
+            tca.setColumnHeaderIncluded(false);
+            tca.setDynamicAdjustment(true);
+        }
+
+        public boolean shouldProceed(final ArrayList<String> ldapIDs) {
+            infoTableModel.setRowCount(0);
+            for (String entry : ldapIDs) {
+                infoTableModel.addRow(new Object[]{entry});
+            }
+            tca.adjustColumns();
+            this.setTitle("Checking agents with below LDAPs (" + ldapIDs.size() + ")");
+            Utils.ScreenInfo.CenterWindow(this);
+            this.showModal();
+
+            return getDialogResult() == JOptionPane.OK_OPTION;
+        }
+
+    };
+
+    LDAP_Dialog showLDAP = null;
+
+    private boolean shouldCheckLDAPCSV(final ArrayList<String> ldapIDs) {
+
+        if (showLDAP == null) {
+            showLDAP = new LDAP_Dialog(this, JOptionPane.OK_CANCEL_OPTION);
+        }
+
+        return showLDAP.shouldProceed(ldapIDs);
+
     }
 
     private boolean shouldImportCSV(final ArrayList<Pair<String, String>> placeDN, boolean isImport) {

@@ -2143,6 +2143,12 @@ public class ConfigServerManager {
 
     }
 
+    public ArrayList< CfgPerson> getAllPersons() {
+        final CfgPersonQuery query = new CfgPersonQuery();
+        return getAll(query, CfgPerson.class);
+
+    }
+
     private final static ISearchSettings FIND_ALL = new ISearchSettings() {
         @Override
         public boolean isCaseSensitive() {
