@@ -301,7 +301,7 @@ public class ConfigServerManager {
         return service;
     }
 
-    <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls) throws ConfigException, InterruptedException {
+    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls) throws ConfigException, InterruptedException {
         Main.logger.debug("query " + q + " for object type " + cls);
         String qToString = q.toString();
         checkQueryNeedsUpdate();
@@ -2116,7 +2116,7 @@ public class ConfigServerManager {
 
     }
 
-    public HashMap<Integer, CfgObject> getAllLoginID_Agents() {
+    public HashMap<Integer, CfgObject> getAllLoginID_Agents() throws ConfigException, InterruptedException {
         HashMap<Integer, CfgObject> agent = new HashMap<>();
         for (CfgObject obj : getAllAgents()) {
             if (obj instanceof CfgPerson) {
@@ -2136,16 +2136,15 @@ public class ConfigServerManager {
         return agent;
     }
 
-    private ArrayList< CfgPerson> getAllAgents() {
+    private Collection< CfgPerson> getAllAgents() throws ConfigException, InterruptedException {
         final CfgPersonQuery query = new CfgPersonQuery();
         query.setIsAgent(CfgFlag.CFGTrue.asInteger());
-        return getAll(query, CfgPerson.class);
+        return getResults(query, CfgPerson.class);
 
     }
 
-    public ArrayList< CfgPerson> getAllPersons() {
-        final CfgPersonQuery query = new CfgPersonQuery();
-        return getAll(query, CfgPerson.class);
+    public Collection< CfgPerson> getAllPersons() throws ConfigException, InterruptedException {
+        return getResults(new CfgPersonQuery(), CfgPerson.class);
 
     }
 

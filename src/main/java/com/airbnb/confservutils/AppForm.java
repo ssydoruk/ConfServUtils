@@ -334,6 +334,7 @@ public final class AppForm extends javax.swing.JFrame {
         jMenu7 = new javax.swing.JMenu();
         miCheckDNPlaceExists = new javax.swing.JMenuItem();
         miFindLDAPs = new javax.swing.JMenuItem();
+        miFindLDAPsForUsers = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
         miAppOptionsReplace = new javax.swing.JMenuItem();
@@ -569,6 +570,14 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu7.add(miFindLDAPs);
 
+        miFindLDAPsForUsers.setText("Find LDAP for userNames");
+        miFindLDAPsForUsers.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miFindLDAPsForUsersActionPerformed(evt);
+            }
+        });
+        jMenu7.add(miFindLDAPsForUsers);
+
         jMenu1.add(jMenu7);
 
         jMenuBar1.add(jMenu1);
@@ -677,6 +686,10 @@ public final class AppForm extends javax.swing.JFrame {
     private void miFindLDAPsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFindLDAPsActionPerformed
         verifyLDAP();
     }//GEN-LAST:event_miFindLDAPsActionPerformed
+
+    private void miFindLDAPsForUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFindLDAPsForUsersActionPerformed
+        verifyUserNameLDAP();
+    }//GEN-LAST:event_miFindLDAPsForUsersActionPerformed
 
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyCSV();
@@ -1973,6 +1986,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miCheckDNPlaceExists;
     private javax.swing.JMenuItem miExtensionWithoutPlace;
     private javax.swing.JMenuItem miFindLDAPs;
+    private javax.swing.JMenuItem miFindLDAPsForUsers;
     private javax.swing.JMenuItem miImportCSV;
     private javax.swing.JMenuItem miLoadStrategy;
     private javax.swing.JMenuItem miLoginsWithoutAgent;
@@ -2794,25 +2808,8 @@ public final class AppForm extends javax.swing.JFrame {
         final int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            final ArrayList<String> ldapIDs = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile()))) {
-                String l;
-                while ((l = reader.readLine()) != null) {
-                    final String[] split = StringUtils.split(l, ",;");
-                    if (ArrayUtils.isNotEmpty(split) && split.length >= 1) {
-                        String trimToNull = StringUtils.trimToNull(split[0]);
-                        if (trimToNull != null) {
-                            ldapIDs.add(trimToNull);
-                        }
-                    } else {
-                        requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
-                    }
-                }
-            } catch (final FileNotFoundException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (final IOException ex) {
-                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            final ArrayList<String> ldapIDs = loadSingleColumn(chooser.getSelectedFile());
+
             if (shouldCheckLDAPCSV(ldapIDs)) {
                 runInThread(new IThreadedFun() {
                     @Override
@@ -2820,7 +2817,7 @@ public final class AppForm extends javax.swing.JFrame {
                         if (connectToConfigServer()) {
 
                             requestOutput("Searching for LDAPs");
-                            ArrayList<CfgPerson> allPersons = configServerManager.getAllPersons();
+                            Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
                             for (String ldapID : ldapIDs) {
                                 boolean ldapFound = false;
                                 for (CfgPerson cfgPerson : allPersons) {
@@ -2832,6 +2829,79 @@ public final class AppForm extends javax.swing.JFrame {
                                 if (!ldapFound) {
 
                                     requestOutput(" * LDAP [" + ldapID + "] not found ");
+                                }
+
+                            }
+
+                        }
+                    }
+
+                }, new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        configServerManager.clearCache();
+                    }
+                });
+            }
+
+        }
+    }
+
+    private ArrayList<String> loadSingleColumn(File f) {
+        final ArrayList<String> userNames = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
+            String l;
+            while ((l = reader.readLine()) != null) {
+                final String[] split = StringUtils.split(l, ",;");
+                if (ArrayUtils.isNotEmpty(split) && split.length >= 1) {
+                    String trimToNull = StringUtils.trimToNull(split[0]);
+                    if (trimToNull != null) {
+                        userNames.add(trimToNull);
+                    }
+                } else {
+                    requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
+                }
+            }
+        } catch (final FileNotFoundException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (final IOException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return userNames;
+    }
+
+    private void verifyUserNameLDAP() {
+
+        final JFileChooser chooser = new JFileChooser();
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        final int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
+            final ArrayList<String> userNames = loadSingleColumn(chooser.getSelectedFile());
+
+            if (shouldCheckLDAPCSV(userNames)) {
+                runInThread(new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        if (connectToConfigServer()) {
+
+                            requestOutput("Searching for userNames");
+                            Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
+                            for (String user : userNames) {
+                                boolean userNameFound = false;
+                                for (CfgPerson cfgPerson : allPersons) {
+                                    if (StringUtils.compareIgnoreCase(user, cfgPerson.getUserName()) == 0) {
+                                        requestOutput(user + " LDAP " + cfgPerson.getExternalID() + "(path: " + cfgPerson.getObjectPath() + ")");
+                                        userNameFound = true;
+                                    }
+                                }
+                                if (!userNameFound) {
+
+                                    requestOutput(" * USER [" + user + "] not found ");
                                 }
 
                             }
