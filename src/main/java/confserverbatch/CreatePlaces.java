@@ -118,33 +118,4 @@ public class CreatePlaces {
         CreatePlaces.logger.info("ComJavaQuickStart finished execution.");
     }
 
-    private void importFile(String pathToCsv) {
-        BufferedReader csvReader = null;
-        String delim = null;
-        try {
-            logger.info(pathToCsv);
-            csvReader = new BufferedReader(new FileReader(pathToCsv));
-            String row;
-
-            while ((row = csvReader.readLine()) != null) {
-                if (StringUtils.isNotBlank(row)) {
-                    String[] split = StringUtils.split(row, delim);
-                }
-                // do something with the data
-            }
-        } catch (IOException ex) {
-            LogManager.getLogger().error(ex);
-        } finally {
-            if (csvReader != null) {
-                try {
-                    csvReader.close();
-                } catch (IOException ex) {
-                    LogManager.getLogger().error(ex);
-                }
-            }
-
-        }
-
-    }
-
 }

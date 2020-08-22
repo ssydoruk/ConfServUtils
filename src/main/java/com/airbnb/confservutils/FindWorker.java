@@ -73,24 +73,19 @@ public class FindWorker {
      * @param cfgObj
      * @param props
      * @param checkNames
-     * @return if object matches, return non-null value. If no kvp matched,
-     * returns empty kvp. Otherwise return non-empty kvp
+     * @return if object matches, return non-null value. If no kvp matched, returns
+     *         empty kvp. Otherwise return non-empty kvp
      */
     public KeyValueCollection matchConfigObject(CfgObject cfgObj, IKeyValueProperties props, boolean checkNames) {
         KeyValueCollection kv = new KeyValueCollection();
 
-        if (ptSection == null
-                && ptKey == null
-                && ptVal == null
-                && ptName == null
-                && ptAll == null) {
+        if (ptSection == null && ptKey == null && ptVal == null && ptName == null && ptAll == null) {
             logger.debug("** No criteria; object added");
 
             return new KeyValueCollection(); // no search parameters means we return all objects
         } else {
             boolean nameMatched = false;
             boolean sectionMatched;
-            boolean includeKVP = false;
             boolean keyMatched = false;
             boolean valMatched = false;
 
@@ -108,7 +103,8 @@ public class FindWorker {
                 } else {
                     if (ptName != null) {
                         for (String string : props.getName(cfgObj)) {
-                            logger.trace("checking name of obj[" + cfgObj.getObjectType() + "] path[" + cfgObj.getObjectPath() + "] name[" + string + "]");
+                            logger.trace("checking name of obj[" + cfgObj.getObjectType() + "] path["
+                                    + cfgObj.getObjectPath() + "] name[" + string + "]");
                             if (matching(ptName, string)) {
                                 logger.debug("Name [" + string + "] matched against " + ptName);
                                 nameMatched = true;
@@ -123,7 +119,7 @@ public class FindWorker {
                     }
                 }
             }
-//            boolean shouldContinue=( ptName==null || nameMatched);
+            // boolean shouldContinue=( ptName==null || nameMatched);
 
             if (ptAll != null || ((ptName == null || nameMatched) && otherNonNull)) {
                 KeyValueCollection options;
@@ -190,13 +186,17 @@ public class FindWorker {
                                         }
                                     }
                                     if (keyMatched || valMatched) {
-                                        logger.debug("sect[" + sectionName + "] km[" + keyMatched + "] vm[" + valMatched + "] key[" + theOpt.getStringKey() + "] val[" + theOpt.getStringValue() + "]");
+                                        logger.debug("sect[" + sectionName + "] km[" + keyMatched + "] vm[" + valMatched
+                                                + "] key[" + theOpt.getStringKey() + "] val[" + theOpt.getStringValue()
+                                                + "]");
 
                                         if (ptAll != null) {
                                             addedValues.addPair(theOpt);
                                         } else {
-                                            int paramsRequested = numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null);
-                                            int paramsFound = numTrue(nameMatched, sectionMatched, keyMatched, valMatched);
+                                            int paramsRequested = numTrue(ptName != null, ptSection != null,
+                                                    ptKey != null, ptVal != null);
+                                            int paramsFound = numTrue(nameMatched, sectionMatched, keyMatched,
+                                                    valMatched);
                                             if (paramsFound >= paramsRequested) {
                                                 addedValues.addPair(theOpt);
                                             }
@@ -205,38 +205,38 @@ public class FindWorker {
                                 }
                             } else {
                                 logger.info("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
-//                            if (ptVal != null) {
-//                                if (matching(ptVal, value.toString())) {
-//                                    valMatched = true; // !!!!!
-//                                    addedValues.addPair(el);
-//
-//                                }
-//                            }
+                                // if (ptVal != null) {
+                                // if (matching(ptVal, value.toString())) {
+                                // valMatched = true; // !!!!!
+                                // addedValues.addPair(el);
+                                //
+                                // }
+                                // }
                             }
                         }
-                        if (!addedValues.isEmpty()
-                                || (((ptAll != null) && numTrue(nameMatched, sectionMatched, keyMatched, valMatched) > 0)
-                                || ((ptAll == null) && numTrue(nameMatched, sectionMatched, keyMatched, valMatched)
-                                >= numTrue(ptName != null, ptSection != null, ptKey != null, ptVal != null)))) {
+                        if (!addedValues.isEmpty() || (((ptAll != null)
+                                && numTrue(nameMatched, sectionMatched, keyMatched, valMatched) > 0)
+                                || ((ptAll == null)
+                                        && numTrue(nameMatched, sectionMatched, keyMatched, valMatched) >= numTrue(
+                                                ptName != null, ptSection != null, ptKey != null, ptVal != null)))) {
                             KeyValueCollection list = kv.getList(sectionName);
                             if (list == null) {
                                 list = new KeyValueCollection();
                                 kv.addList(sectionName, list);
                             }
                             list.addAll(Arrays.asList(addedValues.toArray()));
-//                                    kv.addObject(el.getStringKey(), addedValues);
+                            // kv.addObject(el.getStringKey(), addedValues);
                         }
                     }
                 }
             }
             if (ptAll != null) {
-                logger.debug(" ** all **  match " + ((nameMatched || !kv.isEmpty()) ? "" : "NOT") + " found, obj " + props.getName(cfgObj));
+                logger.debug(" ** all **  match " + ((nameMatched || !kv.isEmpty()) ? "" : "NOT") + " found, obj "
+                        + props.getName(cfgObj));
                 return (nameMatched || !kv.isEmpty()) ? kv : null;
             } else {
-                KeyValueCollection ret = (!kv.isEmpty()
-                        || (ptName != null && nameMatched && numTrue(ptSection != null, ptKey != null, ptVal != null) == 0))
-                        ? kv
-                        : null;
+                KeyValueCollection ret = (!kv.isEmpty() || (ptName != null && nameMatched
+                        && numTrue(ptSection != null, ptKey != null, ptVal != null) == 0)) ? kv : null;
 
                 logger.debug(" ** match " + ((ret == null) ? "NOT" : "") + " found, obj " + props.getName(cfgObj));
 
