@@ -790,8 +790,9 @@ public class ConfigServerManager {
 
         parentForm.requestOutput("*** Checking for place [" + pl + "]" + " DN: " + theDN);
 
-        for ( CfgDN newDN : findDNs(service, theDN)) {
-            if (newDN != null) {
+        Collection<CfgDN> findDNs = findDNs(service, theDN);
+        if (findDNs != null && !findDNs.isEmpty()) {
+            for (CfgDN newDN : findDNs) {
                 String dn = objectBasicInfo(newDN);
                 CfgObject dependend = getDependend(newDN);
                 if (dependend == null) {
@@ -799,10 +800,9 @@ public class ConfigServerManager {
                 } else {
                     parentForm.requestOutput("Found " + dn + "\n\tplace: " + objectBasicInfo(dependend) + "\n\t\tDNs: " + getDNs(((CfgPlace) dependend).getDNDBIDs(), "\n\t\t"));
                 }
-
-            } else {
-                parentForm.requestOutput("! not found [" + theDN+"]");
             }
+        } else {
+            parentForm.requestOutput("! not found [" + theDN + "]");
         }
         CfgPlace cfgPlace = findPlace(service, pl, false);
         if (cfgPlace != null) {
