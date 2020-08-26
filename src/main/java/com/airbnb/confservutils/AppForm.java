@@ -82,6 +82,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -335,6 +336,7 @@ public final class AppForm extends javax.swing.JFrame {
         miCheckDNPlaceExists = new javax.swing.JMenuItem();
         miFindLDAPs = new javax.swing.JMenuItem();
         miFindLDAPsForUsers = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
         miAppOptionsReplace = new javax.swing.JMenuItem();
@@ -580,6 +582,14 @@ public final class AppForm extends javax.swing.JFrame {
 
         jMenu1.add(jMenu7);
 
+        jMenuItem1.setText("folderSearch");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Update");
@@ -690,6 +700,11 @@ public final class AppForm extends javax.swing.JFrame {
     private void miFindLDAPsForUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFindLDAPsForUsersActionPerformed
         verifyUserNameLDAP();
     }//GEN-LAST:event_miFindLDAPsForUsersActionPerformed
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        folderSearch();
+
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyCSV();
@@ -1964,6 +1979,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu6;
     private javax.swing.JMenu jMenu7;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -2008,14 +2024,17 @@ public final class AppForm extends javax.swing.JFrame {
         if (configServerManager.isConnected()) {
             return true;
         } else {
-            IConfService ret = null;
-            final StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
-            final String user = (String) cbUser.getSelectedItem();
-            if (confServ != null && user != null) {
-                ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
+            runInThread(() -> {
+                IConfService ret = null;
+                final StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
+                final String user = (String) cbUser.getSelectedItem();
+                if (confServ != null && user != null) {
+                    ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
 
-            }
-            connectionStatusChanged();
+                }
+                connectionStatusChanged();
+
+            });
             return configServerManager.isConnected();
         }
     }
@@ -3049,6 +3068,41 @@ public final class AppForm extends javax.swing.JFrame {
         }
     }
 
+    private void folderSearch() {
+
+        runInThread(new IThreadedFun() {
+            @Override
+            public void fun() throws ConfigException, InterruptedException {
+                if (connectToConfigServer()) {
+//                    try {
+
+                    ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
+                    placeDN.add(new Pair<>("Place1", "111"));
+                    placeDN.add(new Pair<>("Place2", "222"));
+                    shouldImportCSV(placeDN, false);
+
+//                        CfgFolderQuery q = new CfgFolderQuery();
+//                        q.setType(CfgObjectType.CFGDN.ordinal());
+//                        ArrayList<CfgFolder> results = new ArrayList(configServerManager.getResults(q, CfgFolder.class));
+//                        Collections.sort(results, (o1, o2) -> {
+//                            return ((CfgFolder) o1).getName().compareToIgnoreCase(((CfgFolder) o2).getName());
+//                        });
+//                        StringBuilder b = new StringBuilder();
+//                        for (CfgFolder result : results) {
+//                            b.append("[" + result.getName() + "] at " + result.getObjectPath() + "\n");
+//                        }
+//                        requestOutput("Found total folders: " + b);
+//                    } catch (ConfigException ex) {
+//                        java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                    } catch (InterruptedException ex) {
+//                        java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+                }
+            }
+        });
+
+    }
+
     private class LDAP_Dialog extends Utils.InfoPanel {
 
         DefaultTableModel infoTableModel;
@@ -3140,6 +3194,33 @@ public final class AppForm extends javax.swing.JFrame {
 
         Dimension preferredSize = new Dimension(600, 200);
         jp.setPreferredSize(preferredSize);
+        JPanel topPan = new JPanel();
+
+        topPan.setLayout(new BoxLayout(topPan, BoxLayout.PAGE_AXIS));
+
+        JPanel placeFolder = new JPanel();
+        placeFolder.setLayout(new BoxLayout(placeFolder, BoxLayout.PAGE_AXIS));
+        placeFolder.setBorder(new TitledBorder("Place folder"));
+
+        JTable tabPlaceFolder = new JTable(infoTableModel);
+        tabPlaceFolder.getTableHeader().setVisible(true);
+        tabPlaceFolder.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        placeFolder.add(tabPlaceFolder);
+        placeFolder.add(new JButton("Select"));
+
+        JPanel dnFolders = new JPanel();
+        dnFolders.setLayout(new BoxLayout(dnFolders, BoxLayout.PAGE_AXIS));
+        dnFolders.setBorder(new TitledBorder("DN folders"));
+        JTable tabDNFolders = new JTable(infoTableModel);
+        tabDNFolders.getTableHeader().setVisible(true);
+        tabDNFolders.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        dnFolders.add(tabDNFolders);
+        dnFolders.add(new JButton("Select"));
+
+        topPan.add(jp);
+        topPan.add(placeFolder);
+        topPan.add(dnFolders);
+        topPan.invalidate();
 
         StringBuilder title = new StringBuilder();
         if (isImport) {
@@ -3148,7 +3229,7 @@ public final class AppForm extends javax.swing.JFrame {
             title.append("Do you want to import following Place/DN (total ").append(placeDN.size()).append(")");
         }
 
-        Utils.InfoPanel dlg = new Utils.InfoPanel(this, title.toString(), jp, JOptionPane.OK_CANCEL_OPTION);
+        Utils.InfoPanel dlg = new Utils.InfoPanel(this, title.toString(), topPan, JOptionPane.OK_CANCEL_OPTION);
         Utils.ScreenInfo.CenterWindow(dlg);
         dlg.showModal();
 
