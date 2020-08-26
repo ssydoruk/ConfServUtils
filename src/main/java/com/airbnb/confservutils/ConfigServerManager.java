@@ -192,10 +192,12 @@ import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
-import confserverbatch.SwitchLookup;
+import confserverbatch.DNLocation;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -544,11 +546,14 @@ public class ConfigServerManager {
     }
 
     private CfgPlace doCreatePlace(IConfService service,
-            String pl, ArrayList<CfgDN> cfgDNs) throws ConfigException {
+            String pl, ArrayList<CfgDN> cfgDNs, Integer folderDBID) throws ConfigException {
         CfgPlace cfgPlace = new CfgPlace(service);
 
         cfgPlace.setDNs(cfgDNs);
         cfgPlace.setName(pl);
+        if (folderDBID != null) {
+            cfgPlace.setFolderId(folderDBID);
+        }
         cfgPlace.setTenantDBID(WellKnownDBIDs.EnvironmentDBID);
         parentForm.requestOutput("Creating Place [" + cfgPlace + "]");
 
@@ -584,6 +589,107 @@ public class ConfigServerManager {
 
     }
 
+    public AbstractCollection<CfgFolder> findFolders(FindObject objName, CfgObjectType type) {
+        //<editor-fold defaultstate="collapsed" desc="iSearchSettings">
+        ISearchSettings seearchSettings = new ISearchSettings() {
+            @Override
+            public boolean isCaseSensitive() {
+                return (objName == null) ? false : objName.isCaseSensitive();
+            }
+
+            @Override
+            public boolean isRegex() {
+                return (objName == null) ? false : objName.isRegex();
+            }
+
+            @Override
+            public boolean isFullOutputSelected() {
+                return false;
+            }
+
+            @Override
+            public boolean isSearchAll() {
+                return false;
+            }
+
+            @Override
+            public String getAllSearch() {
+                return null;
+            }
+
+            @Override
+            public String getSection() {
+                return null;
+            }
+
+            @Override
+            public String getObjName() {
+                return (objName == null) ? null : objName.getName();
+            }
+
+            @Override
+            public String getOption() {
+                return null;
+            }
+
+            @Override
+            public String getValue() {
+                return null;
+            }
+
+        };
+        //</editor-fold>
+        ArrayList<CfgFolder> ret = new ArrayList<>();
+        ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
+            @Override
+            public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
+                ret.add((CfgFolder) obj);
+                return true;
+            }
+
+        };
+        try {
+            CfgFolderQuery q = new CfgFolderQuery();
+            q.setType(type.ordinal());
+            q.setObjectType(CfgObjectType.CFGFolder.ordinal());
+
+            if (findObjects(
+                    q,
+                    CfgFolder.class,
+                    new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(CfgObject obj) {
+                    return null;
+                }
+
+                @Override
+                public Collection<String> getName(CfgObject obj) {
+                    Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgFolder) obj).getName());
+                    return ret;
+                }
+            },
+                    new FindWorker(seearchSettings), true, foundProc)) {
+
+            }
+            Collections.sort(ret, (o1, o2) -> {
+                return getFolderFullName(((CfgFolder) o1)).compareToIgnoreCase(getFolderFullName((CfgFolder) o2));
+            });
+            if (logger.isDebugEnabled()) {
+                StringBuilder b = new StringBuilder();
+                for (CfgFolder result : ret) {
+                    b.append("[").append(result.getName()).append("] at ").append(result.getObjectPath()).append("\n");
+                }
+                logger.debug("Found total folders: " + b);
+            }
+            return ret;
+
+        } catch (ConfigException | InterruptedException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
     private boolean placeDNsEqual(Collection<CfgDN> placeDNs, ArrayList<CfgDN> cfgDNs) {
         logger.info("placeDNsEqual: placeDNs: " + StringUtils.join(placeDNs, ",") + "; DNs: " + StringUtils.join(cfgDNs, ","));
         if (placeDNs.size() > 0) {
@@ -607,9 +713,9 @@ public class ConfigServerManager {
         return true;
     }
 
-    private CfgPlace createPlace(String plName, ArrayList<CfgDN> cfgDNs, ExistingObjectDecider eod) throws ConfigException {
+    private CfgPlace createPlace(String plName, ArrayList<CfgDN> cfgDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
         try {
-            return doCreatePlace(service, plName, cfgDNs);
+            return doCreatePlace(service, plName, cfgDNs, folderDBID);
         } catch (ConfigException ex) {
 //            switch(objExistaction)
             if (ex instanceof ConfigServerException) {
@@ -619,8 +725,9 @@ public class ConfigServerManager {
                     case RECREATE:
                         parentForm.requestOutput("Recreating place");
                         cfgPlace.delete();
+
                         parentForm.requestOutput(cfgPlace.getName() + " deleted");
-                        return doCreatePlace(service, plName, cfgDNs);
+                        return doCreatePlace(service, plName, cfgDNs, folderDBID);
 
                     case REUSE:
                         parentForm.requestOutput("Reusing place " + cfgPlace.getName());
@@ -647,7 +754,7 @@ public class ConfigServerManager {
         }
     }
 
-    private String getDNs(Collection<Integer> dns) {
+    private String getDNs(Collection<Integer> dns, String delim) {
         StringBuilder ret = new StringBuilder();
         if (dns != null) {
             for (Integer dbid : dns) {
@@ -655,10 +762,10 @@ public class ConfigServerManager {
                 try {
                     retrieveObject = retrieveObject(CfgObjectType.CFGDN, dbid);
                     if (ret.length() > 0) {
-                        ret.append("; ");
+                        ret.append(delim);
                     }
                     if (retrieveObject != null) {
-                        ret.append(nameDBID(retrieveObject));
+                        ret.append(objectBasicInfo((CfgObject) retrieveObject));
                     }
 
                 } catch (ConfigException ex) {
@@ -669,37 +776,37 @@ public class ConfigServerManager {
         return ret.toString();
     }
 
-    private String nameDBID(ICfgObject obj) {
+    private String objectBasicInfo(CfgObject obj) {
         if (obj != null) {
             String s = getObjName(obj);
-            return s + "(DBID:" + obj.getObjectDbid() + ")";
+            return s + "(DBID:" + obj.getObjectDbid() + ") at [" + obj.getObjectPath() + "]";
         } else {
             return "";
         }
 
     }
 
-    public void checkPlace(String pl, HashMap<SwitchLookup, String> theDNs) throws ConfigException {
+    public void checkPlace(String pl, String theDN) throws ConfigException, InterruptedException {
 
-        parentForm.requestOutput("*** Checking for place [" + pl + "]" + " DNs: " + dnsList(theDNs));
-        for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
-            CfgDN newDN = findDN(service, entry.getValue(), entry.getKey().getSw(), false);
+        parentForm.requestOutput("*** Checking for place [" + pl + "]" + " DN: " + theDN);
+
+        for ( CfgDN newDN : findDNs(service, theDN)) {
             if (newDN != null) {
-                String dn = nameDBID(newDN);
+                String dn = objectBasicInfo(newDN);
                 CfgObject dependend = getDependend(newDN);
                 if (dependend == null) {
                     parentForm.requestOutput("Found DN " + dn + " no place ");
                 } else {
-                    parentForm.requestOutput("Found " + dn + " place: " + nameDBID(dependend) + "DNs: " + getDNs(((CfgPlace) dependend).getDNDBIDs()));
+                    parentForm.requestOutput("Found " + dn + "\n\tplace: " + objectBasicInfo(dependend) + "\n\t\tDNs: " + getDNs(((CfgPlace) dependend).getDNDBIDs(), "\n\t\t"));
                 }
 
             } else {
-                parentForm.requestOutput("! not found: " + dnEntry(entry));
+                parentForm.requestOutput("! not found [" + theDN+"]");
             }
         }
         CfgPlace cfgPlace = findPlace(service, pl, false);
         if (cfgPlace != null) {
-            parentForm.requestOutput("Found place : " + nameDBID(cfgPlace) + ") DNs:" + getDNs(cfgPlace.getDNDBIDs()));
+            parentForm.requestOutput("Found place : " + objectBasicInfo(cfgPlace) + ") DNs:\n\t" + getDNs(cfgPlace.getDNDBIDs(), "\n\t"));
 
         } else {
             parentForm.requestOutput("! not found place");
@@ -983,23 +1090,32 @@ public class ConfigServerManager {
         }
     }
 
-    public CfgPlace createPlace(String pl, HashMap<SwitchLookup, String> theDNs, ExistingObjectDecider eod) throws ConfigException {
+    public Object createPlace(String thePlace, HashMap<DNLocation, String> DNs, ExistingObjectDecider eod, ArrayList<CfgFolder> lastSelectedPlaceFolder) throws ConfigException {
+        if (lastSelectedPlaceFolder != null && !lastSelectedPlaceFolder.isEmpty()) {
+            return createPlace(thePlace, DNs, eod, lastSelectedPlaceFolder.get(0).getDBID());
+        } else {
+            return createPlace(thePlace, DNs, eod, (Integer) null);
+        }
+    }
+
+    public CfgPlace createPlace(String pl, HashMap<DNLocation, String> theDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
         ArrayList<CfgDN> cfgDNs = new ArrayList<>();
-        for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
+        for (Map.Entry<DNLocation, String> entry : theDNs.entrySet()) {
             CfgDN newDN = createExtDN(entry.getKey(), entry.getValue(), eod);
             if (newDN == null) {
                 return null;
             }
             cfgDNs.add(newDN);
         }
-        return createPlace(pl, cfgDNs, eod);
+        return createPlace(pl, cfgDNs, eod, folderDBID);
     }
 
     private CfgDN doCreateDN(IConfService service,
             String theNumber,
             String name,
             CfgDNType type,
-            CfgSwitch sw) throws ConfigException {
+            CfgSwitch sw,
+            Integer folderDBID) throws ConfigException {
         CfgDN dn = new CfgDN(service);
 
         parentForm.requestOutput("Creating DN [" + name + "] switch [" + sw.getName() + "]");
@@ -1008,6 +1124,9 @@ public class ConfigServerManager {
         dn.setType(type);
         dn.setNumber(theNumber);
         dn.setSwitchSpecificType(1);
+        if (folderDBID != null) {
+            dn.setFolderId(folderDBID);
+        }
         dn.setRouteType(CfgRouteType.CFGDefault);
         dn.save();
         if (dn.isSaved()) {
@@ -1016,6 +1135,19 @@ public class ConfigServerManager {
         } else {
             return null;
         }
+    }
+
+    private Collection<CfgDN> findDNs(
+            final IConfService service,
+            final String dn
+    ) throws ConfigException, InterruptedException {
+        CfgDNQuery dnQuery = new CfgDNQuery();
+
+        dnQuery.setDnNumber(dn);
+
+        logger.info("searching " + "DN [" + dn + "]");
+        return getResults(dnQuery, CfgDN.class);
+
     }
 
     private CfgDN findDN(
@@ -1040,10 +1172,10 @@ public class ConfigServerManager {
 
     }
 
-    private CfgDN createExtDN(SwitchLookup key, String value, ExistingObjectDecider eod) throws ConfigException {
+    private CfgDN createExtDN(DNLocation key, String value, ExistingObjectDecider eod) throws ConfigException {
         String name = key.getSw().getName() + "_" + value;
         try {
-            return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw());
+            return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw(), key.getFolderDBID());
         } catch (ConfigException ex) {
 //            switch(objExistaction)
             if (ex instanceof ConfigServerException
@@ -1056,7 +1188,7 @@ public class ConfigServerManager {
                         cfgDN.delete();
                         parentForm.requestOutput(cfgDN.getNumber() + " deleted");
                         return doCreateDN(service, cfgDN.getNumber(), cfgDN.getName(), cfgDN.getType(),
-                                cfgDN.getSwitch());
+                                cfgDN.getSwitch(), cfgDN.getFolderId());
 
                     case REUSE:
                         parentForm.requestOutput("Reusing DN " + cfgDN.getNumber());
@@ -1983,18 +2115,18 @@ public class ConfigServerManager {
         }
     }
 
-    private String dnEntry(Map.Entry<SwitchLookup, String> entry) {
+    private String dnEntry(Map.Entry<DNLocation, String> entry) {
         StringBuilder ret = new StringBuilder();
-        SwitchLookup key = entry.getKey();
+        DNLocation key = entry.getKey();
         String val = entry.getValue();
 
         ret.append("[").append(key.getSw().getName()).append("]").append("/").append(val);
         return ret.toString();
     }
 
-    private String dnsList(HashMap<SwitchLookup, String> theDNs) {
+    private String dnsList(HashMap<DNLocation, String> theDNs) {
         StringBuilder ret = new StringBuilder();
-        for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
+        for (Map.Entry<DNLocation, String> entry : theDNs.entrySet()) {
             if (ret.length() > 0) {
                 ret.append(" ;");
             }
@@ -2195,4 +2327,10 @@ public class ConfigServerManager {
         }
 
     };
+
+    static String getFolderFullName(CfgFolder fld) {
+        return fld.getObjectPath() + "\\[" + fld.getName() + "]";
+
+    }
+
 }

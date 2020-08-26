@@ -362,7 +362,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
         FindObject objName;
 
         if (!getAll) {
-            objName = theForm.getObjName(CfgScript.class.getSimpleName() + " type " + CfgScriptType.CFGEnhancedRouting);
+            objName = theForm.getObjName(theForm, CfgScript.class.getSimpleName() + " type " + CfgScriptType.CFGEnhancedRouting);
 
             if (objName == null) {
                 return null;
@@ -471,7 +471,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
         FindObject objName;
 
         if (!getAll) {
-            objName = theForm.getObjName(CfgDN.class.getSimpleName() + " type " + CfgDNType.CFGRoutingPoint);
+            objName = theForm.getObjName(theForm, CfgDN.class.getSimpleName() + " type " + CfgDNType.CFGRoutingPoint);
 
             if (objName == null) {
                 return null;

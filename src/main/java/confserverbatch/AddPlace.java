@@ -45,20 +45,20 @@ public class AddPlace {
     private ObjectExistAction objExistAction;
     private IConfService service;
     String pl = null;
-    HashMap<SwitchLookup, String> theDNs = new HashMap<>();
+    HashMap<DNLocation, String> theDNs = new HashMap<>();
     private ConfigServerManager csManager;
 
-    public AddPlace(IConfService service, String place, HashMap<SwitchLookup, String> DNs, ObjectExistAction objectExistAction) {
+    public AddPlace(IConfService service, String place, HashMap<DNLocation, String> DNs, ObjectExistAction objectExistAction) {
         this.service = service;
         setObjExistAction(objectExistAction);
         pl = place;
-        for (Map.Entry<SwitchLookup, String> entry : DNs.entrySet()) {
+        for (Map.Entry<DNLocation, String> entry : DNs.entrySet()) {
             theDNs.put(entry.getKey(), entry.getValue());
 
         }
     }
 
-    public AddPlace(ConfigServerManager configServerManager, String string, HashMap<SwitchLookup, String> DNs, ObjectExistAction objectExistAction) {
+    public AddPlace(ConfigServerManager configServerManager, String string, HashMap<DNLocation, String> DNs, ObjectExistAction objectExistAction) {
         this(configServerManager.getService(), string, DNs, objectExistAction);
         csManager = configServerManager;
     }
@@ -134,7 +134,7 @@ public class AddPlace {
 
     public void createAll() throws ConfigException, CloneNotSupportedException {
         ArrayList<CfgDN> cfgDNs = new ArrayList<>();
-        for (Map.Entry<SwitchLookup, String> entry : theDNs.entrySet()) {
+        for (Map.Entry<DNLocation, String> entry : theDNs.entrySet()) {
             cfgDNs.add(createDN(entry.getKey(),
                     entry.getValue()));
         }
@@ -143,9 +143,9 @@ public class AddPlace {
 
     }
 
-    void addPlace(String place, HashMap<SwitchLookup, String> DNs) {
+    void addPlace(String place, HashMap<DNLocation, String> DNs) {
         pl = place;
-        for (Map.Entry<SwitchLookup, String> entry : DNs.entrySet()) {
+        for (Map.Entry<DNLocation, String> entry : DNs.entrySet()) {
             theDNs.put(entry.getKey(), entry.getValue());
 
         }
@@ -156,7 +156,7 @@ public class AddPlace {
     }
 
     //<editor-fold defaultstate="collapsed" desc="cfgDN utility">
-    private CfgDN createDN(SwitchLookup key, String value) throws ConfigException {
+    private CfgDN createDN(DNLocation key, String value) throws ConfigException {
         String name = key.getSw().getName() + "_" + value;
         try {
             return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw());

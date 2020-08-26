@@ -37,8 +37,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jidesoft.dialog.ButtonPanel;
 import com.jidesoft.dialog.StandardDialog;
+import confserverbatch.DNLocation;
 import confserverbatch.ObjectExistAction;
-import confserverbatch.SwitchLookup;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -82,7 +82,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -336,7 +335,6 @@ public final class AppForm extends javax.swing.JFrame {
         miCheckDNPlaceExists = new javax.swing.JMenuItem();
         miFindLDAPs = new javax.swing.JMenuItem();
         miFindLDAPsForUsers = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
         miAppOptionsReplace = new javax.swing.JMenuItem();
@@ -582,14 +580,6 @@ public final class AppForm extends javax.swing.JFrame {
 
         jMenu1.add(jMenu7);
 
-        jMenuItem1.setText("folderSearch");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
-            }
-        });
-        jMenu1.add(jMenuItem1);
-
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Update");
@@ -701,11 +691,6 @@ public final class AppForm extends javax.swing.JFrame {
         verifyUserNameLDAP();
     }//GEN-LAST:event_miFindLDAPsForUsersActionPerformed
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        folderSearch();
-
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
-
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyCSV();
     }// GEN-LAST:event_miCheckDNPlaceExistsActionPerformed
@@ -746,8 +731,9 @@ public final class AppForm extends javax.swing.JFrame {
     }// GEN-LAST:event_btEditConfgServActionPerformed
 
     private void btConnectActionPerformed(final java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btConnectActionPerformed
-        connectToConfigServer();
-        connectionStatusChanged();
+        runInThread(() -> {
+            connectToConfigServer();
+        });
     }// GEN-LAST:event_btConnectActionPerformed
 
     private void pfPasswordActionPerformed(final java.awt.event.ActionEvent evt) {// GEN-FIRST:event_pfPasswordActionPerformed
@@ -1204,7 +1190,7 @@ public final class AppForm extends javax.swing.JFrame {
         upd = null;
         yesToAll = false;
 
-        final FindObject objName = getObjName(
+        final FindObject objName = getObjName(this,
                 CfgTransaction.class.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
 
         if (objName == null) {
@@ -1979,7 +1965,6 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu6;
     private javax.swing.JMenu jMenu7;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -2024,17 +2009,15 @@ public final class AppForm extends javax.swing.JFrame {
         if (configServerManager.isConnected()) {
             return true;
         } else {
-            runInThread(() -> {
-                IConfService ret = null;
-                final StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
-                final String user = (String) cbUser.getSelectedItem();
-                if (confServ != null && user != null) {
-                    ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
+            IConfService ret = null;
+            final StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
+            final String user = (String) cbUser.getSelectedItem();
+            if (confServ != null && user != null) {
+                ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
 
-                }
-                connectionStatusChanged();
+            }
+            connectionStatusChanged();
 
-            });
             return configServerManager.isConnected();
         }
     }
@@ -2372,7 +2355,7 @@ public final class AppForm extends javax.swing.JFrame {
 
     }
 
-    HashSet<String> searchValues = new HashSet<>();
+    static HashSet<String> searchValues = new HashSet<>();
 
     public static final HashMap<String, Integer> cacheOptions = createCacheOptions();
 
@@ -2385,10 +2368,10 @@ public final class AppForm extends javax.swing.JFrame {
         return ret;
     }
 
-    public FindObject getObjName(final String objClass) {
+    static public FindObject getObjName(Window par, final String objClass) {
         if (getObjName == null) {
             findObj = new FindObject();
-            getObjName = new RequestDialog(this, findObj);
+            getObjName = new RequestDialog(par, findObj);
         }
         findObj.setCaseSensitive(false);
         findObj.setLabel("Specify name for " + objClass);
@@ -2400,8 +2383,8 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     private static final String appSection = "application";
-    RequestDialog getObjName = null;
-    FindObject findObj = null;
+    static RequestDialog getObjName = null;
+    static FindObject findObj = null;
 
     /**
      *
@@ -2412,7 +2395,7 @@ public final class AppForm extends javax.swing.JFrame {
         upd = null;
         yesToAll = false;
 
-        final FindObject objName = getObjName(
+        final FindObject objName = getObjName(this,
                 CfgScript.class.getSimpleName() + " type " + CfgScriptType.CFGEnhancedRouting);
 
         if (objName == null) {
@@ -2975,28 +2958,17 @@ public final class AppForm extends javax.swing.JFrame {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
             final ArrayList<Pair<String, String>> placeDN = readPlaceDN(chooser.getSelectedFile());
 
-            if (shouldImportCSV(placeDN, false)) {
+            if (CSVImportDialog.getInstance(this, configServerManager).shouldImportCSV(placeDN, false)) {
                 runInThread(new IThreadedFun() {
                     @Override
                     public void fun() throws ConfigException, InterruptedException {
                         if (connectToConfigServer()) {
-                            final ArrayList<SwitchLookup> switches = new ArrayList<>();
-                            switches.add(new SwitchLookup(configServerManager.getService(), "esv1_sipa1"));
-                            switches.add(new SwitchLookup(configServerManager.getService(), "edn1_sipa1"));
-                            switches.add(new SwitchLookup(configServerManager.getService(), "esg3_sipa1"));
 
                             for (Pair<String, String> entry : placeDN) {
                                 String thePlace = entry.getKey();
                                 String theDN = entry.getValue();
-                                final HashMap<SwitchLookup, String> DNs = new HashMap<>();
-                                for (final SwitchLookup switche : switches) {
-                                    DNs.put(switche, (String) null);
 
-                                }
-                                for (final SwitchLookup switchLookup : DNs.keySet()) {
-                                    DNs.put(switchLookup, theDN);
-                                }
-                                configServerManager.checkPlace(thePlace, DNs);
+                                configServerManager.checkPlace(thePlace, theDN);
                             }
                         }
                     }
@@ -3024,15 +2996,23 @@ public final class AppForm extends javax.swing.JFrame {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
             final ArrayList<Pair<String, String>> placeDN = readPlaceDN(chooser.getSelectedFile());
 
-            if (shouldImportCSV(placeDN, true)) {
+            CSVImportDialog instance = CSVImportDialog.getInstance(this, configServerManager);
+            if (instance.shouldImportCSV(placeDN, true) && JOptionPane.showConfirmDialog(this, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 runInThread(new IThreadedFun() {
                     @Override
                     public void fun() throws ConfigException, InterruptedException {
                         if (connectToConfigServer()) {
-                            final ArrayList<SwitchLookup> switches = new ArrayList<>();
-                            switches.add(new SwitchLookup(configServerManager.getService(), "esv1_sipa1"));
-                            switches.add(new SwitchLookup(configServerManager.getService(), "edn1_sipa1"));
-                            switches.add(new SwitchLookup(configServerManager.getService(), "esg3_sipa1"));
+                            final ArrayList<DNLocation> switches = new ArrayList<>();
+                            ArrayList<CfgFolder> lastSelectedDNFolders = instance.lastSelectedDNFolders();
+                            if (lastSelectedDNFolders != null && !lastSelectedDNFolders.isEmpty()) {
+                                for (CfgFolder lastSelectedDNFolder : lastSelectedDNFolders) {
+                                    switches.add(new DNLocation(configServerManager.getService(), lastSelectedDNFolder));
+                                }
+                            } else {
+                                switches.add(new DNLocation(configServerManager.getService(), "esv1_sipa1"));
+                                switches.add(new DNLocation(configServerManager.getService(), "edn1_sipa1"));
+                                switches.add(new DNLocation(configServerManager.getService(), "esg3_sipa1"));
+                            }
 
                             ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
 
@@ -3040,15 +3020,15 @@ public final class AppForm extends javax.swing.JFrame {
                             for (Pair<String, String> entry : placeDN) {
                                 String thePlace = entry.getKey();
                                 String theDN = entry.getValue();
-                                final HashMap<SwitchLookup, String> DNs = new HashMap<>();
-                                for (final SwitchLookup switche : switches) {
+                                final HashMap<DNLocation, String> DNs = new HashMap<>();
+                                for (final DNLocation switche : switches) {
                                     DNs.put(switche, (String) null);
 
                                 }
-                                for (final SwitchLookup switchLookup : DNs.keySet()) {
+                                for (final DNLocation switchLookup : DNs.keySet()) {
                                     DNs.put(switchLookup, theDN);
                                 }
-                                if (configServerManager.createPlace(thePlace, DNs, eod) == null) // stop creating
+                                if (configServerManager.createPlace(thePlace, DNs, eod, instance.lastSelectedPlaceFolder()) == null) // stop creating
                                 {
                                     requestOutput("****** Import aborted *******");
                                     break;
@@ -3066,41 +3046,6 @@ public final class AppForm extends javax.swing.JFrame {
             }
 
         }
-    }
-
-    private void folderSearch() {
-
-        runInThread(new IThreadedFun() {
-            @Override
-            public void fun() throws ConfigException, InterruptedException {
-                if (connectToConfigServer()) {
-//                    try {
-
-                    ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
-                    placeDN.add(new Pair<>("Place1", "111"));
-                    placeDN.add(new Pair<>("Place2", "222"));
-                    shouldImportCSV(placeDN, false);
-
-//                        CfgFolderQuery q = new CfgFolderQuery();
-//                        q.setType(CfgObjectType.CFGDN.ordinal());
-//                        ArrayList<CfgFolder> results = new ArrayList(configServerManager.getResults(q, CfgFolder.class));
-//                        Collections.sort(results, (o1, o2) -> {
-//                            return ((CfgFolder) o1).getName().compareToIgnoreCase(((CfgFolder) o2).getName());
-//                        });
-//                        StringBuilder b = new StringBuilder();
-//                        for (CfgFolder result : results) {
-//                            b.append("[" + result.getName() + "] at " + result.getObjectPath() + "\n");
-//                        }
-//                        requestOutput("Found total folders: " + b);
-//                    } catch (ConfigException ex) {
-//                        java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-//                    } catch (InterruptedException ex) {
-//                        java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-//                    }
-                }
-            }
-        });
-
     }
 
     private class LDAP_Dialog extends Utils.InfoPanel {
@@ -3158,82 +3103,6 @@ public final class AppForm extends javax.swing.JFrame {
         }
 
         return showLDAP.shouldProceed(ldapIDs);
-
-    }
-
-    private boolean shouldImportCSV(final ArrayList<Pair<String, String>> placeDN, boolean isImport) {
-
-        DefaultTableModel infoTableModel = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // To change body of generated methods, choose Tools | Templates.
-            }
-
-        };
-
-        infoTableModel.addColumn("Place");
-        infoTableModel.addColumn("DN");
-        for (Pair<String, String> entry : placeDN) {
-            String place = entry.getKey();
-            String dn = entry.getValue();
-            infoTableModel.addRow(new Object[]{place, dn});
-        }
-
-        JTable tab = new JTable(infoTableModel);
-        tab.getTableHeader().setVisible(true);
-        tab.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-        TableColumnAdjuster tca = new TableColumnAdjuster(tab);
-        tca.setColumnDataIncluded(true);
-        tca.setColumnHeaderIncluded(false);
-        tca.setDynamicAdjustment(true);
-        tca.adjustColumns();
-
-        JScrollPane jp = new JScrollPane(tab);
-        // jp.add(tab);
-
-        Dimension preferredSize = new Dimension(600, 200);
-        jp.setPreferredSize(preferredSize);
-        JPanel topPan = new JPanel();
-
-        topPan.setLayout(new BoxLayout(topPan, BoxLayout.PAGE_AXIS));
-
-        JPanel placeFolder = new JPanel();
-        placeFolder.setLayout(new BoxLayout(placeFolder, BoxLayout.PAGE_AXIS));
-        placeFolder.setBorder(new TitledBorder("Place folder"));
-
-        JTable tabPlaceFolder = new JTable(infoTableModel);
-        tabPlaceFolder.getTableHeader().setVisible(true);
-        tabPlaceFolder.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        placeFolder.add(tabPlaceFolder);
-        placeFolder.add(new JButton("Select"));
-
-        JPanel dnFolders = new JPanel();
-        dnFolders.setLayout(new BoxLayout(dnFolders, BoxLayout.PAGE_AXIS));
-        dnFolders.setBorder(new TitledBorder("DN folders"));
-        JTable tabDNFolders = new JTable(infoTableModel);
-        tabDNFolders.getTableHeader().setVisible(true);
-        tabDNFolders.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        dnFolders.add(tabDNFolders);
-        dnFolders.add(new JButton("Select"));
-
-        topPan.add(jp);
-        topPan.add(placeFolder);
-        topPan.add(dnFolders);
-        topPan.invalidate();
-
-        StringBuilder title = new StringBuilder();
-        if (isImport) {
-            title.append("Do you want to check existense Place/DN (total ").append(placeDN.size()).append(")");
-        } else {
-            title.append("Do you want to import following Place/DN (total ").append(placeDN.size()).append(")");
-        }
-
-        Utils.InfoPanel dlg = new Utils.InfoPanel(this, title.toString(), topPan, JOptionPane.OK_CANCEL_OPTION);
-        Utils.ScreenInfo.CenterWindow(dlg);
-        dlg.showModal();
-
-        return dlg.getDialogResult() == JOptionPane.OK_OPTION;
 
     }
 
@@ -3300,7 +3169,7 @@ public final class AppForm extends javax.swing.JFrame {
 
     }
 
-    final class RequestDialog extends StandardDialog {
+    final static class RequestDialog extends StandardDialog {
 
         private final JPanel contentPanel;
 

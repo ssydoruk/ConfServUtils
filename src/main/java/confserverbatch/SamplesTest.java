@@ -110,12 +110,12 @@ public class SamplesTest {
 //        CfgAgentInfo ai = new CfgAgentInfo(service, null);
 ////        agent.setAgentInfo(ai);
 //        agent.delete();
-        ArrayList<SwitchLookup> switches = new ArrayList<>();
-        switches.add(new SwitchLookup(service, "esv1_sipa1"));
-        switches.add(new SwitchLookup(service, "edn1_sipa1"));
+        ArrayList<DNLocation> switches = new ArrayList<>();
+        switches.add(new DNLocation(service, "esv1_sipa1"));
+        switches.add(new DNLocation(service, "edn1_sipa1"));
 
-        HashMap<SwitchLookup, String> DNs = new HashMap<>();
-        for (SwitchLookup switche : switches) {
+        HashMap<DNLocation, String> DNs = new HashMap<>();
+        for (DNLocation switche : switches) {
             DNs.put(switche, (String) null);
 
         }
@@ -128,11 +128,11 @@ public class SamplesTest {
 
         ag.setObjExistAction(ObjectExistAction.RECREATE);
 
-        for (SwitchLookup switche : switches) {
+        for (DNLocation switche : switches) {
             ag.addLoginID(switche, "90000");
 
         }
-        for (SwitchLookup switchLookup : DNs.keySet()) {
+        for (DNLocation switchLookup : DNs.keySet()) {
             DNs.put(switchLookup, "90000");
         }
 
