@@ -3154,16 +3154,26 @@ public final class AppForm extends javax.swing.JFrame {
                 if (connectToConfigServer()) {
                     HashMap<Integer, CfgObject> agentLogins = configServerManager.getAllDBID_AgentLogin();
                     HashMap<Integer, CfgObject> agentLoginIDtoAgent = configServerManager.getAllLoginID_Agents();
-                    int totalCnt = 0;
+                    ArrayList<CfgAgentLogin> orphanLoginIDs = new ArrayList<>();
                     for (Map.Entry<Integer, CfgObject> entry : agentLogins.entrySet()) {
                         Integer agentLoginDBID = entry.getKey();
                         CfgAgentLogin al = (CfgAgentLogin) entry.getValue();
                         if (!agentLoginIDtoAgent.containsKey(agentLoginDBID)) {
-                            requestOutput("Orphan loginID at " + al.getObjectPath() + ": " + al.getLoginCode() + "(DBID: " + al.getDBID() + ")");
-                            totalCnt++;
+                            orphanLoginIDs.add(al);
                         }
                     }
-                    requestOutput("Found toral orphans: " + totalCnt);
+                    Collections.sort(orphanLoginIDs, (o1, o2) -> {
+                        CfgAgentLogin al1 = (CfgAgentLogin) o1;
+                        CfgAgentLogin al2 = (CfgAgentLogin) o2;
+                        int compareToIgnoreCase = al1.getLoginCode().compareToIgnoreCase(al2.getLoginCode());
+                        return (compareToIgnoreCase == 0)
+                                ? al1.getObjectPath().compareToIgnoreCase(al2.getObjectPath()) : compareToIgnoreCase;
+                    });
+                    for (CfgAgentLogin al : orphanLoginIDs) {
+                        requestOutput("Orphan loginID at " + al.getObjectPath() + ": " + al.getLoginCode() + "(DBID: " + al.getDBID() + ")");
+
+                    }
+                    requestOutput("Found toral orphans: " + orphanLoginIDs.size());
                 }
             }
         });
