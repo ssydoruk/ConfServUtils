@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
@@ -139,19 +140,20 @@ abstract class CSVImportDialog extends Utils.InfoPanel {
 
         tabPlaceDN = new JTable(modelPlaceDN);
         tabPlaceDN.getTableHeader().setVisible(true);
-        tabPlaceDN.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+//        tabPlaceDN.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        tcaPlaceDN = new TableColumnAdjuster(tabPlaceDN);
-        tcaPlaceDN.setColumnDataIncluded(true);
-        tcaPlaceDN.setColumnHeaderIncluded(false);
-        tcaPlaceDN.setDynamicAdjustment(true);
-        tcaPlaceDN.adjustColumns();
+//        tcaPlaceDN = new TableColumnAdjuster(tabPlaceDN);
+//        tcaPlaceDN.setColumnDataIncluded(true);
+//        tcaPlaceDN.setColumnHeaderIncluded(false);
+//        tcaPlaceDN.setDynamicAdjustment(true);
+//        tcaPlaceDN.adjustColumns();
 
         JScrollPane jp = new JScrollPane(tabPlaceDN);
         // jp.add(tab);
 
-        Dimension preferredSize = new Dimension(600, 200);
+        Dimension preferredSize = new Dimension(600, 400);
         jp.setPreferredSize(preferredSize);
+        jp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         topPan = new JPanel();
 
         topPan.setLayout(new BoxLayout(topPan, BoxLayout.PAGE_AXIS));
@@ -163,6 +165,7 @@ abstract class CSVImportDialog extends Utils.InfoPanel {
         tabPlaceFolder = new JTable();
         tabPlaceFolder.getTableHeader().setVisible(false);
         //        tabPlaceFolder.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        tabPlaceFolder.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         pPlaceFolder.add(tabPlaceFolder);
         JButton btSelectPlaceFolder = new JButton(new AbstractAction("Select") {
             @Override
@@ -245,6 +248,11 @@ abstract class CSVImportDialog extends Utils.InfoPanel {
     class FoldersModel extends AbstractTableModel {
 
         private final ArrayList<CfgFolder> folders;
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return false; //To change body of generated methods, choose Tools | Templates.
+        }
 
         public FoldersModel(AbstractCollection<CfgFolder> findFolders) {
             this.folders = new ArrayList(findFolders);

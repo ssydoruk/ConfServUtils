@@ -2004,7 +2004,7 @@ public final class AppForm extends javax.swing.JFrame {
         this.profile = sGUIProfile;
     }
 
-    private boolean connectToConfigServer() {
+    public boolean connectToConfigServer() {
 
         if (configServerManager.isConnected()) {
             return true;
@@ -2996,12 +2996,13 @@ public final class AppForm extends javax.swing.JFrame {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
             final ArrayList<Pair<String, String>> placeDN = readPlaceDN(chooser.getSelectedFile());
 
-            CSVImportDialog instance = CSVImportDialog.getInstance(this, configServerManager);
-            if (instance.shouldImportCSV(placeDN, true) && JOptionPane.showConfirmDialog(this, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                runInThread(new IThreadedFun() {
-                    @Override
-                    public void fun() throws ConfigException, InterruptedException {
-                        if (connectToConfigServer()) {
+            runInThread(new IThreadedFun() {
+                @Override
+                public void fun() throws ConfigException, InterruptedException {
+                    if (connectToConfigServer()) {
+                        CSVImportDialog instance = CSVImportDialog.getInstance(theForm, configServerManager);
+                        if (instance.shouldImportCSV(placeDN, true) && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+
                             final ArrayList<DNLocation> switches = new ArrayList<>();
                             ArrayList<CfgFolder> lastSelectedDNFolders = instance.lastSelectedDNFolders();
                             if (lastSelectedDNFolders != null && !lastSelectedDNFolders.isEmpty()) {
@@ -3036,16 +3037,16 @@ public final class AppForm extends javax.swing.JFrame {
                             }
                         }
                     }
+                }
 
-                }, new IThreadedFun() {
-                    @Override
-                    public void fun() throws ConfigException, InterruptedException {
-                        configServerManager.clearCache();
-                    }
-                });
-            }
-
+            }, new IThreadedFun() {
+                @Override
+                public void fun() throws ConfigException, InterruptedException {
+                    configServerManager.clearCache();
+                }
+            });
         }
+
     }
 
     private class LDAP_Dialog extends Utils.InfoPanel {
