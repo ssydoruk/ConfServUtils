@@ -2817,14 +2817,14 @@ public final class AppForm extends javax.swing.JFrame {
                     @Override
                     public void fun() throws ConfigException, InterruptedException {
                         if (connectToConfigServer()) {
-
+                            CfgPerson p = new CfgPerson(configServerManager.getService());
                             requestOutput("Searching for LDAPs");
                             Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
                             for (String ldapID : ldapIDs) {
                                 boolean ldapFound = false;
                                 for (CfgPerson cfgPerson : allPersons) {
                                     if (StringUtils.compareIgnoreCase(ldapID, cfgPerson.getExternalID()) == 0) {
-                                        requestOutput(ldapID + " used by " + cfgPerson.getUserName() + "(path: " + cfgPerson.getObjectPath() + ")");
+                                        requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson.getObjectPath() + "\n\t" + cfgPerson.getUserName() + "," + cfgPerson.getExternalID());
                                         ldapFound = true;
                                     }
                                 }
@@ -2897,7 +2897,7 @@ public final class AppForm extends javax.swing.JFrame {
                                 boolean userNameFound = false;
                                 for (CfgPerson cfgPerson : allPersons) {
                                     if (StringUtils.compareIgnoreCase(user, cfgPerson.getUserName()) == 0) {
-                                        requestOutput(user + " LDAP " + cfgPerson.getExternalID() + "(path: " + cfgPerson.getObjectPath() + ")");
+                                        requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson.getObjectPath() + "\n\t" + user + "," + cfgPerson.getExternalID());
                                         userNameFound = true;
                                     }
                                 }
