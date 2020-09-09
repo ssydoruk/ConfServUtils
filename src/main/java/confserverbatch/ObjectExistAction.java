@@ -13,7 +13,8 @@ public enum ObjectExistAction {
     UNKNOWN("Unknown"),
     REUSE("Reuse"),
     RECREATE("Recreate"),
-    FAIL("Fail");
+    FAIL("Fail"),
+    SKIP("Skip");
 
     private final String name;
 

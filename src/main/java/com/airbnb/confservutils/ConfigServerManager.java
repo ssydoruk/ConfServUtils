@@ -5,6 +5,7 @@
  */
 package com.airbnb.confservutils;
 
+import Utils.Pair;
 import static Utils.StringUtils.matching;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.CfgQuery;
@@ -193,6 +194,7 @@ import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
 import confserverbatch.DNLocation;
+import confserverbatch.ObjectExistAction;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -214,6 +216,333 @@ import org.apache.logging.log4j.Logger;
 public class ConfigServerManager {
 
     public static final Logger logger = (Logger) Main.logger;
+    private final static ISearchSettings FIND_ALL = new ISearchSettings() {
+        @Override
+        public boolean isCaseSensitive() {
+            return false;
+        }
+        
+        @Override
+        public boolean isRegex() {
+            return false;
+        }
+        
+        @Override
+        public boolean isFullOutputSelected() {
+            return false;
+        }
+        
+        @Override
+        public boolean isSearchAll() {
+            return false;
+        }
+        
+        @Override
+        public String getAllSearch() {
+            return null;
+        }
+        
+        @Override
+        public String getSection() {
+            return null;
+        }
+        
+        @Override
+        public String getObjName() {
+            return null;
+        }
+        
+        @Override
+        public String getOption() {
+            return null;
+        }
+        
+        @Override
+        public String getValue() {
+            return null;
+        }
+        
+    };
+    public static String getObjName(final ICfgObject retrieveObject) {
+        if (retrieveObject == null) {
+            return null;
+        } else if (retrieveObject instanceof CfgDetectEvent) {
+            return ((CfgDetectEvent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDN) {
+            return ((CfgDN) retrieveObject).getNumber();
+        } else if (retrieveObject instanceof CfgDNAccessNumber) {
+            return ((CfgDNAccessNumber) retrieveObject).getNumber();
+        } else if (retrieveObject instanceof CfgDNGroup) {
+            return ((CfgDNGroup) retrieveObject).getType().toString();
+        } else if (retrieveObject instanceof CfgDNInfo) {
+            return ((CfgDNInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgEnumerator) {
+            return ((CfgEnumerator) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgEnumeratorValue) {
+            return ((CfgEnumeratorValue) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgField) {
+            return ((CfgField) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFilter) {
+            return ((CfgFilter) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFolder) {
+            return ((CfgFolder) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgFormat) {
+            return ((CfgFormat) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGroup) {
+            return ((CfgGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPCustomer) {
+            return ((CfgGVPCustomer) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPIVRProfile) {
+            return ((CfgGVPIVRProfile) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgGVPReseller) {
+            return ((CfgGVPReseller) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgHost) {
+            return ((CfgHost) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgID) {
+            return ((CfgID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgIVR) {
+            return ((CfgIVR) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgIVRPort) {
+            return ((CfgIVRPort) retrieveObject).getPortNumber();
+        } else if (retrieveObject instanceof CfgMemberID) {
+            return ((CfgMemberID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectID) {
+            return ((CfgObjectID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectiveTable) {
+            return ((CfgObjectiveTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgObjectiveTableRecord) {
+            return ((CfgObjectiveTableRecord) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgObjectResource) {
+            return ((CfgObjectResource) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgOS) {
+            return ((CfgOS) retrieveObject).getOStype().toString();
+        } else if (retrieveObject instanceof CfgOwnerID) {
+            return ((CfgOwnerID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgParentID) {
+            return ((CfgParentID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPerson) {
+            return ((CfgPerson) retrieveObject).getUserName();
+        } else if (retrieveObject instanceof CfgPersonBrief) {
+            return ((CfgPersonBrief) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPersonLastLogin) {
+            return ((CfgPersonLastLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPhones) {
+            return ((CfgPhones) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPhysicalSwitch) {
+            return ((CfgPhysicalSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgPlace) {
+            return ((CfgPlace) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgPlaceGroup) {
+            return ((CfgPlaceGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgPortInfo) {
+            return ((CfgPortInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgRemovalEvent) {
+            return ((CfgRemovalEvent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgResourceID) {
+            return ((CfgResourceID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgRole) {
+            return ((CfgRole) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgRoleMember) {
+            return ((CfgRoleMember) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgScheduledTask) {
+            return ((CfgScheduledTask) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgScript) {
+            return ((CfgScript) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgServer) {
+            return ((CfgServer) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgServerHostID) {
+            return ((CfgServerHostID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgServerVersion) {
+            return ((CfgServerVersion) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgService) {
+            return ((CfgService) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgServiceInfo) {
+            return ((CfgServiceInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSkill) {
+            return ((CfgSkill) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSkillLevel) {
+            return ((CfgSkillLevel) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSolutionComponent) {
+            return ((CfgSolutionComponent) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgSolutionComponentDefinition) {
+            return ((CfgSolutionComponentDefinition) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgStatDay) {
+            return ((CfgStatDay) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgStatInterval) {
+            return ((CfgStatInterval) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgStatTable) {
+            return ((CfgStatTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSubcode) {
+            return ((CfgSubcode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSwitch) {
+            return ((CfgSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgSwitchAccessCode) {
+            return ((CfgSwitchAccessCode) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgTableAccess) {
+            return ((CfgTableAccess) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTenant) {
+            return ((CfgTenant) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTenantBrief) {
+            return ((CfgTenantBrief) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTimeZone) {
+            return ((CfgTimeZone) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTransaction) {
+            return ((CfgTransaction) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgTreatment) {
+            return ((CfgTreatment) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgUpdatePackageRecord) {
+            return ((CfgUpdatePackageRecord) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgVoicePrompt) {
+            return ((CfgVoicePrompt) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAccessGroup) {
+            return ((CfgAccessGroup) retrieveObject).getObjectPath();
+        } else if (retrieveObject instanceof CfgAccessGroupBrief) {
+            return ((CfgAccessGroupBrief) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgACE) {
+            return ((CfgACE) retrieveObject).getID().toString();
+        } else if (retrieveObject instanceof CfgACEID) {
+            return ((CfgACEID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgACL) {
+            return ((CfgACL) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgACLID) {
+            return ((CfgACLID) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgActionCode) {
+            return ((CfgActionCode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAddress) {
+            return ((CfgAddress) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgAgentGroup) {
+            return ((CfgAgentGroup) retrieveObject).getGroupInfo().toString();
+        } else if (retrieveObject instanceof CfgAgentInfo) {
+            return ((CfgAgentInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgAgentLogin) {
+            return ((CfgAgentLogin) retrieveObject).getLoginCode();
+        } else if (retrieveObject instanceof CfgAgentLoginInfo) {
+            return ((CfgAgentLoginInfo) retrieveObject).getAgentLogin().getLoginCode();
+        } else if (retrieveObject instanceof CfgAlarmCondition) {
+            return ((CfgAlarmCondition) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgApplication) {
+            return ((CfgApplication) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAppPrototype) {
+            return ((CfgAppPrototype) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgAppRank) {
+            return ((CfgAppRank) retrieveObject).getAppRank().toString();
+        } else if (retrieveObject instanceof CfgAppServicePermission) {
+            return ((CfgAppServicePermission) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgCallingList) {
+            return ((CfgCallingList) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCallingListInfo) {
+            return ((CfgCallingListInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgCampaign) {
+            return ((CfgCampaign) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCampaignGroup) {
+            return ((CfgCampaignGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgCampaignGroupInfo) {
+            return ((CfgCampaignGroupInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgConnInfo) {
+            return ((CfgConnInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDelSwitchAccess) {
+            return ((CfgDelSwitchAccess) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAccessGroup) {
+            return ((CfgDeltaAccessGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaActionCode) {
+            return ((CfgDeltaActionCode) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaAgentGroup) {
+            return ((CfgDeltaAgentGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAgentInfo) {
+            return ((CfgDeltaAgentInfo) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAgentLogin) {
+            return ((CfgDeltaAgentLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaAlarmCondition) {
+            return ((CfgDeltaAlarmCondition) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaApplication) {
+            return ((CfgDeltaApplication) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaAppPrototype) {
+            return ((CfgDeltaAppPrototype) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCallingList) {
+            return ((CfgDeltaCallingList) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCampaign) {
+            return ((CfgDeltaCampaign) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaCampaignGroup) {
+            return ((CfgDeltaCampaignGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaDN) {
+            return ((CfgDeltaDN) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaDNGroup) {
+            return ((CfgDeltaDNGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaEnumerator) {
+            return ((CfgDeltaEnumerator) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaEnumeratorValue) {
+            return ((CfgDeltaEnumeratorValue) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaField) {
+            return ((CfgDeltaField) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFilter) {
+            return ((CfgDeltaFilter) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFolder) {
+            return ((CfgDeltaFolder) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaFormat) {
+            return ((CfgDeltaFormat) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGroup) {
+            return ((CfgDeltaGroup) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPCustomer) {
+            return ((CfgDeltaGVPCustomer) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPIVRProfile) {
+            return ((CfgDeltaGVPIVRProfile) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaGVPReseller) {
+            return ((CfgDeltaGVPReseller) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaHost) {
+            return ((CfgDeltaHost) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaIVR) {
+            return ((CfgDeltaIVR) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaIVRPort) {
+            return ((CfgDeltaIVRPort) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaObjectiveTable) {
+            return ((CfgDeltaObjectiveTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPerson) {
+            return ((CfgDeltaPerson) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaPersonLastLogin) {
+            return ((CfgDeltaPersonLastLogin) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaPhysicalSwitch) {
+            return ((CfgDeltaPhysicalSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPlace) {
+            return ((CfgDeltaPlace) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaPlaceGroup) {
+            return ((CfgDeltaPlaceGroup) retrieveObject).toString();
+        } else if (retrieveObject instanceof CfgDeltaRole) {
+            return ((CfgDeltaRole) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaScheduledTask) {
+            return ((CfgDeltaScheduledTask) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaScript) {
+            return ((CfgDeltaScript) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaService) {
+            return ((CfgDeltaService) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaSkill) {
+            return ((CfgDeltaSkill) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaStatDay) {
+            return ((CfgDeltaStatDay) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaStatTable) {
+            return ((CfgDeltaStatTable) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaSwitch) {
+            return ((CfgDeltaSwitch) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTableAccess) {
+            return ((CfgDeltaTableAccess) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTenant) {
+            return ((CfgDeltaTenant) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTimeZone) {
+            return ((CfgDeltaTimeZone) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTransaction) {
+            return ((CfgDeltaTransaction) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaTreatment) {
+            return ((CfgDeltaTreatment) retrieveObject).getName();
+        } else if (retrieveObject instanceof CfgDeltaVoicePrompt) {
+            return ((CfgDeltaVoicePrompt) retrieveObject).getName();
+            
+        } else {
+            return null;
+        }
+    }
+    static String getFolderFullName(CfgFolder fld) {
+        return fld.getObjectPath() + "\\[" + fld.getName() + "]";
+        
+    }
 
     private IConfService service = null;
     private final AppForm parentForm;
@@ -545,7 +874,7 @@ public class ConfigServerManager {
         lastUpdatedObjects.add(objType);
     }
 
-    private CfgPlace doCreatePlace(IConfService service,
+    private boolean doCreatePlace(IConfService service,
             String pl, ArrayList<CfgDN> cfgDNs, Integer folderDBID) throws ConfigException {
         CfgPlace cfgPlace = new CfgPlace(service);
 
@@ -560,10 +889,8 @@ public class ConfigServerManager {
         cfgPlace.save();
         if (cfgPlace.isSaved()) {
             parentForm.requestOutput("Created place DBID: " + cfgPlace.getDBID());
-            return cfgPlace;
-        } else {
-            return null;
         }
+        return true;
     }
 
     private CfgPlace findPlace(
@@ -713,7 +1040,7 @@ public class ConfigServerManager {
         return true;
     }
 
-    private CfgPlace createPlace(String plName, ArrayList<CfgDN> cfgDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
+    private boolean createPlace(String plName, ArrayList<CfgDN> cfgDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
         try {
             return doCreatePlace(service, plName, cfgDNs, folderDBID);
         } catch (ConfigException ex) {
@@ -734,15 +1061,18 @@ public class ConfigServerManager {
                         if (cfgPlace != null) {
                             if (!placeDNsEqual(cfgPlace.getDNs(), cfgDNs)) {
                                 parentForm.requestOutput("Place found but DNs are different. Cannot reuse");
-                                return null; //this will ensure exception thrown
+                                return false; //this will ensure exception thrown
 
                             }
 
                         }
-                        return cfgPlace;
+                        return true;
+
+                    case SKIP:
+                        return true;
 
                     case FAIL:
-                        return null;
+                        return false;
 
                     default:
                         break;//fails
@@ -813,284 +1143,18 @@ public class ConfigServerManager {
         }
     }
 
-    public static String getObjName(final ICfgObject retrieveObject) {
-        if (retrieveObject == null) {
-            return null;
-        } else if (retrieveObject instanceof CfgDetectEvent) {
-            return ((CfgDetectEvent) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDN) {
-            return ((CfgDN) retrieveObject).getNumber();
-        } else if (retrieveObject instanceof CfgDNAccessNumber) {
-            return ((CfgDNAccessNumber) retrieveObject).getNumber();
-        } else if (retrieveObject instanceof CfgDNGroup) {
-            return ((CfgDNGroup) retrieveObject).getType().toString();
-        } else if (retrieveObject instanceof CfgDNInfo) {
-            return ((CfgDNInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgEnumerator) {
-            return ((CfgEnumerator) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgEnumeratorValue) {
-            return ((CfgEnumeratorValue) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgField) {
-            return ((CfgField) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgFilter) {
-            return ((CfgFilter) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgFolder) {
-            return ((CfgFolder) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgFormat) {
-            return ((CfgFormat) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGroup) {
-            return ((CfgGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGVPCustomer) {
-            return ((CfgGVPCustomer) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGVPIVRProfile) {
-            return ((CfgGVPIVRProfile) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgGVPReseller) {
-            return ((CfgGVPReseller) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgHost) {
-            return ((CfgHost) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgID) {
-            return ((CfgID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgIVR) {
-            return ((CfgIVR) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgIVRPort) {
-            return ((CfgIVRPort) retrieveObject).getPortNumber();
-        } else if (retrieveObject instanceof CfgMemberID) {
-            return ((CfgMemberID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgObjectID) {
-            return ((CfgObjectID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgObjectiveTable) {
-            return ((CfgObjectiveTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgObjectiveTableRecord) {
-            return ((CfgObjectiveTableRecord) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgObjectResource) {
-            return ((CfgObjectResource) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgOS) {
-            return ((CfgOS) retrieveObject).getOStype().toString();
-        } else if (retrieveObject instanceof CfgOwnerID) {
-            return ((CfgOwnerID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgParentID) {
-            return ((CfgParentID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPerson) {
-            return ((CfgPerson) retrieveObject).getUserName();
-        } else if (retrieveObject instanceof CfgPersonBrief) {
-            return ((CfgPersonBrief) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPersonLastLogin) {
-            return ((CfgPersonLastLogin) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPhones) {
-            return ((CfgPhones) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPhysicalSwitch) {
-            return ((CfgPhysicalSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgPlace) {
-            return ((CfgPlace) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgPlaceGroup) {
-            return ((CfgPlaceGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgPortInfo) {
-            return ((CfgPortInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgRemovalEvent) {
-            return ((CfgRemovalEvent) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgResourceID) {
-            return ((CfgResourceID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgRole) {
-            return ((CfgRole) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgRoleMember) {
-            return ((CfgRoleMember) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgScheduledTask) {
-            return ((CfgScheduledTask) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgScript) {
-            return ((CfgScript) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgServer) {
-            return ((CfgServer) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgServerHostID) {
-            return ((CfgServerHostID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgServerVersion) {
-            return ((CfgServerVersion) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgService) {
-            return ((CfgService) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgServiceInfo) {
-            return ((CfgServiceInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgSkill) {
-            return ((CfgSkill) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSkillLevel) {
-            return ((CfgSkillLevel) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgSolutionComponent) {
-            return ((CfgSolutionComponent) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgSolutionComponentDefinition) {
-            return ((CfgSolutionComponentDefinition) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgStatDay) {
-            return ((CfgStatDay) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgStatInterval) {
-            return ((CfgStatInterval) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgStatTable) {
-            return ((CfgStatTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSubcode) {
-            return ((CfgSubcode) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSwitch) {
-            return ((CfgSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgSwitchAccessCode) {
-            return ((CfgSwitchAccessCode) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgTableAccess) {
-            return ((CfgTableAccess) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTenant) {
-            return ((CfgTenant) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTenantBrief) {
-            return ((CfgTenantBrief) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTimeZone) {
-            return ((CfgTimeZone) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTransaction) {
-            return ((CfgTransaction) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgTreatment) {
-            return ((CfgTreatment) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgUpdatePackageRecord) {
-            return ((CfgUpdatePackageRecord) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgVoicePrompt) {
-            return ((CfgVoicePrompt) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgAccessGroup) {
-            return ((CfgAccessGroup) retrieveObject).getObjectPath();
-        } else if (retrieveObject instanceof CfgAccessGroupBrief) {
-            return ((CfgAccessGroupBrief) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgACE) {
-            return ((CfgACE) retrieveObject).getID().toString();
-        } else if (retrieveObject instanceof CfgACEID) {
-            return ((CfgACEID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgACL) {
-            return ((CfgACL) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgACLID) {
-            return ((CfgACLID) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgActionCode) {
-            return ((CfgActionCode) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgAddress) {
-            return ((CfgAddress) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgAgentGroup) {
-            return ((CfgAgentGroup) retrieveObject).getGroupInfo().toString();
-        } else if (retrieveObject instanceof CfgAgentInfo) {
-            return ((CfgAgentInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgAgentLogin) {
-            return ((CfgAgentLogin) retrieveObject).getLoginCode();
-        } else if (retrieveObject instanceof CfgAgentLoginInfo) {
-            return ((CfgAgentLoginInfo) retrieveObject).getAgentLogin().getLoginCode();
-        } else if (retrieveObject instanceof CfgAlarmCondition) {
-            return ((CfgAlarmCondition) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgApplication) {
-            return ((CfgApplication) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgAppPrototype) {
-            return ((CfgAppPrototype) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgAppRank) {
-            return ((CfgAppRank) retrieveObject).getAppRank().toString();
-        } else if (retrieveObject instanceof CfgAppServicePermission) {
-            return ((CfgAppServicePermission) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgCallingList) {
-            return ((CfgCallingList) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgCallingListInfo) {
-            return ((CfgCallingListInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgCampaign) {
-            return ((CfgCampaign) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgCampaignGroup) {
-            return ((CfgCampaignGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgCampaignGroupInfo) {
-            return ((CfgCampaignGroupInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgConnInfo) {
-            return ((CfgConnInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDelSwitchAccess) {
-            return ((CfgDelSwitchAccess) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAccessGroup) {
-            return ((CfgDeltaAccessGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaActionCode) {
-            return ((CfgDeltaActionCode) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaAgentGroup) {
-            return ((CfgDeltaAgentGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAgentInfo) {
-            return ((CfgDeltaAgentInfo) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAgentLogin) {
-            return ((CfgDeltaAgentLogin) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaAlarmCondition) {
-            return ((CfgDeltaAlarmCondition) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaApplication) {
-            return ((CfgDeltaApplication) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaAppPrototype) {
-            return ((CfgDeltaAppPrototype) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaCallingList) {
-            return ((CfgDeltaCallingList) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaCampaign) {
-            return ((CfgDeltaCampaign) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaCampaignGroup) {
-            return ((CfgDeltaCampaignGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaDN) {
-            return ((CfgDeltaDN) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaDNGroup) {
-            return ((CfgDeltaDNGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaEnumerator) {
-            return ((CfgDeltaEnumerator) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaEnumeratorValue) {
-            return ((CfgDeltaEnumeratorValue) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaField) {
-            return ((CfgDeltaField) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaFilter) {
-            return ((CfgDeltaFilter) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaFolder) {
-            return ((CfgDeltaFolder) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaFormat) {
-            return ((CfgDeltaFormat) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGroup) {
-            return ((CfgDeltaGroup) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGVPCustomer) {
-            return ((CfgDeltaGVPCustomer) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGVPIVRProfile) {
-            return ((CfgDeltaGVPIVRProfile) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaGVPReseller) {
-            return ((CfgDeltaGVPReseller) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaHost) {
-            return ((CfgDeltaHost) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaIVR) {
-            return ((CfgDeltaIVR) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaIVRPort) {
-            return ((CfgDeltaIVRPort) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaObjectiveTable) {
-            return ((CfgDeltaObjectiveTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaPerson) {
-            return ((CfgDeltaPerson) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaPersonLastLogin) {
-            return ((CfgDeltaPersonLastLogin) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaPhysicalSwitch) {
-            return ((CfgDeltaPhysicalSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaPlace) {
-            return ((CfgDeltaPlace) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaPlaceGroup) {
-            return ((CfgDeltaPlaceGroup) retrieveObject).toString();
-        } else if (retrieveObject instanceof CfgDeltaRole) {
-            return ((CfgDeltaRole) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaScheduledTask) {
-            return ((CfgDeltaScheduledTask) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaScript) {
-            return ((CfgDeltaScript) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaService) {
-            return ((CfgDeltaService) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaSkill) {
-            return ((CfgDeltaSkill) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaStatDay) {
-            return ((CfgDeltaStatDay) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaStatTable) {
-            return ((CfgDeltaStatTable) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaSwitch) {
-            return ((CfgDeltaSwitch) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTableAccess) {
-            return ((CfgDeltaTableAccess) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTenant) {
-            return ((CfgDeltaTenant) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTimeZone) {
-            return ((CfgDeltaTimeZone) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTransaction) {
-            return ((CfgDeltaTransaction) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaTreatment) {
-            return ((CfgDeltaTreatment) retrieveObject).getName();
-        } else if (retrieveObject instanceof CfgDeltaVoicePrompt) {
-            return ((CfgDeltaVoicePrompt) retrieveObject).getName();
 
-        } else {
-            return null;
-        }
-    }
-
-    public Object createPlace(String thePlace, HashMap<DNLocation, String> DNs, ExistingObjectDecider eod, ArrayList<CfgFolder> lastSelectedPlaceFolder) throws ConfigException {
+    /**
+     * Creates place with DNs
+     *
+     * @param thePlace
+     * @param DNs
+     * @param eod
+     * @param lastSelectedPlaceFolder
+     * @return false if user selects to stop process; true otherwise
+     * @throws ConfigException
+     */
+    public boolean createPlace(String thePlace, HashMap<DNLocation, String> DNs, ExistingObjectDecider eod, ArrayList<CfgFolder> lastSelectedPlaceFolder) throws ConfigException {
         if (lastSelectedPlaceFolder != null && !lastSelectedPlaceFolder.isEmpty()) {
             return createPlace(thePlace, DNs, eod, lastSelectedPlaceFolder.get(0).getDBID());
         } else {
@@ -1098,19 +1162,22 @@ public class ConfigServerManager {
         }
     }
 
-    public CfgPlace createPlace(String pl, HashMap<DNLocation, String> theDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
+    public boolean createPlace(String pl, HashMap<DNLocation, String> theDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
         ArrayList<CfgDN> cfgDNs = new ArrayList<>();
         for (Map.Entry<DNLocation, String> entry : theDNs.entrySet()) {
-            CfgDN newDN = createExtDN(entry.getKey(), entry.getValue(), eod);
-            if (newDN == null) {
-                return null;
+            Pair<ObjectExistAction, CfgObject> createExtDN = createExtDN(entry.getKey(), entry.getValue(), eod);
+            if (createExtDN == null || createExtDN.getKey() == ObjectExistAction.FAIL) {
+                return false;
             }
-            cfgDNs.add(newDN);
+            if (createExtDN.getKey() == ObjectExistAction.SKIP) {
+                return true;
+            }
+            cfgDNs.add((CfgDN) createExtDN.getValue());
         }
         return createPlace(pl, cfgDNs, eod, folderDBID);
     }
 
-    private CfgDN doCreateDN(IConfService service,
+    private Pair<ObjectExistAction, CfgObject> doCreateDN(IConfService service,
             String theNumber,
             String name,
             CfgDNType type,
@@ -1131,7 +1198,7 @@ public class ConfigServerManager {
         dn.save();
         if (dn.isSaved()) {
             parentForm.requestOutput("DN created, DBID: " + dn.getDBID());
-            return dn;
+            return new Pair(ObjectExistAction.UNKNOWN, dn);
         } else {
             return null;
         }
@@ -1172,7 +1239,7 @@ public class ConfigServerManager {
 
     }
 
-    private CfgDN createExtDN(DNLocation key, String value, ExistingObjectDecider eod) throws ConfigException {
+    private Pair<ObjectExistAction, CfgObject> createExtDN(DNLocation key, String value, ExistingObjectDecider eod) throws ConfigException {
         String name = key.getSw().getName() + "_" + value;
         try {
             return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw(), key.getFolderDBID());
@@ -1192,7 +1259,11 @@ public class ConfigServerManager {
 
                     case REUSE:
                         parentForm.requestOutput("Reusing DN " + cfgDN.getNumber());
-                        return cfgDN;
+                        return new Pair(ObjectExistAction.REUSE, cfgDN);
+
+                    case SKIP:
+                        parentForm.requestOutput("skipping " + cfgDN.getNumber());
+                        return new Pair(ObjectExistAction.SKIP, cfgDN);
 
                     case FAIL:
                         return null;
@@ -2280,57 +2351,5 @@ public class ConfigServerManager {
 
     }
 
-    private final static ISearchSettings FIND_ALL = new ISearchSettings() {
-        @Override
-        public boolean isCaseSensitive() {
-            return false;
-        }
-
-        @Override
-        public boolean isRegex() {
-            return false;
-        }
-
-        @Override
-        public boolean isFullOutputSelected() {
-            return false;
-        }
-
-        @Override
-        public boolean isSearchAll() {
-            return false;
-        }
-
-        @Override
-        public String getAllSearch() {
-            return null;
-        }
-
-        @Override
-        public String getSection() {
-            return null;
-        }
-
-        @Override
-        public String getObjName() {
-            return null;
-        }
-
-        @Override
-        public String getOption() {
-            return null;
-        }
-
-        @Override
-        public String getValue() {
-            return null;
-        }
-
-    };
-
-    static String getFolderFullName(CfgFolder fld) {
-        return fld.getObjectPath() + "\\[" + fld.getName() + "]";
-
-    }
 
 }

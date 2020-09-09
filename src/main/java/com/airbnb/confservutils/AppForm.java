@@ -2013,7 +2013,12 @@ public final class AppForm extends javax.swing.JFrame {
             final StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
             final String user = (String) cbUser.getSelectedItem();
             if (confServ != null && user != null) {
+                try {
                 ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
+                    
+                } catch (Exception e) {
+                    showException("Cannot connect to ConfigServer", e);
+                }
 
             }
             connectionStatusChanged();
@@ -3029,7 +3034,7 @@ public final class AppForm extends javax.swing.JFrame {
                                 for (final DNLocation switchLookup : DNs.keySet()) {
                                     DNs.put(switchLookup, theDN);
                                 }
-                                if (configServerManager.createPlace(thePlace, DNs, eod, instance.lastSelectedPlaceFolder()) == null) // stop creating
+                                if (!configServerManager.createPlace(thePlace, DNs, eod, instance.lastSelectedPlaceFolder())) // stop creating
                                 {
                                     requestOutput("****** Import aborted *******");
                                     break;

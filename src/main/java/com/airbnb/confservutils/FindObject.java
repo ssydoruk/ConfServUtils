@@ -6,7 +6,6 @@
 package com.airbnb.confservutils;
 
 import static Utils.Swing.checkBoxSelection;
-import com.genesyslab.platform.commons.GEnum;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
