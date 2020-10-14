@@ -93,17 +93,17 @@ public class CreatePlaces {
                 configServerUser, configServerPass
         );
 
-        ArrayList<DNLocation> switches = new ArrayList<>();
-        switches.add(new DNLocation(service, "esv1_sipa1"));
+        ArrayList<SwitchObjectLocation> switches = new ArrayList<>();
+        switches.add(new SwitchObjectLocation(service, "esv1_sipa1"));
 //        switches.add(new SwitchLookup(service, "edn1_sipa1"));
 
-        HashMap<DNLocation, String> DNs = new HashMap<>();
-        for (DNLocation switche : switches) {
+        HashMap<SwitchObjectLocation, String> DNs = new HashMap<>();
+        for (SwitchObjectLocation switche : switches) {
             DNs.put(switche, (String) null);
 
         }
 
-        for (DNLocation switchLookup : DNs.keySet()) {
+        for (SwitchObjectLocation switchLookup : DNs.keySet()) {
             DNs.put(switchLookup, "90000");
         }
         AddPlace pl = new AddPlace(service, "cyara-90000", DNs, ObjectExistAction.RECREATE);

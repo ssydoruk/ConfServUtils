@@ -54,9 +54,9 @@ public class FullAgent {
     private String employeeID;
     private String externalUserID;
     private IConfService service;
-    HashMap<DNLocation, String> loginIDs = new HashMap();
+    HashMap<SwitchObjectLocation, String> loginIDs = new HashMap();
     String pl = null;
-    HashMap<DNLocation, String> theDNs = new HashMap<>();
+    HashMap<SwitchObjectLocation, String> theDNs = new HashMap<>();
 
     public FullAgent(String string) {
     }
@@ -138,13 +138,13 @@ public class FullAgent {
 
     void createAll() throws ConfigException, CloneNotSupportedException {
         ArrayList<CfgDN> cfgDNs = new ArrayList<>();
-        for (Map.Entry<DNLocation, String> entry : theDNs.entrySet()) {
+        for (Map.Entry<SwitchObjectLocation, String> entry : theDNs.entrySet()) {
             cfgDNs.add(createDN(entry.getKey(),
                     entry.getValue()));
         }
 
         ArrayList<CfgAgentLogin> agentLogins = new ArrayList<>();
-        for (Map.Entry<DNLocation, String> entry : loginIDs.entrySet()) {
+        for (Map.Entry<SwitchObjectLocation, String> entry : loginIDs.entrySet()) {
             agentLogins.add(createAgentLogin(entry.getKey(),
                     entry.getValue()));
         }
@@ -155,14 +155,14 @@ public class FullAgent {
     }
 
 
-    void addLoginID(DNLocation switche, String string) {
+    void addLoginID(SwitchObjectLocation switche, String string) {
         loginIDs.put(switche, string);
     }
 
 
-    void addPlace(String place, HashMap<DNLocation, String> DNs) {
+    void addPlace(String place, HashMap<SwitchObjectLocation, String> DNs) {
         pl = place;
-        for (Map.Entry<DNLocation, String> entry : DNs.entrySet()) {
+        for (Map.Entry<SwitchObjectLocation, String> entry : DNs.entrySet()) {
             theDNs.put(entry.getKey(), entry.getValue());
 
         }
@@ -173,7 +173,7 @@ public class FullAgent {
     }
 
     //<editor-fold defaultstate="collapsed" desc="cfgDN utility">
-    private CfgDN createDN(DNLocation key, String value) throws ConfigException {
+    private CfgDN createDN(SwitchObjectLocation key, String value) throws ConfigException {
         String name = key.getSw().getName() + "_" + value;
         try {
             return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw());
@@ -291,7 +291,7 @@ public class FullAgent {
         return agentLogin;
     }
 
-    private CfgAgentLogin createAgentLogin(DNLocation key, String value) throws ConfigException {
+    private CfgAgentLogin createAgentLogin(SwitchObjectLocation key, String value) throws ConfigException {
         try {
             return doCreateAgentLogin(service, value, key.getSw());
         } catch (ConfigException ex) {

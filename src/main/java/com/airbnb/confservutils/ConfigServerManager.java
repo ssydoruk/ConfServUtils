@@ -193,8 +193,8 @@ import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
-import confserverbatch.DNLocation;
 import confserverbatch.ObjectExistAction;
+import confserverbatch.SwitchObjectLocation;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -221,48 +221,49 @@ public class ConfigServerManager {
         public boolean isCaseSensitive() {
             return false;
         }
-        
+
         @Override
         public boolean isRegex() {
             return false;
         }
-        
+
         @Override
         public boolean isFullOutputSelected() {
             return false;
         }
-        
+
         @Override
         public boolean isSearchAll() {
             return false;
         }
-        
+
         @Override
         public String getAllSearch() {
             return null;
         }
-        
+
         @Override
         public String getSection() {
             return null;
         }
-        
+
         @Override
         public String getObjName() {
             return null;
         }
-        
+
         @Override
         public String getOption() {
             return null;
         }
-        
+
         @Override
         public String getValue() {
             return null;
         }
-        
+
     };
+
     public static String getObjName(final ICfgObject retrieveObject) {
         if (retrieveObject == null) {
             return null;
@@ -534,14 +535,15 @@ public class ConfigServerManager {
             return ((CfgDeltaTreatment) retrieveObject).getName();
         } else if (retrieveObject instanceof CfgDeltaVoicePrompt) {
             return ((CfgDeltaVoicePrompt) retrieveObject).getName();
-            
+
         } else {
             return null;
         }
     }
+
     static String getFolderFullName(CfgFolder fld) {
         return fld.getObjectPath() + "\\[" + fld.getName() + "]";
-        
+
     }
 
     private IConfService service = null;
@@ -1116,6 +1118,27 @@ public class ConfigServerManager {
 
     }
 
+    public void checkLoginID(String loginID) throws ConfigException, InterruptedException {
+
+        parentForm.requestOutput("*** Checking for loginID [" + loginID + "]");
+
+        Collection<CfgAgentLogin> findLoginIDs = findLoginIDs(service, loginID);
+        if (findLoginIDs != null && !findLoginIDs.isEmpty()) {
+            for (CfgAgentLogin newAgentLogin : findLoginIDs) {
+                String agentLogin = objectBasicInfo(newAgentLogin);
+                CfgObject dependend = getDependend(newAgentLogin);
+                if (dependend == null) {
+                    parentForm.requestOutput("Found LoginID " + agentLogin + " no person ");
+                } else {
+                    parentForm.requestOutput("Found " + agentLogin
+                            + "\n\tPerson: " + objectBasicInfo(dependend));
+                }
+            }
+        } else {
+            parentForm.requestOutput("! not found [" + loginID + "]");
+        }
+    }
+
     public void checkPlace(String pl, String theDN) throws ConfigException, InterruptedException {
 
         parentForm.requestOutput("*** Checking for place [" + pl + "]" + " DN: " + theDN);
@@ -1143,7 +1166,6 @@ public class ConfigServerManager {
         }
     }
 
-
     /**
      * Creates place with DNs
      *
@@ -1154,7 +1176,7 @@ public class ConfigServerManager {
      * @return false if user selects to stop process; true otherwise
      * @throws ConfigException
      */
-    public boolean createPlace(String thePlace, HashMap<DNLocation, String> DNs, ExistingObjectDecider eod, ArrayList<CfgFolder> lastSelectedPlaceFolder) throws ConfigException {
+    public boolean createPlace(String thePlace, HashMap<SwitchObjectLocation, String> DNs, ExistingObjectDecider eod, ArrayList<CfgFolder> lastSelectedPlaceFolder) throws ConfigException {
         if (lastSelectedPlaceFolder != null && !lastSelectedPlaceFolder.isEmpty()) {
             return createPlace(thePlace, DNs, eod, lastSelectedPlaceFolder.get(0).getDBID());
         } else {
@@ -1162,9 +1184,22 @@ public class ConfigServerManager {
         }
     }
 
-    public boolean createPlace(String pl, HashMap<DNLocation, String> theDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
+    public boolean createLoginIDs(HashMap<SwitchObjectLocation, String> thelLoginIDs, ExistingObjectDecider eod) throws ConfigException, InterruptedException {
+        for (Map.Entry<SwitchObjectLocation, String> entry : thelLoginIDs.entrySet()) {
+            Pair<ObjectExistAction, CfgObject> newLoginID = createLoginID(entry.getKey(), entry.getValue(), eod);
+            if (newLoginID == null || newLoginID.getKey() == ObjectExistAction.FAIL) {
+                return false;
+            }
+            if (newLoginID.getKey() == ObjectExistAction.SKIP) {
+                return true;
+            }
+        }
+        return true;
+    }
+
+    public boolean createPlace(String pl, HashMap<SwitchObjectLocation, String> theDNs, ExistingObjectDecider eod, Integer folderDBID) throws ConfigException {
         ArrayList<CfgDN> cfgDNs = new ArrayList<>();
-        for (Map.Entry<DNLocation, String> entry : theDNs.entrySet()) {
+        for (Map.Entry<SwitchObjectLocation, String> entry : theDNs.entrySet()) {
             Pair<ObjectExistAction, CfgObject> createExtDN = createExtDN(entry.getKey(), entry.getValue(), eod);
             if (createExtDN == null || createExtDN.getKey() == ObjectExistAction.FAIL) {
                 return false;
@@ -1204,6 +1239,29 @@ public class ConfigServerManager {
         }
     }
 
+    private Pair<ObjectExistAction, CfgObject> doCreateLoginID(IConfService service,
+            String name,
+            CfgSwitch sw,
+            Integer folderDBID) throws ConfigException {
+        CfgAgentLogin login = new CfgAgentLogin(service);
+
+        parentForm.requestOutput("Creating loginID [" + name + "] switch [" + sw.getName() + "]");
+        login.setLoginCode(name);
+        login.setSwitch(sw);
+        login.setUseOverride(CfgFlag.CFGTrue);
+        login.setSwitchSpecificType(1);
+        if (folderDBID != null) {
+            login.setFolderId(folderDBID);
+        }
+        login.save();
+        if (login.isSaved()) {
+            parentForm.requestOutput("loginID created, DBID: " + login.getDBID());
+            return new Pair(ObjectExistAction.UNKNOWN, login);
+        } else {
+            return null;
+        }
+    }
+
     private Collection<CfgDN> findDNs(
             final IConfService service,
             final String dn
@@ -1214,6 +1272,51 @@ public class ConfigServerManager {
 
         logger.info("searching " + "DN [" + dn + "]");
         return getResults(dnQuery, CfgDN.class);
+
+    }
+
+    private Collection<CfgAgentLogin> findLoginIDs(
+            final IConfService service,
+            final String loginID
+    ) throws ConfigException, InterruptedException {
+        return findLoginIDs(service, loginID, null, false);
+    }
+
+    private CfgAgentLogin findLoginID(
+            final IConfService service,
+            final String loginid, final CfgSwitch sw, boolean mustExist) throws ConfigException, InterruptedException {
+        Collection<CfgAgentLogin> ret = findLoginIDs(service, loginid, sw, mustExist);
+        if (ret != null && !ret.isEmpty()) {
+            return (CfgAgentLogin) ret.toArray()[0];
+        } else {
+            return null;
+        }
+
+    }
+
+    private Collection<CfgAgentLogin> findLoginIDs(
+            final IConfService service,
+            final String loginid, final CfgSwitch sw, boolean mustExist
+    ) throws ConfigException, InterruptedException {
+        CfgAgentLoginQuery dnQuery = new CfgAgentLoginQuery(service);
+
+        dnQuery.setLoginCode(loginid);
+        if (sw != null) {
+            dnQuery.setSwitchDbid(sw.getDBID());
+        }
+
+        logger.info("searching " + "loginid [" + loginid + "]" + ((sw != null) ? " switch[" + sw.getName() + "]" : ""));
+        Collection<CfgAgentLogin> loginIDs = service.retrieveMultipleObjects(CfgAgentLogin.class, dnQuery);
+
+        if (loginIDs == null || loginIDs.isEmpty()) {
+            if (mustExist) {
+                throw new ConfigException("loginid [" + loginid + "] switch[" + sw.getName() + "]");
+            }
+        }
+
+        logger.info("found " + ((loginIDs != null && loginIDs.isEmpty()) ? loginIDs.size() : 0) + " entries");
+
+        return loginIDs;
 
     }
 
@@ -1239,7 +1342,7 @@ public class ConfigServerManager {
 
     }
 
-    private Pair<ObjectExistAction, CfgObject> createExtDN(DNLocation key, String value, ExistingObjectDecider eod) throws ConfigException {
+    private Pair<ObjectExistAction, CfgObject> createExtDN(SwitchObjectLocation key, String value, ExistingObjectDecider eod) throws ConfigException {
         String name = key.getSw().getName() + "_" + value;
         try {
             return doCreateDN(service, value, name, CfgDNType.CFGExtension, key.getSw(), key.getFolderDBID());
@@ -1276,6 +1379,42 @@ public class ConfigServerManager {
         }
     }
 
+    private Pair<ObjectExistAction, CfgObject> createLoginID(SwitchObjectLocation switchFolder, String loginIDName, ExistingObjectDecider eod) throws ConfigException, InterruptedException {
+        try {
+            return doCreateLoginID(service, loginIDName, switchFolder.getSw(), switchFolder.getFolderDBID());
+        } catch (ConfigException ex) {
+//            switch(objExistaction)
+            if (ex instanceof ConfigServerException
+                    && ((ConfigServerException) ex).getErrorType() == CfgErrorType.CFGUniquenessViolation) {
+                CfgAgentLogin cfgLoginID = findLoginID(service, loginIDName, switchFolder.getSw(), true);
+                parentForm.requestOutput("LoginID exists: " + cfgLoginID.getLoginCode());
+                switch (eod.getCurrentAction(makeString(cfgLoginID), makeString(getDependend(cfgLoginID)))) {
+                    case RECREATE:
+                        parentForm.requestOutput("Recreating");
+                        cfgLoginID.delete();
+                        parentForm.requestOutput(cfgLoginID.getLoginCode() + " deleted");
+                        return doCreateLoginID(service, loginIDName,
+                                cfgLoginID.getSwitch(), cfgLoginID.getFolderId());
+
+                    case REUSE:
+                        parentForm.requestOutput("Reusing loginID " + cfgLoginID.getLoginCode());
+                        return new Pair(ObjectExistAction.REUSE, cfgLoginID);
+
+                    case SKIP:
+                        parentForm.requestOutput("skipping " + cfgLoginID.getLoginCode());
+                        return new Pair(ObjectExistAction.SKIP, cfgLoginID);
+
+                    case FAIL:
+                        return null;
+                }
+            } else {
+
+                parentForm.requestOutput(ex.getMessage());
+            }
+            throw ex;
+        }
+    }
+
     private CfgObject getDependend(CfgObject cfgObj) {
         if (cfgObj instanceof CfgDN) {
             CfgDN dn = (CfgDN) cfgObj;
@@ -1290,20 +1429,21 @@ public class ConfigServerManager {
                 logger.error(ex);
                 return null;
             }
-//        } else if (cfgObj instanceof CfgPlace) {
-//            CfgPlace pl = (CfgPlace) cfgObj;
-//
-//            CfgPersonQuery personQuery = new CfgPersonQuery();
-//            CfgAg
-//            personQuery.set(pl.getDBID());
-//
-//            try {
-//                //        parentForm.requestOutput("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
-//                return service.retrieveObject(CfgPlace.class, personQuery);
-//            } catch (ConfigException ex) {
-//                logger.error(ex);
-//                return null;
-//            }
+
+        } else if (cfgObj instanceof CfgAgentLogin) {
+            CfgAgentLogin loginID = (CfgAgentLogin) cfgObj;
+
+            CfgPersonQuery personQuery = new CfgPersonQuery(service);
+            personQuery.setLoginDbid(loginID.getDBID());
+
+            try {
+                //        parentForm.requestOutput("searching " + "DN [" + dn + "] switch[" + sw.getName() + "]");
+                return service.retrieveObject(CfgPerson.class, personQuery);
+            } catch (ConfigException ex) {
+                logger.error(ex);
+                return null;
+            }
+
         } else {
             return null;
         }
@@ -2186,18 +2326,18 @@ public class ConfigServerManager {
         }
     }
 
-    private String dnEntry(Map.Entry<DNLocation, String> entry) {
+    private String dnEntry(Map.Entry<SwitchObjectLocation, String> entry) {
         StringBuilder ret = new StringBuilder();
-        DNLocation key = entry.getKey();
+        SwitchObjectLocation key = entry.getKey();
         String val = entry.getValue();
 
         ret.append("[").append(key.getSw().getName()).append("]").append("/").append(val);
         return ret.toString();
     }
 
-    private String dnsList(HashMap<DNLocation, String> theDNs) {
+    private String dnsList(HashMap<SwitchObjectLocation, String> theDNs) {
         StringBuilder ret = new StringBuilder();
-        for (Map.Entry<DNLocation, String> entry : theDNs.entrySet()) {
+        for (Map.Entry<SwitchObjectLocation, String> entry : theDNs.entrySet()) {
             if (ret.length() > 0) {
                 ret.append(" ;");
             }
@@ -2350,6 +2490,5 @@ public class ConfigServerManager {
         return getResults(new CfgPersonQuery(), CfgPerson.class);
 
     }
-
 
 }

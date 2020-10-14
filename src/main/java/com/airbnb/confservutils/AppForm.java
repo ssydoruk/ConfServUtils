@@ -37,8 +37,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jidesoft.dialog.ButtonPanel;
 import com.jidesoft.dialog.StandardDialog;
-import confserverbatch.DNLocation;
 import confserverbatch.ObjectExistAction;
+import confserverbatch.SwitchObjectLocation;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -335,6 +335,7 @@ public final class AppForm extends javax.swing.JFrame {
         miCheckDNPlaceExists = new javax.swing.JMenuItem();
         miFindLDAPs = new javax.swing.JMenuItem();
         miFindLDAPsForUsers = new javax.swing.JMenuItem();
+        miCheckLoginID = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
         miAppOptionsReplace = new javax.swing.JMenuItem();
@@ -348,6 +349,7 @@ public final class AppForm extends javax.swing.JFrame {
         miRestartService = new javax.swing.JMenuItem();
         jMenu5 = new javax.swing.JMenu();
         miImportCSV = new javax.swing.JMenuItem();
+        miCreateLoginIDs = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -578,6 +580,14 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu7.add(miFindLDAPsForUsers);
 
+        miCheckLoginID.setText("Check if LoginID exists");
+        miCheckLoginID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miCheckLoginIDActionPerformed(evt);
+            }
+        });
+        jMenu7.add(miCheckLoginID);
+
         jMenu1.add(jMenu7);
 
         jMenuBar1.add(jMenu1);
@@ -666,6 +676,14 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu5.add(miImportCSV);
 
+        miCreateLoginIDs.setText("Create Login IDs");
+        miCreateLoginIDs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miCreateLoginIDsActionPerformed(evt);
+            }
+        });
+        jMenu5.add(miCreateLoginIDs);
+
         jMenu2.add(jMenu5);
 
         jMenuBar1.add(jMenu2);
@@ -691,8 +709,16 @@ public final class AppForm extends javax.swing.JFrame {
         verifyUserNameLDAP();
     }//GEN-LAST:event_miFindLDAPsForUsersActionPerformed
 
+    private void miCreateLoginIDsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miCreateLoginIDsActionPerformed
+        importLoginIDs();
+    }//GEN-LAST:event_miCreateLoginIDsActionPerformed
+
+    private void miCheckLoginIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miCheckLoginIDActionPerformed
+       verifyLoginIDExists();
+    }//GEN-LAST:event_miCheckLoginIDActionPerformed
+
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
-        verifyCSV();
+        verifyDNPlaceExists();
     }// GEN-LAST:event_miCheckDNPlaceExistsActionPerformed
 
     private void miLoginsWithoutAgentActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miLoginsWithoutAgentActionPerformed
@@ -1942,7 +1968,7 @@ public final class AppForm extends javax.swing.JFrame {
     }// GEN-LAST:event_miCreateDNPlacesActionPerformed
 
     private void miImportCSVActionPerformed(final java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miImportCSVActionPerformed
-        importCSV();
+        importPlaceDNs();
     }// GEN-LAST:event_miImportCSVActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1985,6 +2011,8 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miBufferingOn;
     private javax.swing.JMenuItem miBusinessAttribute;
     private javax.swing.JMenuItem miCheckDNPlaceExists;
+    private javax.swing.JMenuItem miCheckLoginID;
+    private javax.swing.JMenuItem miCreateLoginIDs;
     private javax.swing.JMenuItem miExtensionWithoutPlace;
     private javax.swing.JMenuItem miFindLDAPs;
     private javax.swing.JMenuItem miFindLDAPsForUsers;
@@ -2014,8 +2042,8 @@ public final class AppForm extends javax.swing.JFrame {
             final String user = (String) cbUser.getSelectedItem();
             if (confServ != null && user != null) {
                 try {
-                ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
-                    
+                    ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
+
                 } catch (Exception e) {
                     showException("Cannot connect to ConfigServer", e);
                 }
@@ -2927,20 +2955,22 @@ public final class AppForm extends javax.swing.JFrame {
         }
     }
 
-    private ArrayList<Pair<String, String>> readPlaceDN(File f) {
-        final ArrayList<Pair<String, String>> placeDN = new ArrayList<>();
+    private ArrayList<String[]> readCSV(File f, int minFields) {
+        final ArrayList<String[]> ret = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
             String l;
             while ((l = reader.readLine()) != null) {
-                final String[] split = StringUtils.split(l, ",");
-                if (ArrayUtils.isNotEmpty(split) && split.length >= 2) {
-                    String trimToNull0 = StringUtils.trimToNull(split[0]);
-                    String trimToNull1 = StringUtils.trimToNull(split[1]);
-                    if (trimToNull0 != null && trimToNull1 != null) {
-                        placeDN.add(new Pair(trimToNull0, trimToNull1));
+                boolean gotValue = false;
+                final String[] split = StringUtils.split(l, ",\t|");
+                String[] ar = new String[minFields];
+                for (int i = 0; i < minFields; i++) {
+                    ar[i] = (ArrayUtils.isNotEmpty(split) && split.length > i) ? split[i] : null;
+                    if (StringUtils.isNotBlank(ar[i])) {
+                        gotValue = true;
                     }
-                } else {
-                    requestOutput("Not parsed expression [" + StringUtils.defaultString(l, "<null>") + "]");
+                }
+                if (gotValue) {
+                    ret.add(ar);
                 }
             }
         } catch (final FileNotFoundException ex) {
@@ -2948,10 +2978,10 @@ public final class AppForm extends javax.swing.JFrame {
         } catch (final IOException ex) {
             java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return placeDN;
+        return ret;
     }
 
-    private void verifyCSV() {
+    private void verifyLoginIDExists() {
 
         final JFileChooser chooser = new JFileChooser();
         final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
@@ -2961,7 +2991,44 @@ public final class AppForm extends javax.swing.JFrame {
         final int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            final ArrayList<Pair<String, String>> placeDN = readPlaceDN(chooser.getSelectedFile());
+            ArrayList<String[]> loginIDs = readCSV(chooser.getSelectedFile(), 1);
+
+            if (CSVImportLoginIDs.getInstance(this, configServerManager)
+                    .shouldImportCSV(loginIDs, false)) {
+                runInThread(new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        if (connectToConfigServer()) {
+
+                            for (String[] entry : loginIDs) {
+
+                                configServerManager.checkLoginID(entry[0]);
+                            }
+                        }
+                    }
+
+                }, new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        configServerManager.clearCache();
+                    }
+                });
+            }
+
+        }
+    }
+    
+    private void verifyDNPlaceExists() {
+
+        final JFileChooser chooser = new JFileChooser();
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        final int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
+            ArrayList<String[]> placeDN = readCSV(chooser.getSelectedFile(), 2);
 
             if (CSVImportDialog.getInstance(this, configServerManager).shouldImportCSV(placeDN, false)) {
                 runInThread(new IThreadedFun() {
@@ -2969,11 +3036,9 @@ public final class AppForm extends javax.swing.JFrame {
                     public void fun() throws ConfigException, InterruptedException {
                         if (connectToConfigServer()) {
 
-                            for (Pair<String, String> entry : placeDN) {
-                                String thePlace = entry.getKey();
-                                String theDN = entry.getValue();
+                            for (String[] entry : placeDN) {
 
-                                configServerManager.checkPlace(thePlace, theDN);
+                                configServerManager.checkPlace(entry[0], entry[1]);
                             }
                         }
                     }
@@ -2989,8 +3054,7 @@ public final class AppForm extends javax.swing.JFrame {
         }
     }
 
-    private void importCSV() {
-
+    private void importPlaceDNs() {
         final JFileChooser chooser = new JFileChooser();
         final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
         chooser.setFileFilter(filter);
@@ -2999,7 +3063,7 @@ public final class AppForm extends javax.swing.JFrame {
         final int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
-            final ArrayList<Pair<String, String>> placeDN = readPlaceDN(chooser.getSelectedFile());
+            ArrayList<String[]> placeDN = readCSV(chooser.getSelectedFile(), 2);
 
             runInThread(new IThreadedFun() {
                 @Override
@@ -3008,33 +3072,95 @@ public final class AppForm extends javax.swing.JFrame {
                         CSVImportDialog instance = CSVImportDialog.getInstance(theForm, configServerManager);
                         if (instance.shouldImportCSV(placeDN, true) && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
-                            final ArrayList<DNLocation> switches = new ArrayList<>();
+                            final ArrayList<SwitchObjectLocation> switches = new ArrayList<>();
                             ArrayList<CfgFolder> lastSelectedDNFolders = instance.lastSelectedDNFolders();
                             if (lastSelectedDNFolders != null && !lastSelectedDNFolders.isEmpty()) {
                                 for (CfgFolder lastSelectedDNFolder : lastSelectedDNFolders) {
-                                    switches.add(new DNLocation(configServerManager.getService(), lastSelectedDNFolder));
+                                    switches.add(new SwitchObjectLocation(configServerManager.getService(), lastSelectedDNFolder));
                                 }
                             } else {
-                                switches.add(new DNLocation(configServerManager.getService(), "esv1_sipa1"));
-                                switches.add(new DNLocation(configServerManager.getService(), "edn1_sipa1"));
-                                switches.add(new DNLocation(configServerManager.getService(), "esg3_sipa1"));
+                                switches.add(new SwitchObjectLocation(configServerManager.getService(), "esv1_sipa1"));
+                                switches.add(new SwitchObjectLocation(configServerManager.getService(), "edn1_sipa1"));
+                                switches.add(new SwitchObjectLocation(configServerManager.getService(), "esg3_sipa1"));
                             }
 
                             ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
 
                             eod.init(ObjectExistAction.UNKNOWN, theForm);
-                            for (Pair<String, String> entry : placeDN) {
-                                String thePlace = entry.getKey();
-                                String theDN = entry.getValue();
-                                final HashMap<DNLocation, String> DNs = new HashMap<>();
-                                for (final DNLocation switche : switches) {
+                            for (String[] entry : placeDN) {
+                                String thePlace = entry[0];
+                                String theDN = entry[1];
+                                final HashMap<SwitchObjectLocation, String> DNs = new HashMap<>();
+                                for (final SwitchObjectLocation switche : switches) {
                                     DNs.put(switche, (String) null);
 
                                 }
-                                for (final DNLocation switchLookup : DNs.keySet()) {
+                                for (final SwitchObjectLocation switchLookup : DNs.keySet()) {
                                     DNs.put(switchLookup, theDN);
                                 }
                                 if (!configServerManager.createPlace(thePlace, DNs, eod, instance.lastSelectedPlaceFolder())) // stop creating
+                                {
+                                    requestOutput("****** Import aborted *******");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }, new IThreadedFun() {
+                @Override
+                public void fun() throws ConfigException, InterruptedException {
+                    configServerManager.clearCache();
+                }
+            });
+        }
+
+    }
+
+    private void importLoginIDs() {
+        final JFileChooser chooser = new JFileChooser();
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        final int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
+            ArrayList<String[]> loginIDs = readCSV(chooser.getSelectedFile(), 1);
+
+            runInThread(new IThreadedFun() {
+                @Override
+                public void fun() throws ConfigException, InterruptedException {
+                    if (connectToConfigServer()) {
+                        CSVImportLoginIDs instance = CSVImportLoginIDs.getInstance(theForm, configServerManager);
+                        if (instance.shouldImportCSV(loginIDs, true) && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+
+                            final ArrayList<SwitchObjectLocation> switches = new ArrayList<>();
+                            ArrayList<CfgFolder> lastSelectedLoginidFolders = instance.lastSelectedLoginidFolders();
+                            if (lastSelectedLoginidFolders != null && !lastSelectedLoginidFolders.isEmpty()) {
+                                for (CfgFolder lastSelectedLoginidFolder : lastSelectedLoginidFolders) {
+                                    switches.add(new SwitchObjectLocation(configServerManager.getService(), lastSelectedLoginidFolder));
+                                }
+                            } else {
+                                switches.add(new SwitchObjectLocation(configServerManager.getService(), "esv1_sipa1"));
+                                switches.add(new SwitchObjectLocation(configServerManager.getService(), "edn1_sipa1"));
+                                switches.add(new SwitchObjectLocation(configServerManager.getService(), "esg3_sipa1"));
+                            }
+
+                            ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+
+                            eod.init(ObjectExistAction.UNKNOWN, theForm);
+                            for (String[] entry : loginIDs) {
+                                final HashMap<SwitchObjectLocation, String> loginIDs = new HashMap<>();
+                                for (final SwitchObjectLocation switche : switches) {
+                                    loginIDs.put(switche, (String) null);
+
+                                }
+                                for (final SwitchObjectLocation switchLookup : loginIDs.keySet()) {
+                                    loginIDs.put(switchLookup, entry[0]);
+                                }
+                                if (!configServerManager.createLoginIDs(loginIDs, eod)) // stop creating
                                 {
                                     requestOutput("****** Import aborted *******");
                                     break;

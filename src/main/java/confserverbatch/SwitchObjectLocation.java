@@ -15,7 +15,7 @@ import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
  *
  * @author stepan_sydoruk
  */
-public class DNLocation {
+public class SwitchObjectLocation {
 
     private CfgSwitch sw;
     private Integer folderDBID = null;
@@ -24,15 +24,13 @@ public class DNLocation {
         return folderDBID;
     }
 
-    public DNLocation(IConfService service, String switch1) throws ConfigException, InterruptedException {
-//        CfgSwitchQuery switchQuery = new CfgSwitchQuery(service);
-//        switchQuery.setName(switch1);
-//        Collection<CfgSwitch> execute = switchQuery.execute();
+    public SwitchObjectLocation(IConfService service, String switch1) throws ConfigException, InterruptedException {
+
         CfgSwitchQuery switchQuery = new CfgSwitchQuery(switch1);
         sw = service.retrieveObject(CfgSwitch.class, switchQuery);
     }
 
-    public DNLocation(IConfService service, CfgFolder folder) throws ConfigException {
+    public SwitchObjectLocation(IConfService service, CfgFolder folder) throws ConfigException {
         CfgSwitchQuery switchQuery = new CfgSwitchQuery(folder.getOwnerID().getDBID());
         sw = service.retrieveObject(CfgSwitch.class, switchQuery);
         folderDBID = folder.getDBID();
