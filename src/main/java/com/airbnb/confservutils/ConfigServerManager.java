@@ -1184,6 +1184,46 @@ public class ConfigServerManager {
         }
     }
 
+    public boolean createPersonFromAgent(CfgPerson cfgPerson, ExistingObjectDecider eod) throws ConfigException, InterruptedException {
+        CfgPerson admin = new CfgPerson(service);
+
+        admin.setIsAgent(CfgFlag.CFGFalse);
+        admin.setEmployeeID(cfgPerson.getEmployeeID() + "_admin");
+        admin.setExternalID(cfgPerson.getEmployeeID());
+        admin.setEmailAddress(cfgPerson.getEmailAddress());
+        admin.setUserName(cfgPerson.getUserName() + ".admin");
+        admin.setIsExternalAuth(CfgFlag.CFGTrue);
+        admin.setFirstName(cfgPerson.getFirstName());
+        admin.setLastName(cfgPerson.getLastName());
+        admin.setTenantDBID(cfgPerson.getTenantDBID());
+        
+        parentForm.requestOutput("Creating " + admin.toString());
+
+        try {
+            admin.save();
+        } catch (ConfigException e) {
+            parentForm.requestOutput("failed creation: " + e.toString());
+            return false;
+        }
+
+//        ConfObject am = new ConfObject(admin.getMetaData().);
+//        CfgMetadata metadata = service.getMetaData();
+//
+//        ConfObject obj0 = new ConfObject(metadata, CfgObjectType.CFGPerson);
+//        CfgPerson()
+//
+//        RequestCreateObject req = RequestCreateObject.create(am);
+//        RequestUpdateObject reqUpdate = RequestUpdateObject.create();
+//        logger.info("++" + d.toString());
+//        reqUpdate.setObjectDelta(d);
+//        logger.info("++ req: " + reqUpdate);
+//
+//        Message ret = cfgManager.execRequest(reqUpdate, objType);
+//        logger.info("++ ret: " + ret.toString());
+//        objectsUpdated = true;
+        return true;
+    }
+
     public boolean createLoginIDs(HashMap<SwitchObjectLocation, String> thelLoginIDs, ExistingObjectDecider eod) throws ConfigException, InterruptedException {
         for (Map.Entry<SwitchObjectLocation, String> entry : thelLoginIDs.entrySet()) {
             Pair<ObjectExistAction, CfgObject> newLoginID = createLoginID(entry.getKey(), entry.getValue(), eod);

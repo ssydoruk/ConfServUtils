@@ -350,6 +350,7 @@ public final class AppForm extends javax.swing.JFrame {
         jMenu5 = new javax.swing.JMenu();
         miImportCSV = new javax.swing.JMenuItem();
         miCreateLoginIDs = new javax.swing.JMenuItem();
+        miCreateAdminAccounts = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -684,6 +685,14 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu5.add(miCreateLoginIDs);
 
+        miCreateAdminAccounts.setText("Create admin login by coping agent accounts");
+        miCreateAdminAccounts.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miCreateAdminAccountsActionPerformed(evt);
+            }
+        });
+        jMenu5.add(miCreateAdminAccounts);
+
         jMenu2.add(jMenu5);
 
         jMenuBar1.add(jMenu2);
@@ -714,8 +723,12 @@ public final class AppForm extends javax.swing.JFrame {
     }//GEN-LAST:event_miCreateLoginIDsActionPerformed
 
     private void miCheckLoginIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miCheckLoginIDActionPerformed
-       verifyLoginIDExists();
+        verifyLoginIDExists();
     }//GEN-LAST:event_miCheckLoginIDActionPerformed
+
+    private void miCreateAdminAccountsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miCreateAdminAccountsActionPerformed
+        createAdminFromAgent();
+    }//GEN-LAST:event_miCreateAdminAccountsActionPerformed
 
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyDNPlaceExists();
@@ -2012,6 +2025,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miBusinessAttribute;
     private javax.swing.JMenuItem miCheckDNPlaceExists;
     private javax.swing.JMenuItem miCheckLoginID;
+    private javax.swing.JMenuItem miCreateAdminAccounts;
     private javax.swing.JMenuItem miCreateLoginIDs;
     private javax.swing.JMenuItem miExtensionWithoutPlace;
     private javax.swing.JMenuItem miFindLDAPs;
@@ -3017,7 +3031,7 @@ public final class AppForm extends javax.swing.JFrame {
 
         }
     }
-    
+
     private void verifyDNPlaceExists() {
 
         final JFileChooser chooser = new JFileChooser();
@@ -3167,6 +3181,64 @@ public final class AppForm extends javax.swing.JFrame {
                                 }
                             }
                         }
+                    }
+                }
+
+            }, new IThreadedFun() {
+                @Override
+                public void fun() throws ConfigException, InterruptedException {
+                    configServerManager.clearCache();
+                }
+            });
+        }
+
+    }
+
+    private void createAdminFromAgent() {
+        final JFileChooser chooser = new JFileChooser();
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        final int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
+            ArrayList<String[]> userNames = readCSV(chooser.getSelectedFile(), 1);
+
+            runInThread(new IThreadedFun() {
+                @Override
+                public void fun() throws ConfigException, InterruptedException {
+                    if (connectToConfigServer()) {
+
+                        requestOutput("Searching for userNames");
+                        CSVCreateAgentAdmin instance = CSVCreateAgentAdmin.getInstance(theForm, configServerManager);
+                        if (instance.shouldImportCSVCreateAdmin(userNames, yesToAll)
+                                && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                            Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
+                            for (String[] user : userNames) {
+                                boolean userNameFound = false;
+                                for (CfgPerson cfgPerson : allPersons) {
+                                    if (StringUtils.compareIgnoreCase(user[0], cfgPerson.getUserName()) == 0) {
+                                        requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson.getObjectPath() + "\n\t" + user + "," + cfgPerson.getExternalID());
+                                        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+                                        eod.init(ObjectExistAction.UNKNOWN, theForm);
+
+                                        if (!configServerManager.createPersonFromAgent(cfgPerson, eod)) // stop creating
+                                        {
+                                            requestOutput("****** Import aborted *******");
+                                            break;
+                                        }
+
+                                        userNameFound = true;
+                                    }
+                                }
+                                if (!userNameFound) {
+                                    requestOutput(" * USER [" + user + "] not found ");
+                                }
+
+                            }
+                        }
+
                     }
                 }
 
