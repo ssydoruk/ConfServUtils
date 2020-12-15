@@ -28,6 +28,7 @@ import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.connection.configuration.KeyValueConfiguration;
+import com.genesyslab.platform.commons.connection.configuration.PropertyConfiguration;
 import com.genesyslab.platform.commons.protocol.ChannelState;
 import com.genesyslab.platform.commons.protocol.Endpoint;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
@@ -107,8 +108,14 @@ public class ConfigConnection {
         KeyValueConfiguration cp = new KeyValueConfiguration(new KeyValueCollection());
 //        cp.setTLSEnabled(true);
 
+        PropertyConfiguration conf = new PropertyConfiguration();
+        conf.setUseAddp(true);
+        conf.setAddpClientTimeout(30);
+        conf.setAddpServerTimeout(30);
+        conf.setAddpTrace("both");
+
         Endpoint cfgServerEndpoint
-                = new Endpoint(cfgsrvEndpointName, cfgsrvHost, cfgsrvPort);
+                = new Endpoint(cfgsrvEndpointName, cfgsrvHost, cfgsrvPort, conf);
 
         ConfServerProtocol protocol = new ConfServerProtocol(cfgServerEndpoint);
         protocol.setClientName(clientName);
@@ -118,6 +125,7 @@ public class ConfigConnection {
         protocol.setUseLocalization(false);
 
         IConfService service = ConfServiceFactory.createConfService(protocol);
+        service.getProtocol().setTimeout(120000);
 
         protocol.open();
 
