@@ -29,6 +29,8 @@ import com.genesyslab.platform.commons.protocol.Message;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
+import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
+import com.genesyslab.platform.configuration.protocol.types.CfgObjectState;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
 import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
@@ -321,8 +323,8 @@ public final class AppForm extends javax.swing.JFrame {
         jpOutput = new javax.swing.JPanel();
         spOutputScroll = new javax.swing.JScrollPane();
         taOutput = new javax.swing.JTextArea();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        jmbMainMenuBar = new javax.swing.JMenuBar();
+        jmQuery = new javax.swing.JMenu();
         miObjByDBID = new javax.swing.JMenuItem();
         miAppByIP = new javax.swing.JMenuItem();
         miAppByOption = new javax.swing.JMenuItem();
@@ -331,12 +333,13 @@ public final class AppForm extends javax.swing.JFrame {
         jMenu6 = new javax.swing.JMenu();
         miLoginsWithoutAgent = new javax.swing.JMenuItem();
         miExtensionWithoutPlace = new javax.swing.JMenuItem();
+        miAgentsWithoutExternalIDs = new javax.swing.JMenuItem();
         jMenu7 = new javax.swing.JMenu();
         miCheckDNPlaceExists = new javax.swing.JMenuItem();
         miFindLDAPs = new javax.swing.JMenuItem();
         miFindLDAPsForUsers = new javax.swing.JMenuItem();
         miCheckLoginID = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        jmUpdate = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
         miAppOptionsReplace = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
@@ -493,7 +496,7 @@ public final class AppForm extends javax.swing.JFrame {
 
         getContentPane().add(jpOutput);
 
-        jMenu1.setText("Query");
+        jmQuery.setText("Query");
 
         miObjByDBID.setText("Object by DBID");
         miObjByDBID.addActionListener(new java.awt.event.ActionListener() {
@@ -501,7 +504,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miObjByDBIDActionPerformed(evt);
             }
         });
-        jMenu1.add(miObjByDBID);
+        jmQuery.add(miObjByDBID);
 
         miAppByIP.setText("application by IP");
         miAppByIP.addActionListener(new java.awt.event.ActionListener() {
@@ -509,7 +512,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miAppByIPActionPerformed(evt);
             }
         });
-        jMenu1.add(miAppByIP);
+        jmQuery.add(miAppByIP);
 
         miAppByOption.setText("Applications by option value");
         miAppByOption.addActionListener(new java.awt.event.ActionListener() {
@@ -517,7 +520,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miAppByOptionActionPerformed(evt);
             }
         });
-        jMenu1.add(miAppByOption);
+        jmQuery.add(miAppByOption);
 
         miObjectByAnnex.setText("Object by Annex option");
         miObjectByAnnex.addActionListener(new java.awt.event.ActionListener() {
@@ -525,7 +528,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miObjectByAnnexActionPerformed(evt);
             }
         });
-        jMenu1.add(miObjectByAnnex);
+        jmQuery.add(miObjectByAnnex);
 
         miBusinessAttribute.setText("Business Attribute/Value");
         miBusinessAttribute.addActionListener(new java.awt.event.ActionListener() {
@@ -533,7 +536,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miBusinessAttributeActionPerformed(evt);
             }
         });
-        jMenu1.add(miBusinessAttribute);
+        jmQuery.add(miBusinessAttribute);
 
         jMenu6.setText("ConfigDB verification");
 
@@ -553,7 +556,15 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu6.add(miExtensionWithoutPlace);
 
-        jMenu1.add(jMenu6);
+        miAgentsWithoutExternalIDs.setText("Agents without external IDs");
+        miAgentsWithoutExternalIDs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miAgentsWithoutExternalIDsActionPerformed(evt);
+            }
+        });
+        jMenu6.add(miAgentsWithoutExternalIDs);
+
+        jmQuery.add(jMenu6);
 
         jMenu7.setText("CSV operations");
 
@@ -589,11 +600,11 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu7.add(miCheckLoginID);
 
-        jMenu1.add(jMenu7);
+        jmQuery.add(jMenu7);
 
-        jMenuBar1.add(jMenu1);
+        jmbMainMenuBar.add(jmQuery);
 
-        jMenu2.setText("Update");
+        jmUpdate.setText("Update");
 
         miAnnexSearchReplace.setText("Object find and process");
         miAnnexSearchReplace.addActionListener(new java.awt.event.ActionListener() {
@@ -601,7 +612,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miAnnexSearchReplaceActionPerformed(evt);
             }
         });
-        jMenu2.add(miAnnexSearchReplace);
+        jmUpdate.add(miAnnexSearchReplace);
 
         miAppOptionsReplace.setText("App options search and replace");
         miAppOptionsReplace.addActionListener(new java.awt.event.ActionListener() {
@@ -609,7 +620,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miAppOptionsReplaceActionPerformed(evt);
             }
         });
-        jMenu2.add(miAppOptionsReplace);
+        jmUpdate.add(miAppOptionsReplace);
 
         jMenu3.setText("ORS Cluster");
 
@@ -629,7 +640,7 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu3.add(miAllORSs);
 
-        jMenu2.add(jMenu3);
+        jmUpdate.add(jMenu3);
 
         jMenu4.setText("ORS scripts buffering");
 
@@ -649,7 +660,7 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu4.add(miBufferingOn);
 
-        jMenu2.add(jMenu4);
+        jmUpdate.add(jMenu4);
 
         miLoadStrategy.setText("Load ORS strategy");
         miLoadStrategy.addActionListener(new java.awt.event.ActionListener() {
@@ -657,7 +668,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miLoadStrategyActionPerformed(evt);
             }
         });
-        jMenu2.add(miLoadStrategy);
+        jmUpdate.add(miLoadStrategy);
 
         miRestartService.setText("Restart service");
         miRestartService.addActionListener(new java.awt.event.ActionListener() {
@@ -665,7 +676,7 @@ public final class AppForm extends javax.swing.JFrame {
                 miRestartServiceActionPerformed(evt);
             }
         });
-        jMenu2.add(miRestartService);
+        jmUpdate.add(miRestartService);
 
         jMenu5.setText("CSV operations");
 
@@ -693,9 +704,9 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu5.add(miCreateAdminAccounts);
 
-        jMenu2.add(jMenu5);
+        jmUpdate.add(jMenu5);
 
-        jMenuBar1.add(jMenu2);
+        jmbMainMenuBar.add(jmUpdate);
 
         jmExit.setText("Exit");
         jmExit.addActionListener(new java.awt.event.ActionListener() {
@@ -703,9 +714,9 @@ public final class AppForm extends javax.swing.JFrame {
                 jmExitActionPerformed(evt);
             }
         });
-        jMenuBar1.add(jmExit);
+        jmbMainMenuBar.add(jmExit);
 
-        setJMenuBar(jMenuBar1);
+        setJMenuBar(jmbMainMenuBar);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -729,6 +740,10 @@ public final class AppForm extends javax.swing.JFrame {
     private void miCreateAdminAccountsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miCreateAdminAccountsActionPerformed
         createAdminFromAgent();
     }//GEN-LAST:event_miCreateAdminAccountsActionPerformed
+
+    private void miAgentsWithoutExternalIDsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAgentsWithoutExternalIDsActionPerformed
+        getAgentsWithoutExternalIDs();
+    }//GEN-LAST:event_miAgentsWithoutExternalIDsActionPerformed
 
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyDNPlaceExists();
@@ -1996,14 +2011,11 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
     private javax.swing.JMenu jMenu6;
     private javax.swing.JMenu jMenu7;
-    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -2013,8 +2025,12 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JMenu jmExit;
+    private javax.swing.JMenu jmQuery;
+    private javax.swing.JMenu jmUpdate;
+    private javax.swing.JMenuBar jmbMainMenuBar;
     private javax.swing.JPanel jpConfServ;
     private javax.swing.JPanel jpOutput;
+    private javax.swing.JMenuItem miAgentsWithoutExternalIDs;
     private javax.swing.JMenuItem miAllORSs;
     private javax.swing.JMenuItem miAnnexSearchReplace;
     private javax.swing.JMenuItem miAppByIP;
@@ -2308,6 +2324,9 @@ public final class AppForm extends javax.swing.JFrame {
     SwingWorker worker = null;
 
     private void workStarted(final boolean isStarted) {
+        jmQuery.setEnabled(!isStarted);
+        jmUpdate.setEnabled(!isStarted);
+        jmExit.setEnabled(!isStarted);
         btCancel.setVisible(isStarted);
         btClearOutput.setVisible(!isStarted);
         btDisconnect.setVisible(!isStarted);
@@ -3377,6 +3396,40 @@ public final class AppForm extends javax.swing.JFrame {
 
                     }
                     requestOutput("Found toral orphans: " + orphanLoginIDs.size());
+                }
+            }
+        });
+
+    }
+
+    private void getAgentsWithoutExternalIDs() {
+        runInThread(new IThreadedFun() {
+            @Override
+            public void fun() throws ConfigException, InterruptedException {
+                if (connectToConfigServer()) {
+                    ArrayList<CfgPerson> persons = new ArrayList<>();
+                    for (CfgPerson thePerson : configServerManager.getAllPersons()) {
+                        if (StringUtils.isBlank(thePerson.getExternalID()) && thePerson.getState() == CfgObjectState.CFGEnabled
+                                && thePerson.getIsAgent() == CfgFlag.CFGTrue
+                                && StringUtils.containsNone(thePerson.getEmployeeID(), '@')) {
+                            persons.add(thePerson);
+                        }
+                    }
+                    Collections.sort(persons, (o1, o2) -> {
+                        CfgPerson al1 = (CfgPerson) o1;
+                        CfgPerson al2 = (CfgPerson) o2;
+                        int compareToIgnoreCase = al1.getObjectPath().compareToIgnoreCase(al2.getObjectPath());
+                        return (compareToIgnoreCase == 0)
+                                ? al1.getUserName().compareToIgnoreCase(al2.getUserName()) : compareToIgnoreCase;
+                    });
+                    for (CfgPerson al : persons) {
+                        requestOutput("Empty id for " + al.getObjectPath()
+                                + " agent:" + (al.getIsAgent() == CfgFlag.CFGTrue)
+                                + " emp[" + al.getEmployeeID() + "]"
+                                + " username[" + al.getUserName() + "] DBID:" + al.getDBID() + "");
+
+                    }
+                    requestOutput("Found toral orphans: " + persons.size());
                 }
             }
         });
