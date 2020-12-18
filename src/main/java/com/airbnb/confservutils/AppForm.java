@@ -2128,9 +2128,7 @@ public final class AppForm extends javax.swing.JFrame {
         final boolean isConnected = configServerManager.isConnected();
         btDisconnect.setEnabled(isConnected);
         btConnect.setEnabled(!isConnected);
-        cbConfigServer.setEnabled(!isConnected);
-        cbUser.setEnabled(!isConnected);
-        pfPassword.setEnabled(!isConnected);
+        changeCSParams(!isConnected);
     }
 
     private void runAppByIPActionPerformed(final ActionEvent evt) {
@@ -2347,6 +2345,8 @@ public final class AppForm extends javax.swing.JFrame {
             protected Object doInBackground() throws Exception {
                 worker = this;
                 workStarted(true);
+                changeCSParams(false);
+
                 try {
                     fun.fun();
                 } catch (Exception e) {
@@ -3268,6 +3268,13 @@ public final class AppForm extends javax.swing.JFrame {
                 }
             });
         }
+
+    }
+
+    private void changeCSParams(boolean isEnabled) {
+        cbConfigServer.setEnabled(isEnabled);
+        cbUser.setEnabled(isEnabled);
+        pfPassword.setEnabled(isEnabled);
 
     }
 
