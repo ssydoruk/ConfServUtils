@@ -17,7 +17,6 @@
     <orderEntry type="library" name="Maven: org.jasypt:jasypt:1.9.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.7" level="project" />
     <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.4" level="project" />
-    <orderEntry type="library" name="Maven: com.airbnb:my-utils:1.0" level="project" />
     <orderEntry type="library" name="Maven: com.genesyslab.platform:comappblock:900.7.5" level="project" />
     <orderEntry type="library" name="Maven: com.genesyslab.platform:system:900.7.5" level="project" />
     <orderEntry type="library" name="Maven: com.genesyslab.platform:protocol:900.7.5" level="project" />
@@ -40,5 +39,18 @@
     <orderEntry type="library" name="Maven: io.netty:netty-handler:4.1.49.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-tcnative-boringssl-static:2.0.30.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-tcnative:osx-x86_64:2.0.30.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:log4j-over-slf4j:1.7.30" level="project" />
+    <orderEntry type="library" name="Maven: com.mycompany:Utils:1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.github.lgooddatepicker:LGoodDatePicker:10.4.1" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.6" level="project" />
+    <orderEntry type="library" name="Maven: net.java.dev.jna:jna:5.5.0" level="project" />
+    <orderEntry type="library" name="Maven: net.java.dev.jna:jna-platform:5.5.0" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.xml.bind:jakarta.xml.bind-api:2.3.2" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.activation:jakarta.activation-api:1.2.1" level="project" />
+    <orderEntry type="library" name="Maven: org.glassfish.jaxb:jaxb-runtime:2.3.2" level="project" />
+    <orderEntry type="library" name="Maven: org.glassfish.jaxb:txw2:2.3.2" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.istack:istack-commons-runtime:3.0.8" level="project" />
+    <orderEntry type="library" name="Maven: org.jvnet.staxex:stax-ex:1.8.1" level="project" />
+    <orderEntry type="library" name="Maven: com.sun.xml.fastinfoset:FastInfoset:1.2.16" level="project" />
   </component>
 </module>

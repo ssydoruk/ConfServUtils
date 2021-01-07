@@ -354,6 +354,7 @@ public final class AppForm extends javax.swing.JFrame {
         miImportCSV = new javax.swing.JMenuItem();
         miCreateLoginIDs = new javax.swing.JMenuItem();
         miCreateAdminAccounts = new javax.swing.JMenuItem();
+        miFindPersonRunScript = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
         jButton1.setText("jButton1");
@@ -704,6 +705,14 @@ public final class AppForm extends javax.swing.JFrame {
         });
         jMenu5.add(miCreateAdminAccounts);
 
+        miFindPersonRunScript.setText("Find person and update with script");
+        miFindPersonRunScript.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miFindPersonRunScriptActionPerformed(evt);
+            }
+        });
+        jMenu5.add(miFindPersonRunScript);
+
         jmUpdate.add(jMenu5);
 
         jmbMainMenuBar.add(jmUpdate);
@@ -744,6 +753,10 @@ public final class AppForm extends javax.swing.JFrame {
     private void miAgentsWithoutExternalIDsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAgentsWithoutExternalIDsActionPerformed
         getAgentsWithoutExternalIDs();
     }//GEN-LAST:event_miAgentsWithoutExternalIDsActionPerformed
+
+    private void miFindPersonRunScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFindPersonRunScriptActionPerformed
+        findAgentRunScript();
+    }//GEN-LAST:event_miFindPersonRunScriptActionPerformed
 
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyDNPlaceExists();
@@ -1096,143 +1109,170 @@ public final class AppForm extends javax.swing.JFrame {
         // Tools | Templates.
     }
 
+    private String loadFile(File fileName) {
+        StringBuilder txt = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String l;
+            while ((l = reader.readLine()) != null) {
+                txt.append(l).append('\n');
+
+            }
+        } catch (final FileNotFoundException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (final IOException ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return txt.toString();
+    }
+
+    private void debugJS() {
+        if (connectToConfigServer()) {
+            JSRunner.runScript(loadFile(new File("/Users/stepan_sydoruk/src/ConfServUtils/jsTest.js")),
+                    configServerManager, new String[]{"stepan.sydoruk@ext.airbnb.com"});
+        }
+    }
+
     private void miAnnexSearchReplaceActionPerformed(final java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miAnnexSearchReplaceActionPerformed
         yesToAll = false;
         upd = null;
 
-        if (annexReplace == null) {
-            panelAnnexReplace = new AnnexReplace(this);
-            annexReplace = new RequestDialog(this, panelAnnexReplace, (JMenuItem) evt.getSource());
-        }
-
-        if (annexReplace.doShow()) {
-
-            if (!panelAnnexReplace.checkParameters()) {
-                return;
+        debugJS();
+        if (false) {
+            if (annexReplace == null) {
+                panelAnnexReplace = new AnnexReplace(this);
+                annexReplace = new RequestDialog(this, panelAnnexReplace, (JMenuItem) evt.getSource());
             }
-            if (connectToConfigServer()) {
 
-                final AnnexReplace pn = (AnnexReplace) annexReplace.getContentPanel();
+            if (annexReplace.doShow()) {
 
-                ICfgObjectFoundProc foundProc;
-                if (pn.isActionUpdateKVP()) {
-                    foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                            final int total) -> {
-                        requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
-                                + kv.toString());
-                        // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
-                        // "\n kv: " + kv.toString());
-
-                        try {
-                            if (yesToAll) {
-                                if (upd != null) {
-                                    upd.updateObj(pn, obj, kv);
-                                }
-
-                            } else {
-                                upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
-                                final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
-                                switch (showYesNoPanel(pn.getSearchSummaryHTML(),
-                                        "Object " + current + " of matched " + total
-                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
-                                    case YES_TO_ALL:
-                                        if (JOptionPane.showConfirmDialog(theForm,
-                                                "Are you sure you want to modify this and all following found objects?",
-                                                "Please confirm", JOptionPane.YES_NO_OPTION,
-                                                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                                            yesToAll = true;
-                                            upd.updateObj(pn, obj, kv);
-                                            break;
-                                        }
-                                        break;
-
-                                    case JOptionPane.YES_OPTION:
-                                        upd.updateObj(pn, obj, kv);
-                                        break;
-
-                                    case JOptionPane.NO_OPTION:
-                                        break;
-
-                                    case JOptionPane.CANCEL_OPTION:
-                                        return false;
-                                }
-                            }
-                        } catch (final ProtocolException | HeadlessException protocolException) {
-                            showError("Exception while updating: " + protocolException.getMessage());
-                        }
-
-                        return true;
-                    };
-                } else { // delete object
-                    foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                            final int total) -> {
-                        requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
-                                + kv.toString());
-                        // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
-                        // "\n kv: " + kv.toString());
-
-                        try {
-                            if (yesToAll) {
-                                if (upd != null) {
-                                    upd.updateObj(pn, obj, kv);
-                                }
-
-                            } else {
-                                upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
-                                final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
-                                switch (showYesNoPanel(pn.getSearchSummaryHTML(),
-                                        "Object " + current + " of matched " + total + "\n-->\n" + obj.toString()
-                                        + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
-                                        + estimateUpdateObj)) {
-                                    case YES_TO_ALL:
-                                        if (JOptionPane.showConfirmDialog(theForm,
-                                                "Are you sure you want to modify this and all following found objects?",
-                                                "Please confirm", JOptionPane.YES_NO_OPTION,
-                                                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                                            yesToAll = true;
-                                            upd.updateObj(pn, obj, kv);
-                                            break;
-                                        }
-                                        break;
-
-                                    case JOptionPane.YES_OPTION:
-                                        upd.updateObj(pn, obj, kv);
-                                        break;
-
-                                    case JOptionPane.NO_OPTION:
-                                        break;
-
-                                    case JOptionPane.CANCEL_OPTION:
-                                        return false;
-                                }
-                            }
-                        } catch (final ProtocolException | HeadlessException protocolException) {
-                            showError("Exception while updating: " + protocolException.getMessage());
-                        }
-                        return true;
-                    };
+                if (!panelAnnexReplace.checkParameters()) {
+                    return;
                 }
+                if (connectToConfigServer()) {
 
-                runInThread(() -> {
-                    for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
-                        try {
-                            if (!configServerManager.doTheSearch(value, pn, false, true, foundProc)) {
-                                break;
+                    final AnnexReplace pn = (AnnexReplace) annexReplace.getContentPanel();
+
+                    ICfgObjectFoundProc foundProc;
+                    if (pn.isActionUpdateKVP()) {
+                        foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
+                                final int total) -> {
+                            requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
+                                    + kv.toString()
+                                    + "\n" + Utils.StringUtils.toJson(obj));
+                            // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
+                            // "\n kv: " + kv.toString());
+
+                            try {
+                                if (yesToAll) {
+                                    if (upd != null) {
+                                        upd.updateObj(pn, obj, kv);
+                                    }
+
+                                } else {
+                                    upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                                    final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
+                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(),
+                                            "Object " + current + " of matched " + total
+                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        case YES_TO_ALL:
+                                            if (JOptionPane.showConfirmDialog(theForm,
+                                                    "Are you sure you want to modify this and all following found objects?",
+                                                    "Please confirm", JOptionPane.YES_NO_OPTION,
+                                                    JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                                yesToAll = true;
+                                                upd.updateObj(pn, obj, kv);
+                                                break;
+                                            }
+                                            break;
+
+                                        case JOptionPane.YES_OPTION:
+                                            upd.updateObj(pn, obj, kv);
+                                            break;
+
+                                        case JOptionPane.NO_OPTION:
+                                            break;
+
+                                        case JOptionPane.CANCEL_OPTION:
+                                            return false;
+                                    }
+                                }
+                            } catch (final ProtocolException | HeadlessException protocolException) {
+                                showError("Exception while updating: " + protocolException.getMessage());
                             }
-                        } catch (final ConfigException | InterruptedException ex) {
-                            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+
+                            return true;
+                        };
+                    } else { // delete object
+                        foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
+                                final int total) -> {
+                            requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
+                                    + kv.toString());
+                            // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
+                            // "\n kv: " + kv.toString());
+
+                            try {
+                                if (yesToAll) {
+                                    if (upd != null) {
+                                        upd.updateObj(pn, obj, kv);
+                                    }
+
+                                } else {
+                                    upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                                    final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
+                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(),
+                                            "Object " + current + " of matched " + total + "\n-->\n" + obj.toString()
+                                            + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
+                                            + estimateUpdateObj)) {
+                                        case YES_TO_ALL:
+                                            if (JOptionPane.showConfirmDialog(theForm,
+                                                    "Are you sure you want to modify this and all following found objects?",
+                                                    "Please confirm", JOptionPane.YES_NO_OPTION,
+                                                    JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                                yesToAll = true;
+                                                upd.updateObj(pn, obj, kv);
+                                                break;
+                                            }
+                                            break;
+
+                                        case JOptionPane.YES_OPTION:
+                                            upd.updateObj(pn, obj, kv);
+                                            break;
+
+                                        case JOptionPane.NO_OPTION:
+                                            break;
+
+                                        case JOptionPane.CANCEL_OPTION:
+                                            return false;
+                                    }
+                                }
+                            } catch (final ProtocolException | HeadlessException protocolException) {
+                                showError("Exception while updating: " + protocolException.getMessage());
+                            }
+                            return true;
+                        };
                     }
-                });
 
-                if (upd != null && upd.isObjectsUpdated()) {
-                    configServerManager.clearCache();
+                    runInThread(() -> {
+                        for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
+                            try {
+                                if (!configServerManager.doTheSearch(value, pn, false, true, foundProc)) {
+                                    break;
+                                }
+                            } catch (final ConfigException | InterruptedException ex) {
+                                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+
+                    if (upd != null && upd.isObjectsUpdated()) {
+                        configServerManager.clearCache();
+                    }
                 }
-            }
 
+            }
         }
     }// GEN-LAST:event_miAnnexSearchReplaceActionPerformed
 
@@ -2046,6 +2086,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miExtensionWithoutPlace;
     private javax.swing.JMenuItem miFindLDAPs;
     private javax.swing.JMenuItem miFindLDAPsForUsers;
+    private javax.swing.JMenuItem miFindPersonRunScript;
     private javax.swing.JMenuItem miImportCSV;
     private javax.swing.JMenuItem miLoadStrategy;
     private javax.swing.JMenuItem miLoginsWithoutAgent;
@@ -3211,6 +3252,69 @@ public final class AppForm extends javax.swing.JFrame {
             });
         }
 
+    }
+
+    private void findAgentRunScript() {
+        final JFileChooser chooser = new JFileChooser();
+        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setMultiSelectionEnabled(false);
+        final int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
+            ArrayList<String[]> userNames = readCSV(chooser.getSelectedFile(), 1);
+            CSVUpdatePersonByScript instance = CSVUpdatePersonByScript.getInstance(theForm, configServerManager);
+            if (instance.shouldProceed(userNames)
+                    && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                runInThread(new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        if (connectToConfigServer()) {
+                            requestOutput("Searching for userNames");
+                            ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+                            eod.init(ObjectExistAction.UNKNOWN, theForm);
+                            for (String[] user : userNames) {
+                                JSRunner.runScript(instance.getScript(), configServerManager, user);
+                                /*
+                            requestOutput("Searching for userNames");
+                            Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
+                            for (String[] user : userNames) {
+                                boolean userNameFound = false;
+                                for (CfgPerson cfgPerson : allPersons) {
+                                    if (StringUtils.compareIgnoreCase(user[0], cfgPerson.getUserName()) == 0) {
+                                        requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson.getObjectPath() + "\n\t" + user[0] + "," + cfgPerson.getExternalID());
+                                        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+                                        eod.init(ObjectExistAction.UNKNOWN, theForm);
+
+                                        if (!configServerManager.runScriptOnObject(cfgPerson, eod, instance.getScript())) // stop creating
+                                        {
+                                            requestOutput("****** Import aborted *******");
+                                            break;
+                                        }
+
+                                        userNameFound = true;
+                                    }
+                                }
+                                if (!userNameFound) {
+                                    requestOutput(" * USER [" + user + "] not found ");
+                                }
+                                 */
+                            }
+                        }
+
+                    }
+                },
+                        new IThreadedFun() {
+                    @Override
+                    public void fun() throws ConfigException, InterruptedException {
+                        configServerManager.clearCache();
+                    }
+                }
+                );
+            }
+
+        }
     }
 
     private void createAdminFromAgent() {

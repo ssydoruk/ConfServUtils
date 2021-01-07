@@ -178,6 +178,7 @@ import com.genesyslab.platform.applicationblocks.com.queries.CfgTimeZoneQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgTreatmentQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgVoicePromptQuery;
+import com.genesyslab.platform.commons.collections.KVList;
 import com.genesyslab.platform.commons.collections.KeyValueCollection;
 import com.genesyslab.platform.commons.collections.KeyValuePair;
 import com.genesyslab.platform.commons.protocol.ChannelState;
@@ -186,13 +187,27 @@ import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.confserver.events.EventError;
 import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectCreated;
 import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttribute;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeEnumItem;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributePrimitive;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeReferenceClassList;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeReferenceLink;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionClass;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionStructure;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
+import com.genesyslab.platform.configuration.protocol.obj.ConfObjectBase;
+import com.genesyslab.platform.configuration.protocol.obj.ConfStructure;
+import com.genesyslab.platform.configuration.protocol.obj.ConfStructureCollection;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
 import com.genesyslab.platform.configuration.protocol.types.CfgErrorType;
 import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
 import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import confserverbatch.ObjectExistAction;
 import confserverbatch.SwitchObjectLocation;
 import java.util.AbstractCollection;
@@ -203,11 +218,13 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
+import org.graalvm.polyglot.HostAccess;
 
 /**
  *
@@ -1196,7 +1213,7 @@ public class ConfigServerManager {
         admin.setFirstName(cfgPerson.getFirstName());
         admin.setLastName(cfgPerson.getLastName());
         admin.setTenantDBID(cfgPerson.getTenantDBID());
-        
+
         parentForm.requestOutput("Creating " + admin.toString());
 
         try {
@@ -1994,7 +2011,10 @@ public class ConfigServerManager {
             if (findObjects(query, CfgApplication.class, new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(final CfgObject obj) {
-                    return ((CfgApplication) obj).getUserProperties();
+                    KeyValueCollection ret;
+                    ret = (((CfgApplication) obj).getUserProperties());
+                    ret.addAll(((CfgApplication) obj).getOptions());
+                    return ret;
                 }
 
                 @Override
@@ -2531,4 +2551,166 @@ public class ConfigServerManager {
 
     }
 
+    @HostAccess.Export
+    public String findObject(String objectType, String attrName, String attrValue) throws Exception {
+        CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
+//        CfgFilterBasedQuery q = new CfgFilterBasedQuery(_objectType);
+
+        CfgPersonQuery q = new CfgPersonQuery();
+        q.setDbid(247);
+        Collection<CfgPerson> allPersons = getResults(q, CfgPerson.class);
+        for (CfgPerson person : allPersons) {
+
+            ConfObjectBase rod = person.getRawObjectData();
+            Object propertyValue = rod.getPropertyValue(attrName);
+            if (propertyValue != null && attrValue.equals(propertyValue)) {
+                return cfgObjectToJson(person);
+            }
+        }
+        parentForm.requestOutput("findObject  type:" + _objectType + " attr:" + attrName + " value:" + attrValue);
+        return "person";
+    }
+
+    @HostAccess.Export
+    public String updateObject(String objectType, int DBID, String jsonAttributes) {
+        CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
+        parentForm.requestOutput("findObject  type:" + _objectType + " jsonAttributes:" + jsonAttributes);
+        return "person";
+    }
+
+    private HashMap<CfgDescriptionClass, String> objTypeProperties = null;
+
+    @HostAccess.Export
+    public String getObjectAttributes(String objectType) throws Exception {
+        if (objTypeProperties == null) {
+            objTypeProperties = new HashMap<>();
+        }
+        CfgDescriptionClass cfgClass = service.getMetaData().getCfgClass(objectType);
+        if (cfgClass == null) {
+            throw new Exception("Incorrect object type [" + objectType + "]");
+        }
+        String props = objTypeProperties.get(cfgClass);
+        if (props == null) {
+            ArrayList<CfgDescriptionAttributePrimitive> ret = new ArrayList<>();
+            for (CfgDescriptionAttribute a : service.getMetaData().getCfgClass(objectType).getAttributes()) {
+//            logger.debug(CfgDescriptionJson.toJson(a));
+                if (a instanceof CfgDescriptionAttributePrimitive && !a.isKey()) {
+                    if (a instanceof CfgDescriptionAttributeEnumItem) {
+                        ret.add((CfgDescriptionAttributeEnumItem) a);
+                    } else {
+                        ret.add((CfgDescriptionAttributePrimitive) a);
+                    }
+                }
+            }
+            props = CfgDescriptionJson.toJson(ret);
+            objTypeProperties.put(cfgClass, props);
+        }
+        return props;
+    }
+
+    Gson gson = new Gson();
+
+    private String cfgObjectToJson(CfgObject person) {
+        CfgDescriptionClass metaData = person.getMetaData();
+        ConfObjectBase rawObjectData = person.getRawObjectData();
+
+        JsonObject result = new JsonObject();
+        result.addProperty("type", person.getObjectType().toString());
+        result.addProperty("path", person.getObjectPath());
+        result.addProperty("FolderDBID", person.getFolderId());
+
+        JsonObject props = new JsonObject();
+        for (CfgDescriptionAttribute a : metaData.getAttributes()) {
+            String attrName = a.getSchemaName();
+            Object val = rawObjectData.getPropertyValue(attrName);
+            if (val == null) {
+                props.addProperty(attrName,
+                        (String) null
+                );
+            } else {
+                if (val instanceof Integer) {
+                    props.addProperty(attrName, (Integer) val);
+                } else if (val instanceof String) {
+                    props.addProperty(attrName, (String) val);
+                } else if (val instanceof KeyValueCollection) {
+                    props.add(attrName, kvpJson((KeyValueCollection) val));
+                } else if (val instanceof ConfStructure) {
+                    props.add(attrName, kvpConfStructure((ConfStructure) val));
+                } else {
+                    props.addProperty(attrName, val.toString());
+                }
+            }
+        }
+        result.add("properties", props);
+
+        return result.toString();
+    }
+
+    private JsonElement kvpJson(KVList val) {
+        JsonObject ret = new JsonObject();
+        for (Iterator iterator = val.iterator(); iterator.hasNext();) {
+            Object nextElement = iterator.next();
+            if (nextElement instanceof KeyValuePair) {
+                String key = ((KeyValuePair) nextElement).getStringKey();
+                Object newVal = ((KeyValuePair) nextElement).getValue();
+                if ((newVal instanceof KeyValueCollection)) {
+                    ret.add(key, kvpJson((KVList) newVal));
+                } else if ((newVal instanceof String)) {
+                    ret.addProperty(key, (String) newVal);
+                } else if ((newVal instanceof Integer)) {
+                    ret.addProperty(key, (Integer) newVal);
+                } else {
+                    ret.addProperty(key, newVal.toString());
+                }
+            }
+
+        }
+
+        return ret;
+    }
+
+    private JsonElement kvpConfStructure(ConfStructure confStructure) {
+        JsonObject ret = new JsonObject();
+        CfgDescriptionStructure classInfo = confStructure.getClassInfo();
+
+        for (CfgDescriptionAttribute attr : classInfo.getAttributes()) {
+            Object propertyValue = confStructure.getPropertyValue(attr.getIndex());
+            if (attr instanceof CfgDescriptionAttributeReferenceLink) {
+                CfgDescriptionAttributeReferenceLink aa = (CfgDescriptionAttributeReferenceLink) attr;
+                if (propertyValue instanceof Integer) {
+                    ret.addProperty(attr.getName(), (Integer) propertyValue);
+                } else {
+                    ret.addProperty(attr.getName(), (String) propertyValue);
+                }
+            } else if (attr instanceof CfgDescriptionAttributeReferenceClassList) {
+                ret.add(attr.getName(), jsonConfStructureCollection((ConfStructureCollection) propertyValue));
+
+//                CfgDescriptionAttributeReferenceClassList aa = (CfgDescriptionAttributeReferenceClassList) a;
+//                Object propertyValue = confStructure.getPropertyValue(aa.getItemName());
+            }
+        }
+        return ret;
+    }
+
+    private JsonElement jsonConfStructureCollection(ConfStructureCollection confStructureCollection) {
+        JsonArray ret = new JsonArray();
+        for (Iterator<ConfStructure> iterator = confStructureCollection.iterator(); iterator.hasNext();) {
+            ConfStructure attr = iterator.next();
+            Iterator<CfgDescriptionAttribute> iterator1;
+            JsonObject obj = new JsonObject();
+            for (iterator1 = attr.getClassInfo().getAttributes().iterator(); iterator1.hasNext();) {
+                CfgDescriptionAttribute descrAttr = iterator1.next();
+                Object propertyValue = attr.getPropertyValue(descrAttr.getIndex());
+                if (propertyValue instanceof Integer) {
+                    obj.addProperty(descrAttr.getName(), (Integer) propertyValue);
+                } else {
+                    if (propertyValue != null) {
+                        obj.addProperty(descrAttr.getName(), propertyValue.toString());
+                    }
+                }
+            }
+            ret.add(obj);
+        }
+        return ret;
+    }
 }

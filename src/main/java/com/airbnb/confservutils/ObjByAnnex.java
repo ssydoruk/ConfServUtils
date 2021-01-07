@@ -356,7 +356,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         buf.append(" types [").append(StringUtils.join(getSelectedObjectTypes(), ",")).append("]");
 
         if (isSearchAll()) {
-            buf.append(" term \"").append(getAllSearch()).append("\" in all fields, including object attributes");
+            buf.append(" term \"").append(getAllSearch()).append("\" in all fields (also Options for Application), including object attributes");
         } else {
             if (getObjName() != null) {
                 buf.append(" name [").append(getObjName()).append("]");
