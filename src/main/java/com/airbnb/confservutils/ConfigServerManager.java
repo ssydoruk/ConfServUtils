@@ -2578,6 +2578,21 @@ public class ConfigServerManager {
 
     Gson gson = new Gson();
 
+    /**
+     *
+     * @param objectType - CfgPerson, etc
+     * @param DBID
+     * @param updateObjProperties - JSON with parameters to update
+     * @return
+     * @throws ProtocolException
+     *
+     *
+     * example of updateObjProperties for person var updateObj = { // userName:
+     * "stepan.sydoruk@ext.airbnb.com", agentInfo: { skillLevels: { changed: {
+     * 103: 2, 238: 3 }, deleted: [238], added: { 103: 2, 238: 3 }, },
+     * agentLogins: { changed: {}, deleted: {}, }, }, };
+     *
+     */
     @HostAccess.Export
     public String updateObject(String objectType, int DBID, String updateObjProperties) throws ProtocolException {
         CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
@@ -2589,16 +2604,16 @@ public class ConfigServerManager {
 
         String s = metaData.getCfgClass(objectType).getDelta().getClassDescription().getAttributeByName(objectType).getSchemaName();
         ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-        ConfObjectBase deltaAgentInfo;
-        ConfStructureCollection changedSkillLevels;
 
         deltaPerson.setPropertyValue("DBID", DBID);              // - required
         JsonObject convertedObject = gson.fromJson(updateObjProperties, JsonObject.class);
 
+        boolean sendRequest = false;
         for (Map.Entry<String, JsonElement> entry : convertedObject.entrySet()) {
 
             if (entry.getValue().isJsonPrimitive()) {
                 JsonPrimitive val = entry.getValue().getAsJsonPrimitive();
+                sendRequest = true;
                 if (val.isNumber()) {
                     deltaPerson.setPropertyValue(entry.getKey(), entry.getValue().getAsNumber());
                 } else if (val.isString()) {
@@ -2608,30 +2623,16 @@ public class ConfigServerManager {
             } else {
                 if (_objectType == CfgObjectType.CFGPerson) {
                     if (entry.getKey().equals("agentInfo")) {
-                        deltaAgentInfo = (ConfStructure) objectDelta.getOrCreatePropertyValue("deltaAgentInfo");
-
                         JsonObject skillLevels = entry.getValue().getAsJsonObject().getAsJsonObject("skillLevels");
                         if (skillLevels != null) {
-                            JsonObject added = skillLevels.getAsJsonObject("added");
-                            if (added != null ) {
-                                addedSkillLevels(_objectType, s, DBID, added.getAsJsonObject());
-                            }
-                            JsonObject changed = skillLevels.getAsJsonObject("changed");
-                            if (changed != null ) {
-                                updateSkillLevels(_objectType, s, DBID, changed.getAsJsonObject());
-                            }
-                            JsonArray deleted = skillLevels.getAsJsonArray("deleted");
-                            if (deleted != null) {
-                                deleteSkillLevels(_objectType, s, DBID, deleted);
-
-                            }
+                            addedSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonObject("added"));
+                            updateSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonObject("changed"));
+                            deleteSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonArray("deleted"));
                         }
 
                         switch (entry.getKey()) {
 
                             case "agentLogins":
-                                deltaAgentInfo = (ConfObject) objectDelta.getOrCreatePropertyValue(metaData.getCfgClass(objectType).getDelta().getClassDescription().getAttributeByName("CfgDeltaAgentInfo").getSchemaName());
-
                                 break;
                         }
                     }
@@ -2640,13 +2641,14 @@ public class ConfigServerManager {
                 logger.info(entry.getValue());
             }
         }
-        RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-        reqUpdate.setObjectDelta(objectDelta);
+        if (sendRequest) {
+            RequestUpdateObject reqUpdate = RequestUpdateObject.create();
+            reqUpdate.setObjectDelta(objectDelta);
 
-        logger.info("++ req: " + reqUpdate);
-        Message ret = execRequest(reqUpdate, _objectType);
-        logger.info("++ ret: " + ret.toString());
-
+            logger.info("++ req: " + reqUpdate);
+            Message ret = execRequest(reqUpdate, _objectType);
+            logger.info("++ ret: " + ret.toString());
+        }
         return "person";
     }
 
@@ -2784,85 +2786,84 @@ public class ConfigServerManager {
     }
 
     private void deleteSkillLevels(CfgObjectType _objectType, String s, int DBID, JsonArray deleted) throws ProtocolException {
-        CfgMetadata metaData = service.getMetaData();
+        if (deleted != null && deleted.size() > 0) {
+            CfgMetadata metaData = service.getMetaData();
 
-        ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
+            ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
 
-        ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-        ConfObjectBase deltaAgentInfo = (ConfStructure) objectDelta.getOrCreatePropertyValue("deltaAgentInfo");
+            ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
+            ConfObjectBase deltaAgentInfo = (ConfStructure) objectDelta.getOrCreatePropertyValue("deltaAgentInfo");
 
-        deltaPerson.setPropertyValue("DBID", DBID);              // - required
+            deltaPerson.setPropertyValue("DBID", DBID);              // - required
 
-        for (JsonElement jsonElement : deleted) {
-            ConfIntegerCollection col = (ConfIntegerCollection) deltaAgentInfo.getOrCreatePropertyValue("deletedSkillDBIDs");
-            col.add(jsonElement.getAsInt());
+            for (JsonElement jsonElement : deleted) {
+                ConfIntegerCollection col = (ConfIntegerCollection) deltaAgentInfo.getOrCreatePropertyValue("deletedSkillDBIDs");
+                col.add(jsonElement.getAsInt());
+            }
+            executeUpdate(objectDelta, _objectType);
         }
+    }
 
-        RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-        reqUpdate.setObjectDelta(objectDelta);
-
-        logger.info("++ req: " + reqUpdate);
-        Message ret = execRequest(reqUpdate, _objectType);
-        logger.info("++ ret: " + ret.toString());
-
+    private boolean emptyJsonObj(JsonObject obj) {
+        return (obj == null || obj.isJsonNull() || obj.size() <= 0);
     }
 
     private void updateSkillLevels(CfgObjectType _objectType, String s, int DBID, JsonObject changed) throws ProtocolException {
-        CfgMetadata metaData = service.getMetaData();
+        if (!emptyJsonObj(changed)) {
+            CfgMetadata metaData = service.getMetaData();
 
-        ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
+            ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
 
-        ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-        ConfObjectBase deltaAgentInfo = (ConfStructure) objectDelta.getOrCreatePropertyValue("deltaAgentInfo");
+            ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
+            ConfObjectBase deltaAgentInfo = (ConfStructure) objectDelta.getOrCreatePropertyValue("deltaAgentInfo");
 
-        ConfStructureCollection changedSkillLevels;
+            ConfStructureCollection changedSkillLevels;
 
-        deltaPerson.setPropertyValue("DBID", DBID);              // - required
+            deltaPerson.setPropertyValue("DBID", DBID);              // - required
 
-        for (Map.Entry<String, JsonElement> changedEntry : changed.getAsJsonObject().entrySet()) {
-            changedSkillLevels = (ConfStructureCollection) deltaAgentInfo.getOrCreatePropertyValue("changedSkillLevels");
-            ConfStructure createStructure = changedSkillLevels.createStructure();
-            createStructure.setPropertyValue("skillDBID", Integer.parseInt(changedEntry.getKey()));
-            createStructure.setPropertyValue("level", changedEntry.getValue().getAsInt());
-            changedSkillLevels.add(createStructure);
-
+            for (Map.Entry<String, JsonElement> changedEntry : changed.getAsJsonObject().entrySet()) {
+                changedSkillLevels = (ConfStructureCollection) deltaAgentInfo.getOrCreatePropertyValue("changedSkillLevels");
+                ConfStructure createStructure = changedSkillLevels.createStructure();
+                createStructure.setPropertyValue("skillDBID", Integer.parseInt(changedEntry.getKey()));
+                createStructure.setPropertyValue("level", changedEntry.getValue().getAsInt());
+                changedSkillLevels.add(createStructure);
+            }
+            executeUpdate(objectDelta, _objectType);
         }
-        RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-        reqUpdate.setObjectDelta(objectDelta);
-
-        logger.info("++ req: " + reqUpdate);
-        Message ret = execRequest(reqUpdate, _objectType);
-        logger.info("++ ret: " + ret.toString());
-
     }
-    
-    private void addedSkillLevels(CfgObjectType _objectType, String s, int DBID, JsonObject changed) throws ProtocolException {
-        CfgMetadata metaData = service.getMetaData();
 
-        ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
+    private void addedSkillLevels(CfgObjectType _objectType, String s, int DBID, JsonObject added) throws ProtocolException {
+        if (!emptyJsonObj(added)) {
+            CfgMetadata metaData = service.getMetaData();
 
-        ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-        ConfObject deltaPerson1 = (ConfObject) objectDelta.getOrCreatePropertyValue("deltaPerson");
-        ConfStructure deltaAgentInfo = (ConfStructure) deltaPerson1.getOrCreatePropertyValue("agentInfo");
+            ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
 
-        ConfStructureCollection changedSkillLevels;
+            ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
+            ConfObject deltaPerson1 = (ConfObject) objectDelta.getOrCreatePropertyValue("deltaPerson");
+            ConfStructure deltaAgentInfo = (ConfStructure) deltaPerson1.getOrCreatePropertyValue("agentInfo");
 
-        deltaPerson.setPropertyValue("DBID", DBID);              // - required
+            ConfStructureCollection changedSkillLevels;
 
-        for (Map.Entry<String, JsonElement> changedEntry : changed.getAsJsonObject().entrySet()) {
-            changedSkillLevels = (ConfStructureCollection) deltaAgentInfo.getOrCreatePropertyValue("skillLevels");
-            ConfStructure createStructure = changedSkillLevels.createStructure();
-            createStructure.setPropertyValue("skillDBID", Integer.parseInt(changedEntry.getKey()));
-            createStructure.setPropertyValue("level", changedEntry.getValue().getAsInt());
-            changedSkillLevels.add(createStructure);
+            deltaPerson.setPropertyValue("DBID", DBID);              // - required
 
+            for (Map.Entry<String, JsonElement> changedEntry : added.getAsJsonObject().entrySet()) {
+                changedSkillLevels = (ConfStructureCollection) deltaAgentInfo.getOrCreatePropertyValue("skillLevels");
+                ConfStructure createStructure = changedSkillLevels.createStructure();
+                createStructure.setPropertyValue("skillDBID", Integer.parseInt(changedEntry.getKey()));
+                createStructure.setPropertyValue("level", changedEntry.getValue().getAsInt());
+                changedSkillLevels.add(createStructure);
+
+            }
+            executeUpdate(objectDelta, _objectType);
         }
+    }
+
+    private void executeUpdate(ConfObjectDelta objectDelta, CfgObjectType _objectType) throws ProtocolException {
         RequestUpdateObject reqUpdate = RequestUpdateObject.create();
         reqUpdate.setObjectDelta(objectDelta);
 
         logger.info("++ req: " + reqUpdate);
         Message ret = execRequest(reqUpdate, _objectType);
         logger.info("++ ret: " + ret.toString());
-
     }
 }
