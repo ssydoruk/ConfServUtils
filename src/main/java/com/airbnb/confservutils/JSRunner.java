@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.HashMap;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import org.apache.logging.log4j.Level;
@@ -23,13 +24,18 @@ import org.graalvm.polyglot.Value;
  */
 public class JSRunner {
 
-    static boolean runScript(String script, ConfigServerManager aThis, String[] params) {
+  
+    static HashMap<String, Object> updateObjProperties = new HashMap<>();
+
+    static boolean runScript(String script, ConfigServerManager csManager, String[] params ) {
         Context cont = getInstance().getCondContext();
         Value bindings = cont.getBindings("js");
-        bindings.putMember("CS", aThis);
+        updateObjProperties.clear();
+        bindings.putMember("CS", csManager);
         bindings.putMember("PARAMS", params);
+        bindings.putMember("UPDATEPROPS", updateObjProperties);
         bindings.putMember("TERMINATE", false);
-        
+
         cont.eval("js", script);
         boolean ret = bindings.getMember("TERMINATE").asBoolean();
         logger.trace("runScript [" + script + "], TERMINATE:[" + ret + "]");
@@ -69,7 +75,7 @@ public class JSRunner {
                 System.out.println("--close");
             }
         };
-        
+
         logHandler.setLevel(java.util.logging.Level.INFO);
         condContext = Context.newBuilder("js")
                 .allowAllAccess(true)
@@ -97,8 +103,7 @@ public class JSRunner {
     }
 
     private Context condContext = null;
-  
-  
+
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();
 
     /**
@@ -139,8 +144,7 @@ public class JSRunner {
         return eval.asBoolean();
 
     }
-*/
-
+     */
     class OutReaderThread extends Thread {
 
         private final PipedInputStream pipedIn;

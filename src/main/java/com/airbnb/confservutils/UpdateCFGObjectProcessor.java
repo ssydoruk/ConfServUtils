@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
-import javax.swing.JOptionPane;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
@@ -43,17 +42,17 @@ import org.apache.logging.log4j.Logger;
  * @author stepan_sydoruk
  */
 public class UpdateCFGObjectProcessor {
-    
+
     private static final Logger logger = Main.getLogger();
     public static final HashMap<CfgObjectType, String> deltaByType = createDeltaByType();
     static final public String BACKUP_PREFIX = "#";
-    
+
     public static String uncommented(String currentValue) {
-        
+
         return StringUtils.stripStart(currentValue, BACKUP_PREFIX);
-        
+
     }
-    
+
     public static KeyValueCollection getSection(KeyValueCollection sections, String section) {
         KeyValueCollection list = sections.getList(section);
         if (list == null) {
@@ -61,13 +60,13 @@ public class UpdateCFGObjectProcessor {
             sections.addList(section, list);
         }
         return list;
-        
+
     }
-    
+
     private static String cleanString(String s) {
         return StringUtils.strip(StringUtils.trim(s));
     }
-    
+
     private static HashMap<CfgObjectType, String> createDeltaByType() {
         HashMap<CfgObjectType, String> ret = new HashMap<>();
         ret.put(CfgObjectType.CFGDN, "deltaDN");
@@ -75,20 +74,20 @@ public class UpdateCFGObjectProcessor {
         ret.put(CfgObjectType.CFGScript, "deltaScript");
         ret.put(CfgObjectType.CFGApplication, "deltaApplication");
         ret.put(CfgObjectType.CFGAgentLogin, "deltaAgentLogin");
-        
+
         return ret;
     }
-    
+
     public static String getCommentedKey(String key) {
         return BACKUP_PREFIX + key;
     }
-    
+
     private final CfgObjectType objType;
     private final ConfigServerManager cfgManager;
     private final AppForm theForm;
     private CfgObject cfgObjproperties;
     private final KVPUpdater annexUpdates;
-    
+
     KeyValueCollection updateSections = new KeyValueCollection();
     KeyValueCollection createSections = new KeyValueCollection();
     KeyValueCollection deleteSections = new KeyValueCollection();
@@ -98,7 +97,7 @@ public class UpdateCFGObjectProcessor {
     private ICustomKVP customKVPProc = null;
     ArrayList<CfgObject> deleteObjects = new ArrayList<>();
     private boolean objectsUpdated;
-    
+
     UpdateCFGObjectProcessor(ConfigServerManager _configServerManager, CfgObjectType _objType, AppForm _theForm) {
         this.cfgObjproperties = null;
         this.cfgManager = _configServerManager;
@@ -106,115 +105,105 @@ public class UpdateCFGObjectProcessor {
         theForm = _theForm;
         annexUpdates = new KVPUpdater(true);
     }
-    
+
     private void prepareUpdate() {
         updateSections.clear();
         createSections.clear();
         deleteSections.clear();
         objectsUpdated = false;
     }
-    
+
     private void prepareDelete() {
         deleteObjects.clear();
         objectsUpdated = false;
-        
+
     }
-    
+
     void addAddKey(String section, String key, String val) {
         getSection(createSections, section).addString(cleanString(key), cleanString(val));
     }
-    
+
     void addUpdateKey(String section, String key, String val) {
         getSection(updateSections, section).addString(cleanString(key), cleanString(val));
     }
-    
+
     void addAddKeyForce(String section, String key, String val, CfgObject obj) {
         getSection(createSections, section).addString(cleanString(key), cleanString(val));
     }
-    
+
     void addAddKey(String section, String key, String val, CfgObject obj) {
         Pair<String, String> existing = updateExisted(obj, section, key);
-        
+
         if (StringUtils.isNotEmpty(existing.getKey())) {
             String newSection = existing.getKey();
             String newKey = existing.getValue();
             if (StringUtils.isBlank(newKey)) {
                 getSection(createSections, newSection).addString(cleanString(key), cleanString(val));
-                
+
             } else {
                 addUpdateKey(newSection, newKey, val);
             }
-            
+
         } else {
             getSection(createSections, section).addString(cleanString(key), cleanString(val));
         }
     }
-    
+
     void addDeleteKey(String section, String key, String val, CfgObject obj) {
         Pair<String, String> existing = updateExisted(obj, section, key);
         if (StringUtils.isNotEmpty(existing.getKey())) {
             if ((StringUtils.isNotEmpty(key) && StringUtils.isNotEmpty(existing.getValue()))) {
                 getSection(deleteSections, existing.getKey()).addString(existing.getValue(), cleanString(val));
             }
-            
+
             if ((StringUtils.isEmpty(key) && StringUtils.isEmpty(existing.getValue()))) {
                 getSection(deleteSections, existing.getKey()).addString("", "");
             }
-            
+
         }
-        
+
     }
-    
+
     public void setPropKeys(String _changedPropsKey, String _deletedPropsKey, String _createdPropsKey) {
         changedPropsKey = _changedPropsKey;
         deletedPropsKey = _deletedPropsKey;
         createdPropsKey = _createdPropsKey;
     }
-    
+
     String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, CfgApplication appNew) {
         cfgObjproperties = appNew;
         return estimateUpdateObj(us, obj, kv);
     }
-    
+
     private Message commitUpdateKVP(CfgObject obj) throws ProtocolException {
         if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty() || cfgObjproperties != null) {
             IConfService service = cfgManager.getService();
             CfgMetadata metaData = service.getMetaData();
             ConfObjectDelta d = new ConfObjectDelta(metaData, objType);
-            
-            String dByType = deltaByType.get(objType);
-            if (StringUtils.isAllEmpty(dByType)) {
-                JOptionPane.showConfirmDialog(theForm, "Cannot find delta by type!!!", "Update failed", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_OPTION);
-            } else {
-                
-                ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue(dByType);
-                
-                obj1.setPropertyValue("DBID", obj.getObjectDbid());              // - required
 
-                if (!updateSections.isEmpty()) {
-                    d.setPropertyValue(changedPropsKey, updateSections);
-                }
-                
-                if (!deleteSections.isEmpty()) {
-                    d.setPropertyValue(deletedPropsKey, deleteSections);
-                }
-                
-                if (!createSections.isEmpty()) {
-                    obj1.setPropertyValue(createdPropsKey, createSections);
-                }
-                
-                if (cfgObjproperties != null) {
-                    int cfgPrimitiveInt = CfgTypeMask.Primitive.getCfgType();
-                    for (CfgDescriptionAttribute attr : cfgObjproperties.getMetaData().getAttributes()) {
-                        if (!attr.isKey() && (attr.getTypeBitMask() & cfgPrimitiveInt) != 0) {
-                            String name = attr.getName();
-                            Object prop = cfgObjproperties.getProperty(name);
-                            if (prop != null) {
-                                obj1.setPropertyValue(name, prop);
-                            }
+            ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue(metaData.getCfgClass(objType.name()).getDelta().getClassDescription().getAttributeByName(objType.name()).getSchemaName());
+            obj1.setPropertyValue("DBID", obj.getObjectDbid());              // - required
+            if (!updateSections.isEmpty()) {
+                d.setPropertyValue(changedPropsKey, updateSections);
+            }
+            if (!deleteSections.isEmpty()) {
+                d.setPropertyValue(deletedPropsKey, deleteSections);
+            }
+            if (!createSections.isEmpty()) {
+                obj1.setPropertyValue(createdPropsKey, createSections);
+            }
+            if (cfgObjproperties != null) {
+                int cfgPrimitiveInt = CfgTypeMask.Primitive.getCfgType();
+                for (CfgDescriptionAttribute attr : cfgObjproperties.getMetaData().getAttributes()) {
+                    if (!attr.isKey() && (attr.getTypeBitMask() & cfgPrimitiveInt) != 0) {
+                        String name = attr.getName();
+                        Object prop = cfgObjproperties.getProperty(name);
+                        if (prop != null) {
+                            obj1.setPropertyValue(name, prop);
                         }
                     }
                 }
+            }
 //                    CfgApplication app = new CfgApplication(service);
 //                    app.setCommandLine("line");
 //                    app.setCommandLineArguments("args");
@@ -225,34 +214,29 @@ public class UpdateCFGObjectProcessor {
 //                    CfgDescriptionObject attributeInfo = obj1.getClassInfo();
 //                app.getp 
 //                obj1.setPropertyValue("commandLine", "aaa");
+RequestUpdateObject reqUpdate = RequestUpdateObject.create();
+logger.info("++" + d.toString());
+reqUpdate.setObjectDelta(d);
+logger.info("++ req: " + reqUpdate);
+Message ret = cfgManager.execRequest(reqUpdate, objType);
+logger.info("++ ret: " + ret.toString());
+objectsUpdated = true;
+return ret;
 
-                RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-                logger.info("++" + d.toString());
-                reqUpdate.setObjectDelta(d);
-                logger.info("++ req: " + reqUpdate);
-                
-                Message ret = cfgManager.execRequest(reqUpdate, objType);
-                logger.info("++ ret: " + ret.toString());
-                objectsUpdated = true;
-                
-                return ret;
-                
-            }
-            
         }
         return null;
     }
-    
+
     public boolean isObjectsUpdated() {
         return objectsUpdated;
     }
-    
+
     void addDeleteKey(KeyValueCollection kv) {
         for (Object object : kv) {
             deleteSections.add(object);
         }
     }
-    
+
     private void fillUpdateKVP(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
         prepareUpdate();
         switch (us.getKVPUpdateAction()) {
@@ -270,7 +254,7 @@ public class UpdateCFGObjectProcessor {
                                 if (newKey.equals(kvInstance.getStringKey())) {
                                     theForm.requestOutput("\t!! skipping, no change in key\n");
                                 } else {
-                                    
+
                                     addDeleteKey(section, newKey, kvInstance.getStringValue(), obj);
                                     addAddKey(section, newKey, kvInstance.getStringValue());
                                     addDeleteKey(section, kvInstance.getStringKey(), kvInstance.getStringValue(), obj);
@@ -283,29 +267,29 @@ public class UpdateCFGObjectProcessor {
                     }
                 }
                 break;
-            
+
             case ADD_SECTION: {
                 Collection<UserProperties> addedKVP = us.getAddedKVP();
                 if (addedKVP != null) {
                     for (UserProperties userProperties : addedKVP) {
                         addAddKey(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
-                        
+
                     }
                 }
             }
             break;
-            
+
             case ADD_OPTION_FORCE: {
                 Collection<UserProperties> addedKVP = us.getAddedKVP();
                 if (addedKVP != null) {
                     for (UserProperties userProperties : addedKVP) {
                         addAddKeyForce(userProperties.getSection(), userProperties.getKey(), userProperties.getValue(), obj);
-                        
+
                     }
                 }
             }
             break;
-            
+
             case REMOVE: {
                 if (kv != null && !kv.isEmpty()) {
                     addDeleteKey(kv);
@@ -320,7 +304,7 @@ public class UpdateCFGObjectProcessor {
                 }
             }
             break;
-            
+
             case REPLACE_WITH:
                 for (Object object : kv) {
                     if (object instanceof KeyValuePair) {
@@ -345,12 +329,12 @@ public class UpdateCFGObjectProcessor {
                             logger.error("Unsupport value type: " + valueType + " obj: " + obj.toString());
                         }
                         logger.info(kvp);
-                        
+
                     }
-                    
+
                 }
                 break;
-            
+
             case RESTORE_FROM_BACKUP:
                 ArrayList<UserProperties> allBackup = getAllBackup(obj);
                 if (allBackup.isEmpty()) {
@@ -370,19 +354,19 @@ public class UpdateCFGObjectProcessor {
                 break;
         }
     }
-    
+
     public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, CfgObject newObjectProperties) throws ProtocolException {
         cfgObjproperties = newObjectProperties;
         return updateObj(us, obj, kv);
     }
-    
+
     public Message updateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) throws ProtocolException {
-        
+
         switch (us.getObjectUpdateAction()) {
             case KVP_CHANGE:
                 fillUpdateKVP(us, obj, kv);
                 return commitUpdateKVP(obj);
-            
+
             case OBJECT_DELETE:
                 fillUpdateDelete(us, obj, kv, false);
                 commitUpdateDelete(obj);
@@ -390,10 +374,10 @@ public class UpdateCFGObjectProcessor {
         }
         return null;
     }
-    
+
     private String getCurValue(CfgObject obj, String section, String origProperty) {
         KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
-        
+
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
                 if (object instanceof KeyValuePair) {
@@ -401,7 +385,7 @@ public class UpdateCFGObjectProcessor {
                     if (kvp.getStringKey().equals(section)) {
                         Object value = kvp.getValue();
                         ValueType valueType = kvp.getValueType();
-                        
+
                         if (valueType == ValueType.TKV_LIST) {
                             for (Object _kvInstance : (KeyValueCollection) value) {
                                 KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
@@ -418,10 +402,10 @@ public class UpdateCFGObjectProcessor {
         }
         return null;
     }
-    
+
     public String estimateUpdateObjKVP(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
         fillUpdateKVP(us, obj, kv);
-        
+
         StringBuilder ret = new StringBuilder();
         if (!updateSections.isEmpty() || !createSections.isEmpty() || !deleteSections.isEmpty() || cfgObjproperties != null) {
             if (!updateSections.isEmpty()) {
@@ -441,7 +425,7 @@ public class UpdateCFGObjectProcessor {
                     }
                 }
             }
-            
+
             if (!createSections.isEmpty()) {
                 for (Object object : createSections) {
                     if (object instanceof KeyValuePair) {
@@ -459,7 +443,7 @@ public class UpdateCFGObjectProcessor {
                     }
                 }
             }
-            
+
             if (!deleteSections.isEmpty()) {
                 for (Object object : deleteSections) {
                     if (object instanceof KeyValuePair) {
@@ -477,7 +461,7 @@ public class UpdateCFGObjectProcessor {
                     }
                 }
             }
-            
+
             if (cfgObjproperties != null) {
                 ret.append("Properties change:\n");
                 int cfgPrimitiveInt = CfgTypeMask.Primitive.getCfgType();
@@ -494,7 +478,7 @@ public class UpdateCFGObjectProcessor {
         } else {
             return null;
         }
-        
+
         return ret.toString();
     }
 
@@ -510,13 +494,13 @@ public class UpdateCFGObjectProcessor {
         switch (us.getObjectUpdateAction()) {
             case KVP_CHANGE:
                 return estimateUpdateObjKVP(us, obj, kv);
-            
+
             case OBJECT_DELETE:
                 return estimateUpdateObjDelete(us, obj, kv);
-            
+
         }
         return null;
-        
+
     }
 
     /**
@@ -530,7 +514,7 @@ public class UpdateCFGObjectProcessor {
      */
     private Pair<String, String> updateExisted(CfgObject obj, String section, String stringKey) {
         Pair<String, String> ret = new Pair<>(null, null);
-        
+
         KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
@@ -538,7 +522,7 @@ public class UpdateCFGObjectProcessor {
                     KeyValuePair kvp = (KeyValuePair) object;
                     Object value = kvp.getValue();
                     ValueType valueType = kvp.getValueType();
-                    
+
                     if (kvp.getStringKey().equalsIgnoreCase(section)) {
                         ret.setKey(kvp.getStringKey());
                         if (StringUtils.isEmpty(stringKey)) {
@@ -560,17 +544,17 @@ public class UpdateCFGObjectProcessor {
         }
         return ret;
     }
-    
+
     private boolean updateExisted(CfgObject obj, String section, String stringKey, String stringValue) {
         KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
-        
+
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
                 if (object instanceof KeyValuePair) {
                     KeyValuePair kvp = (KeyValuePair) object;
                     Object value = kvp.getValue();
                     ValueType valueType = kvp.getValueType();
-                    
+
                     if (kvp.getStringKey().equals(section)) {
                         if (valueType == ValueType.TKV_LIST) {
                             for (Object _kvInstance : (KeyValueCollection) value) {
@@ -588,18 +572,18 @@ public class UpdateCFGObjectProcessor {
         }
         return false;
     }
-    
+
     private ArrayList<UserProperties> getAllBackup(CfgObject obj) {
         ArrayList<UserProperties> ret = new ArrayList<>();
         KeyValueCollection property = (customKVPProc == null) ? (KeyValueCollection) obj.getProperty("userProperties") : customKVPProc.getCustomKVP(obj);
-        
+
         if (property != null && !property.isEmpty()) {
             for (Object object : property) {
                 if (object instanceof KeyValuePair) {
                     KeyValuePair kvp = (KeyValuePair) object;
                     Object value = kvp.getValue();
                     ValueType valueType = kvp.getValueType();
-                    
+
                     if (valueType == ValueType.TKV_LIST) {
                         for (Object _kvInstance : (KeyValueCollection) value) {
                             KeyValuePair kvInstance = (KeyValuePair) _kvInstance;
@@ -615,7 +599,7 @@ public class UpdateCFGObjectProcessor {
         }
         return ret;
     }
-    
+
     private void setProperty(CfgObject obj, String section, String key, String value) {
         if (updateExisted(obj, section, key, value)) {
             addUpdateKey(section, key, value);
@@ -623,9 +607,9 @@ public class UpdateCFGObjectProcessor {
             addAddKey(section, key, value);
         }
     }
-    
+
     private void setProperty(CfgObject obj, StringBuilder buf, String section, String key, String value) {
-        
+
         if (updateExisted(obj, section, key, value)) {
 //            upd.addUpdateKey(section, key, value);
             buf.append("updating option value [")
@@ -646,18 +630,18 @@ public class UpdateCFGObjectProcessor {
                     .append("\"\n");
         }
     }
-    
+
     public void setCustomKVPProc(ICustomKVP customKVPProc) {
         this.customKVPProc = customKVPProc;
     }
-    
+
     private void fillUpdateDelete(IUpdateSettings us, CfgObject obj, KeyValueCollection kv, boolean alwaysCheckDependent) {
         prepareDelete();
         try {
             CfgObject delObj = obj.clone();
             deleteObjects.add(delObj);
             if (alwaysCheckDependent || us.isDeleteDependendObjects()) {
-                
+
                 if (obj.getObjectType() == CfgObjectType.CFGPlace) {
                     CfgPlace pl = (CfgPlace) obj;
                     for (Integer dnDBID : pl.getDNDBIDs()) {
@@ -693,13 +677,13 @@ public class UpdateCFGObjectProcessor {
         } catch (CloneNotSupportedException ex) {
             java.util.logging.Logger.getLogger(UpdateCFGObjectProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
-    
+
     private String getObjDescr(CfgObject obj) {
         return "Type: " + obj.getObjectType() + " DBID:" + obj.getObjectDbid();
     }
-    
+
     private String estimateUpdateObjDelete(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
         fillUpdateDelete(us, obj, kv, true);
         StringBuilder ret = new StringBuilder("Deleting object(s):-->\n");
@@ -709,16 +693,16 @@ public class UpdateCFGObjectProcessor {
         ret.append("<--\n");
         return ret.toString();
     }
-    
+
     private void commitUpdateDelete(CfgObject obj) {
         for (CfgObject deleteObject : deleteObjects) {
             try {
                 RequestDeleteObject reqDel = RequestDeleteObject.create();
                 reqDel.setDbid(deleteObject.getObjectDbid());
                 reqDel.setObjectType(deleteObject.getObjectType().asInteger());
-                
+
                 theForm.requestOutput("++ deleting object type:" + CfgObjectType.valueOf(reqDel.getObjectType()) + " dbid: " + reqDel.getDbid());
-                
+
                 Message ret = cfgManager.execRequest(reqDel, objType);
                 if (ret instanceof EventObjectDeleted) {
                     EventObjectDeleted o = (EventObjectDeleted) ret;
@@ -741,39 +725,39 @@ public class UpdateCFGObjectProcessor {
                         + ": " + ex.getMessage());
             }
         }
-        
+
     }
-    
+
     public static interface ICustomKVP {
-        
+
         public KeyValueCollection getCustomKVP(CfgObject obj);
     };
-    
+
     class KVPUpdater {
-        
+
         private final KeyValueCollection updateSections = new KeyValueCollection();
         private final KeyValueCollection createSections = new KeyValueCollection();
         private final KeyValueCollection deleteSections = new KeyValueCollection();
-        
+
         private String changedPropsKey;
         private String deletedPropsKey;
         private String createdPropsKey;
-        
+
         public KVPUpdater(boolean isUserProperties) {
             if (isUserProperties) {
                 initKeys("changedUserProperties", "deletedUserProperties", "userProperties");
             } else {
                 initKeys("changedOptions", "deletedOptions", "options");
             }
-            
+
         }
-        
+
         private void initKeys(String changedPropsKey, String deletedPropsKey, String createdPropsKey) {
             this.changedPropsKey = changedPropsKey;
             this.deletedPropsKey = deletedPropsKey;
             this.createdPropsKey = createdPropsKey;
         }
-        
+
     }
-    
+
 }
