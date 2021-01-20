@@ -31,7 +31,7 @@ import javax.swing.table.TableModel;
  */
 abstract class CSVCreateAgentAdmin extends CSVGeneralImportDialog {
 
-    static CSVCreateAgentAdmin instance = null;
+    private static CSVCreateAgentAdmin instance = null;
 
     public static CSVCreateAgentAdmin getInstance(Window parent, ConfigServerManager cfg) {
         if (instance == null) {

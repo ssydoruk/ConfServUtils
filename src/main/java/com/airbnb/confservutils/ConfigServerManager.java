@@ -7,235 +7,34 @@ package com.airbnb.confservutils;
 
 import Utils.Pair;
 import static Utils.StringUtils.matching;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.applicationblocks.com.CfgQuery;
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.ConfigServerException;
-import com.genesyslab.platform.applicationblocks.com.ICfgObject;
-import com.genesyslab.platform.applicationblocks.com.IConfService;
-import com.genesyslab.platform.applicationblocks.com.WellKnownDBIDs;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgACE;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgACEID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgACL;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgACLID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAccessGroupBrief;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgActionCode;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAddress;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLoginInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAlarmCondition;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAppPrototype;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAppRank;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAppServicePermission;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgCallingList;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgCallingListInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgCampaign;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgCampaignGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgCampaignGroupInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgConnInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDNAccessNumber;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDNGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDNInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDelSwitchAccess;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAccessGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaActionCode;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAgentGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAgentInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAgentLogin;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAlarmCondition;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaAppPrototype;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaApplication;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaCallingList;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaCampaign;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaCampaignGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaDN;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaDNGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaEnumerator;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaEnumeratorValue;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaField;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaFilter;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaFolder;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaFormat;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGVPCustomer;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGVPIVRProfile;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGVPReseller;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaHost;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaIVR;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaIVRPort;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaObjectiveTable;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPerson;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPersonLastLogin;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPhysicalSwitch;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPlace;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaPlaceGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaRole;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaScheduledTask;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaScript;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaService;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaSkill;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaStatDay;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaStatTable;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaSwitch;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTableAccess;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTenant;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTimeZone;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTransaction;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaTreatment;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDeltaVoicePrompt;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDetectEvent;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumerator;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgEnumeratorValue;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgField;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgFilter;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgFolder;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgFormat;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgGVPCustomer;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgGVPIVRProfile;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgGVPReseller;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgHost;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgIVR;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgIVRPort;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgMemberID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgOS;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectResource;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectiveTable;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgObjectiveTableRecord;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgOwnerID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgParentID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPersonBrief;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPersonLastLogin;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPhones;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPhysicalSwitch;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPlaceGroup;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPortInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgRemovalEvent;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgResourceID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgRole;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgRoleMember;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgScheduledTask;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgServer;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgServerHostID;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgServerVersion;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgService;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgServiceInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSkill;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSkillLevel;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSolutionComponent;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSolutionComponentDefinition;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgStatDay;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgStatInterval;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgStatTable;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSubcode;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitch;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgSwitchAccessCode;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgTableAccess;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgTenant;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgTenantBrief;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgTimeZone;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgTransaction;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgTreatment;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgUpdatePackageRecord;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgVoicePrompt;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgAccessGroupQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgActionCodeQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentGroupQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentLoginQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgAlarmConditionQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgDNGroupQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorValueQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgFolderQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgGVPIVRProfileQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgIVRPortQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgIVRQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgObjectiveTableQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgPersonQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceGroupQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgServiceQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgSkillQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgStatDayQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgStatTableQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgSwitchQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgTenantQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgTimeZoneQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgTreatmentQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgVoicePromptQuery;
-import com.genesyslab.platform.commons.collections.KVList;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.collections.KeyValuePair;
-import com.genesyslab.platform.commons.protocol.ChannelState;
-import com.genesyslab.platform.commons.protocol.Message;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventError;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectCreated;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttribute;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeEnumItem;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributePrimitive;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeReferenceClassList;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttributeReferenceLink;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionClass;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionStructure;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
-import com.genesyslab.platform.configuration.protocol.obj.ConfIntegerCollection;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObjectBase;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
-import com.genesyslab.platform.configuration.protocol.obj.ConfStructure;
-import com.genesyslab.platform.configuration.protocol.obj.ConfStructureCollection;
-import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
-import com.genesyslab.platform.configuration.protocol.types.CfgErrorType;
-import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgRouteType;
-import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import confserverbatch.ObjectExistAction;
-import confserverbatch.SwitchObjectLocation;
-import java.util.AbstractCollection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import com.airbnb.confservutils.ConfigConnection;
+import com.airbnb.confservutils.ConfigServerManager;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.applicationblocks.com.objects.*;
+import com.genesyslab.platform.applicationblocks.com.queries.*;
+import com.genesyslab.platform.commons.collections.*;
+import com.genesyslab.platform.commons.protocol.*;
+import com.genesyslab.platform.configuration.protocol.confserver.events.*;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.*;
+import com.genesyslab.platform.configuration.protocol.obj.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import com.genesyslab.platform.configuration.protocol.utilities.*;
+import confserverbatch.*;
+import java.util.*;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-import org.graalvm.polyglot.HostAccess;
 
 /**
  *
  * @author stepan_sydoruk
  */
 public class ConfigServerManager {
+
+    public AppForm getParentForm() {
+        return parentForm;
+    }
 
     public static final Logger logger = (Logger) Main.logger;
     private final static ISearchSettings FIND_ALL = new ISearchSettings() {
@@ -590,7 +389,8 @@ public class ConfigServerManager {
         }
     }
 
-    IConfService connect(StoredSettings.ConfServer confServ, String user, String string) {
+    IConfService connect(StoredSettings.ConfServer confServ, String user, String string) throws
+            ConfigException, InterruptedException, ProtocolException {
 
         try {
             disconnect();
@@ -634,6 +434,7 @@ public class ConfigServerManager {
         } catch (ConfigException | InterruptedException | ProtocolException ex) {
             service = null;
             parentForm.showException("Cannot connect to ConfigServer", ex);
+            throw ex;
 
         }
         return service;
@@ -656,13 +457,13 @@ public class ConfigServerManager {
         return service;
     }
 
-    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls) throws ConfigException, InterruptedException {
+    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls, boolean refresh) throws ConfigException, InterruptedException {
         Main.logger.debug("query " + q + " for object type " + cls);
         String qToString = q.toString();
         checkQueryNeedsUpdate();
 
         Collection<T> cfgObjs;
-        if (prevQueries.containsKey(qToString) && prevQueries.get(qToString) != null) {
+        if (!refresh && (prevQueries.containsKey(qToString) && prevQueries.get(qToString) != null)) {
             cfgObjs = (Collection<T>) prevQueries.get(qToString);
         } else {
             Main.logger.debug("executing the request " + q);
@@ -671,6 +472,10 @@ public class ConfigServerManager {
             prevQueries.put(qToString, cfgObjs);
         }
         return cfgObjs;
+    }
+
+    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls) throws ConfigException, InterruptedException {
+        return getResults(q, cls, false);
     }
 
     private <T extends CfgObject> void findApps(
@@ -2556,314 +2361,175 @@ public class ConfigServerManager {
 
     }
 
-    @HostAccess.Export
-    public String findObject(String objectType, String attrName, String attrValue) throws Exception {
-        CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
-//        CfgFilterBasedQuery q = new CfgFilterBasedQuery(_objectType);
+    public boolean connectToConfigServer() throws Exception {
 
-        CfgPersonQuery q = new CfgPersonQuery();
-        q.setDbid(247);
-        Collection<CfgPerson> allPersons = getResults(q, CfgPerson.class);
-        for (CfgPerson person : allPersons) {
-            logger.debug(person.toString());
-            ConfObjectBase rod = person.getRawObjectData();
-            Object propertyValue = rod.getPropertyValue(attrName);
-            if (propertyValue != null && attrValue.contains(propertyValue.toString())) {
-                return cfgObjectToJson(person);
-            }
-        }
-        parentForm.requestOutput("findObject  type:" + _objectType + " attr:" + attrName + " value:" + attrValue);
-        return "{}";
-    }
+        if (isConnected()) {
+            return true;
+        } else {
+            IConfService ret = null;
+            final StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) getParentForm().cbConfigServergetSelectedItem();
+            final String user = (String) getParentForm().cbUsergetSelectedItem();
+            if (confServ != null && user != null) {
+                try {
+                    ret = connect(confServ, user, getParentForm().pfPasswordgetPassword());
 
-    Gson gson = new Gson();
-
-    /**
-     *
-     * @param objectType - CfgPerson, etc
-     * @param DBID
-     * @param updateObjProperties - JSON with parameters to update
-     * @return
-     * @throws ProtocolException
-     *
-     *
-     * example of updateObjProperties for person var updateObj = { // userName:
-     * "stepan.sydoruk@ext.airbnb.com", agentInfo: { skillLevels: { changed: {
-     * 103: 2, 238: 3 }, deleted: [238], added: { 103: 2, 238: 3 }, },
-     * agentLogins: { changed: {}, deleted: {}, }, }, };
-     *
-     */
-    @HostAccess.Export
-    public String updateObject(String objectType, int DBID, String updateObjProperties) throws ProtocolException {
-        CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
-        parentForm.requestOutput("findObject  type:" + _objectType + " updateObjProperties:" + updateObjProperties);
-
-        CfgMetadata metaData = service.getMetaData();
-
-        ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
-
-        String s = metaData.getCfgClass(objectType).getDelta().getClassDescription().getAttributeByName(objectType).getSchemaName();
-        ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-
-        deltaPerson.setPropertyValue("DBID", DBID);              // - required
-        JsonObject convertedObject = gson.fromJson(updateObjProperties, JsonObject.class);
-
-        boolean sendRequest = false;
-        for (Map.Entry<String, JsonElement> entry : convertedObject.entrySet()) {
-
-            if (entry.getValue().isJsonPrimitive()) {
-                JsonPrimitive val = entry.getValue().getAsJsonPrimitive();
-                sendRequest = true;
-                if (val.isNumber()) {
-                    deltaPerson.setPropertyValue(entry.getKey(), entry.getValue().getAsNumber());
-                } else if (val.isString()) {
-                    deltaPerson.setPropertyValue(entry.getKey(), entry.getValue().getAsString());
+                } catch (Exception e) {
+                    getParentForm().showException("Cannot connect to ConfigServer", e);
+                    throw e;
                 }
 
-            } else {
-                if (_objectType == CfgObjectType.CFGPerson) {
-                    if (entry.getKey().equals("agentInfo")) {
-                        JsonObject skillLevels = entry.getValue().getAsJsonObject().getAsJsonObject("skillLevels");
-                        if (skillLevels != null) {
-                            addedSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonObject("added"));
-                            updateSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonObject("changed"));
-                            deleteSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonArray("deleted"));
-                        }
-
-                        switch (entry.getKey()) {
-
-                            case "agentLogins":
-                                break;
-                        }
-                    }
-
-                }
-                logger.info(entry.getValue());
             }
-        }
-        if (sendRequest) {
-            RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-            reqUpdate.setObjectDelta(objectDelta);
+            getParentForm().connectionStatusChanged();
 
-            logger.info("++ req: " + reqUpdate);
-            Message ret = execRequest(reqUpdate, _objectType);
-            logger.info("++ ret: " + ret.toString());
+            return isConnected();
         }
-        return "person";
     }
 
-    private HashMap<CfgDescriptionClass, String> objTypeProperties = null;
+    public ConfObject createObject(ConfObject newObj) throws Exception {
+        RequestCreateObject reqCreate = RequestCreateObject.create();
+        reqCreate.setObject(newObj);
 
-    @HostAccess.Export
-    public String getObjectAttributes(String objectType) throws Exception {
-        if (objTypeProperties == null) {
-            objTypeProperties = new HashMap<>();
+        Message resp = service.getProtocol().request(reqCreate);
+
+        if (resp instanceof EventObjectCreated) {
+            return ((EventObjectCreated) resp).getObject();
+        } else if (resp instanceof EventError) {
+            String err = "Error on object create: "
+                    + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
+                    + "\tDescription: " + ((EventError) resp).getDescription();
+            logger.error(err);
+            throw new Exception(err);
+
         }
-        CfgDescriptionClass cfgClass = service.getMetaData().getCfgClass(objectType);
-        if (cfgClass == null) {
-            throw new Exception("Incorrect object type [" + objectType + "]");
-        }
-        String props = objTypeProperties.get(cfgClass);
-        if (props == null) {
-            ArrayList<CfgDescriptionAttributePrimitive> ret = new ArrayList<>();
-            for (CfgDescriptionAttribute a : service.getMetaData().getCfgClass(objectType).getAttributes()) {
-//            logger.debug(CfgDescriptionJson.toJson(a));
-                if (a instanceof CfgDescriptionAttributePrimitive && !a.isKey()) {
-                    if (a instanceof CfgDescriptionAttributeEnumItem) {
-                        ret.add((CfgDescriptionAttributeEnumItem) a);
-                    } else {
-                        ret.add((CfgDescriptionAttributePrimitive) a);
-                    }
-                }
-            }
-            props = CfgDescriptionJson.toJson(ret);
-            objTypeProperties.put(cfgClass, props);
-        }
-        return props;
+        return null;
     }
 
-    private String cfgObjectToJson(CfgObject person) {
-        CfgDescriptionClass metaData = person.getMetaData();
-        ConfObjectBase rawObjectData = person.getRawObjectData();
+    Collection findObjects(String objectType, int max, boolean refresh) throws ConfigException, InterruptedException {
+        CfgObjectType t = CfgObjectType.valueOf(objectType);
+        CfgFilterBasedQuery q = new CfgFilterBasedQuery(t);
 
-        JsonObject result = new JsonObject();
-        result.addProperty("type", person.getObjectType().toString());
-        result.addProperty("path", person.getObjectPath());
-        result.addProperty("FolderDBID", person.getFolderId());
+        Collection allObjects = null;
+        if (t == CfgObjectType.CFGPerson) {
+            allObjects = getResults(q, CfgPerson.class, refresh);
+        } else if (t == CfgObjectType.CFGPlace) {
+            allObjects = getResults(q, CfgPlace.class, refresh);
+        } else if (t == CfgObjectType.CFGDN) {
+            allObjects = getResults(q, CfgDN.class, refresh);
+        } else if (t == CfgObjectType.CFGAgentLogin) {
+            allObjects = getResults(q, CfgAgentLogin.class, refresh);
+        } else if (t == CfgObjectType.CFGAgentGroup) {
+            allObjects = getResults(q, CfgAgentGroup.class, refresh);
+        } else if (t == CfgObjectType.CFGApplication) {
+            allObjects = getResults(q, CfgApplication.class, refresh);
+        } else if (t == CfgObjectType.CFGSwitch) {
+            allObjects = getResults(q, CfgSwitch.class, refresh);
+        } else if (t == CfgObjectType.CFGFolder) {
+            allObjects = getResults(q, CfgFolder.class, refresh);
+        } else if (t == CfgObjectType.CFGDNGroup) {
+            allObjects = getResults(q, CfgDNGroup.class, refresh);
 
-        JsonObject props = new JsonObject();
-        for (CfgDescriptionAttribute a : metaData.getAttributes()) {
-            String attrName = a.getSchemaName();
-            Object val = rawObjectData.getPropertyValue(attrName);
-            if (val == null) {
-                props.addProperty(attrName,
-                        (String) null
-                );
-            } else {
-                if (val instanceof Integer) {
-                    props.addProperty(attrName, (Integer) val);
-                } else if (val instanceof String) {
-                    props.addProperty(attrName, (String) val);
-                } else if (val instanceof KeyValueCollection) {
-                    props.add(attrName, kvpJson((KeyValueCollection) val));
-                } else if (val instanceof ConfStructure) {
-                    props.add(attrName, kvpConfStructure((ConfStructure) val));
-                } else {
-                    props.addProperty(attrName, val.toString());
-                }
-            }
+        } else if (t == CfgObjectType.CFGPlaceGroup) {
+            allObjects = getResults(q, CfgPlaceGroup.class, refresh);
+
+        } else if (t == CfgObjectType.CFGScript) {
+            allObjects = getResults(q, CfgScript.class, refresh);
+
+        } else if (t == CfgObjectType.CFGTransaction) {
+            allObjects = getResults(q, CfgTransaction.class, refresh);
+
+        } else if (t == CfgObjectType.CFGEnumerator) {
+            allObjects = getResults(q, CfgEnumerator.class, refresh);
+
+        } else if (t == CfgObjectType.CFGEnumeratorValue) {
+            allObjects = getResults(q, CfgEnumeratorValue.class, refresh);
+
+        } else if (t == CfgObjectType.CFGGVPIVRProfile) {
+            allObjects = getResults(q, CfgGVPIVRProfile.class, refresh);
+
+        } else if (t == CfgObjectType.CFGAccessGroup) {
+            allObjects = getResults(q, CfgAccessGroup.class, refresh);
+
+        } else if (t == CfgObjectType.CFGActionCode) {
+            allObjects = getResults(q, CfgActionCode.class, refresh);
+
+        } else if (t == CfgObjectType.CFGAlarmCondition) {
+            allObjects = getResults(q, CfgAlarmCondition.class, refresh);
+
+        } else if (t == CfgObjectType.CFGApplication) {
+            allObjects = getResults(q, CfgApplication.class, refresh);
+
+        } else if (t == CfgObjectType.CFGHost) {
+            allObjects = getResults(q, CfgHost.class, refresh);
+
+        } else if (t == CfgObjectType.CFGTenant) {
+            allObjects = getResults(q, CfgTenant.class, refresh);
+
+        } else if (t == CfgObjectType.CFGIVRPort) {
+            allObjects = getResults(q, CfgIVRPort.class, refresh);
+
+        } else if (t == CfgObjectType.CFGIVR) {
+            allObjects = getResults(q, CfgIVR.class, refresh);
+
+        } else if (t == CfgObjectType.CFGObjectiveTable) {
+            allObjects = getResults(q, CfgObjectiveTable.class, refresh);
+
+        } else if (t == CfgObjectType.CFGService) {
+            allObjects = getResults(q, CfgService.class, refresh);
+
+        } else if (t == CfgObjectType.CFGSkill) {
+            allObjects = getResults(q, CfgSkill.class, refresh);
+
+        } else if (t == CfgObjectType.CFGStatDay) {
+            allObjects = getResults(q, CfgStatDay.class, refresh);
+
+        } else if (t == CfgObjectType.CFGStatTable) {
+            allObjects = getResults(q, CfgStatTable.class, refresh);
+
+        } else if (t == CfgObjectType.CFGTimeZone) {
+            allObjects = getResults(q, CfgTimeZone.class, refresh);
+
+        } else if (t == CfgObjectType.CFGTreatment) {
+            allObjects = getResults(q, CfgTreatment.class, refresh);
+
+        } else if (t == CfgObjectType.CFGVoicePrompt) {
+            allObjects = getResults(q, CfgVoicePrompt.class, refresh);
+
         }
-        result.add("properties", props);
 
-        return result.toString();
-    }
-
-    private JsonElement kvpJson(KVList val) {
-        JsonObject ret = new JsonObject();
-        for (Iterator iterator = val.iterator(); iterator.hasNext();) {
-            Object nextElement = iterator.next();
-            if (nextElement instanceof KeyValuePair) {
-                String key = ((KeyValuePair) nextElement).getStringKey();
-                Object newVal = ((KeyValuePair) nextElement).getValue();
-                if ((newVal instanceof KeyValueCollection)) {
-                    ret.add(key, kvpJson((KVList) newVal));
-                } else if ((newVal instanceof String)) {
-                    ret.addProperty(key, (String) newVal);
-                } else if ((newVal instanceof Integer)) {
-                    ret.addProperty(key, (Integer) newVal);
-                } else {
-                    ret.addProperty(key, newVal.toString());
-                }
-            }
-
-        }
-
-        return ret;
-    }
-
-    private JsonElement kvpConfStructure(ConfStructure confStructure) {
-        JsonObject ret = new JsonObject();
-        CfgDescriptionStructure classInfo = confStructure.getClassInfo();
-
-        for (CfgDescriptionAttribute attr : classInfo.getAttributes()) {
-            Object propertyValue = confStructure.getPropertyValue(attr.getIndex());
-            if (attr instanceof CfgDescriptionAttributeReferenceLink) {
-                if (propertyValue instanceof Integer) {
-                    ret.addProperty(attr.getName(), (Integer) propertyValue);
-                } else {
-                    ret.addProperty(attr.getName(), (String) propertyValue);
-                }
-            } else if (attr instanceof CfgDescriptionAttributeReferenceClassList) {
-                ret.add(attr.getName(), jsonConfStructureCollection((ConfStructureCollection) propertyValue));
-
-//                CfgDescriptionAttributeReferenceClassList aa = (CfgDescriptionAttributeReferenceClassList) a;
-//                Object propertyValue = confStructure.getPropertyValue(aa.getItemName());
-            }
-        }
-        return ret;
-    }
-
-    private JsonElement jsonConfStructureCollection(ConfStructureCollection confStructureCollection) {
-        JsonArray ret = new JsonArray();
-        for (Iterator<ConfStructure> iterator = confStructureCollection.iterator(); iterator.hasNext();) {
-            ConfStructure attr = iterator.next();
-            Iterator<CfgDescriptionAttribute> iterator1;
-            JsonObject obj = new JsonObject();
-            for (iterator1 = attr.getClassInfo().getAttributes().iterator(); iterator1.hasNext();) {
-                CfgDescriptionAttribute descrAttr = iterator1.next();
-                Object propertyValue = attr.getPropertyValue(descrAttr.getIndex());
-                if (propertyValue instanceof Integer) {
-                    obj.addProperty(descrAttr.getName(), (Integer) propertyValue);
-                } else {
-                    if (propertyValue != null) {
-                        obj.addProperty(descrAttr.getName(), propertyValue.toString());
-                    }
+        if (max > 0) {
+            ArrayList<CfgObject> ret = new ArrayList();
+            int i = 1;
+            for (Iterator it = allObjects.iterator(); it.hasNext();) {
+                CfgObject obj = (CfgObject) it.next();
+                logger.debug(obj);
+                ret.add(obj);
+                if (max > 0 && i++ >= max) {
+                    break;
                 }
             }
-            ret.add(obj);
-        }
-        return ret;
-    }
-
-    private void deleteSkillLevels(CfgObjectType _objectType, String s, int DBID, JsonArray deleted) throws ProtocolException {
-        if (deleted != null && deleted.size() > 0) {
-            CfgMetadata metaData = service.getMetaData();
-
-            ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
-
-            ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-            ConfObjectBase deltaAgentInfo = (ConfStructure) objectDelta.getOrCreatePropertyValue("deltaAgentInfo");
-
-            deltaPerson.setPropertyValue("DBID", DBID);              // - required
-
-            for (JsonElement jsonElement : deleted) {
-                ConfIntegerCollection col = (ConfIntegerCollection) deltaAgentInfo.getOrCreatePropertyValue("deletedSkillDBIDs");
-                col.add(jsonElement.getAsInt());
-            }
-            executeUpdate(objectDelta, _objectType);
+            return ret;
+        } else {
+            return allObjects;
         }
     }
 
-    private boolean emptyJsonObj(JsonObject obj) {
-        return (obj == null || obj.isJsonNull() || obj.size() <= 0);
-    }
+    public boolean deleteObject(Integer objTypeInt, int DBID) throws ProtocolException, Exception {
+        RequestDeleteObject reqDelete = RequestDeleteObject.create(objTypeInt, DBID);
 
-    private void updateSkillLevels(CfgObjectType _objectType, String s, int DBID, JsonObject changed) throws ProtocolException {
-        if (!emptyJsonObj(changed)) {
-            CfgMetadata metaData = service.getMetaData();
+        Message resp = service.getProtocol().request(reqDelete);
 
-            ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
+        logger.error(resp);
+        if (resp instanceof EventObjectDeleted) {
+            parentForm.requestOutput("Deleted object DBID:\n" + ((EventObjectDeleted)resp).getDbid()+" type: "+CfgObjectType.valueOf(((EventObjectDeleted)resp).getObjectType()));
+            return true;
+        } else if (resp instanceof EventError) {
+            String err = "Error on object create: "
+                    + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
+                    + "\tDescription: " + ((EventError) resp).getDescription();
+            logger.error(err);
+            throw new Exception(err);
 
-            ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-            ConfObjectBase deltaAgentInfo = (ConfStructure) objectDelta.getOrCreatePropertyValue("deltaAgentInfo");
-
-            ConfStructureCollection changedSkillLevels;
-
-            deltaPerson.setPropertyValue("DBID", DBID);              // - required
-
-            for (Map.Entry<String, JsonElement> changedEntry : changed.getAsJsonObject().entrySet()) {
-                changedSkillLevels = (ConfStructureCollection) deltaAgentInfo.getOrCreatePropertyValue("changedSkillLevels");
-                ConfStructure createStructure = changedSkillLevels.createStructure();
-                createStructure.setPropertyValue("skillDBID", Integer.parseInt(changedEntry.getKey()));
-                createStructure.setPropertyValue("level", changedEntry.getValue().getAsInt());
-                changedSkillLevels.add(createStructure);
-            }
-            executeUpdate(objectDelta, _objectType);
         }
-    }
-
-    private void addedSkillLevels(CfgObjectType _objectType, String s, int DBID, JsonObject added) throws ProtocolException {
-        if (!emptyJsonObj(added)) {
-            CfgMetadata metaData = service.getMetaData();
-
-            ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
-
-            ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
-            ConfObject deltaPerson1 = (ConfObject) objectDelta.getOrCreatePropertyValue("deltaPerson");
-            ConfStructure deltaAgentInfo = (ConfStructure) deltaPerson1.getOrCreatePropertyValue("agentInfo");
-
-            ConfStructureCollection changedSkillLevels;
-
-            deltaPerson.setPropertyValue("DBID", DBID);              // - required
-
-            for (Map.Entry<String, JsonElement> changedEntry : added.getAsJsonObject().entrySet()) {
-                changedSkillLevels = (ConfStructureCollection) deltaAgentInfo.getOrCreatePropertyValue("skillLevels");
-                ConfStructure createStructure = changedSkillLevels.createStructure();
-                createStructure.setPropertyValue("skillDBID", Integer.parseInt(changedEntry.getKey()));
-                createStructure.setPropertyValue("level", changedEntry.getValue().getAsInt());
-                changedSkillLevels.add(createStructure);
-
-            }
-            executeUpdate(objectDelta, _objectType);
-        }
-    }
-
-    private void executeUpdate(ConfObjectDelta objectDelta, CfgObjectType _objectType) throws ProtocolException {
-        RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-        reqUpdate.setObjectDelta(objectDelta);
-
-        logger.info("++ req: " + reqUpdate);
-        Message ret = execRequest(reqUpdate, _objectType);
-        logger.info("++ ret: " + ret.toString());
+        return true;
     }
 }

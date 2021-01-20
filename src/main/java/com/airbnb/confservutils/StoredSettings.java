@@ -15,6 +15,7 @@ import javax.swing.DefaultComboBoxModel;
 class StoredSettings {
 
     ArrayList<ConfServer> configServers = new ArrayList<>();
+    ArrayList<String> lastFiles = new ArrayList<>();
 
     ArrayList<String> users = new ArrayList<>();
     String password;
@@ -61,6 +62,20 @@ class StoredSettings {
 
     public ArrayList<ConfServer> getConfigServers() {
         return configServers;
+    }
+
+    public void addLastFile(String fileName) {
+        int indexOf = lastFiles.indexOf(fileName);
+        if (indexOf > 0) {
+            lastFiles.remove(indexOf);
+        }
+        if (indexOf != 0) {
+            lastFiles.add(0, fileName);
+        }
+    }
+
+    public ArrayList<String> getLastFiles() {
+        return lastFiles;
     }
 
     public ArrayList<String> getUsers() {

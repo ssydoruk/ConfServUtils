@@ -5,18 +5,13 @@
  */
 package com.airbnb.confservutils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.util.HashMap;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.util.logging.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.*;
 
 /**
  *
@@ -24,23 +19,115 @@ import org.graalvm.polyglot.Value;
  */
 public class JSRunner {
 
-  
-    static HashMap<String, Object> updateObjProperties = new HashMap<>();
+    private OutReaderThread stdOutReader;
 
-    static boolean runScript(String script, ConfigServerManager csManager, String[] params ) {
+    private OutReaderThread getStdOutReader() {
+        return stdOutReader;
+    }
+
+    private OutReaderThread getStdErrReader() {
+        return stdErrReader;
+    }
+    private OutReaderThread stdErrReader;
+
+    static boolean runFile(String fileName, ConfigServerManager csManager, IOutputHook stdOutHook, IOutputHook stdErrHook, boolean forceFile) {
+        JSRunner inst = getInstance();
+//        inst.resetContext();
+        inst.getStdOutReader().setReaderHook(stdOutHook);
+        inst.getStdErrReader().setReaderHook(stdErrHook);
+
+        boolean ret = runFile(fileName, csManager, null, forceFile);
+
+//        inst.getStdOutReader().setReaderHook(null);
+//        inst.getStdErrReader().setReaderHook(null);
+        return ret;
+
+    }
+
+    static boolean runFile(String fileName, ConfigServerManager csManager, String[] params, boolean forceFile) {
+        logger.trace("runFile [" + fileName + "]");
+
+        try {
+            Source source = getSource(fileName, forceFile);
+            return runScript(new IEvalMethod() {
+                @Override
+                public void theMethod(Context cont) {
+                    cont.eval(source);
+                }
+
+            }, csManager, params);
+
+        } catch (IOException ex) {
+            Logger.getLogger(JSRunner.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+
+        return false;
+    }
+
+    private static final HashMap<String, Source> sourceFiles = new HashMap();
+
+    private static Source getSource(String fileName, boolean forceFile) throws IOException {
+        if (Main.isDebug()) {
+            return Source.newBuilder("js", new File(fileName)).cached(false).build();
+        } else {
+
+            Source source = sourceFiles.get(fileName);
+            if (source != null && forceFile) {
+                sourceFiles.remove(fileName);
+                source = null;
+            }
+            if (source == null) {
+                source = Source.newBuilder("js", new File(fileName)).build();
+                try {
+                    JSRunner.getInstance().getCondContext().parse(source);
+
+                } catch (PolyglotException e) {
+                    logger.error("e", e);
+                }
+                sourceFiles.put(fileName, source);
+            }
+            return source;
+        }
+    }
+
+    static boolean runScript(String script, ConfigServerManager csManager, String[] params) {
+        logger.trace("runScript anonymous script [" + script + "]");
+
+        return runScript(new IEvalMethod() {
+            @Override
+            public void theMethod(Context cont) {
+                cont.eval("js", script);
+            }
+        }, csManager, params);
+
+    }
+
+    private static boolean runScript(IEvalMethod method, ConfigServerManager csManager, String[] params) {
         Context cont = getInstance().getCondContext();
         Value bindings = cont.getBindings("js");
-        updateObjProperties.clear();
-        bindings.putMember("CS", csManager);
+        bindings.putMember("CS", CStoJS.getInstance(csManager));
         bindings.putMember("PARAMS", params);
-        bindings.putMember("UPDATEPROPS", updateObjProperties);
         bindings.putMember("TERMINATE", false);
 
-        cont.eval("js", script);
-        boolean ret = bindings.getMember("TERMINATE").asBoolean();
-        logger.trace("runScript [" + script + "], TERMINATE:[" + ret + "]");
-        return ret;
+        method.theMethod(cont);
+        return bindings.getMember("TERMINATE").asBoolean();
     }
+
+    private void resetContext() {
+        condContext.close(true);
+        stdErrReader.interrupt();
+        stdOutReader.interrupt();
+        try {
+            init();
+        } catch (IOException ex) {
+            Logger.getLogger(JSRunner.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+    }
+
+    interface IEvalMethod {
+
+        void theMethod(Context cont);
+    };
 
     private JSRunner() {
         try {
@@ -54,14 +141,15 @@ public class JSRunner {
         PipedInputStream pipedStdOutReader = new PipedInputStream();
         PipedInputStream pipedStdErrReader = new PipedInputStream();
 
-        OutReaderThread stdInReader = new OutReaderThread(pipedStdOutReader, Level.INFO);
-        OutReaderThread stdErrReader = new OutReaderThread(pipedStdErrReader, Level.ERROR);
+        stdOutReader = new OutReaderThread(pipedStdOutReader, Level.DEBUG);
+        stdErrReader = new OutReaderThread(pipedStdErrReader, Level.ERROR);
         PipedOutputStream stdOut = new PipedOutputStream(pipedStdOutReader);
         PipedOutputStream stdErr = new PipedOutputStream(pipedStdErrReader);
 
         Handler logHandler = new Handler() {
             @Override
             public void publish(LogRecord record) {
+
                 System.out.println("-- publish: " + record.getMessage());
             }
 
@@ -76,16 +164,24 @@ public class JSRunner {
             }
         };
 
-        logHandler.setLevel(java.util.logging.Level.INFO);
-        condContext = Context.newBuilder("js")
+        logHandler.setLevel(java.util.logging.Level.FINEST);
+
+        Context.Builder builder = Context.newBuilder("js")
                 .allowAllAccess(true)
                 .err(stdErr)
-                .out(stdOut)
-                .logHandler(stdOut)
-                .build();
-        stdInReader.start();
+                .out(stdOut);
+        if (System.getProperties().containsKey("debug")) {
+            // commented out because too much useless (so far) logs
+//            builder.option("log.level", "FINEST");
+//            builder.option("log.js.level", "FINEST");
+//            builder.option("log.js.com.oracle.truffle.js.parser.JavaScriptLanguage.level", "FINEST");
+//            builder.option("log.file", "poly.txt");
+            builder.option("inspect", "9229");
+        }
+        condContext = builder.build();
+
+        stdOutReader.start();
         stdErrReader.start();
-        condContext.eval("js", "true"); // to test javascript engine init. 
 
     }
 
@@ -149,6 +245,16 @@ public class JSRunner {
 
         private final PipedInputStream pipedIn;
         private final Level logLevel;
+        private IOutputHook readerHook = null;
+
+        synchronized public IOutputHook getReaderHook() {
+            return readerHook;
+        }
+
+        synchronized public void setReaderHook(IOutputHook readerHook) {
+            System.out.println("setReaderHook " + (readerHook != null));
+            this.readerHook = readerHook;
+        }
 
         private OutReaderThread(PipedInputStream pipedStdIn, Level level) {
             pipedIn = pipedStdIn;
@@ -162,7 +268,12 @@ public class JSRunner {
                 String s;
                 BufferedReader br = new BufferedReader(new InputStreamReader(pipedIn));
                 while ((s = br.readLine()) != null) {
-                    logger.log(logLevel, s);
+                    logger.log(logLevel, "<js> " + s);
+                    IOutputHook h = getReaderHook();
+                    if (h != null) {
+                        h.processOut(s);
+                        logger.log(logLevel, "<js> " + "h != null");
+                    }
                 }
             } catch (IOException ex) {
                 logger.error("Exception while reading js output", ex);

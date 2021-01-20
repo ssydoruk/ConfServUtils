@@ -23,18 +23,13 @@
 //===============================================================================
 package com.airbnb.confservutils;
 
-import com.genesyslab.platform.applicationblocks.com.ConfServiceFactory;
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.IConfService;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.connection.configuration.KeyValueConfiguration;
-import com.genesyslab.platform.commons.connection.configuration.PropertyConfiguration;
-import com.genesyslab.platform.commons.protocol.ChannelState;
-import com.genesyslab.platform.commons.protocol.Endpoint;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.ConfServerProtocol;
-import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import org.apache.logging.log4j.LogManager;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.commons.collections.*;
+import com.genesyslab.platform.commons.connection.configuration.*;
+import com.genesyslab.platform.commons.protocol.*;
+import com.genesyslab.platform.configuration.protocol.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import org.apache.logging.log4j.*;
 
 /**
  * Sample methods for initialization of configuration service instance.
@@ -126,6 +121,41 @@ public class ConfigConnection {
 
         IConfService service = ConfServiceFactory.createConfService(protocol);
         service.getProtocol().setTimeout(120000);
+        
+//        service.getProtocol().setMessageHandler(new MessageHandler() {
+//            @Override
+//            public void onMessage(Message msg) {
+//                System.out.println("!!"+msg.messageName());
+//                switch (msg.messageId()) {
+//                    case EventObjectsRead.ID:
+//
+//                        EventObjectsRead objectsRead
+//                                = (EventObjectsRead) msg;
+//                        System.out.println(msg.messageName());
+//                        System.out.println("1There are total "
+//                                + objectsRead.getObjectTotalCount() + ", in this batch:" + objectsRead.getObjectCount()
+//                                + " type: "
+//                                + CfgObjectType.valueOf(objectsRead.getObjectType())
+//                        );
+//                        break;
+//
+//                    case EventError.ID:
+//                        System.out.println(msg.messageName());
+//
+//                        break;
+//
+//                    case EventObjectsSent.ID:
+//                        System.out.println(msg.messageName());
+//                        break;
+//
+//                    default:
+//                        System.out.println(msg.messageName());
+//                        break;
+//
+//                }
+//            }
+//        });
+        
 
         protocol.open();
 

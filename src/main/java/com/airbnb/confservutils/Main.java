@@ -113,6 +113,9 @@ public class Main {
             try {
                 AppForm frm = new AppForm();
                 frm.setProfile(sGUIProfile);
+                if (Main.isDebug()) {
+                    JSRunner.getInstance().getCondContext();
+                }
                 frm.runGui();
             } catch (IOException ex) {
                 showHelpExit("Not able to run application: " + ex.getMessage(), options);
@@ -120,6 +123,12 @@ public class Main {
         } else {
             showHelpExit("No config file specified", options);
         }
+    }
+
+    static final boolean isDebug = System.getProperties().containsKey("debug");
+
+    static public boolean isDebug() {
+        return isDebug;
     }
 
     static void exitHelp(String string) {

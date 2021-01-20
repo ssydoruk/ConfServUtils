@@ -5,6 +5,38 @@
 		}
 	],
 	"settings": {
-		"java.dependency.packagePresentation": "flat"
+		"java.dependency.packagePresentation": "flat",
+		"java.completion.enabled": false,
+		"java.debug.settings.enableRunDebugCodeLens": false,
+		"java.configuration.updateBuildConfiguration": "interactive"
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"type": "graalvm",
+				"request": "attach",
+				"name": "Attach",
+				"port": 9229
+			},
+		{
+			"type": "graalvm",
+			"request": "attach",
+			"name": "Attach to Remote",
+			"address": "localhost",
+			"port": 9229,
+			"localRoot": "",
+			"remoteRoot": ""
+		},
+		{
+            "type": "java",
+            "name": "Debug (Launch)-Main<ConfServUtils>",
+            "request": "launch",
+            "mainClass": "com.airbnb.confservutils.Main",
+            "args": "--gui-profile /Users/stepan_sydoruk/GCTI/var/confUtil.txt",
+            "vmArgs": "-Dlog4j.configurationFile=/Users/stepan_sydoruk/GCTI/etc/csUtilsDebug.xml",
+            "projectName": "ConfServUtils"
+        }
+		]
 	}
 }

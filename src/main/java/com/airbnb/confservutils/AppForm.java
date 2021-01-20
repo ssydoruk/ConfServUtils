@@ -14,7 +14,6 @@ import com.genesyslab.platform.applicationblocks.com.CfgObject;
 import com.genesyslab.platform.applicationblocks.com.CfgQuery;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ICfgObject;
-import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.*;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
@@ -37,8 +36,6 @@ import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jidesoft.dialog.ButtonPanel;
-import com.jidesoft.dialog.StandardDialog;
 import confserverbatch.ObjectExistAction;
 import confserverbatch.SwitchObjectLocation;
 import java.awt.Component;
@@ -70,23 +67,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -107,6 +97,7 @@ public final class AppForm extends javax.swing.JFrame {
     StoredSettings ds = null;
     private static final Logger logger = LogManager.getLogger();
     private final AppForm theForm;
+    private DialogRunScript dialogRunScript = null;
 
     public void runGui() throws FileNotFoundException, IOException {
         loadConfig();
@@ -339,6 +330,12 @@ public final class AppForm extends javax.swing.JFrame {
         miFindLDAPs = new javax.swing.JMenuItem();
         miFindLDAPsForUsers = new javax.swing.JMenuItem();
         miCheckLoginID = new javax.swing.JMenuItem();
+        jmScript = new javax.swing.JMenu();
+        miOpenScript = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        jspStart = new javax.swing.JPopupMenu.Separator();
+        miClearRecent = new javax.swing.JMenuItem();
+        jspEnd = new javax.swing.JPopupMenu.Separator();
         jmUpdate = new javax.swing.JMenu();
         miAnnexSearchReplace = new javax.swing.JMenuItem();
         miAppOptionsReplace = new javax.swing.JMenuItem();
@@ -605,6 +602,40 @@ public final class AppForm extends javax.swing.JFrame {
 
         jmbMainMenuBar.add(jmQuery);
 
+        jmScript.setText("Script");
+        jmScript.addMenuListener(new javax.swing.event.MenuListener() {
+            public void menuSelected(javax.swing.event.MenuEvent evt) {
+                jmScriptMenuSelected(evt);
+            }
+            public void menuDeselected(javax.swing.event.MenuEvent evt) {
+            }
+            public void menuCanceled(javax.swing.event.MenuEvent evt) {
+            }
+        });
+
+        miOpenScript.setText("Open...");
+        miOpenScript.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miOpenScriptActionPerformed(evt);
+            }
+        });
+        jmScript.add(miOpenScript);
+
+        jMenu1.setText("Previous...");
+        jmScript.add(jMenu1);
+        jmScript.add(jspStart);
+
+        miClearRecent.setText("Clear recent");
+        miClearRecent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miClearRecentActionPerformed(evt);
+            }
+        });
+        jmScript.add(miClearRecent);
+        jmScript.add(jspEnd);
+
+        jmbMainMenuBar.add(jmScript);
+
         jmUpdate.setText("Update");
 
         miAnnexSearchReplace.setText("Object find and process");
@@ -757,6 +788,34 @@ public final class AppForm extends javax.swing.JFrame {
     private void miFindPersonRunScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFindPersonRunScriptActionPerformed
         findAgentRunScript();
     }//GEN-LAST:event_miFindPersonRunScriptActionPerformed
+
+    private void miOpenScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miOpenScriptActionPerformed
+        miOpenScriptSelected();
+    }//GEN-LAST:event_miOpenScriptActionPerformed
+
+    private void jmScriptMenuSelected(javax.swing.event.MenuEvent evt) {//GEN-FIRST:event_jmScriptMenuSelected
+
+        jmScript.removeAll();
+        jmScript.add(miOpenScript);
+        ArrayList<String> lastFiles = ds.getLastFiles();
+        if (!lastFiles.isEmpty()) {
+            jmScript.add(jspStart);
+            for (String lastFile : lastFiles) {
+                jmScript.add(new JMenuItem(new AbstractAction(lastFile) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        scriptSelected(new File(lastFile));
+                    }
+                }));
+            }
+            jmScript.add(jspEnd);
+            jmScript.add(miClearRecent);
+        }
+    }//GEN-LAST:event_jmScriptMenuSelected
+
+    private void miClearRecentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miClearRecentActionPerformed
+        ds.getLastFiles().clear();
+    }//GEN-LAST:event_miClearRecentActionPerformed
 
     private void miCheckDNPlaceExistsActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_miCheckDNPlaceExistsActionPerformed
         verifyDNPlaceExists();
@@ -1109,26 +1168,10 @@ public final class AppForm extends javax.swing.JFrame {
         // Tools | Templates.
     }
 
-    private String loadFile(File fileName) {
-        StringBuilder txt = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            String l;
-            while ((l = reader.readLine()) != null) {
-                txt.append(l).append('\n');
-
-            }
-        } catch (final FileNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (final IOException ex) {
-            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return txt.toString();
-    }
-
     private void debugJS() {
         if (connectToConfigServer()) {
-            JSRunner.runScript(loadFile(new File("/Users/stepan_sydoruk/src/ConfServUtils/jsTest.js")),
-                    configServerManager, new String[]{"stepan.sydoruk@ext.airbnb.com"});
+            JSRunner.runFile("/Users/stepan_sydoruk/src/ConfServUtils/jsTest.js",
+                    configServerManager, new String[]{"stepan.sydoruk@ext.airbnb.com"}, false);
         }
     }
 
@@ -2051,6 +2094,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
@@ -2066,10 +2110,13 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JMenu jmExit;
     private javax.swing.JMenu jmQuery;
+    private javax.swing.JMenu jmScript;
     private javax.swing.JMenu jmUpdate;
     private javax.swing.JMenuBar jmbMainMenuBar;
     private javax.swing.JPanel jpConfServ;
     private javax.swing.JPanel jpOutput;
+    private javax.swing.JPopupMenu.Separator jspEnd;
+    private javax.swing.JPopupMenu.Separator jspStart;
     private javax.swing.JMenuItem miAgentsWithoutExternalIDs;
     private javax.swing.JMenuItem miAllORSs;
     private javax.swing.JMenuItem miAnnexSearchReplace;
@@ -2081,6 +2128,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miBusinessAttribute;
     private javax.swing.JMenuItem miCheckDNPlaceExists;
     private javax.swing.JMenuItem miCheckLoginID;
+    private javax.swing.JMenuItem miClearRecent;
     private javax.swing.JMenuItem miCreateAdminAccounts;
     private javax.swing.JMenuItem miCreateLoginIDs;
     private javax.swing.JMenuItem miExtensionWithoutPlace;
@@ -2093,6 +2141,7 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
     private javax.swing.JMenuItem miOneORS;
+    private javax.swing.JMenuItem miOpenScript;
     private javax.swing.JMenuItem miRestartService;
     private javax.swing.JPasswordField pfPassword;
     private javax.swing.JScrollPane spOutputScroll;
@@ -2103,30 +2152,21 @@ public final class AppForm extends javax.swing.JFrame {
         this.profile = sGUIProfile;
     }
 
-    public boolean connectToConfigServer() {
-
-        if (configServerManager.isConnected()) {
-            return true;
-        } else {
-            IConfService ret = null;
-            final StoredSettings.ConfServer confServ = (StoredSettings.ConfServer) cbConfigServer.getSelectedItem();
-            final String user = (String) cbUser.getSelectedItem();
-            if (confServ != null && user != null) {
-                try {
-                    ret = configServerManager.connect(confServ, user, new String(pfPassword.getPassword()));
-
-                } catch (Exception e) {
-                    showException("Cannot connect to ConfigServer", e);
-                }
-
-            }
-            connectionStatusChanged();
-
-            return configServerManager.isConnected();
-        }
+    public String pfPasswordgetPassword() {
+        return new String(pfPassword.getPassword());
     }
 
-    private String getPassword() {
+    public boolean connectToConfigServer()  {
+        try {
+            return configServerManager.connectToConfigServer();
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+    }
+
+    public String getPassword() {
         return textEncryptor.decrypt(ds.getPassword());
     }
 
@@ -2165,11 +2205,19 @@ public final class AppForm extends javax.swing.JFrame {
         requestOutput(buf.toString(), false);
     }
 
-    private void connectionStatusChanged() {
+    public void connectionStatusChanged() {
         final boolean isConnected = configServerManager.isConnected();
         btDisconnect.setEnabled(isConnected);
         btConnect.setEnabled(!isConnected);
         changeCSParams(!isConnected);
+    }
+
+    public Object cbConfigServergetSelectedItem() {
+        return cbConfigServer.getSelectedItem();
+    }
+
+    public Object cbUsergetSelectedItem() {
+        return cbUser.getSelectedItem();
     }
 
     private void runAppByIPActionPerformed(final ActionEvent evt) {
@@ -2909,15 +2957,10 @@ public final class AppForm extends javax.swing.JFrame {
 
     private void verifyLDAP() {
 
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            final ArrayList<String> ldapIDs = loadSingleColumn(chooser.getSelectedFile());
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getAbsolutePath());
+            final ArrayList<String> ldapIDs = loadSingleColumn(csvFile);
 
             if (shouldCheckLDAPCSV(ldapIDs)) {
                 runInThread(new IThreadedFun() {
@@ -2982,15 +3025,10 @@ public final class AppForm extends javax.swing.JFrame {
 
     private void verifyUserNameLDAP() {
 
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            final ArrayList<String> userNames = loadSingleColumn(chooser.getSelectedFile());
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getName());
+            final ArrayList<String> userNames = loadSingleColumn(csvFile);
 
             if (shouldCheckLDAPCSV(userNames)) {
                 runInThread(new IThreadedFun() {
@@ -3057,15 +3095,10 @@ public final class AppForm extends javax.swing.JFrame {
 
     private void verifyLoginIDExists() {
 
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            ArrayList<String[]> loginIDs = readCSV(chooser.getSelectedFile(), 1);
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getName());
+            ArrayList<String[]> loginIDs = readCSV(csvFile, 1);
 
             if (CSVImportLoginIDs.getInstance(this, configServerManager)
                     .shouldImportCSV(loginIDs, false)) {
@@ -3094,15 +3127,10 @@ public final class AppForm extends javax.swing.JFrame {
 
     private void verifyDNPlaceExists() {
 
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getName());
-            ArrayList<String[]> placeDN = readCSV(chooser.getSelectedFile(), 2);
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getAbsolutePath());
+            ArrayList<String[]> placeDN = readCSV(csvFile, 2);
 
             if (CSVImportDialog.getInstance(this, configServerManager).shouldImportCSV(placeDN, false)) {
                 runInThread(new IThreadedFun() {
@@ -3129,15 +3157,10 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     private void importPlaceDNs() {
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
-            ArrayList<String[]> placeDN = readCSV(chooser.getSelectedFile(), 2);
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getAbsolutePath());
+            ArrayList<String[]> placeDN = readCSV(csvFile, 2);
 
             runInThread(new IThreadedFun() {
                 @Override
@@ -3193,15 +3216,10 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     private void importLoginIDs() {
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
-            ArrayList<String[]> loginIDs = readCSV(chooser.getSelectedFile(), 1);
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getAbsolutePath());
+            ArrayList<String[]> loginIDs = readCSV(csvFile, 1);
 
             runInThread(new IThreadedFun() {
                 @Override
@@ -3255,15 +3273,10 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     private void findAgentRunScript() {
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
-            ArrayList<String[]> userNames = readCSV(chooser.getSelectedFile(), 1);
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getAbsolutePath());
+            ArrayList<String[]> userNames = readCSV(csvFile, 1);
             CSVUpdatePersonByScript instance = CSVUpdatePersonByScript.getInstance(theForm, configServerManager);
             if (instance.shouldProceed(userNames)
                     && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
@@ -3318,15 +3331,10 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     private void createAdminFromAgent() {
-        final JFileChooser chooser = new JFileChooser();
-        final FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV files", "csv");
-        chooser.setFileFilter(filter);
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setMultiSelectionEnabled(false);
-        final int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            requestOutput("You chose to open this file: " + chooser.getSelectedFile().getAbsolutePath());
-            ArrayList<String[]> userNames = readCSV(chooser.getSelectedFile(), 1);
+        File csvFile = Utils.FileUtils.selectSingleFile(this, null, null, "CSV files", "csv");
+        if (csvFile != null) {
+            requestOutput("You chose to open this file: " + csvFile.getAbsolutePath());
+            ArrayList<String[]> userNames = readCSV(csvFile, 1);
 
             runInThread(new IThreadedFun() {
                 @Override
@@ -3380,6 +3388,23 @@ public final class AppForm extends javax.swing.JFrame {
         cbUser.setEnabled(isEnabled);
         pfPassword.setEnabled(isEnabled);
 
+    }
+
+    private void scriptSelected(File jsFile) {
+        ds.addLastFile(jsFile.getAbsolutePath());
+        saveConfig();
+        if (dialogRunScript == null) {
+            dialogRunScript = new DialogRunScript(this);
+        }
+        dialogRunScript.doShow(jsFile, configServerManager);
+
+    }
+
+    private void miOpenScriptSelected() {
+        File jsFile = Utils.FileUtils.selectSingleFile(this, null, null, "Javascript files", "js");
+        if (jsFile != null) {
+            scriptSelected(jsFile);
+        }
     }
 
     private class LDAP_Dialog extends Utils.InfoPanel {
@@ -3545,132 +3570,6 @@ public final class AppForm extends javax.swing.JFrame {
             }
         });
 
-    }
-
-    final static class RequestDialog extends StandardDialog {
-
-        private final JPanel contentPanel;
-
-        private RequestDialog(final Window parent, final JPanel contentPanel, final JMenuItem mi) {
-            this(parent, contentPanel);
-            setTitle(mi.getText() + " parameters");
-
-        }
-
-        private RequestDialog(final Window parent, final JPanel contentPanel) {
-            super(parent);
-            this.contentPanel = contentPanel;
-            setTitle("Enter request parameters");
-        }
-
-        @Override
-        public JPanel getContentPanel() {
-            return contentPanel;
-        }
-
-        @Override
-        public JComponent createBannerPanel() {
-            return null;
-        }
-
-        @Override
-        public JComponent createContentPanel() {
-            final JPanel content = new JPanel();
-            content.setLayout(new BoxLayout(content, BoxLayout.PAGE_AXIS));
-            content.add(contentPanel);
-
-            return content;
-        }
-
-        @Override
-        public ButtonPanel createButtonPanel() {
-            final ButtonPanel buttonPanel = new ButtonPanel();
-            final JButton cancelButton = new JButton();
-            buttonPanel.addButton(cancelButton);
-
-            cancelButton.setAction(new AbstractAction() {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    setDialogResult(RESULT_CANCELLED);
-                    setVisible(false);
-                    dispose();
-                }
-            });
-            cancelButton.setText("Close");
-
-            final JButton jbOK = new JButton("OK");
-            buttonPanel.addButton(jbOK);
-
-            // listPane.add(jbFilter);
-            jbOK.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    setDialogResult(RESULT_AFFIRMED);
-                    dispose();
-                }
-            });
-
-            final String act = "OK";
-
-            setDefaultCancelAction(cancelButton.getAction());
-            setDefaultAction(jbOK.getAction());
-            getRootPane().setDefaultButton(jbOK);
-
-            buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            buttonPanel.setSizeConstraint(ButtonPanel.NO_LESS_THAN); // since the checkbox is quite wide, we don't want
-            // all of them have the same size.
-            return buttonPanel;
-        }
-
-        public boolean doShow(final String title, final IConfigPanel onShow) {
-            if (onShow != null) {
-                onShow.showProc();
-            }
-            return doShow(title);
-        }
-
-        public boolean doShow(final String Title) {
-            setTitle(Title);
-            return doShow();
-        }
-
-        public boolean doShow() {
-
-            // setModal(true);
-            pack();
-            if (contentPanel instanceof ISearchCommon) {
-                ((ISearchCommon) contentPanel).setChoices(searchValues);
-            }
-
-            // ScreenInfo.CenterWindow(this);
-            setLocationRelativeTo(getParent());
-            // setVisible(true);
-            setAlwaysOnTop(true);
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    toFront();
-
-                }
-            });
-            // setVisible(false);
-            setVisible(true);
-
-            if (getDialogResult() == StandardDialog.RESULT_AFFIRMED) {
-                if (contentPanel instanceof ISearchCommon) {
-                    final Collection<String> choices = ((ISearchCommon) contentPanel).getChoices();
-                    if (choices != null && !choices.isEmpty()) {
-                        for (final String choice : choices) {
-                            searchValues.add(choice);
-                        }
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-
-        }
     }
 
 }
