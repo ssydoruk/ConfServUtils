@@ -23,7 +23,7 @@ import java.util.logging.*;
 import org.graalvm.polyglot.*;
 
 /**
- *
+ * Interface to Java code from javascript code
  * @author stepan_sydoruk
  */
 public class CStoJS {
@@ -582,6 +582,11 @@ public class CStoJS {
         logger.info("++ ret: " + ret.toString());
     }
 
+    /**
+     * Establishes connection to the configuration server. 
+     * @return true if connected; false otherwise
+     * @throws Exception 
+     */
     @HostAccess.Export
     public boolean connectToConfigServer() throws Exception {
         return csManager.connectToConfigServer();

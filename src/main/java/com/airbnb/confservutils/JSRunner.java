@@ -338,7 +338,7 @@ public class JSRunner {
         }
 
         synchronized public void setReaderHook(IOutputHook readerHook) {
-            System.out.println("setReaderHook " + (readerHook != null));
+//            System.out.println("setReaderHook " + (readerHook != null));
             this.readerHook = readerHook;
         }
 

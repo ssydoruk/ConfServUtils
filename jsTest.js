@@ -8,7 +8,7 @@ try {
   var allSwitches = CS.findObjects("CfgPerson");
   for (let index = 0; index < allSwitches.size(); index++) {
     var obj = allSwitches.get(index);
-    if (CS.getAttribute(obj, "userName").includes("stepan")) {
+    if (CS.getAttribute(obj, "userName").includes("gaurav")) {
       console.log(JSON.stringify(JSON.parse(CS.objToJson(obj))));
     }
   }
