@@ -7,8 +7,10 @@ package com.airbnb.confservutils;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.logging.*;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.graalvm.polyglot.*;
@@ -20,26 +22,103 @@ import org.graalvm.polyglot.*;
 public class JSRunner {
 
     private OutReaderThread stdOutReader;
+    private String port;
+    private IOutputHook errHook = null;
+    private IOutputHook outHook = null;
+
+    public IOutputHook getErrHook() {
+        return errHook;
+    }
+
+    public void setErrHook(IOutputHook errHook) {
+        this.errHook = errHook;
+        if (stdErrReader != null && errHook != null) {
+            stdErrReader.setReaderHook(errHook);
+        }
+    }
+
+    public IOutputHook getOutHook() {
+        return outHook;
+    }
+
+    public void setOutHook(IOutputHook outHook) {
+        this.outHook = outHook;
+        if (stdOutReader != null && outHook != null) {
+            stdOutReader.setReaderHook(outHook);
+        }
+    }
 
     private OutReaderThread getStdOutReader() {
         return stdOutReader;
     }
 
+    public ArrayList<String> setDebugPort(String _port) {
+        if ((port == null && _port == null) || (port != null && _port != null && port.equals(_port))) {
+            return null;
+        }
+        IOutputHook _errHook = errHook;
+        IOutputHook _outHook = outHook;
+        close();
+        CountDownLatch latch = new CountDownLatch(1);
+        ArrayList<String> buf = new ArrayList();
+
+        if (_port != null) {
+            setErrHook(new IOutputHook() {
+                int linesRead = 0;
+
+                @Override
+                public void processOut(String str) {
+                    buf.add(str);
+                    // logger.debug("l:" + linesRead);
+                    if (++linesRead > 2) { // reading 3 lines
+                        latch.countDown(); // the procedure will be called from separate thread of output/error reader
+                                           // so no locking
+                    }
+                }
+            });
+        }
+        this.port = _port;
+        try {
+            init();
+            if (_port != null) {
+                latch.await(2, TimeUnit.SECONDS);
+            }
+            logger.info("done with stdout");
+
+        } catch (IOException | InterruptedException ex) {
+            logger.error("ex ", ex);
+        } finally {
+            setErrHook(_errHook);
+            setOutHook(_outHook);
+        }
+        logger.info("buf: " + StringUtils.join(buf, '\n'));
+        return (port != null) ? buf : null;
+    }
+
     private OutReaderThread getStdErrReader() {
         return stdErrReader;
     }
+
     private OutReaderThread stdErrReader;
 
-    static boolean runFile(String fileName, ConfigServerManager csManager, IOutputHook stdOutHook, IOutputHook stdErrHook, boolean forceFile) {
+    static boolean runFile(String fileName, ConfigServerManager csManager, IOutputHook stdOutHook,
+            IOutputHook stdErrHook, boolean forceFile) {
         JSRunner inst = getInstance();
-//        inst.resetContext();
+        IOutputHook errHook = inst.getStdErrReader().getReaderHook();
+        IOutputHook outHook = inst.getStdOutReader().getReaderHook();
         inst.getStdOutReader().setReaderHook(stdOutHook);
         inst.getStdErrReader().setReaderHook(stdErrHook);
 
-        boolean ret = runFile(fileName, csManager, null, forceFile);
+        boolean ret = false;
+        try {
+            ret = runFile(fileName, csManager, null, forceFile);
+        } finally {
+            inst.getStdOutReader().setReaderHook(outHook);
+            inst.getStdErrReader().setReaderHook(errHook);
+        }
 
-//        inst.getStdOutReader().setReaderHook(null);
-//        inst.getStdErrReader().setReaderHook(null);
+        // inst.getStdOutReader().setReaderHook(null);
+        // inst.getStdErrReader().setReaderHook(null);
         return ret;
 
     }
@@ -90,6 +169,10 @@ public class JSRunner {
         }
     }
 
+    public String getPort() {
+        return port;
+    }
+
     static boolean runScript(String script, ConfigServerManager csManager, String[] params) {
         logger.trace("runScript anonymous script [" + script + "]");
 
@@ -124,6 +207,20 @@ public class JSRunner {
         }
     }
 
+    private void close() {
+        if (condContext != null) {
+            condContext.close(true);
+        }
+        if (stdErrReader != null) {
+            stdErrReader.interrupt();
+            stdErrReader = null;
+        }
+        if (stdOutReader != null) {
+            stdOutReader.interrupt();
+            stdOutReader = null;
+        }
+    }
+
     interface IEvalMethod {
 
         void theMethod(Context cont);
@@ -142,7 +239,10 @@ public class JSRunner {
         PipedInputStream pipedStdErrReader = new PipedInputStream();
 
         stdOutReader = new OutReaderThread(pipedStdOutReader, Level.DEBUG);
+        stdOutReader.setReaderHook(outHook);
+
         stdErrReader = new OutReaderThread(pipedStdErrReader, Level.ERROR);
+        stdErrReader.setReaderHook(errHook);
         PipedOutputStream stdOut = new PipedOutputStream(pipedStdOutReader);
         PipedOutputStream stdErr = new PipedOutputStream(pipedStdErrReader);
 
@@ -166,17 +266,9 @@ public class JSRunner {
 
         logHandler.setLevel(java.util.logging.Level.FINEST);
 
-        Context.Builder builder = Context.newBuilder("js")
-                .allowAllAccess(true)
-                .err(stdErr)
-                .out(stdOut);
-        if (System.getProperties().containsKey("debug")) {
-            // commented out because too much useless (so far) logs
-//            builder.option("log.level", "FINEST");
-//            builder.option("log.js.level", "FINEST");
-//            builder.option("log.js.com.oracle.truffle.js.parser.JavaScriptLanguage.level", "FINEST");
-//            builder.option("log.file", "poly.txt");
-            builder.option("inspect", "9229");
+        Context.Builder builder = Context.newBuilder("js").allowAllAccess(true).err(stdErr).out(stdOut);
+        if (port != null) {
+            builder.option("inspect", port);
         }
         condContext = builder.build();
 
@@ -208,38 +300,32 @@ public class JSRunner {
      * @param rec
      * @param scriptFields
      * @return true if record should be ignored (based on balue of boolean
-     * IGNORE_RECORD calculated by the script
+     *         IGNORE_RECORD calculated by the script
      */
     /*
-    public static boolean evalFields(String script, ILogRecord rec, HashMap<String, Object> scriptFields) {
-        Context cont = getInstance().getCondContext();
-        Value bindings = cont.getBindings("js");
-        bindings.putMember("RECORD", rec);
-        bindings.putMember("FIELDS", scriptFields);
-        bindings.putMember("IGNORE_RECORD", false);
-        cont.eval("js", script);
-        boolean ret = bindings.getMember("IGNORE_RECORD").asBoolean();
-        logger.trace("evalFields [" + scriptFields + "], ignored:[" + ret + "] - result of [" + script + "]");
-        return ret;
-    }
-
-    public static String execString(String script, ILogRecord rec) {
-        Context cont = getInstance().getCondContext();
-        cont.getBindings("js").putMember("RECORD", rec);
-        Value eval = cont.eval("js", script);
-        logger.trace("eval [" + eval + "] - result of [" + script + "]");
-        return eval.asString();
-
-    }
-
-    public static boolean execBoolean(String script, ILogRecord rec) {
-        Context cont = getInstance().getCondContext();
-        cont.getBindings("js").putMember("RECORD", rec);
-        Value eval = cont.eval("js", script);
-        logger.trace("eval [" + eval + "] - result of [" + script + "]");
-        return eval.asBoolean();
-
-    }
+     * public static boolean evalFields(String script, ILogRecord rec,
+     * HashMap<String, Object> scriptFields) { Context cont =
+     * getInstance().getCondContext(); Value bindings = cont.getBindings("js");
+     * bindings.putMember("RECORD", rec); bindings.putMember("FIELDS",
+     * scriptFields); bindings.putMember("IGNORE_RECORD", false); cont.eval("js",
+     * script); boolean ret = bindings.getMember("IGNORE_RECORD").asBoolean();
+     * logger.trace("evalFields [" + scriptFields + "], ignored:[" + ret +
+     * "] - result of [" + script + "]"); return ret; }
+     * 
+     * public static String execString(String script, ILogRecord rec) { Context cont
+     * = getInstance().getCondContext(); cont.getBindings("js").putMember("RECORD",
+     * rec); Value eval = cont.eval("js", script); logger.trace("eval [" + eval +
+     * "] - result of [" + script + "]"); return eval.asString();
+     * 
+     * }
+     * 
+     * public static boolean execBoolean(String script, ILogRecord rec) { Context
+     * cont = getInstance().getCondContext();
+     * cont.getBindings("js").putMember("RECORD", rec); Value eval = cont.eval("js",
+     * script); logger.trace("eval [" + eval + "] - result of [" + script + "]");
+     * return eval.asBoolean();
+     * 
+     * }
      */
     class OutReaderThread extends Thread {
 

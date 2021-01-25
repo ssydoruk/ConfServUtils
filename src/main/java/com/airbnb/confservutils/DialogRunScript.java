@@ -10,7 +10,9 @@ import static com.jidesoft.dialog.StandardDialog.RESULT_CANCELLED;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 import javax.swing.*;
+import org.apache.commons.lang3.*;
 
 /**
  *
@@ -23,6 +25,7 @@ final class DialogRunScript extends StandardDialog {
     private String fileName;
     private final JButton btSave;
     private final JButton btOK;
+    private final JToggleButton btDebug;
     private final JButton btCancel;
     final ButtonPanel buttonPanel;
     private boolean forceFile = false;
@@ -33,6 +36,7 @@ final class DialogRunScript extends StandardDialog {
         setTitle("Enter request parameters");
         lbFile = new JLabel();
         pRunScript = new PRunScript();
+        JSRunner.getInstance().setDebugPort(Main.isDebug() ? "9229" : (String) null);
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
@@ -57,7 +61,15 @@ final class DialogRunScript extends StandardDialog {
             }
         }));
 
-        buttonPanel.addButton(btClear=new JButton(new AbstractAction("Clear log") {
+        buttonPanel.addButton(btDebug = new JToggleButton(new AbstractAction("Debug") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setDebug(((AbstractButton) e.getSource()).getModel().isSelected());
+            }
+
+        }));
+
+        buttonPanel.addButton(btClear = new JButton(new AbstractAction("Clear log") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 pRunScript.clearLog();
@@ -107,8 +119,38 @@ final class DialogRunScript extends StandardDialog {
     private void runSelected() {
         scriptExecuted(true);
         pRunScript.runScript(forceFile);
-        forceFile=false;
+        forceFile = false;
         scriptExecuted(false);
+    }
+
+    private void setDebug(boolean debugOn) {
+        String msg = null;
+        if (debugOn) {
+            String portEntered = JOptionPane.showInputDialog(this, "Enter debug port", 9229);
+            if (portEntered == null) {
+                btDebug.setSelected(false);
+
+                return;
+            } else {
+                ArrayList<String> initMessages = JSRunner.getInstance().setDebugPort(portEntered);
+                if (initMessages != null) {
+                    msg = StringUtils.join(initMessages, "\n");
+                }
+
+            }
+        } else {
+            JSRunner.getInstance().setDebugPort(null);
+        }
+        showDebugMessage((msg != null) ? msg : "Debugging is turned off");
+    }
+
+    private DebugInfoDialog debugDialog = null;
+
+    private void showDebugMessage(String msg) {
+        if (debugDialog == null) {
+            debugDialog = new DebugInfoDialog(this);
+        }
+        debugDialog.showAnn("Javascript debug", msg);
     }
 
     private void changeDocStatus(DOC_STATE docState) {

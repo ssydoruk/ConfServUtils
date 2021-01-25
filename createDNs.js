@@ -239,7 +239,7 @@ function renameObjects() {
             CS.updateObject("CfgPlace", dbid, JSON.stringify(createObj))
         );
       }
-    }else {
+    } else {
       console.log("not found place " + arr[0]);
     }
 
