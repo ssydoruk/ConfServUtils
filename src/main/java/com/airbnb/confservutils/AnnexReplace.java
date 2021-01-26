@@ -5,39 +5,24 @@
  */
 package com.airbnb.confservutils;
 
-import Utils.GridEditor;
+import Utils.*;
 import static Utils.Swing.checkBoxSelection;
-import com.genesyslab.platform.commons.GEnum;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.jidesoft.swing.CheckBoxList;
-import com.jidesoft.swing.CheckBoxListSelectionModel;
-import java.awt.Window;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import com.genesyslab.platform.commons.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import com.jidesoft.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
 import java.util.List;
-import javax.swing.AbstractButton;
-import javax.swing.DefaultListModel;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.ListModel;
+import javax.swing.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.*;
 
-/**
- *
- * @author stepan_sydoruk
- */
+
 public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings, ISearchCommon, IUpdateSettings {
 
     private final AppForm theForm;
 
-    /**
-     * Creates new form AppByDBID
-     */
     public AnnexReplace(AppForm _theForm) {
         initComponents();
         theForm = _theForm;

@@ -23,40 +23,14 @@
 //===============================================================================
 package confserverbatch;
 
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.IConfService;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.commons.protocol.*;
+import java.util.*;
+import org.apache.logging.log4j.*;
 
-/**
- * Small test application to execute some of described samples in test mode to
- * ensure that provided code is working.
- *
- * @author <a href="mailto:makagon@genesyslab.com">Petr Makagon</a>
- * @author <a href="mailto:vladb@genesyslab.com">Vladislav Baranovsky</a>
- * @author <a href="mailto:afilatov@genesyslab.com">Alexander Filatov</a>
- * @author <a href="mailto:abrazhny@genesyslab.com">Anton Brazhnyk</a>
- * @author <a href="mailto:svolokh@genesyslab.com">Sergii Volokh</a>
- */
+
 public class CreatePlaces {
 
-    /**
-     * Small function to be executed to check that main Configuration Service
-     * operations are working. Some kind of test. Can be used for automatic
-     * tests with dependance on Genesys environment.
-     *
-     * @param args programm commandline arguments
-     * @throws ConfigException in case of any configuration service exception
-     * @throws ProtocolException in case of any configuration protocol exception
-     * @throws InterruptedException if process was interrupted
-     */
     public static final Logger logger = LogManager.getLogger();
 
     public static void main(final String[] args)

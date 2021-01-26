@@ -6,18 +6,13 @@
 package com.airbnb.confservutils;
 
 import static Utils.StringUtils.matching;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.collections.KeyValuePair;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.regex.Pattern;
-import org.apache.logging.log4j.LogManager;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.commons.collections.*;
+import java.util.*;
+import java.util.regex.*;
+import org.apache.logging.log4j.*;
 
-/**
- *
- * @author stepan_sydoruk
- */
+
 public class FindWorker {
 
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();

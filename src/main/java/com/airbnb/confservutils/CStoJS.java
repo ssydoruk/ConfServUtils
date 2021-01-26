@@ -24,6 +24,7 @@ import org.graalvm.polyglot.*;
 
 /**
  * Interface to Java code from javascript code
+ *
  * @author stepan_sydoruk
  */
 public class CStoJS {
@@ -38,10 +39,22 @@ public class CStoJS {
         return csToJS;
     }
 
-    public Collection findObjects(String objectType) throws Exception {
+    private Collection findObjects(String objectType) throws Exception {
         return findObjects(objectType, 0, false);
     }
 
+    /**
+     * <b>Javascript exported</b> Gets list of objects of specified type
+     *
+     * <p>
+     * sss
+     *
+     * @param objectType String type of the object ("CfgPerson", etc)
+     * @param refresh should data be refreshed from ConfigServer; false by
+     * default
+     * @return Collection (ArrayList) of CfgObject inherited
+     * @throws Exception
+     */
     @HostAccess.Export
     public Collection findObjects(String objectType, boolean refresh) throws Exception {
         return findObjects(objectType, 0, refresh);
@@ -50,8 +63,9 @@ public class CStoJS {
     private ConfigServerManager csManager;
 
     /**
+     * <b>Javascript exported</b>
      *
-     * @param objectType
+     * @param objectType objectType String type of the object ("CfgPerson", etc)
      * @param max
      * @param refresh
      * @return Collection of CfgObject
@@ -67,31 +81,75 @@ public class CStoJS {
         throw new Exception("exception 1");
     }
 
+    /**
+     * <b>Javascript exported</b> CfgObject to JSON String
+     *
+     * @param obj CfgObject parameter
+     * @return JSON converted obj and then packed into string
+     */
     @HostAccess.Export
     public String objToJson(CfgObject obj) {
         return cfgObjectToJson(obj).toString();
     }
 
+    /**
+     * <b>Javascript exported</b>
+     *
+     * @param obj CfgObject
+     * @param attr String name of attribute
+     * @return String value of the attribute
+     */
     @HostAccess.Export
     public String getAttribute(CfgObject obj, String attr) {
         return obj.getRawObjectData().getPropertyValue(attr).toString();
     }
 
+    /**
+     * <b>Javascript exported</b> gets all attributes for the object in
+     * ConfObject form
+     *
+     * @param obj CfgObject
+     * @return ConfObjectBase representation of object attributes
+     */
     @HostAccess.Export
     public ConfObjectBase getAttributes(CfgObject obj) {
         return obj.getRawObjectData();
     }
 
+    /**
+     * <b>Javascript exported</b> converts int constant to String representation
+     *
+     * @param enumName name of the Genesys enumeration
+     * @param num int value to convert
+     * @return
+     * @throws ClassNotFoundException
+     */
     @HostAccess.Export
     public String enumToString(String enumName, int num) throws ClassNotFoundException {
         return GEnum.getValue((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), num).toString();
     }
 
+    /**
+     * <b>Javascript exported</b> gets path of the object in ConfigServer
+     * hierarchy
+     *
+     * @param obj CfgObject
+     * @return String path
+     */
     @HostAccess.Export
     public String getObjectPath(CfgObject obj) {
         return obj.getObjectPath();
     }
 
+    /**
+     * <b>Javascript exported</b> String value of constant to numeric
+     *
+     * @see #enumToString(java.lang.String, int)
+     * @param enumName name of the Genesys enumeration
+     * @param val String
+     * @return
+     * @throws ClassNotFoundException
+     */
     @HostAccess.Export
     public int enumToNum(String enumName, String val) throws ClassNotFoundException {
         return GEnum.getValue((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), val).ordinal();
@@ -193,11 +251,26 @@ public class CStoJS {
 
     Gson gson = new Gson();
 
+    /**
+     * <b>Javascript exported</b> Deletes object from ConfigServer
+     *
+     * @param objectType objectType String type of the object ("CfgPerson", etc)
+     * @param DBID String value of object DBID
+     * @return true if objected deleted; false otherwise
+     */
     @HostAccess.Export
     public boolean deleteObject(String objectType, String DBID) {
         return deleteObject(objectType, Integer.parseInt(DBID));
     }
 
+    /**
+     * <b>Javascript exported</b> Deletes object from ConfigServer
+     *
+     * @param objectType objectType String type of the object ("CfgPerson", etc)
+     * @param DBID int value of object DBID
+     * @return true if objected deleted; false otherwise
+     * @see #deleteObject(java.lang.String, java.lang.String)
+     */
     @HostAccess.Export
     public boolean deleteObject(String objectType, int DBID) {
         CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
@@ -211,6 +284,13 @@ public class CStoJS {
         return false;
     }
 
+    /**
+     * <b>Javascript exported</b> creates object in ConfigServer
+     *
+     * @param objectType objectType String type of the object ("CfgPerson", etc)
+     * @param createObjProperties String JSON string with object properties
+     * @return DBID if objected deleted; -1 otherwise
+     */
     @HostAccess.Export
     public Integer createObject(String objectType, String createObjProperties) {
         CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
@@ -276,18 +356,28 @@ public class CStoJS {
     }
 
     /**
+     * <b>Javascript exported</b> updates object properties ConfigServer
+     * <p>
+     * example of updateObjProperties for person null     {@code
+     * var updateObj = {
+     * userName: "stepan.sydoruk@ext.airbnb.com",
+     * agentInfo: {
+     * skillLevels: {
+     * changed: {
+     * 103: 2,
+     * 238: 3,
+     * },
+     * deleted: [238],
+     * added: { 103: 2, 238: 3 },
+     * },
+     * agentLogins: { changed: {}, deleted: {} }, }, }; }
      *
-     * @param objectType - CfgPerson, etc
-     * @param DBID
+     * @param objectType objectType String type of the object ("CfgPerson", etc)
+     * @param _DBID object DBID
      * @param updateObjProperties - JSON with parameters to update
      * @return
      * @throws ProtocolException
      *
-     *
-     * example of updateObjProperties for person var updateObj = { // userName:
-     * "stepan.sydoruk@ext.airbnb.com", agentInfo: { skillLevels: { changed: {
-     * 103: 2, 238: 3 }, deleted: [238], added: { 103: 2, 238: 3 }, },
-     * agentLogins: { changed: {}, deleted: {}, }, }, };
      *
      */
     @HostAccess.Export
@@ -583,9 +673,11 @@ public class CStoJS {
     }
 
     /**
-     * Establishes connection to the configuration server. 
+     * <b>Javascript exported</b> Establishes connection to the configuration
+     * server.
+     *
      * @return true if connected; false otherwise
-     * @throws Exception 
+     * @throws Exception
      */
     @HostAccess.Export
     public boolean connectToConfigServer() throws Exception {
@@ -596,11 +688,26 @@ public class CStoJS {
         this.csManager = _csManager;
     }
 
+    /**
+     * <b>Javascript exported</b> reads CSV as list of string arrays 
+     *
+     * @param fileName String name of the file to read
+     * @return true if connected; false otherwise
+     * @throws java.io.IOException
+     */
     @HostAccess.Export
     public List<String[]> readCSV(String fileName) throws IOException {
         return readCSV(fileName, 0);
     }
 
+    /**
+     * <b>Javascript exported</b> reads CSV as list of string arrays 
+     *
+     * @param fileName String name of the file to read
+     * @param skipLines
+     * @return true if connected; false otherwise
+     * @throws java.io.IOException
+     */
     @HostAccess.Export
     public List<String[]> readCSV(String fileName, int skipLines) throws IOException {
         try {

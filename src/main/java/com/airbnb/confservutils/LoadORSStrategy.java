@@ -6,42 +6,23 @@
 package com.airbnb.confservutils;
 
 import Utils.Pair;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgScript;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgDNQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
-import com.genesyslab.platform.commons.GEnum;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
-import com.jidesoft.swing.CheckBoxListSelectionModel;
-import java.awt.HeadlessException;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.applicationblocks.com.objects.*;
+import com.genesyslab.platform.applicationblocks.com.queries.*;
+import com.genesyslab.platform.commons.*;
+import com.genesyslab.platform.commons.collections.*;
+import com.genesyslab.platform.commons.protocol.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import com.jidesoft.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
 import java.util.logging.Level;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
+import javax.swing.*;
+import javax.swing.border.*;
 import org.apache.logging.log4j.Logger;
 
-/**
- *
- * @author stepan_sydoruk
- */
+
 public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettings, IConfigPanel {
 
     private final AppForm theForm;
@@ -49,9 +30,6 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
     private final String sRPsTitle;
     private final String sORSTitle;
 
-    /**
-     * Creates new form AppByDBID
-     */
     public LoadORSStrategy(AppForm _theForm, ConfigServerManager _configServerManager) {
         initComponents();
         theForm = _theForm;

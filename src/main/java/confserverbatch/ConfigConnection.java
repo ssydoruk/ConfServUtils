@@ -23,43 +23,17 @@
 //===============================================================================
 package confserverbatch;
 
-import com.genesyslab.platform.applicationblocks.com.ConfServiceFactory;
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.IConfService;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.connection.configuration.KeyValueConfiguration;
-import com.genesyslab.platform.commons.protocol.ChannelState;
-import com.genesyslab.platform.commons.protocol.Endpoint;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.ConfServerProtocol;
-import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import org.apache.logging.log4j.LogManager;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.commons.collections.*;
+import com.genesyslab.platform.commons.connection.configuration.*;
+import com.genesyslab.platform.commons.protocol.*;
+import com.genesyslab.platform.configuration.protocol.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import org.apache.logging.log4j.*;
 
-/**
- * Sample methods for initialization of configuration service instance.
- *
- * @author <a href="mailto:makagon@genesyslab.com">Petr Makagon</a>
- * @author <a href="mailto:vladb@genesyslab.com">Vladislav Baranovsky</a>
- * @author <a href="mailto:afilatov@genesyslab.com">Alexander Filatov</a>
- * @author <a href="mailto:abrazhny@genesyslab.com">Anton Brazhnyk</a>
- * @author <a href="mailto:svolokh@genesyslab.com">Sergii Volokh</a>
- */
+
 public class ConfigConnection {
 
-    /**
-     * Sample Configuration service initialization function example.
-     *
-     * @param cfgsrvEndpointName name for the server connection endpoint
-     * @param cfgsrvHost configuration server host name
-     * @param cfgsrvPort configuration server port
-     * @param username configuration server login username
-     * @param password configuration server login password
-     * @return initialized configuration service
-     * @throws ConfigException in case of exception while service or
-     * configuration protocol initialization
-     * @throws InterruptedException if process was interrupted
-     * @throws ProtocolException exception on protocol connection openning
-     */
     public static IConfService initializeConfigService(
             final String cfgsrvEndpointName,
             final String cfgsrvHost,
@@ -78,22 +52,6 @@ public class ConfigConnection {
                 username, password);
     }
 
-    /**
-     * Sample Configuration service initialization function example.
-     *
-     * @param cfgsrvEndpointName name for the server connection endpoint
-     * @param cfgsrvHost configuration server host name
-     * @param cfgsrvPort configuration server port
-     * @param clientType configuration server client application name
-     * @param clientName configuration server client application type
-     * @param username configuration server login user name
-     * @param password configuration server login password
-     * @return initialized configuration service
-     * @throws ConfigException in case of exception while service or
-     * configuration protocol initialization
-     * @throws InterruptedException if process was interrupted
-     * @throws ProtocolException exception on protocol connection opening
-     */
     public static IConfService initializeConfigService(
             final String cfgsrvEndpointName,
             final String cfgsrvHost,
@@ -124,15 +82,6 @@ public class ConfigConnection {
         return service;
     }
 
-    /**
-     * Un-initializes ConfService instance created with
-     * {@link #initializeConfigService(String, String, int, CfgAppType, String, String, String)}.
-     *
-     * @param service configuration service reference
-     * @throws InterruptedException
-     * @throws IllegalStateException
-     * @throws ProtocolException
-     */
     public static void uninitializeConfigService(
             final IConfService service) throws ProtocolException, IllegalStateException, InterruptedException {
         if (service.getProtocol().getState() != ChannelState.Closed) {

@@ -41,11 +41,11 @@ function objectDBID_props(objType, refresh = false) {
 /**
  *
  * @param {String} objType - type of the object
- * @param {*} compareProc - function that takes CfgObject as paremeter. Should return:
+ * @param {function} compareProc - function that takes CfgObject as paremeter. Should return:
  *  0 - ignore object
  *  1 - match found; stop search
  *  2 - match found; continue search
- * @param {*} refresh
+ * @param {boolean} refresh - should data be refetch from ConfigServer. False by default (use cached)
  */
 function findObject(objType, compareProc, refresh = false) {
   var objs = objectDBID_props(objType, refresh);

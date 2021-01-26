@@ -5,88 +5,37 @@
  */
 package com.airbnb.confservutils;
 
-import Utils.InfoPanel;
 import Utils.Pair;
 import static Utils.Swing.checkBoxSelection;
-import Utils.TableColumnAdjuster;
-import Utils.ValuesEditor;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.applicationblocks.com.CfgQuery;
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.ICfgObject;
+import Utils.*;
+import com.airbnb.confservutils.ConfigConnection;
+import com.airbnb.confservutils.ConfigServerManager;
+import com.genesyslab.platform.applicationblocks.com.*;
 import com.genesyslab.platform.applicationblocks.com.objects.*;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgApplicationQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgEnumeratorValueQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgHostQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgScriptQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgTransactionQuery;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.collections.KeyValuePair;
-import com.genesyslab.platform.commons.collections.ValueType;
+import com.genesyslab.platform.applicationblocks.com.queries.*;
+import com.genesyslab.platform.commons.collections.*;
 import com.genesyslab.platform.commons.protocol.Message;
 import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
-import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
-import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectState;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgScriptType;
-import com.genesyslab.platform.configuration.protocol.types.CfgTransactionType;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import confserverbatch.ObjectExistAction;
-import confserverbatch.SwitchObjectLocation;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.HeadlessException;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import com.genesyslab.platform.configuration.protocol.confserver.events.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import com.google.gson.*;
+import confserverbatch.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.net.*;
+import java.text.*;
+import java.util.*;
 import java.util.logging.Level;
-import javax.swing.AbstractAction;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.SwingWorker;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
-import javax.swing.table.DefaultTableModel;
-import org.apache.commons.lang3.ArrayUtils;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.table.*;
+import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jasypt.util.text.StrongTextEncryptor;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.PTRRecord;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.ReverseMap;
+import org.jasypt.util.text.*;
+import org.xbill.DNS.*;
 
 /**
  *
@@ -1179,143 +1128,139 @@ public final class AppForm extends javax.swing.JFrame {
         yesToAll = false;
         upd = null;
 
-        debugJS();
-        if (false) {
-            if (annexReplace == null) {
-                panelAnnexReplace = new AnnexReplace(this);
-                annexReplace = new RequestDialog(this, panelAnnexReplace, (JMenuItem) evt.getSource());
+        if (annexReplace == null) {
+            panelAnnexReplace = new AnnexReplace(this);
+            annexReplace = new RequestDialog(this, panelAnnexReplace, (JMenuItem) evt.getSource());
+        }
+        if (annexReplace.doShow()) {
+            
+            if (!panelAnnexReplace.checkParameters()) {
+                return;
             }
-
-            if (annexReplace.doShow()) {
-
-                if (!panelAnnexReplace.checkParameters()) {
-                    return;
-                }
-                if (connectToConfigServer()) {
-
-                    final AnnexReplace pn = (AnnexReplace) annexReplace.getContentPanel();
-
-                    ICfgObjectFoundProc foundProc;
-                    if (pn.isActionUpdateKVP()) {
-                        foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                                final int total) -> {
-                            requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
-                                    + kv.toString()
-                                    + "\n" + Utils.StringUtils.toJson(obj));
-                            // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
-                            // "\n kv: " + kv.toString());
-
-                            try {
-                                if (yesToAll) {
-                                    if (upd != null) {
-                                        upd.updateObj(pn, obj, kv);
-                                    }
-
-                                } else {
-                                    upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
-                                    final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
-                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(),
-                                            "Object " + current + " of matched " + total
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
-                                        case YES_TO_ALL:
-                                            if (JOptionPane.showConfirmDialog(theForm,
-                                                    "Are you sure you want to modify this and all following found objects?",
-                                                    "Please confirm", JOptionPane.YES_NO_OPTION,
-                                                    JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                                                yesToAll = true;
-                                                upd.updateObj(pn, obj, kv);
-                                                break;
-                                            }
-                                            break;
-
-                                        case JOptionPane.YES_OPTION:
+            if (connectToConfigServer()) {
+                
+                final AnnexReplace pn = (AnnexReplace) annexReplace.getContentPanel();
+                
+                ICfgObjectFoundProc foundProc;
+                if (pn.isActionUpdateKVP()) {
+                    foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
+                            final int total) -> {
+                        requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
+                                + kv.toString()
+                                + "\n" + Utils.StringUtils.toJson(obj));
+                        // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
+                        // "\n kv: " + kv.toString());
+                        
+                        try {
+                            if (yesToAll) {
+                                if (upd != null) {
+                                    upd.updateObj(pn, obj, kv);
+                                }
+                                
+                            } else {
+                                upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                                final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
+                                switch (showYesNoPanel(pn.getSearchSummaryHTML(),
+                                        "Object " + current + " of matched " + total
+                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                    case YES_TO_ALL:
+                                        if (JOptionPane.showConfirmDialog(theForm,
+                                                "Are you sure you want to modify this and all following found objects?",
+                                                "Please confirm", JOptionPane.YES_NO_OPTION,
+                                                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                                            
+                                            yesToAll = true;
                                             upd.updateObj(pn, obj, kv);
                                             break;
-
-                                        case JOptionPane.NO_OPTION:
-                                            break;
-
-                                        case JOptionPane.CANCEL_OPTION:
-                                            return false;
-                                    }
-                                }
-                            } catch (final ProtocolException | HeadlessException protocolException) {
-                                showError("Exception while updating: " + protocolException.getMessage());
-                            }
-
-                            return true;
-                        };
-                    } else { // delete object
-                        foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                                final int total) -> {
-                            requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
-                                    + kv.toString());
-                            // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
-                            // "\n kv: " + kv.toString());
-
-                            try {
-                                if (yesToAll) {
-                                    if (upd != null) {
+                                        }
+                                        break;
+                                        
+                                    case JOptionPane.YES_OPTION:
                                         upd.updateObj(pn, obj, kv);
-                                    }
-
-                                } else {
-                                    upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
-                                    final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
-                                    switch (showYesNoPanel(pn.getSearchSummaryHTML(),
-                                            "Object " + current + " of matched " + total + "\n-->\n" + obj.toString()
-                                            + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
-                                            + estimateUpdateObj)) {
-                                        case YES_TO_ALL:
-                                            if (JOptionPane.showConfirmDialog(theForm,
-                                                    "Are you sure you want to modify this and all following found objects?",
-                                                    "Please confirm", JOptionPane.YES_NO_OPTION,
-                                                    JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                                                yesToAll = true;
-                                                upd.updateObj(pn, obj, kv);
-                                                break;
-                                            }
-                                            break;
-
-                                        case JOptionPane.YES_OPTION:
-                                            upd.updateObj(pn, obj, kv);
-                                            break;
-
-                                        case JOptionPane.NO_OPTION:
-                                            break;
-
-                                        case JOptionPane.CANCEL_OPTION:
-                                            return false;
-                                    }
+                                        break;
+                                        
+                                    case JOptionPane.NO_OPTION:
+                                        break;
+                                        
+                                    case JOptionPane.CANCEL_OPTION:
+                                        return false;
                                 }
-                            } catch (final ProtocolException | HeadlessException protocolException) {
-                                showError("Exception while updating: " + protocolException.getMessage());
                             }
-                            return true;
-                        };
-                    }
-
-                    runInThread(() -> {
-                        for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
-                            try {
-                                if (!configServerManager.doTheSearch(value, pn, false, true, foundProc)) {
-                                    break;
-                                }
-                            } catch (final ConfigException | InterruptedException ex) {
-                                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
-                            }
+                        } catch (final ProtocolException | HeadlessException protocolException) {
+                            showError("Exception while updating: " + protocolException.getMessage());
                         }
-                    });
-
-                    if (upd != null && upd.isObjectsUpdated()) {
-                        configServerManager.clearCache();
-                    }
+                        
+                        return true;
+                    };
+                } else { // delete object
+                    foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
+                            final int total) -> {
+                        requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
+                                + kv.toString());
+                        // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
+                        // "\n kv: " + kv.toString());
+                        
+                        try {
+                            if (yesToAll) {
+                                if (upd != null) {
+                                    upd.updateObj(pn, obj, kv);
+                                }
+                                
+                            } else {
+                                upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
+                                final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
+                                switch (showYesNoPanel(pn.getSearchSummaryHTML(),
+                                        "Object " + current + " of matched " + total + "\n-->\n" + obj.toString()
+                                                + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
+                                                + estimateUpdateObj)) {
+                                    case YES_TO_ALL:
+                                        if (JOptionPane.showConfirmDialog(theForm,
+                                                "Are you sure you want to modify this and all following found objects?",
+                                                "Please confirm", JOptionPane.YES_NO_OPTION,
+                                                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+                                            
+                                            yesToAll = true;
+                                            upd.updateObj(pn, obj, kv);
+                                            break;
+                                        }
+                                        break;
+                                        
+                                    case JOptionPane.YES_OPTION:
+                                        upd.updateObj(pn, obj, kv);
+                                        break;
+                                        
+                                    case JOptionPane.NO_OPTION:
+                                        break;
+                                        
+                                    case JOptionPane.CANCEL_OPTION:
+                                        return false;
+                                }
+                            }
+                        } catch (final ProtocolException | HeadlessException protocolException) {
+                            showError("Exception while updating: " + protocolException.getMessage());
+                        }
+                        return true;
+                    };
                 }
-
+                
+                runInThread(() -> {
+                    for (final CfgObjectType value : pn.getSelectedObjectTypes()) {
+                        try {
+                            if (!configServerManager.doTheSearch(value, pn, false, true, foundProc)) {
+                                break;
+                            }
+                        } catch (final ConfigException | InterruptedException ex) {
+                            java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                });
+                
+                if (upd != null && upd.isObjectsUpdated()) {
+                    configServerManager.clearCache();
+                }
             }
+            
         }
     }// GEN-LAST:event_miAnnexSearchReplaceActionPerformed
 
@@ -3185,8 +3130,8 @@ public final class AppForm extends javax.swing.JFrame {
 
                             eod.init(ObjectExistAction.UNKNOWN, theForm);
                             for (String[] entry : placeDN) {
-                                String thePlace = entry[0];
-                                String theDN = entry[1];
+                                String thePlace = entry[0].trim();
+                                String theDN = entry[1].trim();
                                 final HashMap<SwitchObjectLocation, String> DNs = new HashMap<>();
                                 for (final SwitchObjectLocation switche : switches) {
                                     DNs.put(switche, (String) null);

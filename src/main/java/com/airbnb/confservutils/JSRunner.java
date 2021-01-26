@@ -188,6 +188,8 @@ public class JSRunner {
     private static boolean runScript(IEvalMethod method, ConfigServerManager csManager, String[] params) {
         Context cont = getInstance().getCondContext();
         Value bindings = cont.getBindings("js");
+        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+//        eod.init(ObjectExistAction.FAIL, theForm);
         bindings.putMember("CS", CStoJS.getInstance(csManager));
         bindings.putMember("PARAMS", params);
         bindings.putMember("TERMINATE", false);

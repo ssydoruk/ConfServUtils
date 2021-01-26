@@ -6,33 +6,16 @@
 package com.airbnb.confservutils;
 
 import Utils.Pair;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.applicationblocks.com.IConfService;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLoginInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgApplication;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgDN;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.collections.KeyValuePair;
-import com.genesyslab.platform.commons.collections.ValueType;
-import com.genesyslab.platform.commons.protocol.Message;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectDeleted;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestDeleteObject;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttribute;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgTypeMask;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
-import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.applicationblocks.com.objects.*;
+import com.genesyslab.platform.commons.collections.*;
+import com.genesyslab.platform.commons.protocol.*;
+import com.genesyslab.platform.configuration.protocol.confserver.events.*;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.*;
+import com.genesyslab.platform.configuration.protocol.metadata.*;
+import com.genesyslab.platform.configuration.protocol.obj.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import java.util.*;
 import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -214,14 +197,14 @@ public class UpdateCFGObjectProcessor {
 //                    CfgDescriptionObject attributeInfo = obj1.getClassInfo();
 //                app.getp 
 //                obj1.setPropertyValue("commandLine", "aaa");
-RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-logger.info("++" + d.toString());
-reqUpdate.setObjectDelta(d);
-logger.info("++ req: " + reqUpdate);
-Message ret = cfgManager.execRequest(reqUpdate, objType);
-logger.info("++ ret: " + ret.toString());
-objectsUpdated = true;
-return ret;
+            RequestUpdateObject reqUpdate = RequestUpdateObject.create();
+            logger.info("++" + d.toString());
+            reqUpdate.setObjectDelta(d);
+            logger.info("++ req: " + reqUpdate);
+            Message ret = cfgManager.execRequest(reqUpdate, objType);
+            logger.info("++ ret: " + ret.toString());
+            objectsUpdated = true;
+            return ret;
 
         }
         return null;
@@ -482,14 +465,6 @@ return ret;
         return ret.toString();
     }
 
-    /**
-     *
-     * @param us
-     * @param obj
-     * @param kv
-     * @param configServerManager
-     * @return null if there is nothing to update or string with all updates
-     */
     public String estimateUpdateObj(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {
         switch (us.getObjectUpdateAction()) {
             case KVP_CHANGE:
@@ -503,15 +478,6 @@ return ret;
 
     }
 
-    /**
-     * searches for current section and key and if found, returns current
-     * values. Comparison is done case insensitive
-     *
-     * @param obj
-     * @param section
-     * @param stringKey
-     * @return
-     */
     private Pair<String, String> updateExisted(CfgObject obj, String section, String stringKey) {
         Pair<String, String> ret = new Pair<>(null, null);
 
