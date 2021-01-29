@@ -73,10 +73,9 @@ function findObject(objType, compareProc, refresh = false) {
   return null;
 }
 
-
 /**
- * Find object by name attribute. 
- * @param {string} objType 
+ * Find object by name attribute.
+ * @param {string} objType
  * @param {string} objName - name to search for
  * @param {boolean} refresh - if true, means disable cache
  */
@@ -92,7 +91,7 @@ function findObjectByName(objType, objName, refresh = false) {
 
 /**
  * gets the name of the 'name' attribute depending of objectType
- * @param {string} objType 
+ * @param {string} objType
  */
 function getNameName(objType) {
   switch (objType) {
@@ -116,11 +115,11 @@ function getAgentSwitches() {
   for (const dbid in objs) {
     if (CS.getAttribute(objs[dbid], "name").includes("sipa1")) {
       agentSwitches[dbid] = objs[dbid];
-    //   console.log(
-    //     CS.getAttribute(objs[dbid], "name") +
-    //       " DBID: " +
-    //       CS.getAttribute(objs[dbid], "DBID")
-    //   );
+      //   console.log(
+      //     CS.getAttribute(objs[dbid], "name") +
+      //       " DBID: " +
+      //       CS.getAttribute(objs[dbid], "DBID")
+      //   );
     }
   }
   return agentSwitches;
@@ -176,6 +175,30 @@ function testFunctions() {
 
   var agLoginAttr = JSON.parse(CS.getObjectAttributes("CfgAgentLogin"));
   console.log("folder attributes: " + JSON.stringify(agLoginAttr));
+}
+
+/**
+ * Helper function; will fire exception if variable is empty
+ * @param {*} varName 
+ */
+function required(varName) {
+  throw new Error(`${varName} is required. `);
+}
+
+/**
+ * gets first id of GEnum constant
+ * @param {String} gEnumName GEnum name
+ * @param {String} subString Substring to search for
+ */
+function findEnum(gEnumName, subString=required('subString')) {
+  const subLower = subString.toLowerCase();
+  for( const element of CS.getGEnum(gEnumName)) {
+    if (element.toString().toLowerCase().includes(subLower)) {
+      return element.asInteger();
+    }
+    
+  };
+  return null;
 }
 
 function testLoginIDs() {

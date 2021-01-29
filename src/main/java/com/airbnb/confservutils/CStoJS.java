@@ -128,6 +128,34 @@ public class CStoJS {
     public String enumToString(String enumName, int num) throws ClassNotFoundException {
         return GEnum.getValue((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), num).toString();
     }
+    
+        /**
+     * <b>Javascript exported</b> converts int constant to String representation
+     *
+     * @param enumName name of the Genesys enumeration
+     * @param num int value to convert
+     * @return
+     * @throws ClassNotFoundException
+     */
+    @HostAccess.Export
+    public String enumToString(String enumName, String num) throws ClassNotFoundException {
+        return GEnum.getValue((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), Integer.parseInt(num)).toString();
+    }
+    
+    
+            /**
+     * <b>Javascript exported</b> converts int constant to String representation
+     *
+     * @param enumName name of the Genesys enumeration
+     * @param num int value to convert
+     * @return
+     * @throws ClassNotFoundException
+     */
+    @HostAccess.Export
+    public Object[] getGEnum(String enumName) throws ClassNotFoundException {
+        return  GEnum.values((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName)).toArray();
+    }
+
 
     /**
      * <b>Javascript exported</b> gets path of the object in ConfigServer

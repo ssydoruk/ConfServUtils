@@ -112,7 +112,12 @@ public class JSRunner {
         boolean ret = false;
         try {
             ret = runFile(fileName, csManager, null, forceFile);
-        } finally {
+        }catch (Exception e){
+            stdErrHook.processOut("Exception executing:\n"+e.getMessage()+"\n--------------\n");
+            logger.error("", e);
+        }
+        
+         finally {
             inst.getStdOutReader().setReaderHook(outHook);
             inst.getStdErrReader().setReaderHook(errHook);
         }
@@ -131,7 +136,12 @@ public class JSRunner {
             return runScript(new IEvalMethod() {
                 @Override
                 public void theMethod(Context cont) {
+//                    try {
                     cont.eval(source);
+//                    }
+//                    catch (Exception e){
+//                        logger.error("Error executing ", e);
+//                    }
                 }
 
             }, csManager, params);
@@ -225,7 +235,7 @@ public class JSRunner {
 
     interface IEvalMethod {
 
-        void theMethod(Context cont);
+        void theMethod(Context cont) throws PolyglotException;
     };
 
     private JSRunner() {

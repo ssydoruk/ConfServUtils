@@ -1,5 +1,6 @@
 // const req = require('aa');
 // import 'aa';
+load("/Users/stepan_sydoruk/src/ConfServUtils/common.js");
 
 console.log("-start-");
 try {
