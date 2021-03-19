@@ -16,6 +16,30 @@ function getFolderTypes(type) {
   return ret;
 }
 
+function updatePersonLoginIDs(personDBID, arrLoginsToAdd, arrLoginsToRemove) {
+  // var createObj={};
+  var createObj = {
+    agentInfo: {
+      agentLogins: {
+        changed: {},
+        deleted: {},
+        added: {},
+      },
+    },
+  };
+
+  createObj.agentInfo.agentLogins.added=arrLoginsToAdd;
+  createObj.agentInfo.agentLogins.deleted=arrLoginsToRemove;
+
+
+  var obj1 = CS.updateObject(
+    "CfgPerson",
+    personDBID,
+    JSON.stringify(createObj)
+  );
+  console.log("update result: " + obj1);
+}
+
 /**
  * retrieves all objects from ConfigServer
  *
@@ -74,6 +98,15 @@ function findObject(objType, compareProc, refresh = false) {
 }
 
 /**
+ * Returns true if object is null or empty; false otherwise
+ *
+ * @param {obj} object object to check for
+ */
+function objectNotEmpty(object) {
+  return object == null || Object.keys(object).length === 0 ? false : true;
+}
+
+/**
  * Find object by name attribute.
  * @param {string} objType
  * @param {string} objName - name to search for
@@ -87,6 +120,24 @@ function findObjectByName(objType, objName, refresh = false) {
     } else return 0;
   };
   return findObject(objType, fun, refresh);
+}
+
+/**
+ * Find object by name attribute.
+ * @param {string} objType
+ * @param {string} objName - name to search for
+ * @param {boolean} refresh - if true, means disable cache
+ */
+function findObjectByNameIncludes(objType, objName, refresh = false) {
+  return findObject(
+    objType,
+    function (obj) {
+      if (CS.getAttribute(obj, getNameName(objType)).includes(objName)) {
+        return 2;
+      } else return 0;
+    },
+    refresh
+  );
 }
 
 /**
@@ -179,7 +230,7 @@ function testFunctions() {
 
 /**
  * Helper function; will fire exception if variable is empty
- * @param {*} varName 
+ * @param {*} varName
  */
 function required(varName) {
   throw new Error(`${varName} is required. `);
@@ -190,21 +241,51 @@ function required(varName) {
  * @param {String} gEnumName GEnum name
  * @param {String} subString Substring to search for
  */
-function findEnum(gEnumName, subString=required('subString')) {
+function findEnum(gEnumName, subString = required("subString")) {
   const subLower = subString.toLowerCase();
-  for( const element of CS.getGEnum(gEnumName)) {
+  for (const element of CS.getGEnum(gEnumName)) {
     if (element.toString().toLowerCase().includes(subLower)) {
       return element.asInteger();
     }
-    
-  };
+  }
   return null;
+}
+
+function createAgentLogin(loginCode, switchDBID) {
+  var createObj = {
+    loginCode: loginCode,
+    state: 1,
+    useOverride: 2,
+    switchDBID: switchDBID,
+    switchSpecificType: 1,
+  };
+  var ret = CS.createObject("CfgAgentLogin", JSON.stringify(createObj));
+  if (ret >= 0) {
+    console.log(
+      "created login DBID: " +
+        ret +
+        " code:" +
+        loginCode +
+        " switchDBID:" +
+        switchDBID
+    );
+  } else {
+    console.log(
+      "NOT created login DBID: " +
+        ret +
+        " code:" +
+        loginCode +
+        " switchDBID:" +
+        switchDBID
+    );
+  }
+  return ret;
 }
 
 function testLoginIDs() {
   const NEWNAME = "aaaaaa";
   {
-    var dbid = findObjectByName("CfgAgentLogin", NEWNAME);
+    // var dbid = findObjectByName("CfgAgentLogin", NEWNAME);
     // if (dbid != null)
     //   console.log("deleted login: " + CS.deleteObject("CfgAgentLogin", dbid));
   }

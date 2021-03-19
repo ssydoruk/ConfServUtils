@@ -13,21 +13,6 @@
 	"launch": {
 		"version": "0.2.0",
 		"configurations": [
-			{
-				"type": "graalvm",
-				"request": "attach",
-				"name": "Attach",
-				"port": 9229
-			},
-		{
-			"type": "graalvm",
-			"request": "attach",
-			"name": "Attach to Remote",
-			"address": "localhost",
-			"port": 9229,
-			"localRoot": "",
-			"remoteRoot": ""
-		},
 		{
             "type": "java",
             "name": "Debug (Launch)-Main<ConfServUtils>",

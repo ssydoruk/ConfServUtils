@@ -5,7 +5,7 @@
  */
 package confserverbatch;
 
-import com.airbnb.confservutils.ConfigServerManager;
+import com.ssydoruk.confservutils.ConfigServerManager;
 import com.genesyslab.platform.applicationblocks.com.ConfigException;
 import com.genesyslab.platform.applicationblocks.com.ConfigServerException;
 import com.genesyslab.platform.applicationblocks.com.IConfService;
@@ -46,7 +46,6 @@ public class AddPlace {
     private IConfService service;
     String pl = null;
     HashMap<SwitchObjectLocation, String> theDNs = new HashMap<>();
-    private ConfigServerManager csManager;
 
     public AddPlace(IConfService service, String place, HashMap<SwitchObjectLocation, String> DNs, ObjectExistAction objectExistAction) {
         this.service = service;
@@ -60,7 +59,6 @@ public class AddPlace {
 
     public AddPlace(ConfigServerManager configServerManager, String string, HashMap<SwitchObjectLocation, String> DNs, ObjectExistAction objectExistAction) {
         this(configServerManager.getService(), string, DNs, objectExistAction);
-        csManager = configServerManager;
     }
 
     void setObjExistAction(ObjectExistAction objectExistAction) {

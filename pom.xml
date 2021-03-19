@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.airbnb</groupId>
+    <groupId>com.ssydoruk</groupId>
     <artifactId>ConfServUtils</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
@@ -137,12 +137,12 @@
         <dependency>
             <groupId>org.graalvm.sdk</groupId>
             <artifactId>graal-sdk</artifactId>
-            <version>20.3.0</version>
+            <version>21.0.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.graalvm.truffle</groupId>
             <artifactId>truffle-api</artifactId>
-            <version>20.3.0</version>
+            <version>21.0.0.2</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -184,7 +184,7 @@
                     <assembleDirectory>/Users/stepan_sydoruk/GCTI/lib/confServUtils</assembleDirectory>
                     <programs>
                         <program>
-                            <mainClass>com.airbnb.confservutils.Main</mainClass>
+                            <mainClass>com.ssydoruk.confservutils.Main</mainClass>
                             <id>csUtils</id>
                         </program>
                     </programs>
