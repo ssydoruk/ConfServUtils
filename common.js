@@ -28,9 +28,8 @@ function updatePersonLoginIDs(personDBID, arrLoginsToAdd, arrLoginsToRemove) {
     },
   };
 
-  createObj.agentInfo.agentLogins.added=arrLoginsToAdd;
-  createObj.agentInfo.agentLogins.deleted=arrLoginsToRemove;
-
+  createObj.agentInfo.agentLogins.added = arrLoginsToAdd;
+  createObj.agentInfo.agentLogins.deleted = arrLoginsToRemove;
 
   var obj1 = CS.updateObject(
     "CfgPerson",
@@ -174,6 +173,29 @@ function getAgentSwitches() {
     }
   }
   return agentSwitches;
+}
+
+/**
+ * gets CfgObject and returns HostDBID if obj is server and HostDBID is configured
+ *
+ * @param {*} appObj
+ */
+function getAppHostDBID(v) {
+  if (v != null && v.hasOwnProperty("attributes")) {
+    var attrs = v["attributes"];
+    if (
+      attrs != undefined &&
+      attrs.hasOwnProperty("serverInfo") &&
+      attrs["serverInfo"] != null &&
+      attrs["serverInfo"].hasOwnProperty("hostDBID")
+    ) {
+      var dbid = parseInt(attrs["serverInfo"]["hostDBID"]);
+      if (dbid > 0) {
+        return dbid;
+      }
+    }
+  }
+  return null;
 }
 
 function testFunctions() {

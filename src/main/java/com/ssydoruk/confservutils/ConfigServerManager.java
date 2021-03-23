@@ -7,6 +7,8 @@ package com.ssydoruk.confservutils;
 
 import Utils.Pair;
 import static Utils.StringUtils.matching;
+import static java.util.Collections.*;
+
 import com.ssydoruk.confservutils.ConfigConnection;
 import com.ssydoruk.confservutils.ConfigServerManager;
 import com.genesyslab.platform.applicationblocks.com.*;
@@ -374,6 +376,7 @@ public class ConfigServerManager {
 
     ConfigServerManager(AppForm aThis) {
         parentForm = aThis;
+        theCfgObjComparator = new CfgObjComparator();
     }
 
     public void clearCache() {
@@ -457,6 +460,16 @@ public class ConfigServerManager {
         return service;
     }
 
+    private class CfgObjComparator implements Comparator<ICfgObject>{
+
+        @Override
+        public int compare(ICfgObject o1, ICfgObject o2) {
+            return 0;
+        }
+    }
+
+    private final CfgObjComparator theCfgObjComparator;
+
     public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls, boolean refresh) throws ConfigException, InterruptedException {
         Main.logger.debug("query " + q + " for object type " + cls);
         String qToString = q.toString();
@@ -469,6 +482,7 @@ public class ConfigServerManager {
             Main.logger.debug("executing the request " + q);
             cfgObjs = service.retrieveMultipleObjects(cls, q);
             Main.logger.debug("retrieved " + ((cfgObjs == null) ? 0 : cfgObjs.size()) + " objects");
+//            Collections.sort(cfgObjs);
             prevQueries.put(qToString, cfgObjs);
         }
         return cfgObjs;
@@ -828,7 +842,7 @@ public class ConfigServerManager {
                     new FindWorker(seearchSettings), true, foundProc)) {
 
             }
-            Collections.sort(ret, (o1, o2) -> {
+            sort(ret, (o1, o2) -> {
                 return getFolderFullName(((CfgFolder) o1)).compareToIgnoreCase(getFolderFullName((CfgFolder) o2));
             });
             if (logger.isDebugEnabled()) {

@@ -2118,7 +2118,12 @@ public final class AppForm extends javax.swing.JFrame {
     }
 
     public String getPassword() {
-        return textEncryptor.decrypt(ds.getPassword());
+        try {
+            return textEncryptor.decrypt(ds.getPassword());
+        } catch (Exception e) {
+            logger.error("Error decrypting password", e);
+            return "";
+        }
     }
 
     public void requestOutput(final String toString, final boolean printBlock) {

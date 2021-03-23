@@ -101,7 +101,9 @@ public class CStoJS {
      */
     @HostAccess.Export
     public String getAttribute(CfgObject obj, String attr) {
-        return obj.getRawObjectData().getPropertyValue(attr).toString();
+        Object propertyValue = obj.getRawObjectData().getPropertyValue(attr);
+
+        return (propertyValue!=null)?propertyValue.toString():null;
     }
 
     /**
