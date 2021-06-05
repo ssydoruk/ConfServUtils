@@ -151,6 +151,9 @@ function getNameName(objType) {
     case "CfgPerson":
       return "userName";
 
+    case "CfgDN":
+      return "number";
+
     default:
       return "name";
   }
@@ -332,3 +335,5 @@ function testLoginIDs() {
   //   "new object DBID: " + findObjectByName("CfgAgentLogin", NEWNAME, true)
   // );
 }
+
+        

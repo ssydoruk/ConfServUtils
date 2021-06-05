@@ -5,22 +5,34 @@
  */
 package com.ssydoruk.confservutils;
 
-import static com.ssydoruk.confservutils.ConfigServerManager.logger;
-import com.genesyslab.platform.applicationblocks.com.*;
-import com.genesyslab.platform.commons.*;
-import com.genesyslab.platform.commons.collections.*;
-import com.genesyslab.platform.commons.protocol.*;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.*;
+import com.genesyslab.platform.applicationblocks.com.CfgObject;
+import com.genesyslab.platform.commons.GEnum;
+import com.genesyslab.platform.commons.collections.KVList;
+import com.genesyslab.platform.commons.collections.KeyValueCollection;
+import com.genesyslab.platform.commons.collections.KeyValuePair;
+import com.genesyslab.platform.commons.protocol.Message;
+import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestReadObjects;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
 import com.genesyslab.platform.configuration.protocol.metadata.*;
 import com.genesyslab.platform.configuration.protocol.obj.*;
-import com.genesyslab.platform.configuration.protocol.types.*;
+import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.google.gson.*;
-import com.opencsv.*;
-import java.io.*;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import org.graalvm.polyglot.HostAccess;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
-import org.graalvm.polyglot.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.ssydoruk.confservutils.ConfigServerManager.logger;
+import static com.ssydoruk.confservutils.Misc.getSection;
 
 /**
  * Interface to Java code from javascript code
@@ -50,8 +62,8 @@ public class CStoJS {
      * sss
      *
      * @param objectType String type of the object ("CfgPerson", etc)
-     * @param refresh should data be refreshed from ConfigServer; false by
-     * default
+     * @param refresh    should data be refreshed from ConfigServer; false by
+     *                   default
      * @return Collection (ArrayList) of CfgObject inherited
      * @throws Exception
      */
@@ -95,15 +107,26 @@ public class CStoJS {
     /**
      * <b>Javascript exported</b>
      *
-     * @param obj CfgObject
+     * @param obj  CfgObject
      * @param attr String name of attribute
      * @return String value of the attribute
      */
     @HostAccess.Export
-    public String getAttribute(CfgObject obj, String attr) {
+    public Object getAttribute(CfgObject obj, String attr) {
         Object propertyValue = obj.getRawObjectData().getPropertyValue(attr);
-
-        return (propertyValue!=null)?propertyValue.toString():null;
+//        if (propertyValue instanceof KeyValueCollection) {
+//            JsonElement jsonElement = kvpJson((KVList) propertyValue);
+//            Gson gson = new GsonBuilder()
+//                    .enableComplexMapKeySerialization()
+//                    .disableHtmlEscaping()
+//                    .setPrettyPrinting()
+//                    .setLenient()
+//                    .create();
+//            String s = gson.toJson(jsonElement);
+//            return s;
+//        }
+        return propertyValue;
+//        return (propertyValue!=null)?propertyValue.toString():null;
     }
 
     /**
@@ -122,7 +145,7 @@ public class CStoJS {
      * <b>Javascript exported</b> converts int constant to String representation
      *
      * @param enumName name of the Genesys enumeration
-     * @param num int value to convert
+     * @param num      int value to convert
      * @return
      * @throws ClassNotFoundException
      */
@@ -130,12 +153,12 @@ public class CStoJS {
     public String enumToString(String enumName, int num) throws ClassNotFoundException {
         return GEnum.getValue((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), num).toString();
     }
-    
-        /**
+
+    /**
      * <b>Javascript exported</b> converts int constant to String representation
      *
      * @param enumName name of the Genesys enumeration
-     * @param num int value to convert
+     * @param num      int value to convert
      * @return
      * @throws ClassNotFoundException
      */
@@ -143,9 +166,9 @@ public class CStoJS {
     public String enumToString(String enumName, String num) throws ClassNotFoundException {
         return GEnum.getValue((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), Integer.parseInt(num)).toString();
     }
-    
-    
-            /**
+
+
+    /**
      * <b>Javascript exported</b> converts int constant to String representation
      *
      * @param enumName name of the Genesys enumeration
@@ -154,7 +177,7 @@ public class CStoJS {
      */
     @HostAccess.Export
     public Object[] getGEnum(String enumName) throws ClassNotFoundException {
-        return  GEnum.values((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName)).toArray();
+        return GEnum.values((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName)).toArray();
     }
 
 
@@ -173,11 +196,11 @@ public class CStoJS {
     /**
      * <b>Javascript exported</b> String value of constant to numeric
      *
-     * @see #enumToString(java.lang.String, int)
      * @param enumName name of the Genesys enumeration
-     * @param val String
+     * @param val      String
      * @return
      * @throws ClassNotFoundException
+     * @see #enumToString(java.lang.String, int)
      */
     @HostAccess.Export
     public int enumToNum(String enumName, String val) throws ClassNotFoundException {
@@ -201,10 +224,10 @@ public class CStoJS {
 
             RequestReadObjects requestReadObjects
                     = RequestReadObjects.create(
-                            intPerson,
-                            null
+                    intPerson,
+                    null
                     //                        ,                        filterKey
-                    );
+            );
             Val v = new Val();
 
             CountDownLatch latch = new CountDownLatch(1);
@@ -258,9 +281,7 @@ public class CStoJS {
     }
 
 
-
     /**
-     *
      * @param objectType
      * @param attrName
      * @param attrValue
@@ -271,7 +292,7 @@ public class CStoJS {
     public String findObject(String objectType, String attrName, Object attrValue) throws Exception {
         CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
 
-        for (Iterator it = findObjects(objectType).iterator(); it.hasNext();) {
+        for (Iterator it = findObjects(objectType).iterator(); it.hasNext(); ) {
             CfgObject cfgObj = (CfgObject) it.next();
             logger.debug(cfgObj.toString());
             ConfObjectBase rod = cfgObj.getRawObjectData();
@@ -290,7 +311,7 @@ public class CStoJS {
      * <b>Javascript exported</b> Deletes object from ConfigServer
      *
      * @param objectType objectType String type of the object ("CfgPerson", etc)
-     * @param DBID String value of object DBID
+     * @param DBID       String value of object DBID
      * @return true if objected deleted; false otherwise
      */
     @HostAccess.Export
@@ -302,7 +323,7 @@ public class CStoJS {
      * <b>Javascript exported</b> Deletes object from ConfigServer
      *
      * @param objectType objectType String type of the object ("CfgPerson", etc)
-     * @param DBID int value of object DBID
+     * @param DBID       int value of object DBID
      * @return true if objected deleted; false otherwise
      * @see #deleteObject(java.lang.String, java.lang.String)
      */
@@ -319,15 +340,17 @@ public class CStoJS {
         return false;
     }
 
+
     /**
      * <b>Javascript exported</b> creates object in ConfigServer
      *
-     * @param objectType objectType String type of the object ("CfgPerson", etc)
+     * @param objectType          objectType String type of the object ("CfgPerson", etc)
      * @param createObjProperties String JSON string with object properties
      * @return DBID if objected deleted; -1 otherwise
      */
     @HostAccess.Export
-    public Integer createObject(String objectType, String createObjProperties) {
+    public Integer createObject(String objectType, String createObjProperties,
+    KeyValueCollection userProperties) throws Exception {
         CfgObjectType _objectType = CfgObjectType.valueOf(objectType);
         csManager.getParentForm().requestOutput("createObject  type:" + _objectType + " createObjProperties:" + createObjProperties);
 
@@ -347,6 +370,9 @@ public class CStoJS {
 //      osInfo.setPropertyValue("OStype",    8);
 //      osInfo.setPropertyValue("OSversion", "7");
         JsonObject convertedObject = gson.fromJson(createObjProperties, JsonObject.class);
+        if( userProperties != null) {
+            newObj.setPropertyValue("userProperties", userProperties);
+        }
 
         boolean sendRequest = false;
         for (Map.Entry<String, JsonElement> entry : convertedObject.entrySet()) {
@@ -361,6 +387,34 @@ public class CStoJS {
                 }
 
             } else {
+                logger.info("Not a primitive");
+
+                if (entry.getKey().equals("userProperties")) {
+                    if (userProperties!=null ){
+                        continue;
+                    }
+
+                    if (entry.getValue().isJsonObject()) {
+                        KeyValueCollection kvp = new KeyValueCollection();
+
+                        for (Map.Entry<String, JsonElement> section : entry.getValue().getAsJsonObject().entrySet()) {
+                            JsonElement val = section.getValue();
+                            if (val.isJsonObject()) {
+                                for (Map.Entry<String, JsonElement> sectionKVP : val.getAsJsonObject().entrySet()) {
+                                    logger.info(sectionKVP.getValue().getAsJsonPrimitive().toString());
+                                    getSection(kvp, section.getKey()).addObject(sectionKVP.getKey(), sectionKVP.getValue().getAsJsonPrimitive().toString());
+                                }
+                            } else {
+                                throw new Exception("Not JSON object");
+                            }
+
+                        }
+                        newObj.setPropertyValue("userProperties", kvp);
+                    } else {
+                        throw new Exception("Incorrect userProperties");
+                    }
+
+                }
 //                if (_objectType == CfgObjectType.CFGPerson) {
 //                    if (entry.getKey().equals("agentInfo")) {
 //                        JsonObject skillLevels = entry.getValue().getAsJsonObject().getAsJsonObject("skillLevels");
@@ -407,13 +461,11 @@ public class CStoJS {
      * },
      * agentLogins: { changed: {}, deleted: {} }, }, }; }
      *
-     * @param objectType objectType String type of the object ("CfgPerson", etc)
-     * @param _DBID object DBID
+     * @param objectType          objectType String type of the object ("CfgPerson", etc)
+     * @param _DBID               object DBID
      * @param updateObjProperties - JSON with parameters to update
      * @return
      * @throws ProtocolException
-     *
-     *
      */
     @HostAccess.Export
     public String updateObject(String objectType, String _DBID, String updateObjProperties) throws ProtocolException {
@@ -547,7 +599,7 @@ public class CStoJS {
 
     private JsonElement kvpJson(KVList val) {
         JsonObject ret = new JsonObject();
-        for (Iterator iterator = val.iterator(); iterator.hasNext();) {
+        for (Iterator iterator = val.iterator(); iterator.hasNext(); ) {
             Object nextElement = iterator.next();
             if (nextElement instanceof KeyValuePair) {
                 String key = ((KeyValuePair) nextElement).getStringKey();
@@ -571,7 +623,7 @@ public class CStoJS {
     private JsonElement kvpConfDataCollection(ConfDataCollection confDataCollection) {
         JsonArray ret = new JsonArray();
         Iterator iterator;
-        for (iterator = confDataCollection.iterator(); iterator.hasNext();) {
+        for (iterator = confDataCollection.iterator(); iterator.hasNext(); ) {
             Object attr = iterator.next();
             ret.add(new JsonPrimitive(attr.toString()));
         }
@@ -605,11 +657,11 @@ public class CStoJS {
             return null;
         }
         JsonArray ret = new JsonArray();
-        for (Iterator<ConfStructure> iterator = confStructureCollection.iterator(); iterator.hasNext();) {
+        for (Iterator<ConfStructure> iterator = confStructureCollection.iterator(); iterator.hasNext(); ) {
             ConfStructure attr = iterator.next();
             Iterator<CfgDescriptionAttribute> iterator1;
             JsonObject obj = new JsonObject();
-            for (iterator1 = attr.getClassInfo().getAttributes().iterator(); iterator1.hasNext();) {
+            for (iterator1 = attr.getClassInfo().getAttributes().iterator(); iterator1.hasNext(); ) {
                 CfgDescriptionAttribute descrAttr = iterator1.next();
                 Object propertyValue = attr.getPropertyValue(descrAttr.getIndex());
                 if (propertyValue instanceof Integer) {
@@ -724,7 +776,7 @@ public class CStoJS {
     }
 
     /**
-     * <b>Javascript exported</b> reads CSV as list of string arrays 
+     * <b>Javascript exported</b> reads CSV as list of string arrays
      *
      * @param fileName String name of the file to read
      * @return true if connected; false otherwise
@@ -736,9 +788,9 @@ public class CStoJS {
     }
 
     /**
-     * <b>Javascript exported</b> reads CSV as list of string arrays 
+     * <b>Javascript exported</b> reads CSV as list of string arrays
      *
-     * @param fileName String name of the file to read
+     * @param fileName  String name of the file to read
      * @param skipLines
      * @return true if connected; false otherwise
      * @throws java.io.IOException
@@ -749,13 +801,13 @@ public class CStoJS {
 
             final CSVReader reader
                     = new CSVReaderBuilder(new FileReader(fileName))
-                            .withSkipLines(skipLines)
-                            .withCSVParser(new CSVParserBuilder()
-                                    .withSeparator('\t')
-                                    .withSeparator(',')
-                                    .withIgnoreQuotations(true)
-                                    .build())
-                            .build();
+                    .withSkipLines(skipLines)
+                    .withCSVParser(new CSVParserBuilder()
+                            .withSeparator('\t')
+                            .withSeparator(',')
+                            .withIgnoreQuotations(true)
+                            .build())
+                    .build();
 
             List<String[]> ret = reader.readAll();
             return ret;

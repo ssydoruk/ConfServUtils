@@ -19,6 +19,8 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.*;
 
+import static com.ssydoruk.confservutils.Misc.getSection;
+
 /**
  *
  * @author stepan_sydoruk
@@ -35,15 +37,7 @@ public class UpdateCFGObjectProcessor {
 
     }
 
-    public static KeyValueCollection getSection(KeyValueCollection sections, String section) {
-        KeyValueCollection list = sections.getList(section);
-        if (list == null) {
-            list = new KeyValueCollection();
-            sections.addList(section, list);
-        }
-        return list;
 
-    }
 
     private static String cleanString(String s) {
         return StringUtils.strip(StringUtils.trim(s));
