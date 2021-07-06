@@ -21,6 +21,7 @@ import com.google.gson.*;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvException;
 import org.graalvm.polyglot.HostAccess;
 
 import java.io.FileNotFoundException;
@@ -100,7 +101,7 @@ public class CStoJS {
      * @return JSON converted obj and then packed into string
      */
     @HostAccess.Export
-    public String objToJson(CfgObject obj) {
+    public String objToJson(CfgObject obj) throws ClassNotFoundException {
         return cfgObjectToJson(obj).toString();
     }
 
@@ -151,8 +152,14 @@ public class CStoJS {
      */
     @HostAccess.Export
     public String enumToString(String enumName, int num) throws ClassNotFoundException {
-        return GEnum.getValue((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), num).toString();
+        return enumToString((Class<GEnum>) Class.forName("com.genesyslab.platform.configuration.protocol.types." + enumName), num).toString();
     }
+
+    private String enumToString(Class<GEnum> forName, int num) {
+        return GEnum.getValue(forName, num).toString();
+    }
+
+
 
     /**
      * <b>Javascript exported</b> converts int constant to String representation
@@ -559,7 +566,7 @@ public class CStoJS {
         return props;
     }
 
-    private JsonObject cfgObjectToJson(CfgObject person) {
+    private JsonObject cfgObjectToJson(CfgObject person) throws ClassNotFoundException {
         CfgDescriptionClass metaData = person.getMetaData();
         ConfObjectBase rawObjectData = person.getRawObjectData();
 
@@ -630,7 +637,7 @@ public class CStoJS {
         return ret;
     }
 
-    private JsonElement kvpConfStructure(ConfStructure confStructure) {
+    private JsonElement kvpConfStructure(ConfStructure confStructure) throws ClassNotFoundException {
         JsonObject ret = new JsonObject();
         CfgDescriptionStructure classInfo = confStructure.getClassInfo();
 
@@ -648,9 +655,14 @@ public class CStoJS {
 //                CfgDescriptionAttributeReferenceClassList aa = (CfgDescriptionAttributeReferenceClassList) a;
 //                Object propertyValue = confStructure.getPropertyValue(aa.getItemName());
             }
+            else if( attr instanceof CfgDescriptionAttributeEnumItem){
+                ret.addProperty(attr.getName(), enumToString(((CfgDescriptionAttributeEnumItem) attr).getEnumDescription().getCfgEnumClass(), (Integer) propertyValue));
+            }
         }
         return ret;
     }
+
+
 
     private JsonElement jsonConfStructureCollection(ConfStructureCollection confStructureCollection) {
         if (confStructureCollection == null) {
@@ -812,7 +824,7 @@ public class CStoJS {
             List<String[]> ret = reader.readAll();
             return ret;
 
-        } catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException | CsvException ex) {
             Logger.getLogger(CStoJS.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }

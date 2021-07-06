@@ -23,6 +23,7 @@ import com.genesyslab.platform.applicationblocks.com.queries.CfgPersonQuery;
 import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
 import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
 import com.genesyslab.platform.configuration.protocol.types.CfgDNType;
+import com.genesyslab.platform.configuration.protocol.types.CfgOSType;
 import com.genesyslab.platform.configuration.protocol.types.CfgErrorType;
 import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;

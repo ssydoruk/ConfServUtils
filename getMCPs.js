@@ -15,9 +15,12 @@ try {
     var hostDBID = getAppHostDBID(app);
     if (hostDBID != null) {
       var hostObj = JSON.parse(CS.objToJson(hosts[hostDBID]));
-      if (hostObj['attributes']['OSinfo'].OStype != null &&
-        !hostObj['attributes']['OSinfo'].OStype.toLowerCase().includes('windows')) {
-        console.log(CS.getAttribute(hosts[hostDBID], 'name') + ',' + app['attributes']['name']);
+    //   console.log(JSON.stringify(hostObj));
+      if (hostObj['attributes']['OSinfo'].OStype != null
+        ) {
+            if(app['attributes']['name'].includes('MCP')){
+                console.log(  app['attributes']['name']+ ','+hostObj['attributes']['name']+ ','+hostObj['attributes']['IPaddress']+ ','+hostObj['attributes']['OSinfo'].OStype);
+            }
       }
     }
 
