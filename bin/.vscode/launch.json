@@ -1,0 +1,39 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Chrome",
+      "port": 9222,
+      "request": "attach",
+      "type": "pwa-chrome",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "graalvm",
+      "request": "attach",
+      "name": "Attach to Remote",
+      "address": "127.0.0.1",
+      "port": 9229,
+      "localRoot": "",
+      "remoteRoot": ""
+    },
+    {
+      "type": "graalvm",
+      "request": "attach",
+      "name": "Attach graalvm",
+      "port": 9229,
+      "protocol": "chromeDevTools"
+    },
+    {
+      "name": "Attach javascript",
+      "port": 9229,
+      "request": "attach",
+      "address": "127.0.0.1",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "pwa-node"
+    }
+  ]
+}
