@@ -5,8 +5,7 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.GridEditor;
-import static Utils.Swing.checkBoxSelection;
+import Utils.swing.GridEditor;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import com.jidesoft.swing.CheckBoxListSelectionModel;
@@ -34,8 +33,8 @@ public class RestartServices extends javax.swing.JPanel {
     public RestartServices(AppForm _theForm) {
         initComponents();
         theForm = _theForm;
-        Utils.Swing.restrictHeight(tfObjectName);
-        Utils.Swing.restrictHeight(cbApplicationType);
+        Utils.swing.Swing.restrictHeight(tfObjectName);
+        Utils.swing.Swing.restrictHeight(cbApplicationType);
 
         Main.loadGenesysTypes(cbApplicationType, CfgAppType.values());
 
@@ -248,7 +247,7 @@ public class RestartServices extends javax.swing.JPanel {
 
     public String getObjName() {
         if (!isSearchAll()) {
-            return checkBoxSelection(tfObjectName);
+            return Utils.swing.Swing.checkBoxSelection(tfObjectName);
         } else {
             return null;
         }
@@ -341,13 +340,13 @@ public class RestartServices extends javax.swing.JPanel {
 
     public void setChoices(Collection<String> choices) {
 
-        Utils.Swing.setChoices(tfObjectName, choices);
+        Utils.swing.Swing.setChoices(tfObjectName, choices);
 
     }
 
     public Collection<String> getChoices() {
 
-        return Utils.Swing.getChoices(tfObjectName);
+        return Utils.swing.Swing.getChoices(tfObjectName);
     }
 
     private void modelUncheck(CheckBoxListSelectionModel selectionModel, GEnum[] gEnum) {

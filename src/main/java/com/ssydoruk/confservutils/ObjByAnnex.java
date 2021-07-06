@@ -5,7 +5,7 @@
  */
 package com.ssydoruk.confservutils;
 
-import static Utils.Swing.checkBoxSelection;
+import static Utils.swing.Swing.checkBoxSelection;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import com.jidesoft.swing.CheckBoxList;
@@ -36,11 +36,11 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
      */
     public ObjByAnnex() {
         initComponents();
-        Utils.Swing.restrictHeight(tfObjectName);
-        Utils.Swing.restrictHeight(tfOption);
-        Utils.Swing.restrictHeight(tfOptionValue);
-        Utils.Swing.restrictHeight(tfSearchString);
-        Utils.Swing.restrictHeight(tfSection);
+        Utils.swing.Swing.restrictHeight(tfObjectName);
+        Utils.swing.Swing.restrictHeight(tfOption);
+        Utils.swing.Swing.restrictHeight(tfOptionValue);
+        Utils.swing.Swing.restrictHeight(tfSearchString);
+        Utils.swing.Swing.restrictHeight(tfSection);
         clm = new DefaultListModel();
         clb = new CheckBoxList((ListModel) clm);
         jpObjectTypes.add(new JScrollPane(clb));
@@ -283,13 +283,13 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getSection() {
-        return checkBoxSelection(tfSection);
+        return Utils.swing.Swing.checkBoxSelection(tfSection);
     }
 
     @Override
     public String getObjName() {
         if (!isSearchAll()) {
-            return checkBoxSelection(tfObjectName);
+            return Utils.swing.Swing.checkBoxSelection(tfObjectName);
         } else {
             return null;
         }
@@ -297,12 +297,12 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getOption() {
-        return checkBoxSelection(tfOption);
+        return Utils.swing.Swing.checkBoxSelection(tfOption);
     }
 
     @Override
     public String getValue() {
-        return checkBoxSelection(tfOptionValue);
+        return Utils.swing.Swing.checkBoxSelection(tfOptionValue);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -345,7 +345,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public String getAllSearch() {
-        return checkBoxSelection(tfSearchString);
+        return Utils.swing.Swing.checkBoxSelection(tfSearchString);
 
     }
 
@@ -380,18 +380,18 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
     @Override
     public void setChoices(final Collection<String> choices) {
-        Utils.Swing.setChoices(tfSearchString, choices);
-        Utils.Swing.setChoices(tfObjectName, choices);
-        Utils.Swing.setChoices(tfOption, choices);
-        Utils.Swing.setChoices(tfOptionValue, choices);
-        Utils.Swing.setChoices(tfSection, choices);
+        Utils.swing.Swing.setChoices(tfSearchString, choices);
+        Utils.swing.Swing.setChoices(tfObjectName, choices);
+        Utils.swing.Swing.setChoices(tfOption, choices);
+        Utils.swing.Swing.setChoices(tfOptionValue, choices);
+        Utils.swing.Swing.setChoices(tfSection, choices);
     }
 
     @Override
     public Collection<String> getChoices() {
 
-        return (isSearchAll()) ? Utils.Swing.getChoices(tfSearchString)
-                : Utils.Swing.getChoices(tfObjectName, tfOption, tfOptionValue, tfSection);
+        return (isSearchAll()) ? Utils.swing.Swing.getChoices(tfSearchString)
+                : Utils.swing.Swing.getChoices(tfObjectName, tfOption, tfOptionValue, tfSection);
     }
 
     private void modelUncheck(final CheckBoxListSelectionModel selectionModel, final GEnum[] gEnum) {

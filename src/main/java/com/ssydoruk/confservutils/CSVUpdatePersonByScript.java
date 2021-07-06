@@ -5,7 +5,6 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.TableColumnAdjuster;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.Window;
@@ -37,7 +36,7 @@ abstract class CSVUpdatePersonByScript extends CSVGeneralImportDialog {
     DefaultTableModel modelPersons;
     JTable tabPersons;
 
-    TableColumnAdjuster tcaPersons;
+    Utils.swing.TableColumnAdjuster tcaPersons;
     JPanel topPan;
     JSEditPanel jsEditPanel;
     private final ConfigServerManager cfg;

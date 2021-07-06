@@ -5,8 +5,7 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.*;
-import static Utils.Swing.checkBoxSelection;
+import Utils.swing.*;
 import com.genesyslab.platform.commons.*;
 import com.genesyslab.platform.configuration.protocol.types.*;
 import com.jidesoft.swing.*;
@@ -15,7 +14,7 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.apache.logging.log4j.*;
 
 
@@ -26,10 +25,10 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     public AnnexReplace(AppForm _theForm) {
         initComponents();
         theForm = _theForm;
-        Utils.Swing.restrictHeight(tfObjectName);
-        Utils.Swing.restrictHeight(tfOption);
-        Utils.Swing.restrictHeight(tfOptionValue);
-        Utils.Swing.restrictHeight(tfSection);
+        Utils.swing.Swing.restrictHeight(tfObjectName);
+        Utils.swing.Swing.restrictHeight(tfOption);
+        Utils.swing.Swing.restrictHeight(tfOptionValue);
+        Utils.swing.Swing.restrictHeight(tfSection);
         clm = new DefaultListModel();
         clb = new CheckBoxList((ListModel) clm);
         jpObjectTypes.add(new JScrollPane(clb));
@@ -347,13 +346,13 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String getSection() {
-        return checkBoxSelection(tfSection);
+        return Utils.swing.Swing.checkBoxSelection(tfSection);
     }
 
     @Override
     public String getObjName() {
         if (!isSearchAll()) {
-            return checkBoxSelection(tfObjectName);
+            return Utils.swing.Swing.checkBoxSelection(tfObjectName);
         } else {
             return null;
         }
@@ -361,12 +360,12 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String getOption() {
-        return checkBoxSelection(tfOption);
+        return Utils.swing.Swing.checkBoxSelection(tfOption);
     }
 
     @Override
     public String getValue() {
-        return checkBoxSelection(tfOptionValue);
+        return Utils.swing.Swing.checkBoxSelection(tfOptionValue);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -493,16 +492,16 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     @Override
     public void setChoices(Collection<String> choices) {
 
-        Utils.Swing.setChoices(tfObjectName, choices);
-        Utils.Swing.setChoices(tfOption, choices);
-        Utils.Swing.setChoices(tfOptionValue, choices);
-        Utils.Swing.setChoices(tfSection, choices);
+        Utils.swing.Swing.setChoices(tfObjectName, choices);
+        Utils.swing.Swing.setChoices(tfOption, choices);
+        Utils.swing.Swing.setChoices(tfOptionValue, choices);
+        Utils.swing.Swing.setChoices(tfSection, choices);
     }
 
     @Override
     public Collection<String> getChoices() {
 
-        return Utils.Swing.getChoices(tfObjectName,
+        return Utils.swing.Swing.getChoices(tfObjectName,
                 tfOption,
                 tfOptionValue,
                 tfSection);
@@ -528,7 +527,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         return new StringBuilder()
                 .append(rbReplaceWith.getText())
                 .append(" (")
-                .append(checkBoxSelection(tfReplaceWith))
+                .append(Utils.swing.Swing.checkBoxSelection(tfReplaceWith))
                 .append(") backup:")
                 .append(cbMakeBackup.isSelected());
     }
@@ -557,7 +556,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                     return false;
                 }
             } else if (rbReplaceWith.isSelected()) {
-                if (StringUtils.isBlank(checkBoxSelection(tfReplaceWith))) {
+                if (StringUtils.isBlank(Utils.swing.Swing.checkBoxSelection(tfReplaceWith))) {
                     JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -593,7 +592,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String KVPreplaceWith(String currentValue) {
-        return checkBoxSelection(tfReplaceWith);
+        return Utils.swing.Swing.checkBoxSelection(tfReplaceWith);
 
     }
 

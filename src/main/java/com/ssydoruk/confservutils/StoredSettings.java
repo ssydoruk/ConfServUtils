@@ -5,8 +5,9 @@
  */
 package com.ssydoruk.confservutils;
 
-import java.util.ArrayList;
-import javax.swing.DefaultComboBoxModel;
+import Utils.swing.*;
+import java.util.*;
+import javax.swing.*;
 
 /**
  *
@@ -42,10 +43,10 @@ class StoredSettings {
         this.password = password;
     }
 
-    void loadConfServs(ArrayList<Object[]> data) {
+    void loadConfServs(ArrayList<EditableValue[]> data) {
         configServers.clear();
-        for (Object[] objects : data) {
-            configServers.add(new ConfServer(objects[0], objects[1], objects[2], objects[3]));
+        for (EditableValue[] objects : data) {
+            configServers.add(new ConfServer(objects[0].getValue(), objects[1].getValue(), objects[2].getValue(), objects[3].getValue()));
         }
     }
 

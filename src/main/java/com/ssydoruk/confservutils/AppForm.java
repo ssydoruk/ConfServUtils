@@ -6,8 +6,8 @@
 package com.ssydoruk.confservutils;
 
 import Utils.Pair;
-import static Utils.Swing.checkBoxSelection;
 import Utils.*;
+import Utils.swing.*;
 import com.ssydoruk.confservutils.ConfigConnection;
 import com.ssydoruk.confservutils.ConfigServerManager;
 import com.genesyslab.platform.applicationblocks.com.*;
@@ -87,7 +87,7 @@ public final class AppForm extends javax.swing.JFrame {
 
     private void configServerChanged(final ActionEvent e) {
         final JComboBox cb = (JComboBox) e.getSource();
-        setTitle("ConfigServer query - " + checkBoxSelection(cb));
+        setTitle("ConfigServer query - " + Utils.swing.Swing.checkBoxSelection(cb));
 
     }
 
@@ -117,7 +117,7 @@ public final class AppForm extends javax.swing.JFrame {
 
     }
 
-    private ValuesEditor confServEditor;
+    private Utils.swing.ValuesEditor confServEditor;
 
     private String profile;
     public static final int YES_TO_ALL = 100;
@@ -781,17 +781,17 @@ public final class AppForm extends javax.swing.JFrame {
     private void btEditConfgServActionPerformed(final java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btEditConfgServActionPerformed
 
         if (confServEditor == null) {
-            confServEditor = new ValuesEditor((Window) this.getRootPane().getParent(), "Config Server profiles",
+            confServEditor = new Utils.swing.ValuesEditor((Window) this.getRootPane().getParent(), "Config Server profiles",
                     "Select %d profiles");
 
         }
-        final ArrayList<Object[]> values = new ArrayList<>();
+        final ArrayList<EditableValue[]> values = new ArrayList<>();
         for (final StoredSettings.ConfServer configServer : ds.getConfigServers()) {
-            final Object[] v = new Object[4];
-            v[0] = configServer.getProfile();
-            v[1] = configServer.getHost();
-            v[2] = configServer.getPort();
-            v[3] = configServer.getApp();
+            final EditableValue[] v = new EditableValue[4];
+            v[0] = new StringValue(configServer.getProfile());
+            v[1] = new StringValue(configServer.getHost());
+            v[2] = new StringValue(configServer.getPort());
+            v[3] = new StringValue(configServer.getApp());
             values.add(v);
         }
         // for (DownloadSettings.LFMTHostInstance hi : ds.getLfmtHostInstances()) {
@@ -3360,7 +3360,7 @@ public final class AppForm extends javax.swing.JFrame {
     private class LDAP_Dialog extends Utils.InfoPanel {
 
         DefaultTableModel infoTableModel;
-        TableColumnAdjuster tca;
+        Utils.swing.TableColumnAdjuster tca;
 
         public LDAP_Dialog(Window parent, int buttonOptions) throws HeadlessException {
             super(parent, buttonOptions);
@@ -3382,7 +3382,7 @@ public final class AppForm extends javax.swing.JFrame {
             JScrollPane jp = new JScrollPane(tab);
             super.setMainPanel(jp);
 
-            tca = new TableColumnAdjuster(tab);
+            tca = new Utils.swing.TableColumnAdjuster(tab);
             tca.setColumnDataIncluded(true);
             tca.setColumnHeaderIncluded(false);
             tca.setDynamicAdjustment(true);

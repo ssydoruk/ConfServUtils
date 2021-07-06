@@ -5,7 +5,6 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.TableColumnAdjuster;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgFolder;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import java.awt.Dimension;
@@ -45,7 +44,7 @@ abstract class CSVImportLoginIDs extends CSVGeneralImportDialog {
     JTable tabLoginID;
     JTable tabLoginIDsFolders;
 
-    TableColumnAdjuster tcaLoginID;
+    Utils.swing.TableColumnAdjuster tcaLoginID;
     JPanel loginidFolders;
     JPanel topPan;
     private final ConfigServerManager cfg;

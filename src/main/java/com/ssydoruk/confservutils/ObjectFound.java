@@ -23,7 +23,7 @@ public class ObjectFound extends javax.swing.JPanel {
     public ObjectFound() {
         initComponents();
 //        jPanel1.add(lbSummary);
-//        Utils.Swing.restrictHeight(lbSummary);
+//        Utils.swing.Swing.restrictHeight(lbSummary);
     }
 
     /**
@@ -83,7 +83,7 @@ public class ObjectFound extends javax.swing.JPanel {
 
     void setInfoMsg(String infoMsg) {
         lbSummary1.setText(infoMsg);
-//        Utils.Swing.restrictHeight(lbSummary1);
+//        Utils.swing.Swing.restrictHeight(lbSummary1);
 //        pLabel.setMaximumSize(new Dimension(pLabel.getSize().width, lbSummary1.getMinimumSize().height));
 //        lbSummary.setMaximumSize(maximumSize);
 

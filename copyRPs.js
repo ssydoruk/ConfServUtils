@@ -9,7 +9,7 @@ console.log("-start-");
 try {
   CS.connectToConfigServer();
 
-  var srcDNs = findObjectByName("CfgDN", "15102952120");
+  var srcDNs = findObjectByName("CfgDN", "18442342500");
   //   var srcDNs = findObjectByName("CfgDN", "33184884000");
 
   if (srcDNs != null) {

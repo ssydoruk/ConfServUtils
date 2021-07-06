@@ -5,8 +5,8 @@
  */
 package com.ssydoruk.confservutils;
 
-import static Utils.Swing.checkBoxSelection;
-import static Utils.Swing.restrictHeight;
+import static Utils.swing.Swing.checkBoxSelection;
+import static Utils.swing.Swing.restrictHeight;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import java.util.Collection;
 
@@ -48,12 +48,12 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String getObjName() {
-        return checkBoxSelection(tfName);
+        return Utils.swing.Swing.checkBoxSelection(tfName);
     }
 
     @Override
     public String getAllSearch() {
-        return checkBoxSelection(tfSearchString);
+        return Utils.swing.Swing.checkBoxSelection(tfSearchString);
     }
 
     /**
@@ -200,17 +200,17 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public String getSection() {
-        return checkBoxSelection(tfSection);
+        return Utils.swing.Swing.checkBoxSelection(tfSection);
     }
 
     @Override
     public String getOption() {
-        return checkBoxSelection(tfOption);
+        return Utils.swing.Swing.checkBoxSelection(tfOption);
     }
 
     @Override
     public String getValue() {
-        return checkBoxSelection(tfOptionValue);
+        return Utils.swing.Swing.checkBoxSelection(tfOptionValue);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -272,19 +272,19 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
 
     @Override
     public void setChoices(Collection<String> choices) {
-        Utils.Swing.setChoices(tfSearchString, choices);
-        Utils.Swing.setChoices(tfSection, choices);
-        Utils.Swing.setChoices(tfOption, choices);
-        Utils.Swing.setChoices(tfOptionValue, choices);
-        Utils.Swing.setChoices(tfName, choices);
+        Utils.swing.Swing.setChoices(tfSearchString, choices);
+        Utils.swing.Swing.setChoices(tfSection, choices);
+        Utils.swing.Swing.setChoices(tfOption, choices);
+        Utils.swing.Swing.setChoices(tfOptionValue, choices);
+        Utils.swing.Swing.setChoices(tfName, choices);
 
     }
 
     @Override
     public Collection<String> getChoices() {
         return (isSearchAll())
-                ? Utils.Swing.getChoices(tfSearchString)
-                : Utils.Swing.getChoices(
+                ? Utils.swing.Swing.getChoices(tfSearchString)
+                : Utils.swing.Swing.getChoices(
                         tfOption,
                         tfOptionValue,
                         tfSection,

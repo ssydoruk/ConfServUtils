@@ -5,7 +5,7 @@
  */
 package com.ssydoruk.confservutils;
 
-import static Utils.Swing.checkBoxSelection;
+import static Utils.swing.Swing.checkBoxSelection;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
@@ -89,7 +89,7 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public String getName() {
-        return checkBoxSelection(tfObjectName);
+        return Utils.swing.Swing.checkBoxSelection(tfObjectName);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -120,13 +120,13 @@ public class FindObject extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public void setChoices(Collection<String> choices) {
-        Utils.Swing.setChoices(tfObjectName, choices);
+        Utils.swing.Swing.setChoices(tfObjectName, choices);
 
     }
 
     @Override
     public Collection<String> getChoices() {
-        return Utils.Swing.getChoices(tfObjectName);
+        return Utils.swing.Swing.getChoices(tfObjectName);
     }
 
 }

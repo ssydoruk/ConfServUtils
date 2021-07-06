@@ -5,8 +5,7 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.GridEditor;
-import static Utils.Swing.checkBoxSelection;
+import Utils.swing.GridEditor;
 import com.genesyslab.platform.commons.GEnum;
 import com.genesyslab.platform.configuration.protocol.types.CfgAppType;
 import com.jidesoft.swing.CheckBoxListSelectionModel;
@@ -37,10 +36,10 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
     public AppOptionsChange(AppForm _theForm) {
         initComponents();
         theForm = _theForm;
-        Utils.Swing.restrictHeight(tfObjectName);
-        Utils.Swing.restrictHeight(tfOption);
-        Utils.Swing.restrictHeight(tfOptionValue);
-        Utils.Swing.restrictHeight(tfSection);
+        Utils.swing.Swing.restrictHeight(tfObjectName);
+        Utils.swing.Swing.restrictHeight(tfOption);
+        Utils.swing.Swing.restrictHeight(tfOptionValue);
+        Utils.swing.Swing.restrictHeight(tfSection);
 
         Main.loadGenesysTypes(cbApplicationType, CfgAppType.values());
 
@@ -342,13 +341,13 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
 
     @Override
     public String getSection() {
-        return checkBoxSelection(tfSection);
+        return Utils.swing.Swing.checkBoxSelection(tfSection);
     }
 
     @Override
     public String getObjName() {
         if (!isSearchAll()) {
-            return checkBoxSelection(tfObjectName);
+            return Utils.swing.Swing.checkBoxSelection(tfObjectName);
         } else {
             return null;
         }
@@ -356,12 +355,12 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
 
     @Override
     public String getOption() {
-        return checkBoxSelection(tfOption);
+        return Utils.swing.Swing.checkBoxSelection(tfOption);
     }
 
     @Override
     public String getValue() {
-        return checkBoxSelection(tfOptionValue);
+        return Utils.swing.Swing.checkBoxSelection(tfOptionValue);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -465,16 +464,16 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
     @Override
     public void setChoices(Collection<String> choices) {
 
-        Utils.Swing.setChoices(tfObjectName, choices);
-        Utils.Swing.setChoices(tfOption, choices);
-        Utils.Swing.setChoices(tfOptionValue, choices);
-        Utils.Swing.setChoices(tfSection, choices);
+        Utils.swing.Swing.setChoices(tfObjectName, choices);
+        Utils.swing.Swing.setChoices(tfOption, choices);
+        Utils.swing.Swing.setChoices(tfOptionValue, choices);
+        Utils.swing.Swing.setChoices(tfSection, choices);
     }
 
     @Override
     public Collection<String> getChoices() {
 
-        return Utils.Swing.getChoices(tfObjectName,
+        return Utils.swing.Swing.getChoices(tfObjectName,
                 tfOption,
                 tfOptionValue,
                 tfSection);
@@ -500,7 +499,7 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         return new StringBuilder()
                 .append(rbReplaceWith.getText())
                 .append(" (")
-                .append(checkBoxSelection(tfReplaceWith))
+                .append(Utils.swing.Swing.checkBoxSelection(tfReplaceWith))
                 .append(") backup:")
                 .append(cbMakeBackup.isSelected());
     }
@@ -527,7 +526,7 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
                 return false;
             }
         } else if (rbReplaceWith.isSelected()) {
-            if (StringUtils.isBlank(checkBoxSelection(tfReplaceWith))) {
+            if (StringUtils.isBlank(Utils.swing.Swing.checkBoxSelection(tfReplaceWith))) {
                 JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
@@ -562,7 +561,7 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
 
     @Override
     public String KVPreplaceWith(String currentValue) {
-        return checkBoxSelection(tfReplaceWith);
+        return Utils.swing.Swing.checkBoxSelection(tfReplaceWith);
 
     }
 

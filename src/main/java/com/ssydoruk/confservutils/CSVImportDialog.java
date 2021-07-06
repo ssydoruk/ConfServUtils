@@ -5,7 +5,6 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.TableColumnAdjuster;
 import com.genesyslab.platform.applicationblocks.com.objects.CfgFolder;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import java.awt.Dimension;
@@ -47,7 +46,7 @@ abstract class CSVImportDialog extends CSVGeneralImportDialog {
     JTable tabPlaceFolder;
     JTable tabDNFolders;
 
-    TableColumnAdjuster tcaPlaceDN;
+    Utils.swing.TableColumnAdjuster tcaPlaceDN;
     JPanel pPlaceFolder;
     JPanel dnFolders;
     JPanel topPan;

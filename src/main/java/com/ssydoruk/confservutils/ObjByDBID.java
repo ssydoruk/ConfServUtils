@@ -5,7 +5,7 @@
  */
 package com.ssydoruk.confservutils;
 
-import static Utils.Swing.checkBoxSelection;
+import static Utils.swing.Swing.checkBoxSelection;
 import Utils.Util;
 import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import java.util.Collection;
@@ -121,16 +121,16 @@ public class ObjByDBID extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public String getSearchSummary() {
-        return "Search for object type " + getSelectedItem() + " dbid: " + checkBoxSelection(tfDBID);
+        return "Search for object type " + getSelectedItem() + " dbid: " + Utils.swing.Swing.checkBoxSelection(tfDBID);
     }
 
     @Override
     public void setChoices(Collection<String> choices) {
-        Utils.Swing.setChoices(tfDBID, choices);
+        Utils.swing.Swing.setChoices(tfDBID, choices);
     }
 
     @Override
     public Collection<String> getChoices() {
-        return Utils.Swing.getChoices(tfDBID);
+        return Utils.swing.Swing.getChoices(tfDBID);
     }
 }

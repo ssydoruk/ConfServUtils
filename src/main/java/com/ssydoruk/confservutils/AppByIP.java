@@ -5,8 +5,8 @@
  */
 package com.ssydoruk.confservutils;
 
-import static Utils.Swing.checkBoxSelection;
-import java.util.Collection;
+import static Utils.swing.Swing.checkBoxSelection;
+import java.util.*;
 
 /**
  *
@@ -15,7 +15,7 @@ import java.util.Collection;
 public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
 
     public String getText() {
-        return checkBoxSelection(tfIPAddress);
+        return Utils.swing.Swing.checkBoxSelection(tfIPAddress);
     }
 
     /**
@@ -85,16 +85,16 @@ public class AppByIP extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public String getSearchSummary() {
-        return "App by IP; IP[" + checkBoxSelection(tfIPAddress) + "]";
+        return "App by IP; IP[" + Utils.swing.Swing.checkBoxSelection(tfIPAddress) + "]";
     }
 
     @Override
     public void setChoices(Collection<String> choices) {
-        Utils.Swing.setChoices(tfIPAddress, choices);
+        Utils.swing.Swing.setChoices(tfIPAddress, choices);
     }
 
     @Override
     public Collection<String> getChoices() {
-        return Utils.Swing.getChoices(tfIPAddress);
+        return Utils.swing.Swing.getChoices(tfIPAddress);
     }
 }

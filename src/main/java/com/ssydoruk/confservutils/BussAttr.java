@@ -5,12 +5,10 @@
  */
 package com.ssydoruk.confservutils;
 
-import static Utils.Swing.checkBoxSelection;
-import com.genesyslab.platform.commons.GEnum;
-import java.util.ArrayList;
-import java.util.Collection;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
+import com.genesyslab.platform.commons.*;
+import java.util.*;
+import org.apache.commons.lang3.*;
+import org.apache.logging.log4j.*;
 
 /**
  *
@@ -124,7 +122,7 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public String getName() {
-        return checkBoxSelection(tfObjectName);
+        return Utils.swing.Swing.checkBoxSelection(tfObjectName);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -165,13 +163,13 @@ public class BussAttr extends javax.swing.JPanel implements ISearchCommon {
 
     @Override
     public void setChoices(Collection<String> choices) {
-        Utils.Swing.setChoices(tfObjectName, choices);
+        Utils.swing.Swing.setChoices(tfObjectName, choices);
 
     }
 
     @Override
     public Collection<String> getChoices() {
-        return Utils.Swing.getChoices(tfObjectName);
+        return Utils.swing.Swing.getChoices(tfObjectName);
     }
 
 }
