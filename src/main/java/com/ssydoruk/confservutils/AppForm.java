@@ -5,11 +5,9 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.Pair;
 import Utils.*;
+import Utils.Pair;
 import Utils.swing.*;
-import com.ssydoruk.confservutils.ConfigConnection;
-import com.ssydoruk.confservutils.ConfigServerManager;
 import com.genesyslab.platform.applicationblocks.com.*;
 import com.genesyslab.platform.applicationblocks.com.objects.*;
 import com.genesyslab.platform.applicationblocks.com.queries.*;
@@ -19,6 +17,8 @@ import com.genesyslab.platform.commons.protocol.ProtocolException;
 import com.genesyslab.platform.configuration.protocol.confserver.events.*;
 import com.genesyslab.platform.configuration.protocol.types.*;
 import com.google.gson.*;
+import com.ssydoruk.confservutils.ConfigConnection;
+import com.ssydoruk.confservutils.ConfigServerManager;
 import confserverbatch.*;
 import java.awt.*;
 import java.awt.event.*;
