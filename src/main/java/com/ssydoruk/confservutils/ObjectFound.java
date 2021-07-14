@@ -5,10 +5,8 @@
  */
 package com.ssydoruk.confservutils;
 
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
+import javax.swing.*;
+import javax.swing.border.*;
 
 /**
  *
@@ -22,8 +20,7 @@ public class ObjectFound extends javax.swing.JPanel {
 //    JMultilineLabel lbSummary = new JMultilineLabel();
     public ObjectFound() {
         initComponents();
-//        jPanel1.add(lbSummary);
-//        Utils.swing.Swing.restrictHeight(lbSummary);
+        
     }
 
     /**
@@ -59,6 +56,8 @@ public class ObjectFound extends javax.swing.JPanel {
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Found object properties"));
         jPanel2.setLayout(new java.awt.BorderLayout());
 
+        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPane1.setAutoscrolls(true);
         jScrollPane1.setViewportView(jtfObjectProperties);
 
