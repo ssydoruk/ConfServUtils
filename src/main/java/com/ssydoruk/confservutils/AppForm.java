@@ -37,6 +37,8 @@ import org.apache.logging.log4j.Logger;
 import org.jasypt.util.text.*;
 import org.xbill.DNS.*;
 
+import static Utils.ScreenInfo.fixOversizedWindow;
+
 /**
  *
  * @author stepan_sydoruk
@@ -1103,6 +1105,7 @@ public final class AppForm extends javax.swing.JFrame {
         }
         pn1.setInfoMsg(infoMsg);
         pn1.setText(msg);
+        Utils.ScreenInfo.CenterWindow(infoDialog);
 
         infoDialog.showModal();
 
