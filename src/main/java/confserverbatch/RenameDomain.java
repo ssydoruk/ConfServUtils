@@ -24,40 +24,20 @@
 package confserverbatch;
 
 import Utils.Pair;
-import com.genesyslab.platform.applicationblocks.com.CfgObject;
-import com.genesyslab.platform.applicationblocks.com.CfgQuery;
-import com.genesyslab.platform.applicationblocks.com.ConfigException;
-import com.genesyslab.platform.applicationblocks.com.IConfService;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLogin;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgAgentLoginInfo;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPerson;
-import com.genesyslab.platform.applicationblocks.com.objects.CfgPlace;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgAgentLoginQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgPersonQuery;
-import com.genesyslab.platform.applicationblocks.com.queries.CfgPlaceQuery;
-import com.genesyslab.platform.commons.collections.KeyValueCollection;
-import com.genesyslab.platform.commons.protocol.Message;
-import com.genesyslab.platform.commons.protocol.ProtocolException;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventError;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectCreated;
-import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectUpdated;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestCreateObject;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
-import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
-import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
-import com.genesyslab.platform.configuration.protocol.obj.ConfStructure;
-import com.genesyslab.platform.configuration.protocol.obj.ConfStructureCollection;
-import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
-import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
-import com.genesyslab.platform.configuration.protocol.types.CfgStructureType;
-import com.genesyslab.platform.configuration.protocol.utilities.CfgUtilities;
-import java.util.ArrayList;
-import java.util.Collection;
+import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.applicationblocks.com.objects.*;
+import com.genesyslab.platform.applicationblocks.com.queries.*;
+import com.genesyslab.platform.commons.collections.*;
+import com.genesyslab.platform.commons.protocol.*;
+import com.genesyslab.platform.configuration.protocol.confserver.events.*;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.*;
+import com.genesyslab.platform.configuration.protocol.metadata.*;
+import com.genesyslab.platform.configuration.protocol.obj.*;
+import com.genesyslab.platform.configuration.protocol.types.*;
+import com.genesyslab.platform.configuration.protocol.utilities.*;
+import java.util.*;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,7 +71,7 @@ public class RenameDomain {
             throws ConfigException, InterruptedException, ProtocolException, CloneNotSupportedException {
 //        ResourceBundle properties = ResourceBundle.getBundle("quickstart");
 
-//        String configServerHost="ESV1-C-PPE-46.ivr.airbnb.biz";
+//        String configServerHost="host.com";
         RenameDomain app = new RenameDomain();
         app.run();
 
@@ -102,7 +82,7 @@ public class RenameDomain {
     boolean testRun = true;
 
 
-    private final Pattern ptSearchDomain = Pattern.compile("(.*)ext.airbnb(.*)");
+    private final Pattern ptSearchDomain = Pattern.compile("(.*)host.com(.*)");
     private final String sReplaceString = "$1nobnb.biz$2";
     public RenameDomain() {
         
@@ -113,7 +93,7 @@ public class RenameDomain {
     private void run() throws ProtocolException, IllegalStateException, InterruptedException, ConfigException {
         logger.info("starting in " + (testRun ? "test" : "production") + " mode");
 
-        configServerManager.connect("default", "esv1-c-mfwk-03t.airbnb.biz", 2020, "stepan.sydoruk@ext.airbnb.com.admin", "QwErAsDf123");
+        configServerManager.connect("default", "host1.com", 2020, "ssydoruk@gmail.com.admin", "QwErAsDf123");
         if (configServerManager.isConnected()) {
             doUpdate();
             configServerManager.disconnect();
@@ -203,7 +183,7 @@ public class RenameDomain {
         CfgPlaceQuery query2 = new CfgPlaceQuery();
         logger.info("********* updating places");
 
-//        query2.setName("stepan.sydoruk@ext.airbnb.com");
+//        query2.setName("ssydoruk@gmail.com");
         if (1 == 1) {
             processConfigObjects(
                     query2,

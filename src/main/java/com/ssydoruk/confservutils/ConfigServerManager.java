@@ -405,10 +405,10 @@ public class ConfigServerManager {
         try {
             /*
             String configServerHost = "10.61.6.55";
-//        String configServerHost="esv1-c-ppe-46.ivr.airbnb.biz";
+//        String configServerHost="host.com";
             int configServerPort = 2025;
-            String configServerUser = "stepan.sydoruk@ext.airbnb.com.admin";
-            String configServerPass = "CCbljher72~pAOk6NiP";
+            String configServerUser = "ssydoruk@gmail.com.admin";
+            String configServerPass = "";
 
             String tempAppName = "AppName4Test"; // Uniq name for temp app to be created,
             // changed and deleted.

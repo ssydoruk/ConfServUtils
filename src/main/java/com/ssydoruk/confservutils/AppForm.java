@@ -1123,7 +1123,7 @@ public final class AppForm extends javax.swing.JFrame {
     private void debugJS() {
         if (connectToConfigServer()) {
             JSRunner.runFile("/Users/stepan_sydoruk/src/ConfServUtils/jsTest.js",
-                    configServerManager, new String[]{"stepan.sydoruk@ext.airbnb.com"}, false);
+                    configServerManager, new String[]{"ssydoruk@gmail.com"}, false);
         }
     }
 

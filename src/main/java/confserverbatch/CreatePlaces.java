@@ -37,13 +37,13 @@ public class CreatePlaces {
             throws ConfigException, InterruptedException, ProtocolException, CloneNotSupportedException {
 //        ResourceBundle properties = ResourceBundle.getBundle("quickstart");
 
-//        String configServerHost="ESV1-C-PPE-46.ivr.airbnb.biz";
+//        String configServerHost="host.com";
         logger.info("starting");
 
-        String configServerHost = "esv1-c-mfwk-03t.airbnb.biz";
-//        String configServerHost="esv1-c-ppe-46.ivr.airbnb.biz";
+        String configServerHost = "host1.com";
+//        String configServerHost="host.com";
         int configServerPort = 2020;
-        String configServerUser = "stepan.sydoruk@ext.airbnb.com.admin";
+        String configServerUser = "ssydoruk@gmail.com.admin";
         String configServerPass = "QwErAsDf123";
 
         String tempAppName = "AppName4Test"; // Uniq name for temp app to be created,

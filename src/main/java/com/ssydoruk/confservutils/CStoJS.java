@@ -456,7 +456,7 @@ public class CStoJS {
      * <p>
      * example of updateObjProperties for person null     {@code
      * var updateObj = {
-     * userName: "stepan.sydoruk@ext.airbnb.com",
+     * userName: "ssydoruk@gmail.com",
      * agentInfo: {
      * skillLevels: {
      * changed: {
