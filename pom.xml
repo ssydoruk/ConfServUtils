@@ -183,6 +183,7 @@
                 <version>1.10</version>
                 <configuration>
                     <assembleDirectory>${installdir}</assembleDirectory>
+                    <showConsoleWindow>false</showConsoleWindow>
                     <programs>
                         <program>
                             <mainClass>com.ssydoruk.confservutils.Main</mainClass>
