@@ -512,6 +512,8 @@ public class CStoJS {
                             updateSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonObject("changed"));
                             deleteSkillLevels(_objectType, s, DBID, skillLevels.getAsJsonArray("deleted"));
                         }
+                        JsonPrimitive agentInfoProperties = entry.getValue().getAsJsonObject().getAsJsonPrimitive("capacityRuleDBID");
+                        modifyAgentInfo(_objectType, s, DBID, agentInfoProperties);
 
                         switch (entry.getKey()) {
 
@@ -760,6 +762,33 @@ public class CStoJS {
             }
             executeUpdate(objectDelta, _objectType);
         }
+    }
+    private void modifyAgentInfo(CfgObjectType _objectType, String s, int DBID, JsonPrimitive added) throws ProtocolException {
+            CfgMetadata metaData = csManager.getService().getMetaData();
+
+            ConfObjectDelta objectDelta = new ConfObjectDelta(metaData, _objectType);
+
+            ConfObject deltaPerson = (ConfObject) objectDelta.getOrCreatePropertyValue(s);
+            ConfObject deltaPerson1 = (ConfObject) objectDelta.getOrCreatePropertyValue("deltaPerson");
+            ConfStructure deltaAgentInfo = (ConfStructure) deltaPerson1.getOrCreatePropertyValue("agentInfo");
+
+            ConfStructureCollection changedSkillLevels;
+//        Object capacityRuleDBID = deltaAgentInfo.getOrCreatePropertyValue("capacityRuleDBID");
+
+        deltaAgentInfo.setPropertyValue("capacityRuleDBID", null);
+
+            deltaPerson.setPropertyValue("DBID", DBID);              // - required
+
+//            for (Map.Entry<String, JsonElement> changedEntry : added.getAsJsonObject().entrySet()) {
+//                changedSkillLevels = (ConfStructureCollection) deltaAgentInfo.getOrCreatePropertyValue("skillLevels");
+//                ConfStructure createStructure = changedSkillLevels.createStructure();
+//                createStructure.setPropertyValue("skillDBID", Integer.parseInt(changedEntry.getKey()));
+//                createStructure.setPropertyValue("level", changedEntry.getValue().getAsInt());
+//                changedSkillLevels.add(createStructure);
+//
+//            }
+            executeUpdate(objectDelta, _objectType);
+
     }
 
     private void executeUpdate(ConfObjectDelta objectDelta, CfgObjectType _objectType) throws ProtocolException {

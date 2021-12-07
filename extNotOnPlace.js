@@ -29,7 +29,10 @@ try {
 
         var dnType = CS.getAttribute(allDNs[dnDBID], "type");
         if ((dnType == extentionType || dnType == acdType)) {
-            if (!linkedDN(dnDBID, arrPlaces)) {
+            var state = CS.getAttribute(allDNs[dnDBID], "state");
+            if (!linkedDN(dnDBID, arrPlaces) 
+            || parseInt(state) == objStateDisabled //removing disabled DNs
+            ) {
                 total++;
                 console.log(
                     name +
@@ -38,7 +41,8 @@ try {
                     " DBID: " +
                     CS.getAttribute(allDNs[dnDBID], "DBID") +
                     " type: " +
-                    CS.enumToString("CfgDNType", CS.getAttribute(allDNs[dnDBID], "type"))
+                    CS.enumToString("CfgDNType", CS.getAttribute(allDNs[dnDBID], "type")
+                    )
                 );
                 CS.deleteObject("CfgDN", parseInt(dnDBID));
             }
@@ -56,7 +60,7 @@ try {
                     " type: " +
                     CS.enumToString("CfgDNType", CS.getAttribute(allDNs[dnDBID], "type"))
                 );
-                CS.deleteObject("CfgDN", parseInt(dnDBID));
+                // CS.deleteObject("CfgDN", parseInt(dnDBID));
             }
         }
     }
