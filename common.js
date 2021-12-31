@@ -16,6 +16,105 @@ function getFolderTypes(type) {
   return ret;
 }
 
+/**
+ * Checks if DN dnDBID is linked on any place
+ * @param {int} dnDBID 
+ * @param {array of objects/places} place 
+ * @returns true if DN is linked to a place; false otherwise
+ */
+function linkedDN(dnDBID, place) {
+  var dnInt = parseInt(dnDBID);
+  for (let i = 0; i < place.length; i++) {
+    var v = place[i];
+    if (v != null && v.hasOwnProperty("attributes")) {
+      var attrs = v["attributes"];
+      if (
+        attrs != undefined &&
+        attrs.hasOwnProperty("DNDBIDs") &&
+        attrs["DNDBIDs"] != null
+      ) {
+        for (var dn of attrs["DNDBIDs"]) {
+          var dnID = parseInt(dn);
+          if (dnID > 0 && dnID == dnInt) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+
+/**
+ * checks if place placeDBID is linked to any person
+ * 
+ * @param {int} placeDBID 
+ * @param {array} arrPersons array of persons objects
+ * @param {object} associating array of all DNs
+ * @returns true/false
+ */
+function dnsOnPlace(place, allDNs) {
+  if (place != null && place.hasOwnProperty("attributes")) {
+    var attrs = place["attributes"];
+    if (
+      attrs != undefined &&
+      attrs.hasOwnProperty("DNDBIDs") &&
+      Array.isArray(attrs["DNDBIDs"]) &&
+      attrs["DNDBIDs"].length > 0
+    ) {
+      const extentionType = findEnum("CfgDNType", "Extension"); // integer value for DN Type Extension
+      const acdType = findEnum("CfgDNType", "ACDPosition"); // integer value for DN Type Extension
+      if (extentionType == null || acdType == null) {
+        throw new Error("Not able to init run");
+      }
+      for (const dnDBID of attrs["DNDBIDs"]) {
+        var dnJSON = JSON.parse(CS.objToJson(allDNs[dnDBID]));
+
+        if (!(dnJSON.attributes.type === extentionType || dnJSON.attributes.type === acdType)) {
+          if(dnJSON.attributes.state != 2){
+            // console.log('Leaving place: '+JSON.stringify(place));
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * checks if place placeDBID is linked to any person
+ * 
+ * @param {int} placeDBID 
+ * @param {array} arrPersons array of persons objects
+ * @returns true/false
+ */
+
+function placeOnPerson(placeDBID, arrPersons) {
+  var placeDBID = parseInt(placeDBID);
+
+  for (const v of arrPersons) {
+    if (v != null && v.hasOwnProperty("attributes")) {
+      var attrs = v["attributes"];
+      if (
+        attrs != undefined &&
+        attrs.hasOwnProperty("agentInfo") &&
+        attrs["agentInfo"] != null
+      ) {
+        var ai = attrs["agentInfo"];
+        if (ai.hasOwnProperty('placeDBID') && ai.placeDBID != null && ai.placeDBID === placeDBID) {
+          // console.log('placedbid'+placeDBID + ' on person '+ JSON.stringify(v));
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+
 function updatePersonLoginIDs(personDBID, arrLoginsToAdd, arrLoginsToRemove) {
   // var createObj={};
   var createObj = {
@@ -217,8 +316,8 @@ function testFunctions() {
       agentSwitches[dbid] = objs[dbid];
       console.log(
         CS.getAttribute(objs[dbid], "name") +
-          " DBID: " +
-          CS.getAttribute(objs[dbid], "DBID")
+        " DBID: " +
+        CS.getAttribute(objs[dbid], "DBID")
       );
     }
   }
@@ -228,10 +327,10 @@ function testFunctions() {
     if (agentSwitches.hasOwnProperty(objs[dbid].getOwnerID().getDBID())) {
       console.log(
         CS.getAttribute(objs[dbid], "name") +
-          " DBID: " +
-          CS.getAttribute(objs[dbid], "DBID") +
-          " path: " +
-          CS.getObjectPath(objs[dbid])
+        " DBID: " +
+        CS.getAttribute(objs[dbid], "DBID") +
+        " path: " +
+        CS.getObjectPath(objs[dbid])
       );
     }
   }
@@ -241,10 +340,10 @@ function testFunctions() {
     if (agentSwitches.hasOwnProperty(objs[dbid].getOwnerID().getDBID())) {
       console.log(
         CS.getAttribute(objs[dbid], "name") +
-          " DBID: " +
-          CS.getAttribute(objs[dbid], "DBID") +
-          " path: " +
-          CS.getObjectPath(objs[dbid])
+        " DBID: " +
+        CS.getAttribute(objs[dbid], "DBID") +
+        " path: " +
+        CS.getObjectPath(objs[dbid])
       );
     }
   }
@@ -288,28 +387,27 @@ function createAgentLogin(loginCode, switchDBID) {
   if (ret >= 0) {
     console.log(
       "created login DBID: " +
-        ret +
-        " code:" +
-        loginCode +
-        " switchDBID:" +
-        switchDBID
+      ret +
+      " code:" +
+      loginCode +
+      " switchDBID:" +
+      switchDBID
     );
   } else {
     console.log(
       "NOT created login DBID: " +
-        ret +
-        " code:" +
-        loginCode +
-        " switchDBID:" +
-        switchDBID
+      ret +
+      " code:" +
+      loginCode +
+      " switchDBID:" +
+      switchDBID
     );
   }
   return ret;
 }
 
 function testLoginIDs() {
-  const NEWNAME = "aaaaaa";
-  {
+  const NEWNAME = "aaaaaa"; {
     // var dbid = findObjectByName("CfgAgentLogin", NEWNAME);
     // if (dbid != null)
     //   console.log("deleted login: " + CS.deleteObject("CfgAgentLogin", dbid));
@@ -335,5 +433,3 @@ function testLoginIDs() {
   //   "new object DBID: " + findObjectByName("CfgAgentLogin", NEWNAME, true)
   // );
 }
-
-        
