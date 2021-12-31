@@ -596,21 +596,27 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
         @Override
         public int compareTo(Object o) {
-            if(o!=null ){
-            ComboItem ob = (ComboItem) o;
-            if(ob!=null &&  ob.toString()==null){
+            try {
+                if (o != null) {
+                    ComboItem ob = (ComboItem) o;
+                    if (ob == null || ob.toString() == null) {
+                        logger.error("obj is null ");
+                        return -1;
+                    }
+                    if (this.toString() == null) {
+                        logger.error("this is null ");
+                        return -1;
+                    }
+                    return this.toString().compareTo(ob.toString());
+                } else {
+                    return -1;
+                }
+            } catch (Exception e) {
                 logger.error("obj is null ");
-            }
-            if(this.toString()==null){
-                logger.error("this is null ");
-            }
-            return this.toString().compareTo(ob.toString());
-            }
-            else {
                 return -1;
+
             }
         }
-
     }
 
     private void loadStrategies(boolean loadAll) {
