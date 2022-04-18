@@ -556,10 +556,10 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
                     return false;
                 }
             } else if (rbReplaceWith.isSelected()) {
-                if (StringUtils.isBlank(Utils.swing.Swing.checkBoxSelection(tfReplaceWith))) {
-                    JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
-                    return false;
-                }
+//                if (StringUtils.isBlank(Utils.swing.Swing.checkBoxSelection(tfReplaceWith))) {
+//                    JOptionPane.showMessageDialog(theForm, "\"Replace with \" string cannot be blank", "Cannot proceed", JOptionPane.ERROR_MESSAGE);
+//                    return false;
+//                }
             }
         }
         return true;

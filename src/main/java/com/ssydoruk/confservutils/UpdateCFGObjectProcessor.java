@@ -6,23 +6,34 @@
 package com.ssydoruk.confservutils;
 
 import Utils.Pair;
-import com.genesyslab.platform.applicationblocks.com.*;
+import com.genesyslab.platform.applicationblocks.com.CfgObject;
+import com.genesyslab.platform.applicationblocks.com.IConfService;
 import com.genesyslab.platform.applicationblocks.com.objects.*;
-import com.genesyslab.platform.commons.collections.*;
-import com.genesyslab.platform.commons.protocol.*;
-import com.genesyslab.platform.configuration.protocol.confserver.events.*;
-import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.*;
-import com.genesyslab.platform.configuration.protocol.metadata.*;
-import com.genesyslab.platform.configuration.protocol.obj.*;
-import com.genesyslab.platform.configuration.protocol.types.*;
-import java.util.*;
+import com.genesyslab.platform.commons.collections.KeyValueCollection;
+import com.genesyslab.platform.commons.collections.KeyValuePair;
+import com.genesyslab.platform.commons.collections.ValueType;
+import com.genesyslab.platform.commons.protocol.Message;
+import com.genesyslab.platform.commons.protocol.ProtocolException;
+import com.genesyslab.platform.configuration.protocol.confserver.events.EventObjectDeleted;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestDeleteObject;
+import com.genesyslab.platform.configuration.protocol.confserver.requests.objects.RequestUpdateObject;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgDescriptionAttribute;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgMetadata;
+import com.genesyslab.platform.configuration.protocol.metadata.CfgTypeMask;
+import com.genesyslab.platform.configuration.protocol.obj.ConfObject;
+import com.genesyslab.platform.configuration.protocol.obj.ConfObjectDelta;
+import com.genesyslab.platform.configuration.protocol.types.CfgFlag;
+import com.genesyslab.platform.configuration.protocol.types.CfgObjectType;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 import static com.ssydoruk.confservutils.Misc.getSection;
 
 /**
- *
  * @author stepan_sydoruk
  */
 public class UpdateCFGObjectProcessor {
@@ -38,9 +49,8 @@ public class UpdateCFGObjectProcessor {
     }
 
 
-
     private static String cleanString(String s) {
-        return StringUtils.strip(StringUtils.trim(s));
+        return (s == null) ? "" : StringUtils.strip(StringUtils.trim(s));
     }
 
     private static HashMap<CfgObjectType, String> createDeltaByType() {
@@ -157,7 +167,7 @@ public class UpdateCFGObjectProcessor {
             CfgMetadata metaData = service.getMetaData();
             ConfObjectDelta d = new ConfObjectDelta(metaData, objType);
 
-            String className=obj.getClass().getSimpleName();
+            String className = obj.getClass().getSimpleName();
             ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue(metaData.getCfgClass(className).getDelta().getClassDescription().getAttributeByName(className).getSchemaName());
             obj1.setPropertyValue("DBID", obj.getObjectDbid());              // - required
             if (!updateSections.isEmpty()) {

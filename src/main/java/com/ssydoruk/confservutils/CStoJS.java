@@ -201,6 +201,18 @@ public class CStoJS {
     }
 
     /**
+     * <b>Javascript exported</b> gets path of the object in ConfigServer
+     * hierarchy
+     *
+     * @param obj CfgObject
+     * @return String path
+     */
+    @HostAccess.Export
+    public Integer getFolderID(CfgObject obj) {
+        return obj.getFolderId();
+    }
+
+    /**
      * <b>Javascript exported</b> String value of constant to numeric
      *
      * @param enumName name of the Genesys enumeration
