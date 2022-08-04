@@ -63,19 +63,10 @@ function dnsOnPlace(place, allDNs) {
       Array.isArray(attrs["DNDBIDs"]) &&
       attrs["DNDBIDs"].length > 0
     ) {
-      const extentionType = findEnum("CfgDNType", "Extension"); // integer value for DN Type Extension
-      const acdType = findEnum("CfgDNType", "ACDPosition"); // integer value for DN Type Extension
-      if (extentionType == null || acdType == null) {
-        throw new Error("Not able to init run");
-      }
       for (const dnDBID of attrs["DNDBIDs"]) {
         var dnJSON = JSON.parse(CS.objToJson(allDNs[dnDBID]));
-
-        if (!(dnJSON.attributes.type === extentionType || dnJSON.attributes.type === acdType)) {
-          if(dnJSON.attributes.state != 2){
-            // console.log('Leaving place: '+JSON.stringify(place));
-            return true;
-          }
+        if (dnJSON != null && dnJSON != undefined && Object.keys(dnJSON).length > 0) {
+          return true;
         }
       }
     }
@@ -114,6 +105,40 @@ function placeOnPerson(placeDBID, arrPersons) {
   return false;
 }
 
+/**
+ * checks if place placeDBID is linked to any person
+ * 
+ * @param {int} loginDBID 
+ * @param {array} arrPersons array of persons objects
+ * @returns true/false
+ */
+
+function loginOnPerson(someID, loginDBID, arrPersons) {
+  var loginDBID = parseInt(loginDBID);
+
+  for (const v of arrPersons) {
+    if (v != null && v.hasOwnProperty("attributes")) {
+      var attrs = v["attributes"];
+      if (
+        attrs != undefined &&
+        attrs.hasOwnProperty("agentInfo") &&
+        attrs["agentInfo"] != null
+      ) {
+        var ai = attrs["agentInfo"];
+        if (ai.hasOwnProperty('agentLogins') &&  ai.agentLogins != null) {
+          for (const agLogin of ai.agentLogins) {
+            if (agLogin != null && agLogin.agentLoginDBID == loginDBID) {
+              // console.log('placedbid'+placeDBID + ' on person '+ JSON.stringify(v));
+              return true;
+            }
+          }
+
+        }
+      }
+    }
+  }
+  return false;
+}
 
 function updatePersonLoginIDs(personDBID, arrLoginsToAdd, arrLoginsToRemove) {
   // var createObj={};

@@ -16,28 +16,28 @@ try {
     break;
   }
 
-  var places = objectDBID_props("CfgDN");
+  var agentLogins = objectDBID_props("CfgDN");
   let re = new RegExp("^[a-z]{2,}");
   const dnExtension = findEnum("CfgDNType", "Extension"); // integer value for DN Type Extension
   if (switchDBID == null || dnExtension == null) {
     throw new Error("Not able to init run");
   }
-  for (const dbid in places) {
-    var name = CS.getAttribute(places[dbid], "number");
+  for (const dbid in agentLogins) {
+    var name = CS.getAttribute(agentLogins[dbid], "number");
 
     if (
-      CS.getAttribute(places[dbid], "switchDBID") == switchDBID &&
-      CS.getAttribute(places[dbid], "type") == dnExtension &&
+      CS.getAttribute(agentLogins[dbid], "switchDBID") == switchDBID &&
+      CS.getAttribute(agentLogins[dbid], "type") == dnExtension &&
       re.test(name)
     ) {
       console.log(
         name +
           " path: " +
-          CS.getObjectPath(places[dbid]) +
+          CS.getObjectPath(agentLogins[dbid]) +
           " DBID: " +
-          CS.getAttribute(places[dbid], "DBID") +
+          CS.getAttribute(agentLogins[dbid], "DBID") +
           " type: " +
-          CS.enumToString("CfgDNType", CS.getAttribute(places[dbid], "type"))
+          CS.enumToString("CfgDNType", CS.getAttribute(agentLogins[dbid], "type"))
       );
     }
   }

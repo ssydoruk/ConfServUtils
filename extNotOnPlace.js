@@ -30,8 +30,8 @@ try {
         var dnType = CS.getAttribute(allDNs[dnDBID], "type");
         if ((dnType == extentionType || dnType == acdType)) {
             var state = CS.getAttribute(allDNs[dnDBID], "state");
-            if (!linkedDN(dnDBID, arrPlaces) 
-            || parseInt(state) == objStateDisabled //removing disabled DNs
+            if (!linkedDN(dnDBID, arrPlaces)
+                // || parseInt(state) == objStateDisabled //removing disabled DNs
             ) {
                 total++;
                 console.log(
@@ -41,12 +41,13 @@ try {
                     " DBID: " +
                     CS.getAttribute(allDNs[dnDBID], "DBID") +
                     " type: " +
-                    CS.enumToString("CfgDNType", CS.getAttribute(allDNs[dnDBID], "type")
-                    )
+                    CS.enumToString("CfgDNType", CS.getAttribute(allDNs[dnDBID], "type")) +
+                        "state: " + (CS.getAttribute(allDNs[dnDBID], "state") == objStateDisabled ? "disabled" : "enabled")
+
                 );
                 CS.deleteObject("CfgDN", parseInt(dnDBID));
             }
-        } else if (dnType == vtoPortType) {
+        } else if (dnType == vtoPortType && false) {
             var state = CS.getAttribute(allDNs[dnDBID], "state");
             if (parseInt(state) == objStateDisabled && !linkedDN(dnDBID, arrPlaces)) {
                 console.log('Disabled vto port' + CS.objToJson(allDNs[dnDBID]));
