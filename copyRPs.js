@@ -9,21 +9,21 @@ console.log("-start-");
 try {
   CS.connectToConfigServer();
 
-  var srcDNs = findObjectByName("CfgDN", "18442342500");
+  var srcDNs = findObjectByName("CfgDN", "6108132");
   //   var srcDNs = findObjectByName("CfgDN", "33184884000");
 
   if (srcDNs != null) {
     var switches = objectDBID_props("CfgSwitch");
-    var csv = CS.readCSV("/Users/stepan_sydoruk/aaa.csv"); // returned is ArrayList of String Array
+    var csv = CS.readCSV("/Users/stepan_sydoruk/RPsToCreate.csv"); // returned is ArrayList of String Array
     for (let index = 0; index < csv.size(); index++) {
       var arr = csv.get(index);
       console.log("processing " + arr);
       var newName;
       if(typeof arr === 'string'){
-        newName=arr;
+        newName=arr.trim();
       }
       else {
-        newName=arr[0];
+        newName=arr[0].trim();
       }
 
       for (const dbid in srcDNs) {
