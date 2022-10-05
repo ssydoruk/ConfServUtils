@@ -1,0 +1,39 @@
+{
+  "ConfigServers": [
+    {
+      "Profile": "prod",
+      "Host": "IL3PWIVRMGMT1",
+      "Port": "2020",
+      "App": "default"
+    },
+    {
+      "Profile": "preprod",
+      "Host": "IL3qWIVRMGMT1",
+      "Port": "2020",
+      "App": "default"
+    },
+    {
+      "Profile": "dev",
+      "Host": "il3dwgenesys1",
+      "Port": "2020",
+      "App": "default"
+    }
+  ],
+  "LastFiles": [
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\placesNoDNsNoPerson.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\loginIDsNotOnPerson.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\extNotOnPlace.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\getHosts.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\removePersonsFromCSV.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\removeCapacityRules.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\appHost.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\findLDAPDNs.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\getRMs.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\getMCPs.js",
+    "C:\\Users\\STISY7\\IdeaProjects\\ConfServUtils\\appTest.js"
+  ],
+  "Users": [
+    "stisy7"
+  ],
+  "Password": "T/m8zAxEgbDcxSLMDhy3hTu7nDjSP/gh"
+}

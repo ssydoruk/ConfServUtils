@@ -8,6 +8,7 @@ package com.ssydoruk.confservutils;
 import com.genesyslab.platform.commons.GEnum;
 import com.jidesoft.swing.CheckBoxList;
 import com.jidesoft.swing.SearchableUtils;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.ListSelectionModel;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -40,7 +42,6 @@ import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuild
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 /**
- *
  * @author stepan_sydoruk
  */
 public class Main {
@@ -150,12 +151,11 @@ public class Main {
     }
 
     private static void initLogger(String sLoaderLog1) {
-        if (sLoaderLog1 == null || sLoaderLog1.isEmpty()) {
-            sLoaderLog1 = "./applog";
-        } else {
-            System.setProperty("logPath", sLoaderLog1);
+//        if (sLoaderLog1 == null || sLoaderLog1.isEmpty()) {
+//            sLoaderLog1 = "./applog";
+//        }
+//        System.setProperty("logPath", sLoaderLog1);
 
-        }
         System.setProperty("log4j2.saveDirectory", "true");
         String s = System.getProperty("log4j.configurationFile");
         if (s != null && !s.isEmpty()) {
@@ -212,6 +212,8 @@ public class Main {
             logger = LogManager.getLogger();
         }
         logger.info("log initialized");
+        logger.debug("debug");
+        logger.trace("trace");
     }
 
     public static void loadGenesysTypes(JComboBox cbObjectSubtype, Collection values, GEnum[] exclude) {
@@ -269,6 +271,7 @@ public class Main {
         }
 
     }
+
     StoredSettings ds = null;
 
 }

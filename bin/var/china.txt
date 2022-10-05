@@ -1,0 +1,252 @@
+{
+  "OutputDir": "/Users/stepan_sydoruk/GCTI/Work/Mar24_China",
+  "TimeProfile": "REGEX",
+  "DateSpec": "2021032[23]",
+  "TimeSpec": "",
+  "ActionCommand": "LS",
+  "GrepText": "5142659785",
+  "UseRSync": true,
+  "AppLogs": true,
+  "LcaLogs": false,
+  "StatusScript": "/Users/stepan_sydoruk/bin/getAppStatus",
+  "AfterActions": [
+    {
+      "Key": "cp -L /Users/stepan_sydoruk/GCTI/bin/logbrowser/logbrBE.sh /Users/stepan_sydoruk/GCTI/bin/logbrowser/logbrFE.sh {OUTDIR}",
+      "Value": true
+    },
+    {
+      "Key": "find {OUTDIR} -name *.log ! -name .\\* -execdir zip --move {}.zip {} ;",
+      "Value": true
+    },
+    {
+      "Key": "find {OUTDIR} -name *.zip -execdir unzip {} ; -execdir rm {} ;",
+      "Value": false
+    },
+    {
+      "Key": "find {OUTDIR} -name *.db -execdir rm {} ;",
+      "Value": false
+    },
+    {
+      "Key": "find {OUTDIR} -name *.log -execdir rm {} ;",
+      "Value": false
+    },
+    {
+      "Key": "{OUTDIR}/logbrBE.sh {OUTDIR}",
+      "Value": true
+    },
+    {
+      "Key": "{OUTDIR}/logbrFE.sh {OUTDIR}",
+      "Value": true
+    }
+  ],
+  "BeforeActions": [
+    {
+      "Key": "find {OUTDIR} -name *.log -execdir unzip {}.zip {} ; -execdir rm {} ;",
+      "Value": false
+    },
+    {
+      "Key": "find {OUTDIR} -name *.db -execdir rm {} ;",
+      "Value": false
+    }
+  ],
+  "ListFiles": true,
+  "LfmtHostInstances": [
+    {
+      "Host": null,
+      "Instance": null,
+      "BaseDir": null
+    },
+    {
+      "Host": "esg4-c-lfmt01.plus.airbnb.biz",
+      "Instance": "lfmt",
+      "BaseDir": "/"
+    }
+  ],
+  "AppProfiles": [
+    {
+      "Name": "SIP Server",
+      "Selected": true,
+      "Lftm": {
+        "Host": "esg4-c-lfmt01.plus.airbnb.biz",
+        "Instance": "lfmt",
+        "BaseDir": "/"
+      },
+      "IsGenesysName": true,
+      "NameSuffixes": {
+        "-001": true,
+        "-1536": false,
+        "-768": false,
+        "-512": false,
+        ".": true
+      },
+      "Apps": [
+        {
+          "Name": "cn_sip_b",
+          "AppDir": null,
+          "Checked": false
+        },
+        {
+          "Name": "cn_sip_p",
+          "AppDir": null,
+          "Checked": true
+        }
+      ]
+    },
+    {
+      "Name": "Routing",
+      "Selected": false,
+      "Lftm": {
+        "Host": "esg4-c-lfmt01.plus.airbnb.biz",
+        "Instance": "lfmt",
+        "BaseDir": "/"
+      },
+      "IsGenesysName": true,
+      "NameSuffixes": {
+        ".": true
+      },
+      "Apps": [
+        {
+          "Name": "cn_ors_1_b",
+          "AppDir": null,
+          "Checked": false
+        },
+        {
+          "Name": "cn_urs_p",
+          "AppDir": null,
+          "Checked": true
+        },
+        {
+          "Name": "cn_ors_1_p",
+          "AppDir": null,
+          "Checked": true
+        },
+        {
+          "Name": "cn_urs_b",
+          "AppDir": null,
+          "Checked": false
+        }
+      ]
+    },
+    {
+      "Name": "Management Layer",
+      "Selected": false,
+      "Lftm": {
+        "Host": "esg4-c-lfmt01.plus.airbnb.biz",
+        "Instance": "lfmt",
+        "BaseDir": "/"
+      },
+      "IsGenesysName": true,
+      "NameSuffixes": null,
+      "Apps": [
+        {
+          "Name": "confserv",
+          "AppDir": null,
+          "Checked": true
+        },
+        {
+          "Name": "cn_csproxy_app_p",
+          "AppDir": null,
+          "Checked": true
+        },
+        {
+          "Name": "cn_scs_b",
+          "AppDir": null,
+          "Checked": false
+        },
+        {
+          "Name": "confserv_b",
+          "AppDir": null,
+          "Checked": false
+        },
+        {
+          "Name": "cn_scs_p",
+          "AppDir": null,
+          "Checked": false
+        },
+        {
+          "Name": "cn_csproxy_app_b",
+          "AppDir": null,
+          "Checked": false
+        }
+      ]
+    },
+    {
+      "Name": "GWS",
+      "Selected": false,
+      "Lftm": {
+        "Host": "esg4-c-lfmt01.plus.airbnb.biz",
+        "Instance": "lfmt",
+        "BaseDir": "/"
+      },
+      "IsGenesysName": false,
+      "NameSuffixes": {
+        "*request.{YYYY}_{MM}_{DD}*.log": true,
+        "{NAME}.log": true,
+        "*{NAME}.{YYYY}{MM}{DD}*.log": true,
+        ".": true
+      },
+      "Apps": [
+        {
+          "Name": "cn_gws_1",
+          "AppDir": "gws",
+          "Checked": true
+        },
+        {
+          "Name": "cn_gws_2",
+          "AppDir": "gws",
+          "Checked": true
+        }
+      ]
+    },
+    {
+      "Name": "GVP",
+      "Selected": false,
+      "Lftm": {
+        "Host": "esg4-c-lfmt01.plus.airbnb.biz",
+        "Instance": "lfmt",
+        "BaseDir": "/"
+      },
+      "IsGenesysName": true,
+      "NameSuffixes": {
+        ".": true
+      },
+      "Apps": [
+        {
+          "Name": "cn_mcp_gir_1",
+          "AppDir": null,
+          "Checked": true
+        },
+        {
+          "Name": "cn_mcp_ivr_2",
+          "AppDir": null,
+          "Checked": true
+        },
+        {
+          "Name": "cn_rm_2",
+          "AppDir": null,
+          "Checked": false
+        },
+        {
+          "Name": "cn_mcp_gir_2",
+          "AppDir": null,
+          "Checked": true
+        },
+        {
+          "Name": "cn_rm_1",
+          "AppDir": null,
+          "Checked": false
+        },
+        {
+          "Name": "cn_mcp_ivr_1",
+          "AppDir": null,
+          "Checked": true
+        }
+      ]
+    }
+  ],
+  "Lfmt": false,
+  "Prod": true,
+  "Hours": "80",
+  "RangeStart": 1560798529000,
+  "RangeEnd": 1560809401000
+}
