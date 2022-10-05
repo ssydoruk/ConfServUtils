@@ -189,7 +189,6 @@
                     <repositoryName>lib</repositoryName>
                     <tempDirectory>tmp</tempDirectory>
                     <preAssembleDirectory>bin</preAssembleDirectory>
-                    <showConsoleWindow>true</showConsoleWindow>
                     <programs>
                         <program>
                             <mainClass>com.ssydoruk.confservutils.Main</mainClass>
