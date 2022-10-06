@@ -444,7 +444,7 @@ function testLoginIDs() {
   //   useOverride: 2,
   //   switchDBID: 103,
   //   switchSpecificType: 1,
-  //   // userName: "stepan.sydoruk@ext.airbnb.com",
+  //   // userName: "stepan.sydoruk@test.com",
   // };
 
   // console.log(

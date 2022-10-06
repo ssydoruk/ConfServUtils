@@ -43,7 +43,7 @@ for (let index = 0; index < allSwitches.size(); index++) {
 
 // console.log(JSON.stringify(obj));
 var createObj = {
-  // userName: "stepan.sydoruk@ext.airbnb.com",
+  // userName: "stepan.sydoruk@test.com",
   agentInfo: {
     skillLevels: {
       changed: {

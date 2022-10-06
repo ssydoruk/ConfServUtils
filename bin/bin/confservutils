@@ -5,7 +5,7 @@
 APPDIR=/home/stepan_sydoruk/IdeaProjects/install
 #DBG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"
 
-JAVA_OPTS="-Dlog4j.configurationFile=${APPDIR}/etc/csUtilsUnix.xml -DlogPath=${APPDIR}/tmp ${DBG}"
+JAVA_OPTS="-Dlog4j.configurationFile=${APPDIR}/etc/csUtils.xml -DlogPath=${APPDIR}/tmp ${DBG}"
 export JAVA_OPTS JAVA_HOME
 ${APPDIR}/bin/csUtils -gui-profile=${APPDIR}/var/confUtil.txt 
 
