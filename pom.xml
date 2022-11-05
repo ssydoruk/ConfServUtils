@@ -120,7 +120,7 @@
         <dependency>
             <groupId>com.mycompany</groupId>
             <artifactId>Utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
         <!-- API, java.xml.bind module -->
         <dependency>
