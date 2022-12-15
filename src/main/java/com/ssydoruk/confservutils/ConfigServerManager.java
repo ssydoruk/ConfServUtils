@@ -402,45 +402,10 @@ public class ConfigServerManager {
         }
         parentForm.requestOutput("connecting...\n", false);
 
-        try {
-            /*
-            String configServerHost = "10.61.6.55";
-//        String configServerHost="host.com";
-            int configServerPort = 2025;
-            String configServerUser = "ssydoruk@gmail.com.admin";
-            String configServerPass = "";
 
-            String tempAppName = "AppName4Test"; // Uniq name for temp app to be created,
-            // changed and deleted.
-            String tempAgentName = "AgentName4Test"; // Uniq name for temp agent to be created,
-            // changed and deleted.
-
-            logger.info("ComJavaQuickStart started execution.");
-
-            String someAppName = "default";
-//        if (someAppName == null || someAppName.equals("")) {
-//            someAppName = "default";
-//        }
-//        configServerHost = properties.getString("ConfServerHost");
-//        configServerPort = Integer.parseInt(properties.getString("ConfServerPort"));
-//        configServerUser = properties.getString("ConfServerUser");
-//        configServerPass = properties.getString("ConfServerPassword");
-             */
-            service = ConfigConnection.initializeConfigService(
-                    confServ.getApp(), confServ.getHost(), confServ.getPortInt(),
-                    user, string);
-
-            if (service != null) {
-                parentForm.requestOutput("connected to ConfigServer " + confServ, false);
-            }
-
-        } catch (ConfigException | InterruptedException | ProtocolException ex) {
-            service = null;
-            parentForm.showException("Cannot connect to ConfigServer", ex);
-            throw ex;
-
-        }
-        return service;
+        return service=ConfigConnection.initializeConfigService(
+                confServ.getApp(), confServ.getHost(), confServ.getPortInt(),
+                user, string);
 
     }
 
@@ -2387,15 +2352,14 @@ public class ConfigServerManager {
                 try {
                     ret = connect(confServ, user, getParentForm().pfPasswordgetPassword());
 
-                } catch (Exception e) {
-                    getParentForm().showException("Cannot connect to ConfigServer", e);
-                    throw e;
+                } catch (ProtocolException | IllegalStateException | InterruptedException ex) {
+                    getParentForm().showException("Failed to connect to ConfigServer: "+ex.getMessage(), ex);
                 }
 
             }
             getParentForm().connectionStatusChanged();
 
-            return isConnected();
+            return ret!=null;
         }
     }
 

@@ -2166,6 +2166,8 @@ public final class AppForm extends javax.swing.JFrame {
 
     public void connectionStatusChanged() {
         final boolean isConnected = configServerManager.isConnected();
+            requestOutput((isConnected)?"Connected to ConfigServer " :"Disconnected from config server");
+
         btDisconnect.setEnabled(isConnected);
         btConnect.setEnabled(!isConnected);
         changeCSParams(!isConnected);
