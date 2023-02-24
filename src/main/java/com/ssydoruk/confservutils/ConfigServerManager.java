@@ -2131,6 +2131,84 @@ public class ConfigServerManager {
                 return false;
             }
         } // </editor-fold>
+        else if (t == CfgObjectType.CFGCampaignGroup) {
+            final CfgCampaignGroupQuery query = new CfgCampaignGroupQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgCampaignGroup.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    KeyValueCollection ret;
+                    ret = (((CfgCampaignGroup) obj).getUserProperties());
+                    return ret;
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgCampaignGroup) obj).getName());
+                    ret.add(((CfgCampaignGroup) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGCampaign) {
+            final CfgCampaignQuery query = new CfgCampaignQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgCampaign.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    KeyValueCollection ret;
+                    ret = (((CfgCampaign) obj).getUserProperties());
+                    return ret;
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgCampaign) obj).getName());
+                    ret.add(((CfgCampaign) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
+        else if (t == CfgObjectType.CFGCallingList) {
+            final CfgCallingListQuery query = new CfgCallingListQuery();
+            // String n = pn.getObjName();
+            // if (pn.isCaseSensitive() && n != null) {
+            // query.setName(n);
+            //
+            // }
+            if (findObjects(query, CfgCallingList.class, new IKeyValueProperties() {
+                @Override
+                public KeyValueCollection getProperties(final CfgObject obj) {
+                    KeyValueCollection ret;
+                    ret = (((CfgCallingList) obj).getUserProperties());
+                    return ret;
+                }
+
+                @Override
+                public Collection<String> getName(final CfgObject obj) {
+                    final Collection<String> ret = new ArrayList<>();
+                    ret.add(((CfgCallingList) obj).getName());
+                    ret.add(((CfgCallingList) obj).getDescription());
+                    return ret;
+                }
+            }, new FindWorker(pn), checkNames, foundProc)) {
+                return false;
+            }
+        } // </editor-fold>
         else {
             if (warnNotFound) {
                 logger.info("Searching for type " + t + " not implemented yet");

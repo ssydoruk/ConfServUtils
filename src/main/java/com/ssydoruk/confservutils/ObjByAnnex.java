@@ -48,14 +48,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
             CfgObjectType.CFGNoObject,
             CfgObjectType.CFGMaxObjectType,
             CfgObjectType.CFGPersonLastLogin,
-            CfgObjectType.CFGCallingList,
-            CfgObjectType.CFGField,
-            CfgObjectType.CFGFormat,
             CfgObjectType.CFGAppPrototype,
-            CfgObjectType.CFGCampaign,
-            CfgObjectType.CFGCampaignGroup,
-            CfgObjectType.CFGTableAccess,
-            CfgObjectType.CFGFilter
 
         });
 
