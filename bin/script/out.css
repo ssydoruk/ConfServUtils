@@ -1,0 +1,38 @@
+body {
+    background: lightyellow;
+    font: 18px Arial, sans-serif;
+}
+
+h1 {
+    color: orange;
+}
+
+._time {
+    color: rgb(10, 10, 10);
+
+}
+
+.mod {
+    color: rgb(145, 255, 0);
+    background-color: yellow;
+}
+
+.eventdesc {
+    color: red;
+}
+
+.grey {
+    background-color: rgba(128, 128, 128, .25);
+}
+
+.red {
+    background-color: rgba(255, 0, 0, .25);
+}
+
+.blue {
+    background-color: rgba(0, 0, 255, .25);
+}
+
+.json {
+    color: blueviolet;
+}

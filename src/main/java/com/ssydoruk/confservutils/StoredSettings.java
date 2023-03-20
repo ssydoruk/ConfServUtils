@@ -21,6 +21,8 @@ class StoredSettings {
     ArrayList<String> users = new ArrayList<>();
     String password;
 
+    CSVToHTMLSettings csvToHTMLSettings = new CSVToHTMLSettings();
+
     public void setLastUsedConfigServer(int lastUsedConfigServer) {
         if (lastUsedConfigServer >= 0 && lastUsedConfigServer < configServers.size()) {
             ArrayList<ConfServer> configServers1 = new ArrayList<>();
@@ -81,6 +83,96 @@ class StoredSettings {
 
     public ArrayList<String> getUsers() {
         return users;
+    }
+
+    public String getCsvFile() {
+        return csvToHTMLSettings.getCsvFile();
+    }
+
+    public void setCsvFile(String csvFile) {
+        csvToHTMLSettings.setCsvFile(csvFile);
+    }
+
+    public String getOutputFile() {
+        return csvToHTMLSettings.getOutputFile();
+    }
+
+    public void setOutputFile(String outputFile) {
+        csvToHTMLSettings.setOutputFile(outputFile);
+    }
+
+    public String getCcsFile() {
+        return csvToHTMLSettings.getCcsFile();
+    }
+
+    public void setCcsFile(String ccsFile) {
+        csvToHTMLSettings.setCcsFile(ccsFile);
+    }
+
+    public String getJsFile() {
+        return csvToHTMLSettings.getJsFile();
+    }
+
+    public void setJsFile(String jsFile) {
+        csvToHTMLSettings.setJsFile(jsFile);
+    }
+
+    public int getAction() {
+        return csvToHTMLSettings.getAction();
+    }
+
+    public void setAction(int action) {
+        csvToHTMLSettings.setAction(action);
+    }
+
+    
+    public static class CSVToHTMLSettings {
+
+        private String csvFile;
+        private String outputFile;
+        private String ccsFile;
+        private int action;
+
+        public int getAction() {
+            return action;
+        }
+
+        public void setAction(int action) {
+            this.action = action;
+        }
+
+        public String getCsvFile() {
+            return csvFile;
+        }
+
+        public void setCsvFile(String csvFile) {
+            this.csvFile = csvFile;
+        }
+
+        public String getOutputFile() {
+            return outputFile;
+        }
+
+        public void setOutputFile(String outputFile) {
+            this.outputFile = outputFile;
+        }
+
+        public String getCcsFile() {
+            return ccsFile;
+        }
+
+        public void setCcsFile(String ccsFile) {
+            this.ccsFile = ccsFile;
+        }
+
+        public String getJsFile() {
+            return jsFile;
+        }
+
+        public void setJsFile(String jsFile) {
+            this.jsFile = jsFile;
+        }
+        String jsFile;
     }
 
     public static class ConfServer {

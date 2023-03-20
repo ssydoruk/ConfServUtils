@@ -72,7 +72,7 @@ public class JSRunner {
                     // logger.debug("l:" + linesRead);
                     if (++linesRead > 2) { // reading 3 lines
                         latch.countDown(); // the procedure will be called from separate thread of output/error reader
-                                           // so no locking
+                        // so no locking
                     }
                 }
             });
@@ -112,12 +112,10 @@ public class JSRunner {
         boolean ret = false;
         try {
             ret = runFile(fileName, csManager, null, forceFile);
-        }catch (Exception e){
-            stdErrHook.processOut("Exception executing:\n"+e.getMessage()+"\n--------------\n");
+        } catch (Exception e) {
+            stdErrHook.processOut("Exception executing:\n" + e.getMessage() + "\n--------------\n");
             logger.error("", e);
-        }
-        
-         finally {
+        } finally {
             inst.getStdOutReader().setReaderHook(outHook);
             inst.getStdErrReader().setReaderHook(errHook);
         }
@@ -206,6 +204,28 @@ public class JSRunner {
 
         method.theMethod(cont);
         return bindings.getMember("TERMINATE").asBoolean();
+    }
+
+    static void runCSVFormatScript(String script, HashMap<String, String> record) {
+        logger.trace("runScript anonymous script [" + script + "]");
+
+        runCSVFormatScript(new IEvalMethod() {
+            @Override
+            public void theMethod(Context cont) {
+                cont.eval("js", script);
+            }
+        }, record);
+
+    }
+
+    private static void runCSVFormatScript(IEvalMethod method, HashMap<String, String> record) {
+        Context cont = getInstance().getCondContext();
+        Value bindings = cont.getBindings("js");
+        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+//        eod.init(ObjectExistAction.FAIL, theForm);
+        bindings.putMember("RECORD", record);
+
+        method.theMethod(cont);
     }
 
     private void resetContext() {
@@ -312,7 +332,7 @@ public class JSRunner {
      * @param rec
      * @param scriptFields
      * @return true if record should be ignored (based on balue of boolean
-     *         IGNORE_RECORD calculated by the script
+     * IGNORE_RECORD calculated by the script
      */
     /*
      * public static boolean evalFields(String script, ILogRecord rec,
