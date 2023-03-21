@@ -141,6 +141,7 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         rbFolder.setText("Folder");
         jPanel4.add(rbFolder);
 
+        bgOpenAction.add(rbDoNothing);
         rbDoNothing.setText("(do nothing)");
         jPanel4.add(rbDoNothing);
 

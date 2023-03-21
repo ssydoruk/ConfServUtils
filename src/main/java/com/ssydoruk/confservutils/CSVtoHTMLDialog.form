@@ -143,6 +143,9 @@
             </Component>
             <Component class="javax.swing.JRadioButton" name="rbDoNothing">
               <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="bgOpenAction"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="(do nothing)"/>
               </Properties>
             </Component>
