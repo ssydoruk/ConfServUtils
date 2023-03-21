@@ -16,7 +16,7 @@ function processRecord() {
       case "log": {
 
         var re;
-        if ((m = s.match(/^(.+(?:IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE REST: Response is:|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results )[^\{]+)(\{.+)'$/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE REST: Response is:|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response))[^\{]+)(\{.+)'$/s)) != undefined) {
           // RECORD.put("eventdesc", s.replace(re, "$1" + JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           RECORD.put("eventdesc", br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           return;

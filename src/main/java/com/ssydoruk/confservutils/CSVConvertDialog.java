@@ -28,6 +28,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -174,7 +175,7 @@ final class CSVConvertDialog extends StandardDialog {
 
     private void runConvert() {
         saveConfig();
-        String outputFile = mainForm.getDs().getOutputFile();
+        File outputFile = new File(mainForm.getDs().getOutputFile());
         File jsFormatFile = new File(mainForm.getDs().getJsFile());
         String script = null;
         if (jsFormatFile.canRead()) {
@@ -186,7 +187,7 @@ final class CSVConvertDialog extends StandardDialog {
             CSVParser records = CSVFormat.RFC4180.builder()
                     .setDelimiter(",").setHeader().setSkipHeaderRecord(true).setQuoteMode(QuoteMode.MINIMAL).build().parse(in);
             Document html = createShell("aaa.html");
-            html.title("This is title");
+            html.title(FilenameUtils.getBaseName(outputFile.getName()));
             html.body().appendElement("h1").attr("id", "header").text("Welcome");
             File ccsFile = new File(mainForm.getDs().getCcsFile());
             if (ccsFile.canRead()) {
@@ -248,10 +249,8 @@ final class CSVConvertDialog extends StandardDialog {
             case 0: // default browser
             {
                 Desktop desktop = Desktop.getDesktop();
-                File dirToOpen = null;
                 try {
-                    dirToOpen = new File(outputFile);
-                    desktop.browse(dirToOpen.toURI());
+                    desktop.browse(outputFile.toURI());
                 } catch (IllegalArgumentException iae) {
                     System.out.println("File Not Found");
                 } catch (IOException ex) {
@@ -263,7 +262,7 @@ final class CSVConvertDialog extends StandardDialog {
             case 1: // explorer
             {
                 try {
-                    Process proc = Runtime.getRuntime().exec("explorer.exe /select," + outputFile.replaceAll("/", "\\\\"));
+                    Process proc = Runtime.getRuntime().exec("explorer.exe /select," + outputFile.getAbsolutePath().replaceAll("/", "\\\\"));
                     proc.waitFor();
                 } catch (IOException | InterruptedException ex) {
                     ex.printStackTrace();
