@@ -15,8 +15,8 @@ function processRecord() {
 
       case "log": {
 
-        var re ;
-        if ((m = s.match(/^.+(IN THE ATTACH KVPs: |FetchConfigsOnDN completed. |configuration found for agent |IN THE REST: Response is:..|IN THE HOOP: HOOP Flags:.)(\{[^']+)/s)) != undefined) {
+        var re;
+        if ((m = s.match(/^(.+(?:IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE REST: Response is:|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results )[^\{]+)(\{.+)'$/s)) != undefined) {
           // RECORD.put("eventdesc", s.replace(re, "$1" + JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           RECORD.put("eventdesc", br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           return;
@@ -56,20 +56,14 @@ function processRecord() {
           }
           break;
         }
-        re = /(Rule Results :[^\{]+)(\{.+\})(.+_data.data array:[^\{]+)(\{.+\})/s;
-        if ((m = s.match(re)) != undefined) {
-          try {
-            RECORD.put("eventdesc", m[1] + JSON.stringify(JSON.parse(m[2]), undefined, 4) + m[3] + JSON.stringify(JSON.parse(m[4]), undefined, 4));
 
-          }
-          catch (e) {
-            console.log('error parsing: ' + e.message);
-            PRINTOUT.detailsMessage = '++>' + el;
-            PRINTOUT.detailsMessage = '++>Rule Results :\n' + el +
-              '\n_data.data array:\n' + dd;
-          }
-          break;
-
+         if ((m = s.match(/^(.+Rule Results :[^\{]+)(\{.+\})(.+_data.data array:[^\{]+)(\{.+\})/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + br(m[3])
+            + printJSON(JSON.stringify(JSON.parse(m[4]), undefined, 4))
+          );
+          return;
         }
 
         if ((m = s.match(/_data.data:[^\{]+(\{.+\}).+RoutingParameters:[^\{]+(\{.+\})/)) != undefined) {
@@ -120,6 +114,6 @@ function br(orig) {
   return orig.replaceAll("\n", '<br>');
 }
 
-function printJSON(orig){
+function printJSON(orig) {
   return wrap(wrap(orig, "span", "class=\"json\""), "pre");
 }
