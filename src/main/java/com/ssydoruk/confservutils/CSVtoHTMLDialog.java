@@ -10,6 +10,9 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import javax.swing.AbstractButton;
 import javax.swing.JRadioButton;
+import org.apache.commons.compress.utils.FileNameUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -151,7 +154,7 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btSelectOutputHTMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectOutputHTMLActionPerformed
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, null, "HTML output file", "HTML files", new String[]{"htm", "html"});
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfOutputFile.getText()), "HTML output file", "HTML files", new String[]{"htm", "html"});
         if (selectSingleFile != null) {
             tfOutputFile.setText(selectSingleFile.getAbsolutePath());
         }
@@ -159,15 +162,28 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     }//GEN-LAST:event_btSelectOutputHTMLActionPerformed
 
     private void btSelectCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectCSVActionPerformed
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, null, "CSV file to convert", "CSV files", new String[]{"csv"});
+
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfCSVFile.getText()), "CSV file to convert", "CSV files", new String[]{"csv"});
         if (selectSingleFile != null) {
             tfCSVFile.setText(selectSingleFile.getAbsolutePath());
+            String outputFile = tfOutputFile.getText();
+            String outputPath = "";
+            String outputExt = "";
+            if (StringUtils.isNotEmpty(outputFile)) {
+                outputPath = FilenameUtils.getFullPath(outputFile);
+                outputExt = FileNameUtils.getExtension(outputFile);
+            }
+            if (StringUtils.isEmpty(outputExt)) {
+                outputExt = "html";
+            }
+            tfOutputFile.setText(FilenameUtils.concat(outputPath, FilenameUtils.getBaseName(selectSingleFile.getName()))
+                    + FilenameUtils.EXTENSION_SEPARATOR + outputExt);
         }
 
     }//GEN-LAST:event_btSelectCSVActionPerformed
 
     private void btSelectCSSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectCSSActionPerformed
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, null, "select CSS file", "CSS files", new String[]{"css"});
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfCSSFile.getText()), "select CSS file", "CSS files", new String[]{"css"});
         if (selectSingleFile != null) {
             tfCSSFile.setText(selectSingleFile.getAbsolutePath());
         }
@@ -175,7 +191,7 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     }//GEN-LAST:event_btSelectCSSActionPerformed
 
     private void btSelectJSScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectJSScriptActionPerformed
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, null, "JS script", "Javascript files", new String[]{"js"});
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfJSScript.getText()), "JS script", "Javascript files", new String[]{"js"});
         if (selectSingleFile != null) {
             tfJSScript.setText(selectSingleFile.getAbsolutePath());
         }
@@ -229,14 +245,13 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
             }
         }
     }
-    
-    
+
     public int getActiveButton() {
         Enumeration<AbstractButton> elements = bgOpenAction.getElements();
         int i = 0;
         while (elements.hasMoreElements()) {
             JRadioButton bt = (JRadioButton) elements.nextElement();
-            if(bt.isSelected()){
+            if (bt.isSelected()) {
                 return i;
             } else {
                 i++;
@@ -269,4 +284,8 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     private javax.swing.JTextField tfJSScript;
     private javax.swing.JTextField tfOutputFile;
     // End of variables declaration//GEN-END:variables
+
+    private File getFileDir(String text) {
+        return (StringUtils.isEmpty(text) ? null : new File(FilenameUtils.getFullPath(text)));
+    }
 }
