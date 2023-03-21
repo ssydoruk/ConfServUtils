@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.Iterator;
 import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -41,6 +42,7 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     private void initComponents() {
 
         bgOpenAction = new javax.swing.ButtonGroup();
+        bgCSSFile = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         tfCSVFile = new javax.swing.JTextField();
@@ -62,6 +64,9 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         rbDefaultBrowser = new javax.swing.JRadioButton();
         rbFolder = new javax.swing.JRadioButton();
         rbDoNothing = new javax.swing.JRadioButton();
+        jPanel5 = new javax.swing.JPanel();
+        rbCSSEmbed = new javax.swing.JRadioButton();
+        rbCSSExternal = new javax.swing.JRadioButton();
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
@@ -150,6 +155,19 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
 
         jPanel2.add(jPanel4);
 
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("CSS file"));
+        jPanel5.setLayout(new javax.swing.BoxLayout(jPanel5, javax.swing.BoxLayout.LINE_AXIS));
+
+        bgCSSFile.add(rbCSSEmbed);
+        rbCSSEmbed.setText("Embeded");
+        jPanel5.add(rbCSSEmbed);
+
+        bgCSSFile.add(rbCSSExternal);
+        rbCSSExternal.setText("external");
+        jPanel5.add(rbCSSExternal);
+
+        jPanel2.add(jPanel5);
+
         add(jPanel2);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -230,10 +248,10 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         return tfOutputFile.getText();
     }
 
-    public void setActiveButton(int idx) {
-        int buttonCount = bgOpenAction.getButtonCount();
+    public void setActiveButton(javax.swing.ButtonGroup bg, int idx) {
+        int buttonCount = bg.getButtonCount();
         int sel = (idx <= buttonCount) ? idx : 0;
-        Enumeration<AbstractButton> elements = bgOpenAction.getElements();
+        Enumeration<AbstractButton> elements = bg.getElements();
         int i = 0;
         while (elements.hasMoreElements()) {
             JRadioButton bt = (JRadioButton) elements.nextElement();
@@ -246,8 +264,10 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         }
     }
 
-    public int getActiveButton() {
-        Enumeration<AbstractButton> elements = bgOpenAction.getElements();
+
+    
+        public int getActiveButton(javax.swing.ButtonGroup bg) {
+        Enumeration<AbstractButton> elements = bg.getElements();
         int i = 0;
         while (elements.hasMoreElements()) {
             JRadioButton bt = (JRadioButton) elements.nextElement();
@@ -260,7 +280,18 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         return 0;
     }
 
+    public ButtonGroup getBgCSSFile() {
+        return bgCSSFile;
+    }
+
+    public ButtonGroup getBgOpenAction() {
+        return bgOpenAction;
+    }
+        
+        
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup bgCSSFile;
     private javax.swing.ButtonGroup bgOpenAction;
     private javax.swing.JButton btSelectCSS;
     private javax.swing.JButton btSelectCSV;
@@ -274,8 +305,11 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JRadioButton rbCSSEmbed;
+    private javax.swing.JRadioButton rbCSSExternal;
     private javax.swing.JRadioButton rbDefaultBrowser;
     private javax.swing.JRadioButton rbDoNothing;
     private javax.swing.JRadioButton rbFolder;

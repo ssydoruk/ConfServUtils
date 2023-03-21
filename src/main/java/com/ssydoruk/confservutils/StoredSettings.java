@@ -125,6 +125,14 @@ class StoredSettings {
         csvToHTMLSettings.setAction(action);
     }
 
+        public int getcssEmbed() {
+        return csvToHTMLSettings.getCssEmbed();
+    }
+
+    public void setcssEmbed(int action) {
+        csvToHTMLSettings.setCssEmbed(action);
+    }
+
     
     public static class CSVToHTMLSettings {
 
@@ -132,6 +140,15 @@ class StoredSettings {
         private String outputFile;
         private String ccsFile;
         private int action;
+        private int cssEmbed;
+
+        public int getCssEmbed() {
+            return cssEmbed;
+        }
+
+        public void setCssEmbed(int cssEmbed) {
+            this.cssEmbed = cssEmbed;
+        }
 
         public int getAction() {
             return action;

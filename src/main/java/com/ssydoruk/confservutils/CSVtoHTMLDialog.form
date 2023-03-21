@@ -4,6 +4,8 @@
   <NonVisualComponents>
     <Component class="javax.swing.ButtonGroup" name="bgOpenAction">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="bgCSSFile">
+    </Component>
   </NonVisualComponents>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -147,6 +149,35 @@
                   <ComponentRef name="bgOpenAction"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="(do nothing)"/>
+              </Properties>
+            </Component>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="jPanel5">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+                <TitledBorder title="CSS file"/>
+              </Border>
+            </Property>
+          </Properties>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JRadioButton" name="rbCSSEmbed">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="bgCSSFile"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Embeded"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JRadioButton" name="rbCSSExternal">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="bgCSSFile"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="external"/>
               </Properties>
             </Component>
           </SubComponents>

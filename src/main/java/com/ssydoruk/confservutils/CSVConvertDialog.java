@@ -142,7 +142,9 @@ final class CSVConvertDialog extends StandardDialog {
         csvToHTMLPanel.setTexttfCSVFile(mainForm.getDs().getCsvFile());
         csvToHTMLPanel.setTexttfOutputFile(mainForm.getDs().getOutputFile());
         csvToHTMLPanel.setTexttfJSScript(mainForm.getDs().getJsFile());
-        csvToHTMLPanel.setActiveButton(mainForm.getDs().getAction());
+        csvToHTMLPanel.setActiveButton(csvToHTMLPanel.getBgOpenAction(), mainForm.getDs().getAction());
+        csvToHTMLPanel.setActiveButton(csvToHTMLPanel.getBgCSSFile(), mainForm.getDs().getcssEmbed());
+
         pack();
         if (contentPanel instanceof ISearchCommon) {
             ((ISearchCommon) contentPanel).setChoices(searchValues);
@@ -169,7 +171,8 @@ final class CSVConvertDialog extends StandardDialog {
         mainForm.getDs().setCsvFile(csvToHTMLPanel.getTexttfCSVFile());
         mainForm.getDs().setOutputFile(csvToHTMLPanel.getTexttfOutputFile());
         mainForm.getDs().setJsFile(csvToHTMLPanel.getTexttfJSScript());
-        mainForm.getDs().setAction(csvToHTMLPanel.getActiveButton());
+        mainForm.getDs().setAction(csvToHTMLPanel.getActiveButton(csvToHTMLPanel.getBgOpenAction()));
+        mainForm.getDs().setcssEmbed(csvToHTMLPanel.getActiveButton(csvToHTMLPanel.getBgCSSFile()));
         mainForm.saveConfig();
     }
 
@@ -189,8 +192,11 @@ final class CSVConvertDialog extends StandardDialog {
             Document html = createShell("aaa.html");
             html.title(FilenameUtils.getBaseName(outputFile.getName()));
             html.body().appendElement("h1").attr("id", "header").text("Welcome");
+
             File ccsFile = new File(mainForm.getDs().getCcsFile());
-            if (ccsFile.canRead()) {
+            if (mainForm.getDs().getcssEmbed() == 1) {//external CCS file
+                html.head().appendElement("link").attr("rel", "stylesheet").attr("href", ccsFile.toURI().toString());
+            } else if (ccsFile.canRead()) {
                 html.body().appendElement("style").text(FileUtils.loadFile(ccsFile));
             }
 
