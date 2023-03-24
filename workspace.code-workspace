@@ -3,5 +3,29 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+		{
+			"name": "Attach",
+			"port": 9229,
+			"request": "attach",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "node"
+		},
+			{
+				"type": "pwa-node",
+				"request": "launch",
+				"name": "Launch Program",
+				"skipFiles": [
+					"<node_internals>/**"
+				],
+				"program": "c:\\Users\\ssydoruk\\IdeaProjects\\ConfServUtils\\bin\\script\\test.js",
+				"__workspaceFolder": "c:\\Users\\ssydoruk\\IdeaProjects\\ConfServUtils\\bin\\script"
+			}
+		]
+	}
 }

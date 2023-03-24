@@ -37,3 +37,71 @@ h1 {
     color: blueviolet;
     font-size: larger;
 }
+
+.in_the_routing {
+    color: rgb(17, 0, 255);
+    background-color: whitesmoke;
+}
+
+.in_business_rule {
+    color: rgba(79, 19, 114, 0.747);
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+
+.in_the_hoop {
+    color: #80aaff;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+
+
+.in_the_rest {
+    color: #009900;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+.in_the_call_flow_steps {
+    color: #470808;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+.in_the_call_flow_steps {
+    color: #470808;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+.in_the_hoop {
+    color: #470808;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+.in_the_attach_kvp {
+    color: #470808;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+.in_the_targeting {
+    color: #470808;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+.in_the_percent_targeting {
+    color: #470808;
+    background-color: whitesmoke;
+    font-weight: bold;
+}
+
+.in_the_opm {
+    color: #470808;
+    background-color: whitesmoke;
+    font-weight: bold;
+}

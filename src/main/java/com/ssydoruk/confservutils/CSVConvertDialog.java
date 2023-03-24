@@ -228,7 +228,8 @@ final class CSVConvertDialog extends StandardDialog {
                 }
 
                 if (script != null) {
-                    JSRunner.runCSVFormatScript(script, row);
+                    if( JSRunner.runCSVFormatScript(script, row) ) //ignore record
+                        continue;
                 }
                 tabRow = tabBody.appendElement("tr");
                 for (int i = 0; i < record.size(); i++) {

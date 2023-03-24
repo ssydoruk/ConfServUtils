@@ -206,10 +206,10 @@ public class JSRunner {
         return bindings.getMember("TERMINATE").asBoolean();
     }
 
-    static void runCSVFormatScript(String script, HashMap<String, String> record) {
+    static boolean runCSVFormatScript(String script, HashMap<String, String> record) {
         logger.trace("runScript anonymous script [" + script + "]");
 
-        runCSVFormatScript(new IEvalMethod() {
+        return runCSVFormatScript(new IEvalMethod() {
             @Override
             public void theMethod(Context cont) {
                 cont.eval("js", script);
@@ -218,14 +218,16 @@ public class JSRunner {
 
     }
 
-    private static void runCSVFormatScript(IEvalMethod method, HashMap<String, String> record) {
+    private static boolean runCSVFormatScript(IEvalMethod method, HashMap<String, String> record) {
         Context cont = getInstance().getCondContext();
         Value bindings = cont.getBindings("js");
         ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
 //        eod.init(ObjectExistAction.FAIL, theForm);
         bindings.putMember("RECORD", record);
+        bindings.putMember("IGNORE_RECORD", false);
 
         method.theMethod(cont);
+        return bindings.getMember("IGNORE_RECORD").asBoolean();
     }
 
     private void resetContext() {
@@ -326,14 +328,7 @@ public class JSRunner {
 
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();
 
-    /**
-     *
-     * @param script
-     * @param rec
-     * @param scriptFields
-     * @return true if record should be ignored (based on balue of boolean
-     * IGNORE_RECORD calculated by the script
-     */
+
     /*
      * public static boolean evalFields(String script, ILogRecord rec,
      * HashMap<String, Object> scriptFields) { Context cont =
