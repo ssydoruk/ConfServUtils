@@ -104,6 +104,15 @@ function processRecord() {
           colorInThe();
           return;
         }
+// ------------------------ in the OPM
+        if ((m = s.match(/^(.+IN THE OPM.+vCSS_IVRParamObj:[^\{]+)(\{.+\})/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
 
         if ((m = s.match(/_data.data:[^\{]+(\{.+\}).+RoutingParameters:[^\{]+(\{.+\})/)) != undefined) {
           var dt = m[1];
