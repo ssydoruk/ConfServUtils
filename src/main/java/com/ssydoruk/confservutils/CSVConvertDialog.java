@@ -241,12 +241,26 @@ final class CSVConvertDialog extends StandardDialog {
                     cell.html(row.get(headerNames.get(i)));
                 }
             }
+            html.body().appendElement("script").text("var coll = document.getElementsByClassName(\"collapsible\");\n" +
+                    "        var i;\n" +
+                    "\n" +
+                    "        for (i = 0; i < coll.length; i++) {\n" +
+                    "            coll[i].addEventListener(\"click\", function () {\n" +
+                    "                this.classList.toggle(\"active\");\n" +
+                    "                var content = this.nextElementSibling;\n" +
+                    "                if (content.style.display === \"block\") {\n" +
+                    "                    content.style.display = \"none\";\n" +
+                    "                } else {\n" +
+                    "                    content.style.display = \"block\";\n" +
+                    "                }\n" +
+                    "            });\n" +
+                    "        }");
+
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
                 writer.write(html.outerHtml());
             } catch (IOException ex) {
                 java.util.logging.Logger.getLogger(CSVToHTML.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         } catch (FileNotFoundException ex) {
             java.util.logging.Logger.getLogger(CSVToHTML.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

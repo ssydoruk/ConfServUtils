@@ -1,1 +1,3 @@
-console.log('hello');
+a = "({ voice: [{ callType: \"defaultCalendar\", calendarResults: [{ start: \"2023-03-28T00:00:00-05:00\", end: \"2023-03-29T00:00:00-05:00\", calendarStatus: \"Open\", calendarReason: \"Regular\", calendarDetail: \"Regular\", calendarName: \"CareCoordination Default Calendar\" }, { start: \"2023-03-29T00:00:00-05:00\", end: \"2023-03-30T00:00:00-05:00\", calendarStatus: \"Open\", calendarReason: \"Regular\", calendarDetail: \"Regular\", calendarName: \"CareCoordination Default Calendar\" }] }] })";
+
+console.log(JSON.stringify(eval(a)));

@@ -20,7 +20,8 @@ var logIGNORE = [
   /"knowledgebase-response/,
   /^\s*'(Diagram created|Running|RelativePathURL|Code Generated|Project version|Project version|Diagram version)/,
   /Reached final in/,
-  /knowledgebase-response/
+  /knowledgebase-response/,
+  /IN THE REST: Request headers parsing --- key/
 ];
 
 processRecord();
@@ -37,7 +38,7 @@ function processRecord() {
   }
 
   var raw = RECORD.get("_raw");
-  if(raw != null && raw.length>0){
+  if (raw != null && raw.length > 0) {
     RECORD.put("_raw", wrap(wrap(raw, "span", "class=\"json\""), "pre"));
     return;
   }
@@ -52,12 +53,16 @@ function processRecord() {
       case "log": {
 
         var re;
-        if ((m = s.match(/^(.+(?:IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE REST: Response is:|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response))[^\{]+)(\{.+)'$/s)) != undefined) {
+
+        if ((m = s.match(/^(.+(?:IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING: (?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR)[^\{]+)(\{.+\})[^\}\>\\S]?/s)) != undefined) {
           // RECORD.put("eventdesc", s.replace(re, "$1" + JSON.stringify(JSON.parse(m[2]), undefined, 4)));
-          RECORD.put("eventdesc", br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
+          RECORD.put("eventdesc",  br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           colorInThe();
           return;
         }
+
+
+
         var re = /fetch done\"({.+})\"/s;
         if ((m = s.match(re)) != undefined) {
           var s = m[1];
@@ -79,22 +84,6 @@ function processRecord() {
           break;
         }
 
-        re = /(^.+IN THE BUSINESS RULE.+vRequest: )(.+\})/s;
-        if ((m = s.match(re)) != undefined) {
-          // var el=m[2];
-          // var v1=m[1];
-          // var p = "<pre>"+JSON.stringify(JSON.parse(el), undefined, 4)+"</pre>";
-          try {
-            RECORD.put("eventdesc", br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
-            colorInThe();
-            return;
-          }
-          catch (e) {
-            console.log('error parsing: ' + e.message);
-          }
-          break;
-        }
-
         if ((m = s.match(/^(.+Rule Results :[^\{]+)(\{.+\})(.+_data.data array:[^\{]+)(\{.+\})/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
@@ -104,7 +93,60 @@ function processRecord() {
           colorInThe();
           return;
         }
-// ------------------------ in the OPM
+
+        if ((m = s.match(/^(.+IN THE HOOP: HOOP Web [^\{]+)(\{.+\})([^\}\>\\S].*HOOP Response[^\{]+)(\{.+\})[^\}\>\\S]*/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + br(m[3])
+            + printJSON(JSON.stringify(JSON.parse(m[4]), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }        
+
+        if ((m = s.match(/^(.+IN THE ROUTING: Feature settings[^\{]+)(\{.+\})([^\}\>\\S].+_data.ivrdata[^\{]+)(\{.+\})([^\}\>\\S].+_data.featuresdata[^\{]+)(\{.+\})/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + br(m[3])
+            + printJSON(JSON.stringify(JSON.parse(m[4]), undefined, 4))
+            + br(m[5])
+            + printJSON(JSON.stringify(JSON.parse(m[6]), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
+
+
+        if ((m = s.match(/^(.+IN THE ROUTING: Classification Step[^\{]+)(\{.+\})(.+)/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + br(m[3])
+          );
+          colorInThe();
+          return;
+        }
+
+
+        /* m[2] is string which is javascript object */
+        if ((m = s.match(/^(.+(?:IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: ROUTING CODE COMPLETED)[^\(]+)(\(.+\))[^\)\>\w]?/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(eval(m[2]), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
+        if ((m = s.match(/^(.+)(\(\{data:.+\}\))[^\)\>\w]?/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(eval(m[2]), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
+
+        // ------------------------ in the OPM
         if ((m = s.match(/^(.+IN THE OPM.+vCSS_IVRParamObj:[^\{]+)(\{.+\})/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
@@ -112,7 +154,6 @@ function processRecord() {
           colorInThe();
           return;
         }
-
 
         if ((m = s.match(/_data.data:[^\{]+(\{.+\}).+RoutingParameters:[^\{]+(\{.+\})/)) != undefined) {
           var dt = m[1];
@@ -173,7 +214,18 @@ function br(orig) {
 }
 
 function printJSON(orig) {
-  return wrap(wrap(orig, "span", "class=\"json\""), "pre");
+  return "<button type=\"button\" class=\"collapsible\">json</button>" +
+    wrap(wrap(orig, "pre"), "span", "class=\"content\"");
+
+
+  //wrap(wrap(orig, "span", "class=\"json\""), "pre");
+
+
+  // return 
+  // "<button type=\"button\" class=\"collapsible\">json</button>"+
+  // wrap(wrap(wrap(orig, "span", "class=\"json\""), "pre"), "span", "class=\"content\"");
+
+
 }
 
 /**
