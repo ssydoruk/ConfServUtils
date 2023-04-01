@@ -54,7 +54,7 @@ function processRecord() {
 
         var re;
 
-        if ((m = s.match(/^(.+(?:IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING: (?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR)[^\{]+)(\{.+\})[^\}\>\\S]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING: (?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("eventdesc", s.replace(re, "$1" + JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           RECORD.put("eventdesc",  br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           colorInThe();
@@ -140,6 +140,19 @@ function processRecord() {
         if ((m = s.match(/^(.+)(\(\{data:.+\}\))[^\)\>\w]?/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(eval(m[2]), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
+        if ((m = s.match(/(.+Rules applied are: LRV_RulesApplied :)(.+)'*$/s)) != undefined) {
+          var arr=m[2].split(",");
+          var res="";
+          for(var s1 of arr){
+            res=res+"<li>"+s1;
+          }
+          RECORD.put("eventdesc", br(m[1])
+            + res           
           );
           colorInThe();
           return;
