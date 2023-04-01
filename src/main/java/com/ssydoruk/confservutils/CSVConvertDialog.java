@@ -6,10 +6,14 @@
 package com.ssydoruk.confservutils;
 
 import Utils.FileUtils;
+
 import static com.ssydoruk.confservutils.AppForm.searchValues;
+
 import com.jidesoft.dialog.ButtonPanel;
 import com.jidesoft.dialog.StandardDialog;
+
 import static com.jidesoft.dialog.StandardDialog.RESULT_CANCELLED;
+
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -24,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -34,13 +39,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+
 import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 
 /**
- *
  * @author stepan_sydoruk
  */
 final class CSVConvertDialog extends StandardDialog {
@@ -181,6 +186,7 @@ final class CSVConvertDialog extends StandardDialog {
         File outputFile = new File(mainForm.getDs().getOutputFile());
         File jsFormatFile = new File(mainForm.getDs().getJsFile());
         String script = null;
+        String s;
         if (jsFormatFile.canRead()) {
             script = FileUtils.loadFile(jsFormatFile);
 //            JSRunner.getInstance().setDebugPort("4889");
@@ -191,7 +197,10 @@ final class CSVConvertDialog extends StandardDialog {
                     .setDelimiter(",").setHeader().setSkipHeaderRecord(true).setQuoteMode(QuoteMode.MINIMAL).build().parse(in);
             Document html = createShell("aaa.html");
             html.title(FilenameUtils.getBaseName(outputFile.getName()));
-            html.body().appendElement("h1").attr("id", "header").text("Welcome");
+            if (StringUtils.isNotBlank(s = JSRunner.runCSVFormatScript(script, HTMLstage.BODY_BEFORE_TABLE)))
+                html.body().append(s);
+             else
+                html.body().appendElement("h1").attr("id", "header").text("Welcome");
 
             File ccsFile = new File(mainForm.getDs().getCcsFile());
             if (mainForm.getDs().getcssEmbed() == 1) {//external CCS file
@@ -199,6 +208,8 @@ final class CSVConvertDialog extends StandardDialog {
             } else if (ccsFile.canRead()) {
                 html.body().appendElement("style").text(FileUtils.loadFile(ccsFile));
             }
+            if (StringUtils.isNotBlank(s = JSRunner.runCSVFormatScript(script, HTMLstage.HEAD)))
+                html.head().append(s);
 
             Element tab = html.body().appendElement("table").attr("id", "tab").attr("border", "1");
 
@@ -228,7 +239,7 @@ final class CSVConvertDialog extends StandardDialog {
                 }
 
                 if (script != null) {
-                    if( JSRunner.runCSVFormatScript(script, row) ) //ignore record
+                    if (JSRunner.runCSVFormatScript(script, row)) //ignore record
                         continue;
                 }
                 tabRow = tabBody.appendElement("tr");
@@ -241,20 +252,24 @@ final class CSVConvertDialog extends StandardDialog {
                     cell.html(row.get(headerNames.get(i)));
                 }
             }
-            html.body().appendElement("script").text("var coll = document.getElementsByClassName(\"collapsible\");\n" +
-                    "        var i;\n" +
-                    "\n" +
-                    "        for (i = 0; i < coll.length; i++) {\n" +
-                    "            coll[i].addEventListener(\"click\", function () {\n" +
-                    "                this.classList.toggle(\"active\");\n" +
-                    "                var content = this.nextElementSibling;\n" +
-                    "                if (content.style.display === \"block\") {\n" +
-                    "                    content.style.display = \"none\";\n" +
-                    "                } else {\n" +
-                    "                    content.style.display = \"block\";\n" +
-                    "                }\n" +
-                    "            });\n" +
-                    "        }");
+            if (StringUtils.isNotBlank(s = JSRunner.runCSVFormatScript(script, HTMLstage.BODY_AFTER_TABLE)))
+                html.body().append(s);
+//             else
+//                html.body().appendElement("script").text("var coll = document.getElementsByClassName(\"collapsible\");\n" +
+//                        "        var i;\n" +
+//                        "\n" +
+//                        "        for (i = 0; i < coll.length; i++) {\n" +
+//                        "            coll[i].addEventListener(\"click\", function () {\n" +
+//                        "                this.classList.toggle(\"active\");\n" +
+//                        "                var content = this.nextElementSibling;\n" +
+//                        "                if (content.style.display === \"block\") {\n" +
+//                        "                    content.style.display = \"none\";\n" +
+//                        "                } else {\n" +
+//                        "                    content.style.display = \"block\";\n" +
+//                        "                }\n" +
+//                        "            });\n" +
+//                        "        }");
+//
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
                 writer.write(html.outerHtml());

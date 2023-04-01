@@ -24,7 +24,47 @@ var logIGNORE = [
   /IN THE REST: Request headers parsing --- key/
 ];
 
-processRecord();
+
+if (typeof HTML_STAGE != 'undefined') {
+  switch (HTML_STAGE) {
+    case "head":
+      break;
+
+    case "body_before_table":
+      break;
+
+    case "body_after_table":
+      HTML = "<script>\n"+
+      "var coll = document.getElementsByClassName(\"collapsible\");\n" +
+        "        var i;\n" +
+        "\n" +
+        "        for (i = 0; i < coll.length; i++) {\n" +
+        "            coll[i].addEventListener(\"click\", function () {\n" +
+        "                this.classList.toggle(\"active\");\n" +
+        "                var content = this.nextElementSibling;\n" +
+        "                if (content.style.display === \"block\") {\n" +
+        "                    content.style.display = \"none\";\n" +
+        "                } else {\n" +
+        "                    content.style.display = \"block\";\n" +
+        "                }\n" +
+        "            });\n" +
+        "        }\n"+
+        "</script>\n"
+        ;
+
+      break;
+
+    case "cell":
+    default:
+      processRecord();
+
+  }
+
+}
+else {
+  processRecord();
+}
+
 
 function processRecord() {
   var m;
@@ -54,9 +94,9 @@ function processRecord() {
 
         var re;
 
-        if ((m = s.match(/^(.+(?:IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING: (?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING: (?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("eventdesc", s.replace(re, "$1" + JSON.stringify(JSON.parse(m[2]), undefined, 4)));
-          RECORD.put("eventdesc",  br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
+          RECORD.put("eventdesc", br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
           colorInThe();
           return;
         }
@@ -102,7 +142,7 @@ function processRecord() {
           );
           colorInThe();
           return;
-        }        
+        }
 
         if ((m = s.match(/^(.+IN THE ROUTING: Feature settings[^\{]+)(\{.+\})([^\}\>\\S].+_data.ivrdata[^\{]+)(\{.+\})([^\}\>\\S].+_data.featuresdata[^\{]+)(\{.+\})/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
@@ -146,13 +186,13 @@ function processRecord() {
         }
 
         if ((m = s.match(/(.+Rules applied are: LRV_RulesApplied :)(.+)'*$/s)) != undefined) {
-          var arr=m[2].split(",");
-          var res="";
-          for(var s1 of arr){
-            res=res+"<li>"+s1;
+          var arr = m[2].split(",");
+          var res = "";
+          for (var s1 of arr) {
+            res = res + "<li>" + s1;
           }
           RECORD.put("eventdesc", br(m[1])
-            + res           
+            + res
           );
           colorInThe();
           return;

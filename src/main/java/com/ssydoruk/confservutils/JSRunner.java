@@ -10,13 +10,13 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import java.util.logging.Logger;
+
 import org.apache.commons.lang3.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.graalvm.polyglot.*;
 
 /**
- *
  * @author stepan_sydoruk
  */
 public class JSRunner {
@@ -25,6 +25,33 @@ public class JSRunner {
     private String port;
     private IOutputHook errHook = null;
     private IOutputHook outHook = null;
+
+    public static String runCSVFormatScript(String script, HTMLstage htmlStage) {
+        logger.trace("runScript anonymous script [" + script + "]");
+
+        return runCSVFormatScript(new IEvalMethod() {
+            @Override
+            public void theMethod(Context cont) {
+                cont.eval("js", script);
+            }
+        }, htmlStage);
+
+    }
+
+    private static String runCSVFormatScript(IEvalMethod method, HTMLstage htmlStage) {
+        Context cont = getInstance().getCondContext();
+        Value bindings = cont.getBindings("js");
+        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+//        eod.init(ObjectExistAction.FAIL, theForm);
+        bindings.putMember("RECORD", null);
+        bindings.putMember("IGNORE_RECORD", false);
+        bindings.putMember("HTML", "");
+        bindings.putMember("HTML_STAGE", htmlStage.toString());
+
+        method.theMethod(cont);
+        String ret = bindings.getMember("HTML").asString();
+        return (StringUtils.isNotEmpty(ret) ? ret : null);
+    }
 
     public IOutputHook getErrHook() {
         return errHook;
@@ -102,7 +129,7 @@ public class JSRunner {
     private OutReaderThread stdErrReader;
 
     static boolean runFile(String fileName, ConfigServerManager csManager, IOutputHook stdOutHook,
-            IOutputHook stdErrHook, boolean forceFile) {
+                           IOutputHook stdErrHook, boolean forceFile) {
         JSRunner inst = getInstance();
         IOutputHook errHook = inst.getStdErrReader().getReaderHook();
         IOutputHook outHook = inst.getStdOutReader().getReaderHook();
@@ -215,7 +242,6 @@ public class JSRunner {
                 cont.eval("js", script);
             }
         }, record);
-
     }
 
     private static boolean runCSVFormatScript(IEvalMethod method, HashMap<String, String> record) {
@@ -225,6 +251,8 @@ public class JSRunner {
 //        eod.init(ObjectExistAction.FAIL, theForm);
         bindings.putMember("RECORD", record);
         bindings.putMember("IGNORE_RECORD", false);
+        bindings.putMember("HTML_STAGE", HTMLstage.ROW);
+
 
         method.theMethod(cont);
         return bindings.getMember("IGNORE_RECORD").asBoolean();
@@ -338,20 +366,20 @@ public class JSRunner {
      * script); boolean ret = bindings.getMember("IGNORE_RECORD").asBoolean();
      * logger.trace("evalFields [" + scriptFields + "], ignored:[" + ret +
      * "] - result of [" + script + "]"); return ret; }
-     * 
+     *
      * public static String execString(String script, ILogRecord rec) { Context cont
      * = getInstance().getCondContext(); cont.getBindings("js").putMember("RECORD",
      * rec); Value eval = cont.eval("js", script); logger.trace("eval [" + eval +
      * "] - result of [" + script + "]"); return eval.asString();
-     * 
+     *
      * }
-     * 
+     *
      * public static boolean execBoolean(String script, ILogRecord rec) { Context
      * cont = getInstance().getCondContext();
      * cont.getBindings("js").putMember("RECORD", rec); Value eval = cont.eval("js",
      * script); logger.trace("eval [" + eval + "] - result of [" + script + "]");
      * return eval.asBoolean();
-     * 
+     *
      * }
      */
     class OutReaderThread extends Thread {
