@@ -124,7 +124,7 @@ function processRecord() {
 
         var re;
 
-        if ((m = s.match(/^(.+(?:DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s+(?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
 
           var obj = JSON.parse(m[2]);
           if (obj.hasOwnProperty("content")) {
