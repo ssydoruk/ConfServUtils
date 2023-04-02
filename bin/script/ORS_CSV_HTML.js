@@ -28,29 +28,59 @@ var logIGNORE = [
 if (typeof HTML_STAGE != 'undefined') {
   switch (HTML_STAGE) {
     case "head":
-      break;
-
-    case "body_before_table":
-      break;
-
-    case "body_after_table":
-      HTML = "<script>\n"+
-      "var coll = document.getElementsByClassName(\"collapsible\");\n" +
-        "        var i;\n" +
-        "\n" +
-        "        for (i = 0; i < coll.length; i++) {\n" +
-        "            coll[i].addEventListener(\"click\", function () {\n" +
-        "                this.classList.toggle(\"active\");\n" +
-        "                var content = this.nextElementSibling;\n" +
+      HTML = "";
+      HTML += "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">";
+      HTML += wrap("    function JSONclick(obj){\n" +
+        "        obj.classList.toggle(\"active\");\n" +
+        "                var content = obj.nextElementSibling;\n" +
         "                if (content.style.display === \"block\") {\n" +
         "                    content.style.display = \"none\";\n" +
         "                } else {\n" +
         "                    content.style.display = \"block\";\n" +
         "                }\n" +
-        "            });\n" +
-        "        }\n"+
-        "</script>\n"
-        ;
+        "    }\n" +
+        "        function doAllJSONs(shouldExpand) {\n" +
+        "            var coll = document.getElementsByClassName(\"content\");\n" +
+        "            var i;\n" +
+        "\n" +
+        "            for (i = 0; i < coll.length; i++) {\n" +
+        "                coll[i].style.display = (shouldExpand) ? \"block\" : \"none\";\n" +
+        "            }\n" +
+        "        }\n" +
+        "\n" +
+        "        function jumpDoc(isTop) {\n" +
+        "            (isTop) ? window.scrollTo(0, 0) : window.scrollTo(0, document.body.scrollHeight);\n" +
+        "        }", "script");
+
+      break;
+
+    case "body_before_table":
+      HTML = wrap(
+        "        <button onclick=\"doAllJSONs(true)\">Expand all</button>\n" +
+        "        <button onclick=\"doAllJSONs(false)\">Collapse all</button>\n" +
+        "        <button onclick=\"jumpDoc(true)\">Top</button>\n" +
+        "        <button onclick=\"jumpDoc(false)\">Bottom</button>\n",
+        "div", "class=\"sticky\"");
+      break;
+
+    case "body_after_table":
+      //      HTML = "<script>\n"+
+      //      "var coll = document.getElementsByClassName(\"collapsible\");\n" +
+      //        "        var i;\n" +
+      //        "\n" +
+      //        "        for (i = 0; i < coll.length; i++) {\n" +
+      //        "            coll[i].addEventListener(\"click\", function () {\n" +
+      //        "                this.classList.toggle(\"active\");\n" +
+      //        "                var content = this.nextElementSibling;\n" +
+      //        "                if (content.style.display === \"block\") {\n" +
+      //        "                    content.style.display = \"none\";\n" +
+      //        "                } else {\n" +
+      //        "                    content.style.display = \"block\";\n" +
+      //        "                }\n" +
+      //        "            });\n" +
+      //        "        }\n"+
+      //        "</script>\n"
+      //        ;
 
       break;
 
@@ -94,9 +124,19 @@ function processRecord() {
 
         var re;
 
-        if ((m = s.match(/^(.+(?:DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING: (?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
-          // RECORD.put("eventdesc", s.replace(re, "$1" + JSON.stringify(JSON.parse(m[2]), undefined, 4)));
-          RECORD.put("eventdesc", br(m[1]) + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4)));
+        if ((m = s.match(/^(.+(?:DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s+(?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+
+          var obj = JSON.parse(m[2]);
+          if (obj.hasOwnProperty("content")) {
+            try {
+              obj.content = JSON.parse(obj.content.replaceAll("\\\"", "\""));
+            } catch (error) {
+            }
+          }
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(obj, undefined, 4))
+          );
+
           colorInThe();
           return;
         }
@@ -169,7 +209,7 @@ function processRecord() {
 
 
         /* m[2] is string which is javascript object */
-        if ((m = s.match(/^(.+(?:IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: ROUTING CODE COMPLETED)[^\(]+)(\(.+\))[^\)\>\w]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: (?:ROUTING CODE COMPLETED|Parameters override)|IN THE PERCENT TARGETING.+(?:Calls in queue stats|Calls distributed stats))[^\(]+)(\(.+\))[^\)\>\w]?/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(eval(m[2]), undefined, 4))
           );
@@ -200,13 +240,27 @@ function processRecord() {
 
 
         // ------------------------ in the OPM
-        if ((m = s.match(/^(.+IN THE OPM.+vCSS_IVRParamObj:[^\{]+)(\{.+\})/s)) != undefined) {
+        if ((m = s.match(/^(.+IN THE OPM: (?:Play Application|OPM data to be attached)[^\{]+)(\{.+\})[^\)\>\w]?/s)) != undefined) {
+          var obj = JSON.parse(m[2]);
+          if (obj.hasOwnProperty("CSS_IVRParamObj")) {
+            obj.CSS_IVRParamObj = JSON.parse(obj.CSS_IVRParamObj.replaceAll("\\\"", "\""));
+          }
           RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + printJSON(JSON.stringify(obj, undefined, 4))
           );
           colorInThe();
           return;
         }
+
+        if ((m = s.match(/^(.+IN THE OPM: setting udata:.+vCSS_IVRParamObj:\s*)\"(.+)\"'$/s)) != undefined) {
+          var l = m[2];
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(l.replaceAll("\\\"", "\"")), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
 
         if ((m = s.match(/_data.data:[^\{]+(\{.+\}).+RoutingParameters:[^\{]+(\{.+\})/)) != undefined) {
           var dt = m[1];
@@ -267,7 +321,7 @@ function br(orig) {
 }
 
 function printJSON(orig) {
-  return "<button type=\"button\" class=\"collapsible\">json</button>" +
+  return "<button type=\"button\" onclick=\"JSONclick(this)\" class=\"collapsible\">json</button>" +
     wrap(wrap(orig, "pre"), "span", "class=\"content\"");
 
 

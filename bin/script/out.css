@@ -3,6 +3,14 @@ body {
     font: 18px Arial, sans-serif;
 }
 
+div.sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+    background-color: #333;
+  }
+  
 h1 {
     color: orange;
 }
@@ -112,7 +120,6 @@ h1 {
     color: #444;
     cursor: pointer;
     padding: 18px;
-    width: 100%;
     border: none;
     text-align: left;
     outline: none;
