@@ -11,7 +11,8 @@ var classMap = {
   "########## IN THE ATTACH KVPs": "in_the_attach_kvp",
   "########## IN THE TARGETING": "in_the_targeting",
   "########## IN THE PERCENT TARGETING": "in_the_percent_targeting",
-  "########## IN THE OPM": "in_the_opm"
+  "########## IN THE OPM": "in_the_opm",
+  "########## IN THE AgentExtension": "in_the_agentextension"
 };
 
 var regexp = /((?:[0-9]{4})-(?:[0-9]{2})-(?:[0-9]{2}))T((?:[0-9]{2}):(?:[0-9]{2}):(?:[0-9]{2})\.(?:[0-9]+))/;
@@ -124,15 +125,12 @@ function processRecord() {
 
         var re;
 
-        if ((m = s.match(/^(.+(?:DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM: Parameters:|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE CALL FLOW STEPS: IVR GVP ERROR|IN THE PERCENT ROUTING:[^\{]+result)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
           var obj = JSON.parse(m[2]);
-          if (obj.hasOwnProperty("content")) {
-            try {
-              obj.content = JSON.parse(obj.content.replaceAll("\\\"", "\""));
-            } catch (error) {
-            }
-          }
+          dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(obj, undefined, 4))
           );
@@ -141,6 +139,18 @@ function processRecord() {
           return;
         }
 
+        if ((m = s.match(/^(.+IN THE CALL FLOW STEPS[^\(]+)(\(.+\))['"]$/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+
+          obj = eval(m[2]);
+          dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(obj, undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
 
 
         var re = /fetch done\"({.+})\"/s;
@@ -165,10 +175,15 @@ function processRecord() {
         }
 
         if ((m = s.match(/^(.+Rule Results :[^\{]+)(\{.+\})(.+_data.data array:[^\{]+)(\{.+\})/s)) != undefined) {
+          var m2Obj = JSON.parse(m[2]);
+          dequoteParams(m2Obj, ["CSS_IVRParamObj"]);
+          var m4Obj= JSON.parse(m[4]);
+          dequoteParams(m4Obj,  ["CSS_IVRParamObj"]);
+
           RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + printJSON(JSON.stringify(m2Obj, undefined, 4))
             + br(m[3])
-            + printJSON(JSON.stringify(JSON.parse(m[4]), undefined, 4))
+            + printJSON(JSON.stringify(m4Obj, undefined, 4))
           );
           colorInThe();
           return;
@@ -199,23 +214,38 @@ function processRecord() {
 
 
         if ((m = s.match(/^(.+IN THE ROUTING: Classification Step[^\{]+)(\{.+\})(.+)/s)) != undefined) {
+
+          updateDesc(m[1], m[2], m[3], ["CSS_IVRParamObj"]);
+          colorInThe();
+          return;
+        }
+
+
+        if ((m = s.match(/^(.+(?:IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: (?:ROUTING CODE COMPLETED|Parameters override)|IN THE PERCENT TARGETING.+(?:Calls in queue stats|Calls distributed stats))[^\(]+)(\(.+\))[^\)\>]?/s)) != undefined) {
+          var obj = eval(m[2]);
+          dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+
           RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
-            + br(m[3])
+            + printJSON(JSON.stringify(obj, undefined, 4))
           );
           colorInThe();
           return;
         }
 
 
-        /* m[2] is string which is javascript object */
-        if ((m = s.match(/^(.+(?:IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: (?:ROUTING CODE COMPLETED|Parameters override)|IN THE PERCENT TARGETING.+(?:Calls in queue stats|Calls distributed stats))[^\(]+)(\(.+\))[^\)\>\w]?/s)) != undefined) {
-          RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(eval(m[2]), undefined, 4))
-          );
-          colorInThe();
-          return;
-        }
+        // if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\(]+OPM Data Type|IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: (?:ROUTING CODE COMPLETED|Parameters override)|IN THE PERCENT TARGETING.+(?:Calls in queue stats|Calls distributed stats))[^\(]+)(\(.+\))[^\)\>]?/s)) != undefined) {
+        //   RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+
+        //   var obj = eval(m[2]);
+        //   dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+
+        //   RECORD.put("eventdesc", br(m[1])
+        //     + printJSON(JSON.stringify(obj, undefined, 4))
+        //   );
+        //   colorInThe();
+        //   return;
+        // }
+
 
         if ((m = s.match(/^(.+)(\(\{data:.+\}\))[^\)\>\w]?/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
@@ -240,7 +270,7 @@ function processRecord() {
 
 
         // ------------------------ in the OPM
-        if ((m = s.match(/^(.+IN THE OPM: (?:Play Application|OPM data to be attached)[^\{]+)(\{.+\})[^\)\>\w]?/s)) != undefined) {
+        if ((m = s.match(/^(.+IN THE OPM: (?:Play Application|data to be attached)[^\{]+)(\{.+\})[^\)\>\w]?/s)) != undefined) {
           var obj = JSON.parse(m[2]);
           if (obj.hasOwnProperty("CSS_IVRParamObj")) {
             obj.CSS_IVRParamObj = JSON.parse(obj.CSS_IVRParamObj.replaceAll("\\\"", "\""));
@@ -252,10 +282,9 @@ function processRecord() {
           return;
         }
 
-        if ((m = s.match(/^(.+IN THE OPM: setting udata:.+vCSS_IVRParamObj:\s*)\"(.+)\"'$/s)) != undefined) {
-          var l = m[2];
+        if ((m = s.match(/^(.+IN THE OPM.+setting udata:[^\{]+vCSS_IVRParamObj:[^\{]+)(.+\})[\\"']+$/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(JSON.parse(l.replaceAll("\\\"", "\"")), undefined, 4))
+            + printJSON(JSON.stringify(JSON.parse(m[2].replaceAll("\\\"", "\"")), undefined, 4))
           );
           colorInThe();
           return;
@@ -321,7 +350,7 @@ function br(orig) {
 }
 
 function printJSON(orig) {
-  return "<button type=\"button\" onclick=\"JSONclick(this)\" class=\"collapsible\">json</button>" +
+  return "<button type=\"button\" onclick=\"JSONclick(this)\" class=\"collapsible\">..</button>" +
     wrap(wrap(orig, "pre"), "span", "class=\"content\"");
 
 
@@ -354,3 +383,39 @@ function colorInThe() {
   }
 
 }
+
+
+/**
+ * Updates eventdesc. 
+ * @param {*} first first part
+ * @param {*} second JSON object
+ * @param {*} props array of keys where value is a string as JSON object
+ */
+function updateDesc(first, second, third, props) {
+  var obj = JSON.parse(second);
+  dequoteParams(obj, props);
+
+  RECORD.put("eventdesc", br(first)
+    + printJSON(JSON.stringify(obj, undefined, 4))
+    + ((third != null) ? br(third) : "")
+  );
+}
+
+
+function dequoteParams(obj, props) {
+  for (var i = 0; i < props.length; i++) {
+    var propName = props[i];
+    if (obj.hasOwnProperty(propName)) {
+      // RECORD.put("mod", RECORD.get("mod") +'<br>'+JSON.stringify(obj)+'<br>'+JSON.stringify(propName));
+      try {
+        obj[propName] = JSON.parse(obj[propName].replaceAll("\\\"", "\""));
+        // RECORD.put("mod", RECORD.get("mod") +'%%%%%%'+JSON.stringify(obj)+'-- -- '+JSON.stringify(propName));
+      } catch (error) {
+        console.log('err: ' + JSON.stringify(error));
+      }
+    }
+  }
+}
+
+
+

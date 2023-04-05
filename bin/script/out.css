@@ -57,6 +57,11 @@ h1 {
     font-weight: bold;
 }
 
+.in_the_agentextension {
+    color: rgba(73, 32, 97, 0.747);
+    background-color: whitesmoke;
+    font-weight: bold;
+}
 
 .in_the_hoop {
     color: #80aaff;
