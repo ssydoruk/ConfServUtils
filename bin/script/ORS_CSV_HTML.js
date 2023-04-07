@@ -18,10 +18,10 @@ var classMap = {
 var regexp = /((?:[0-9]{4})-(?:[0-9]{2})-(?:[0-9]{2}))T((?:[0-9]{2}):(?:[0-9]{2}):(?:[0-9]{2})\.(?:[0-9]+))/;
 
 var logIGNORE = [
-  /"knowledgebase-response/,
+  // /"knowledgebase-response/,
   /^\s*'(Diagram created|Running|RelativePathURL|Code Generated|Project version|Project version|Diagram version)/,
   /Reached final in/,
-  /knowledgebase-response/,
+  // /knowledgebase-response/,
   /IN THE REST: Request headers parsing --- key/
 ];
 
@@ -125,6 +125,13 @@ function processRecord() {
 
         var re;
 
+        if ((m = s.match(/^['\s]*(\{\".+\})[^\}\",]?/s)) != undefined) {
+          RECORD.put("eventdesc", printJSON(JSON.stringify(JSON.parse(m[1]), undefined, 4))
+          );
+
+          return;
+        }
+
         if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
@@ -153,32 +160,11 @@ function processRecord() {
         }
 
 
-        var re = /fetch done\"({.+})\"/s;
-        if ((m = s.match(re)) != undefined) {
-          var s = m[1];
-          PRINTOUT.detailsMessage = s.replace(/\\u000a/g, '\n').replace(/\\\"/g, '\"');
-          break;
-        }
-
-        if ((m = s.match(/application thread \((.+)\)\'/)) != undefined) {
-          //        var s = m[1].replace(/\\n/g, '\n').replace(/\\\"/g, '\"').replace(/\\\\\"/g, '\"');
-          var s = m[1].replace(/\\n/g, '\n').replace(/\\\"/g, '\"');
-          // console.log(s);
-          try {
-            PRINTOUT.detailsMessage = '-->' + JSON.stringify(JSON.parse(s.replace(/(\w+):/g, '\"$1\":')), undefined, 4);
-          }
-          catch (e) {
-            console.log('error parsing: ' + e.message);
-            PRINTOUT.detailsMessage = '++>' + s;
-          }
-          break;
-        }
-
         if ((m = s.match(/^(.+Rule Results :[^\{]+)(\{.+\})(.+_data.data array:[^\{]+)(\{.+\})/s)) != undefined) {
           var m2Obj = JSON.parse(m[2]);
           dequoteParams(m2Obj, ["CSS_IVRParamObj"]);
-          var m4Obj= JSON.parse(m[4]);
-          dequoteParams(m4Obj,  ["CSS_IVRParamObj"]);
+          var m4Obj = JSON.parse(m[4]);
+          dequoteParams(m4Obj, ["CSS_IVRParamObj"]);
 
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(m2Obj, undefined, 4))
@@ -309,6 +295,54 @@ function processRecord() {
 
         }
 
+        /****************** here are messages in plain log tag ************************/
+
+        if ((m = s.match(/^(.+(?:never match|Data Fetched)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+
+          var obj = JSON.parse(m[2]);
+          dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(obj, undefined, 4))
+          );
+
+          colorInThe();
+          return;
+        }
+
+        // JSON object as in javascript
+        if ((m = s.match(/^(.+(?:event received|Data Assigned|return values =|ERROR:)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+
+          obj = eval(m[2]);
+          dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(obj, undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
+        /******** JSON message in a string ********/
+        if ((m = s.match(/^(.+(?:BusinessRule: fetch done)[^\"]*)(\".+\")[']*$/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+          var first=m[1];
+          var s1=dequote(un2quote(m[2]).replaceAll("\n", "")).replaceAll("\\\\", "\\");
+          obj = JSON.parse(s1);
+          // dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+
+          RECORD.put("eventdesc", br(first)
+            + printJSON(JSON.stringify(obj, undefined, 4))
+          );
+          colorInThe();
+          return;
+        }        
+
+
+
+
         else {
           // PRINTOUT.detailsMessage=JSON.stringify({"cc":"bb", "key1":"val1"});
         }
@@ -401,6 +435,10 @@ function updateDesc(first, second, third, props) {
   );
 }
 
+function dequote(str){
+  return (str != null)?str.replaceAll("\\\"", "\""):"";
+}
+
 
 function dequoteParams(obj, props) {
   for (var i = 0; i < props.length; i++) {
@@ -408,7 +446,7 @@ function dequoteParams(obj, props) {
     if (obj.hasOwnProperty(propName)) {
       // RECORD.put("mod", RECORD.get("mod") +'<br>'+JSON.stringify(obj)+'<br>'+JSON.stringify(propName));
       try {
-        obj[propName] = JSON.parse(obj[propName].replaceAll("\\\"", "\""));
+        obj[propName] = JSON.parse(dequote(obj[propName]));
         // RECORD.put("mod", RECORD.get("mod") +'%%%%%%'+JSON.stringify(obj)+'-- -- '+JSON.stringify(propName));
       } catch (error) {
         console.log('err: ' + JSON.stringify(error));
@@ -418,4 +456,15 @@ function dequoteParams(obj, props) {
 }
 
 
+/**
+ * Remove single set of quotation characters
+ * @param {*} str string
+ */
 
+function un2quote(str){
+          var m2;
+          if((m2=str.match(/^\"(.+)\"$/s))!= undefined){
+            return m2[1];
+          }
+          return str;
+}

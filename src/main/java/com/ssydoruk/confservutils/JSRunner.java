@@ -5,7 +5,10 @@
  */
 package com.ssydoruk.confservutils;
 
+import java.awt.*;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
@@ -25,6 +28,7 @@ public class JSRunner {
     private String port;
     private IOutputHook errHook = null;
     private IOutputHook outHook = null;
+
 
     public static String runCSVFormatScript(String script, HTMLstage htmlStage) {
         logger.trace("runScript anonymous script [" + script + "]");
@@ -312,7 +316,7 @@ public class JSRunner {
             @Override
             public void publish(LogRecord record) {
 
-                System.out.println("-- publish: " + record.getMessage());
+                logger.debug("-- publish: " + record.getMessage());
             }
 
             @Override
@@ -322,15 +326,22 @@ public class JSRunner {
 
             @Override
             public void close() throws SecurityException {
-                System.out.println("--close");
+                logger.debug("--close");
             }
         };
 
         logHandler.setLevel(java.util.logging.Level.FINEST);
 
-        Context.Builder builder = Context.newBuilder("js").allowAllAccess(true).err(stdErr).out(stdOut);
+        Context.Builder builder = Context.newBuilder().allowAllAccess(true).err(stdErr).out(stdOut);
         if (port != null) {
             builder.option("inspect", port);
+            String path = java.util.UUID.randomUUID().toString();
+            builder.option("inspect.Path", path);
+            String url = String.format(
+                    "chrome-devtools://devtools/bundled/js_app.html?ws=%s:%s/%s",
+                    "127.0.0.1", port, path);
+//            Runtime rt = Runtime.getRuntime();
+//            Process chrome = rt.exec("cmd /C start microsoft-edge:http://google.com");
         }
         condContext = builder.build();
 

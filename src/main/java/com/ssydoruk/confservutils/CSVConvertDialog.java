@@ -189,7 +189,7 @@ final class CSVConvertDialog extends StandardDialog {
         String s;
         if (jsFormatFile.canRead()) {
             script = FileUtils.loadFile(jsFormatFile);
-//            JSRunner.getInstance().setDebugPort("4889");
+//            JSRunner.getInstance().setDebugPort("9229");
         }
 
         try (BufferedReader in = new BufferedReader(new FileReader(mainForm.getDs().getCsvFile()))) {
@@ -237,11 +237,16 @@ final class CSVConvertDialog extends StandardDialog {
                 for (int i = 0; i < record.size(); i++) {
                     row.put(headerNames.get(i), record.get(i));
                 }
+                logger.debug("csvRow before: "+StringUtils.join(row.values(),"\n"));
+
 
                 if (script != null) {
-                    if (JSRunner.runCSVFormatScript(script, row)) //ignore record
+                    if (JSRunner.runCSVFormatScript(script, row)) { //ignore record
+                        logger.debug("Row skipped!");
                         continue;
+                    }
                 }
+                logger.debug("csvRow after: "+StringUtils.join(row.values(),"\n"));
                 tabRow = tabBody.appendElement("tr");
                 for (int i = 0; i < record.size(); i++) {
                     Element cell = tabRow.appendElement("td");
