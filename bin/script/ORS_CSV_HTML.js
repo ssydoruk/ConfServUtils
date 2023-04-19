@@ -219,6 +219,7 @@ function processRecord() {
         if ((m = s.match(/^(.+(?:IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: (?:ROUTING CODE COMPLETED|Parameters override)|IN THE PERCENT TARGETING.+(?:Calls in queue stats|Calls distributed stats))[^\(]+)(\(.+\))[^\)\>]?/s)) != undefined) {
           var obj = eval(m[2]);
           dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+          decodeURIComponentParams(obj, ["KVPs"]);          
 
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(obj, undefined, 4))
@@ -314,6 +315,7 @@ function processRecord() {
 
           var obj = JSON.parse(m[2]);
           dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+          decodeURIComponentParams(obj, ["KVPs"]);
 
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(obj, undefined, 4))
@@ -329,6 +331,7 @@ function processRecord() {
 
           obj = eval(m[2].replaceAll("\\\\", "\\"));
           dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
+          decodeURIComponentParams(obj, ["KVPs"]);
 
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(obj, undefined, 4))
@@ -488,6 +491,18 @@ function dequoteParams(obj, props) {
   }
 }
 
+function decodeURIComponentParams(obj, props) {
+  for (var i = 0; i < props.length; i++) {
+    var propName = props[i];
+    if (obj.hasOwnProperty(propName) && obj[propName] != null && obj[propName].length > 0) {
+      try {
+        obj[propName] = JSON.parse(decodeURIComponent(obj[propName]));
+      } catch (error) {
+        console.log('err: ' + JSON.stringify(error));
+      }
+    }
+  }
+}
 
 /**
  * Remove single set of quotation characters
