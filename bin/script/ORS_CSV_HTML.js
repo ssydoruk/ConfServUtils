@@ -12,7 +12,8 @@ var classMap = {
   "########## IN THE TARGETING": "in_the_targeting",
   "########## IN THE PERCENT TARGETING": "in_the_percent_targeting",
   "########## IN THE OPM": "in_the_opm",
-  "########## IN THE AgentExtension": "in_the_agentextension"
+  "########## IN THE AgentExtension": "in_the_agentextension",
+  "########## CLUSTER - OMNICHANNEL ROUTING": "in_the_routing"
 };
 
 var regexp = /((?:[0-9]{4})-(?:[0-9]{2})-(?:[0-9]{2}))T((?:[0-9]{2}):(?:[0-9]{2}):(?:[0-9]{2})\.(?:[0-9]+))/;
@@ -132,29 +133,16 @@ function processRecord() {
           return;
         }
 
-        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|Request result =|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension|IN THE TARGETING: TargetListSeleted KVPs)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
-          var obj = JSON.parse(m[2]);
-          dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
-
-          RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(obj, undefined, 4))
-          );
-
+          updateDesc(m[1], m[2], null, ["content", "CSS_IVRParamObj"]);
           colorInThe();
           return;
         }
 
-        if ((m = s.match(/^(.+IN THE CALL FLOW STEPS[^\(]+)(\(.+\))['"]$/s)) != undefined) {
-          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
-
-          obj = eval(m[2]);
-          dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
-
-          RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(obj, undefined, 4))
-          );
+        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS|Request result =|IN THE TARGETING:TARGET BLOCK: Target selected)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
+          updateDescObj(m[1], eval(m[2]), null, ["content", "CSS_IVRParamObj"]);
           colorInThe();
           return;
         }
@@ -185,7 +173,7 @@ function processRecord() {
           return;
         }
 
-        if ((m = s.match(/^(.+IN THE ROUTING: Feature settings[^\{]+)(\{.+\})([^\}\>\\S].+_data.ivrdata[^\{]+)(\{.+\})([^\}\>\\S].+_data.featuresdata[^\{]+)(\{.+\})/s)) != undefined) {
+        if ((m = s.match(/^(.+IN THE ROUTING: Feature settings[^\{]+)(\{.+\})([^\}\>\\S].+ Facts:[^\{]+)(\{.+\})([^\}\>\\S].+ Facts:[^\{]+)(\{.+\})/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
             + br(m[3])
@@ -197,11 +185,32 @@ function processRecord() {
           return;
         }
 
+        if ((m = s.match(/(.+FORCE ROUTE BLOCK[^\{]+)(\{.+\})(.+vHints[^\{]+)(\{.+\})(.+)/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + br(m[3])
+            + printJSON(JSON.stringify(JSON.parse(m[4]), undefined, 4))
+            + br(m[5])
+          );
+          colorInThe();
+          return;
+        }
+
+        if ((m = s.match(/(.+IN THE ROUTING:\s+TARGETS Parsed[^\{]+)(\{.+\})([\s]*TargetsResults:[^\{]+)(\{.+\})([\s\w].+)/s)) != undefined) {
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+            + br(m[3])
+            + printJSON(JSON.stringify(JSON.parse(m[4]), undefined, 4))
+            + br(m[5])
+          );
+          colorInThe();
+          return;
+        }
 
 
         if ((m = s.match(/^(.+IN THE ROUTING: Classification Step[^\{]+)(\{.+\})(.+)/s)) != undefined) {
 
-          updateDesc(m[1], m[2], m[3], ["CSS_IVRParamObj"]);
+          updateDesc(m[1], m[2].replaceAll("\\\\", "\\"), m[3], ["CSS_IVRParamObj"]);
           colorInThe();
           return;
         }
@@ -233,10 +242,13 @@ function processRecord() {
         // }
 
 
-        if ((m = s.match(/^(.+)(\(\{data:.+\}\))[^\)\>\w]?/s)) != undefined) {
-          RECORD.put("eventdesc", br(m[1])
-            + printJSON(JSON.stringify(eval(m[2]), undefined, 4))
-          );
+        if ((m = s.match(/^(.+in user application thread[^\(]*)(\(\{.+\}\))[^\)\>\w]?/s)) != undefined) {
+          try {
+            updateDescObj(m[1], eval(m[2].replaceAll("\n", "").replaceAll("\\\\", "\\").replaceAll("\\\\", "\\")), null, "content");
+          } catch (error) {
+            updateDescObj(m[1], m[2].replaceAll("\n", "").replaceAll("\\\\", "\\").replaceAll("\\\\", "\\"), null, "content");
+
+          }
           colorInThe();
           return;
         }
@@ -297,7 +309,7 @@ function processRecord() {
 
         /****************** here are messages in plain log tag ************************/
 
-        if ((m = s.match(/^(.+(?:never match|Data Fetched)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:never match|Data Fetched|LVQ Request result =)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
           var obj = JSON.parse(m[2]);
@@ -312,10 +324,10 @@ function processRecord() {
         }
 
         // JSON object as in javascript
-        if ((m = s.match(/^(.+(?:event received|Data Assigned|return values =|ERROR:)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:Data Assigned|return values =|ERROR:)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
-          obj = eval(m[2]);
+          obj = eval(m[2].replaceAll("\\\\", "\\"));
           dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
 
           RECORD.put("eventdesc", br(m[1])
@@ -328,8 +340,8 @@ function processRecord() {
         /******** JSON message in a string ********/
         if ((m = s.match(/^(.+(?:BusinessRule: fetch done)[^\"]*)(\".+\")[']*$/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
-          var first=m[1];
-          var s1=dequote(un2quote(m[2]).replaceAll("\n", "")).replaceAll("\\\\", "\\");
+          var first = m[1];
+          var s1 = dequote(un2quote(m[2]).replaceAll("\n", "")).replaceAll("\\\\", "\\");
           obj = JSON.parse(s1);
           // dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
 
@@ -338,7 +350,16 @@ function processRecord() {
           );
           colorInThe();
           return;
-        }        
+        }
+
+
+        if ((m = s.match(/^(.+CLUSTER - OMNICHANNEL[^\{]+(?: = :|API Response =|with _data context)|[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+
+          updateDesc(m[1], m[2], null, ["content", "CSS_IVRParamObj"]);
+          colorInThe();
+          return;
+        }
 
 
 
@@ -426,7 +447,18 @@ function colorInThe() {
  * @param {*} props array of keys where value is a string as JSON object
  */
 function updateDesc(first, second, third, props) {
-  var obj = JSON.parse(second);
+  updateDescObj(first, JSON.parse(second), third, props);
+}
+
+
+/**
+ * 
+ * @param {*} first initial part
+ * @param {*} second is an object
+ * @param {*} third trailing part. can be empty
+ * @param {*} props array of property names that are strings that should be transformed to JSON 
+ */
+function updateDescObj(first, obj, third, props) {
   dequoteParams(obj, props);
 
   RECORD.put("eventdesc", br(first)
@@ -435,15 +467,16 @@ function updateDesc(first, second, third, props) {
   );
 }
 
-function dequote(str){
-  return (str != null)?str.replaceAll("\\\"", "\""):"";
+
+function dequote(str) {
+  return (str != null) ? str.replaceAll("\\\"", "\"") : "";
 }
 
 
 function dequoteParams(obj, props) {
   for (var i = 0; i < props.length; i++) {
     var propName = props[i];
-    if (obj.hasOwnProperty(propName)) {
+    if (obj.hasOwnProperty(propName) && obj[propName] != null && obj[propName].length > 0) {
       // RECORD.put("mod", RECORD.get("mod") +'<br>'+JSON.stringify(obj)+'<br>'+JSON.stringify(propName));
       try {
         obj[propName] = JSON.parse(dequote(obj[propName]));
@@ -461,10 +494,10 @@ function dequoteParams(obj, props) {
  * @param {*} str string
  */
 
-function un2quote(str){
-          var m2;
-          if((m2=str.match(/^\"(.+)\"$/s))!= undefined){
-            return m2[1];
-          }
-          return str;
+function un2quote(str) {
+  var m2;
+  if ((m2 = str.match(/^\"(.+)\"$/s)) != undefined) {
+    return m2[1];
+  }
+  return str;
 }
