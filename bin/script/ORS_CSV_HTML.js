@@ -173,7 +173,7 @@ function processRecord() {
           return;
         }
 
-        if ((m = s.match(/^(.+IN THE ROUTING: Feature settings[^\{]+)(\{.+\})([^\}\>\\S].+ Facts:[^\{]+)(\{.+\})([^\}\>\\S].+ Facts:[^\{]+)(\{.+\})/s)) != undefined) {
+        if ((m = s.match(/^(.+IN THE ROUTING: Feature settings[^\{]+)(\{.*\})([^\}\>\\S].+ Facts:[^\{]+)(\{.*\})([^\}\>\\S].+ Facts:[^\{]+)(\{.*\})/s)) != undefined) {
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
             + br(m[3])
