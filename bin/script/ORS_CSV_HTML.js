@@ -133,10 +133,10 @@ function processRecord() {
           return;
         }
 
-        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension|IN THE TARGETING: TargetListSeleted KVPs)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:OPM Data\s+Type|REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension|IN THE TARGETING: TargetListSeleted KVPs)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
-          updateDesc(m[1], m[2], null, ["content", "CSS_IVRParamObj"]);
+          updateDesc(m[1], m[2], null, ["content", "CSS_IVRParamObj", "REST_RequestMap", "REST_ResponseMap", "REST_RequestBody"]);
           colorInThe();
           return;
         }
