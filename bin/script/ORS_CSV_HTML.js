@@ -129,7 +129,7 @@ function processRecord() {
         if ((m = s.match(/^['\s]*(\{\".+\})[^\}\",]?/s)) != undefined) {
           RECORD.put("eventdesc", printJSON(JSON.stringify(JSON.parse(m[1]), undefined, 4))
           );
-
+          colorInThe();
           return;
         }
 
@@ -219,7 +219,7 @@ function processRecord() {
         if ((m = s.match(/^(.+(?:IN THE REST: Response is|Call to URS Function.+completed|IN THE ROUTING: (?:ROUTING CODE COMPLETED|Parameters override)|IN THE PERCENT TARGETING.+(?:Calls in queue stats|Calls distributed stats))[^\(]+)(\(.+\))[^\)\>]?/s)) != undefined) {
           var obj = eval(m[2]);
           dequoteParams(obj, ["content", "CSS_IVRParamObj"]);
-          decodeURIComponentParams(obj, ["KVPs"]);          
+          decodeURIComponentParams(obj, ["KVPs"]);
 
           RECORD.put("eventdesc", br(m[1])
             + printJSON(JSON.stringify(obj, undefined, 4))
@@ -303,7 +303,7 @@ function processRecord() {
               '_data.data\n' + dt
               + '\nRoutingParameters\n' + rp;
           }
-
+          colorInThe();
           break;
 
         }
@@ -356,7 +356,7 @@ function processRecord() {
         }
 
 
-        if ((m = s.match(/^(.+CLUSTER - OMNICHANNEL[^\{]+(?: = :|API Response =|with _data context)|[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+CLUSTER - OMNICHANNEL[^\{]+(?: = :|API Response =|with _data context)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
           updateDesc(m[1], m[2], null, ["content", "CSS_IVRParamObj"]);
@@ -365,6 +365,41 @@ function processRecord() {
         }
 
 
+        /* URL encoded JSON object */
+        if ((m = s.match(/^(.+(?:IN THE TARGETING:[^%]+vGmsStorageData set as:))(.+)'+$/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+
+          RECORD.put("eventdesc", br(m[1])
+            + printJSON(JSON.stringify(decodeURIJSON(m[2]), undefined, 4))
+          );
+          colorInThe();
+          return;
+        }
+
+        /* URL encoded JSON statement */
+        if ((m = s.match(/^(.+(?:IN THE REST: Request data is[:"\s]+))([^"']+)/s)) != undefined) {
+          // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
+          try {
+            var first = m[1];
+            var second = decodeURIComponent(m[2]);
+            if ((m = second.match(/^(KVPs=)(.+)/)) != undefined) {
+              RECORD.put("eventdesc", br(first)
+                + m[1]
+                + printJSON(JSON.stringify(JSON.parse(m[2]), undefined, 4))
+              );
+
+            }
+            else {
+              RECORD.put("eventdesc", br(first)
+                + printJSON(JSON.stringify(decodeURIJSON(m[2]), undefined, 4))
+              );
+            }
+
+          } catch (error) {
+
+          } colorInThe();
+          return;
+        }
 
 
         else {
@@ -496,12 +531,17 @@ function decodeURIComponentParams(obj, props) {
     var propName = props[i];
     if (obj.hasOwnProperty(propName) && obj[propName] != null && obj[propName].length > 0) {
       try {
-        obj[propName] = JSON.parse(decodeURIComponent(obj[propName]));
+        obj[propName] = decodeURIJSON(obj[propName]);
       } catch (error) {
         console.log('err: ' + JSON.stringify(error));
       }
     }
   }
+}
+
+
+function decodeURIJSON(s) {
+  return JSON.parse(decodeURIComponent(s));
 }
 
 /**
