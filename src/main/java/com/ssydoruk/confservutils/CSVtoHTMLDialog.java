@@ -6,10 +6,13 @@ package com.ssydoruk.confservutils;
 
 import Utils.FileUtils;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -45,19 +48,19 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         bgCSSFile = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        tfCSVFile = new javax.swing.JTextField();
+        tfCSVFile = new javax.swing.JComboBox<>();
         btSelectCSV = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        tfOutputFile = new javax.swing.JTextField();
+        tfOutputFile = new javax.swing.JComboBox<>();
         btSelectOutputHTML = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
-        tfCSSFile = new javax.swing.JTextField();
+        tfCSSFile = new javax.swing.JComboBox<>();
         btSelectCSS = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        tfJSScript = new javax.swing.JTextField();
+        tfJSScript = new javax.swing.JComboBox<>();
         btSelectJSScript = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
@@ -75,6 +78,8 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         jLabel1.setText("CSV file to convert");
         jLabel1.setFocusable(false);
         jPanel1.add(jLabel1);
+
+        tfCSVFile.setEditable(true);
         jPanel1.add(tfCSVFile);
 
         btSelectCSV.setText("...");
@@ -92,6 +97,8 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         jLabel2.setText("Output file");
         jLabel2.setFocusable(false);
         jPanel3.add(jLabel2);
+
+        tfOutputFile.setEditable(true);
         jPanel3.add(tfOutputFile);
 
         btSelectOutputHTML.setText("...");
@@ -109,6 +116,8 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         jLabel4.setText("CSS file");
         jLabel4.setFocusable(false);
         jPanel6.add(jLabel4);
+
+        tfCSSFile.setEditable(true);
         jPanel6.add(tfCSSFile);
 
         btSelectCSS.setText("...");
@@ -126,6 +135,8 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         jLabel5.setText("Processing script");
         jLabel5.setFocusable(false);
         jPanel7.add(jLabel5);
+
+        tfJSScript.setEditable(true);
         jPanel7.add(tfJSScript);
 
         btSelectJSScript.setText("...");
@@ -172,19 +183,19 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btSelectOutputHTMLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectOutputHTMLActionPerformed
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfOutputFile.getText()), "HTML output file", "HTML files", new String[]{"htm", "html"});
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir((String) tfOutputFile.getSelectedItem()), "HTML output file", "HTML files", new String[]{"htm", "html"});
         if (selectSingleFile != null) {
-            tfOutputFile.setText(selectSingleFile.getAbsolutePath());
+            setSelectItem(tfOutputFile, selectSingleFile.getAbsolutePath());
         }
 
     }//GEN-LAST:event_btSelectOutputHTMLActionPerformed
 
     private void btSelectCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectCSVActionPerformed
 
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfCSVFile.getText()), "CSV file to convert", "CSV files", new String[]{"csv"});
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir((String) tfCSVFile.getSelectedItem()), "CSV file to convert", "CSV files", new String[]{"csv"});
         if (selectSingleFile != null) {
-            tfCSVFile.setText(selectSingleFile.getAbsolutePath());
-            String outputFile = tfOutputFile.getText();
+            setSelectItem(tfCSVFile, selectSingleFile.getAbsolutePath());
+            String outputFile = tfOutputFile.getItemAt(0);
             String outputPath = "";
             String outputExt = "";
             if (StringUtils.isNotEmpty(outputFile)) {
@@ -194,58 +205,58 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
             if (StringUtils.isEmpty(outputExt)) {
                 outputExt = "html";
             }
-            tfOutputFile.setText(FilenameUtils.concat(outputPath, FilenameUtils.getBaseName(selectSingleFile.getName()))
+            setSelectItem(tfOutputFile, FilenameUtils.concat(outputPath, FilenameUtils.getBaseName(selectSingleFile.getName()))
                     + FilenameUtils.EXTENSION_SEPARATOR + outputExt);
         }
 
     }//GEN-LAST:event_btSelectCSVActionPerformed
 
     private void btSelectCSSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectCSSActionPerformed
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfCSSFile.getText()), "select CSS file", "CSS files", new String[]{"css"});
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir((String) tfCSSFile.getSelectedItem()), "select CSS file", "CSS files", new String[]{"css"});
         if (selectSingleFile != null) {
-            tfCSSFile.setText(selectSingleFile.getAbsolutePath());
+            setSelectItem(tfCSSFile, selectSingleFile.getAbsolutePath());
         }
 
     }//GEN-LAST:event_btSelectCSSActionPerformed
 
     private void btSelectJSScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSelectJSScriptActionPerformed
-        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir(tfJSScript.getText()), "JS script", "Javascript files", new String[]{"js"});
+        File selectSingleFile = FileUtils.selectSingleFile(dlg, getFileDir((String) tfJSScript.getSelectedItem()), "JS script", "Javascript files", new String[]{"js"});
         if (selectSingleFile != null) {
-            tfJSScript.setText(selectSingleFile.getAbsolutePath());
+            setSelectItem(tfJSScript, selectSingleFile.getAbsolutePath());
         }
 
     }//GEN-LAST:event_btSelectJSScriptActionPerformed
 
-    public void setTexttfCSSFile(String t) {
-        tfCSSFile.setText(t);
+    public void setTexttfCSSFile(List<String> t) {
+        setComboList(tfCSSFile, t);
     }
 
-    public String getTexttfCSSFile() {
-        return tfCSSFile.getText();
+    public List<String> getTexttfCSSFile() {
+        return getAllItems(tfCSSFile);
     }
 
-    public void setTexttfCSVFile(String t) {
-        tfCSVFile.setText(t);
+    public void setTexttfCSVFile(List<String> t) {
+        setComboList(tfCSVFile, t);
     }
 
-    public String getTexttfCSVFile() {
-        return tfCSVFile.getText();
+    public List<String> getTexttfCSVFile() {
+        return getAllItems(tfCSVFile);
     }
 
-    public void setTexttfJSScript(String t) {
-        tfJSScript.setText(t);
+    public void setTexttfJSScript(List<String> t) {
+        setComboList(tfJSScript, t);
     }
 
-    public String getTexttfJSScript() {
-        return tfJSScript.getText();
+    public List<String> getTexttfJSScript() {
+        return getAllItems(tfJSScript);
     }
 
-    public void setTexttfOutputFile(String t) {
-        tfOutputFile.setText(t);
+    public void setTexttfOutputFile(List<String> t) {
+        setComboList(tfOutputFile, t);
     }
 
-    public String getTexttfOutputFile() {
-        return tfOutputFile.getText();
+    public List<String> getTexttfOutputFile() {
+        return getAllItems(tfOutputFile);
     }
 
     public void setActiveButton(javax.swing.ButtonGroup bg, int idx) {
@@ -264,9 +275,7 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
         }
     }
 
-
-    
-        public int getActiveButton(javax.swing.ButtonGroup bg) {
+    public int getActiveButton(javax.swing.ButtonGroup bg) {
         Enumeration<AbstractButton> elements = bg.getElements();
         int i = 0;
         while (elements.hasMoreElements()) {
@@ -287,8 +296,7 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     public ButtonGroup getBgOpenAction() {
         return bgOpenAction;
     }
-        
-        
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup bgCSSFile;
@@ -313,13 +321,40 @@ public class CSVtoHTMLDialog extends javax.swing.JPanel {
     private javax.swing.JRadioButton rbDefaultBrowser;
     private javax.swing.JRadioButton rbDoNothing;
     private javax.swing.JRadioButton rbFolder;
-    private javax.swing.JTextField tfCSSFile;
-    private javax.swing.JTextField tfCSVFile;
-    private javax.swing.JTextField tfJSScript;
-    private javax.swing.JTextField tfOutputFile;
+    private javax.swing.JComboBox<String> tfCSSFile;
+    private javax.swing.JComboBox<String> tfCSVFile;
+    private javax.swing.JComboBox<String> tfJSScript;
+    private javax.swing.JComboBox<String> tfOutputFile;
     // End of variables declaration//GEN-END:variables
 
     private File getFileDir(String text) {
         return (StringUtils.isEmpty(text) ? null : new File(FilenameUtils.getFullPath(text)));
+    }
+
+    private void setSelectItem(JComboBox<String> jcb, String s) {
+        for (int i = 0; i < jcb.getItemCount(); i++) {
+            if (jcb.getItemAt(i).equals(s)) {
+                jcb.setSelectedIndex(i);
+                return;
+            }
+        }
+        jcb.insertItemAt(s, 0);
+        jcb.setSelectedIndex(0);
+    }
+
+    private List<String> getAllItems(JComboBox<String> comboBox) {
+        List<String> ret = new ArrayList<>(comboBox.getItemCount());
+        for (int i = 0; i < comboBox.getItemCount(); i++) {
+            ret.add(comboBox.getItemAt(i));
+        }
+        return ret;
+    }
+
+    private void setComboList(JComboBox<String> combo, List<String> t) {
+        if (t != null && !t.isEmpty()) {
+            combo.setModel(new DefaultComboBoxModel(t.toArray()));
+        } else {
+            combo.setModel(new DefaultComboBoxModel<>());
+        }
     }
 }

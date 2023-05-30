@@ -183,8 +183,8 @@ final class CSVConvertDialog extends StandardDialog {
 
     private void runConvert() {
         saveConfig();
-        File outputFile = new File(mainForm.getDs().getOutputFile());
-        File jsFormatFile = new File(mainForm.getDs().getJsFile());
+        File outputFile = new File(mainForm.getDs().getOutputFile().get(0));
+        File jsFormatFile = new File(mainForm.getDs().getJsFile().get(0));
         String script = null;
         String s;
         if (jsFormatFile.canRead()) {
@@ -192,7 +192,7 @@ final class CSVConvertDialog extends StandardDialog {
 //            JSRunner.getInstance().setDebugPort("9229");
         }
 
-        try (BufferedReader in = new BufferedReader(new FileReader(mainForm.getDs().getCsvFile()))) {
+        try (BufferedReader in = new BufferedReader(new FileReader(mainForm.getDs().getCsvFile().get(0)))) {
             CSVParser records = CSVFormat.RFC4180.builder()
                     .setDelimiter(",").setHeader().setSkipHeaderRecord(true).setQuoteMode(QuoteMode.MINIMAL).build().parse(in);
             Document html = createShell("aaa.html");
@@ -202,7 +202,7 @@ final class CSVConvertDialog extends StandardDialog {
              else
                 html.body().appendElement("h1").attr("id", "header").text("Welcome");
 
-            File ccsFile = new File(mainForm.getDs().getCcsFile());
+            File ccsFile = new File(mainForm.getDs().getCcsFile().get(0));
             if (mainForm.getDs().getcssEmbed() == 1) {//external CCS file
                 html.head().appendElement("link").attr("rel", "stylesheet").attr("href", ccsFile.toURI().toString());
             } else if (ccsFile.canRead()) {

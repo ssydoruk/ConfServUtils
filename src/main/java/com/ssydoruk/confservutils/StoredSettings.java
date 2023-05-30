@@ -85,35 +85,35 @@ class StoredSettings {
         return users;
     }
 
-    public String getCsvFile() {
+    public List<String> getCsvFile() {
         return csvToHTMLSettings.getCsvFile();
     }
 
-    public void setCsvFile(String csvFile) {
+    public void setCsvFile(List<String> csvFile) {
         csvToHTMLSettings.setCsvFile(csvFile);
     }
 
-    public String getOutputFile() {
+    public List<String> getOutputFile() {
         return csvToHTMLSettings.getOutputFile();
     }
 
-    public void setOutputFile(String outputFile) {
+    public void setOutputFile(List<String> outputFile) {
         csvToHTMLSettings.setOutputFile(outputFile);
     }
 
-    public String getCcsFile() {
+    public List<String> getCcsFile() {
         return csvToHTMLSettings.getCcsFile();
     }
 
-    public void setCcsFile(String ccsFile) {
+    public void setCcsFile(List<String> ccsFile) {
         csvToHTMLSettings.setCcsFile(ccsFile);
     }
 
-    public String getJsFile() {
+    public List<String> getJsFile() {
         return csvToHTMLSettings.getJsFile();
     }
 
-    public void setJsFile(String jsFile) {
+    public void setJsFile(List<String> jsFile) {
         csvToHTMLSettings.setJsFile(jsFile);
     }
 
@@ -125,7 +125,7 @@ class StoredSettings {
         csvToHTMLSettings.setAction(action);
     }
 
-        public int getcssEmbed() {
+    public int getcssEmbed() {
         return csvToHTMLSettings.getCssEmbed();
     }
 
@@ -133,14 +133,15 @@ class StoredSettings {
         csvToHTMLSettings.setCssEmbed(action);
     }
 
-    
     public static class CSVToHTMLSettings {
 
-        private String csvFile;
-        private String outputFile;
-        private String ccsFile;
+        private ArrayList<String> csvFile = new ArrayList<>();
+        private ArrayList<String> outputFile = new ArrayList<>();
+        private ArrayList<String> ccsFile = new ArrayList<>();
+        ArrayList<String> jsFile = new ArrayList<>();
         private int action;
         private int cssEmbed;
+        static final int MAX_COMBO_ITEMS = 5;
 
         public int getCssEmbed() {
             return cssEmbed;
@@ -158,38 +159,57 @@ class StoredSettings {
             this.action = action;
         }
 
-        public String getCsvFile() {
+        public List<String> getCsvFile() {
             return csvFile;
         }
 
-        public void setCsvFile(String csvFile) {
-            this.csvFile = csvFile;
+        public void setCsvFile(List<String> list) {
+            if (csvFile == null) {
+                csvFile = new ArrayList<>();
+            }
+            storeListItems(csvFile, list);
         }
 
-        public String getOutputFile() {
+        public List<String> getOutputFile() {
             return outputFile;
         }
 
-        public void setOutputFile(String outputFile) {
-            this.outputFile = outputFile;
+        public void setOutputFile(List<String> list) {
+            if (outputFile == null) {
+                outputFile = new ArrayList<>();
+            }
+            storeListItems(outputFile, list);
         }
 
-        public String getCcsFile() {
+        public List<String> getCcsFile() {
             return ccsFile;
         }
 
-        public void setCcsFile(String ccsFile) {
-            this.ccsFile = ccsFile;
+        public void setCcsFile(List<String> list) {
+            if (ccsFile == null) {
+                ccsFile = new ArrayList<>();
+            }
+            storeListItems(ccsFile, list);
         }
 
-        public String getJsFile() {
+        public List<String> getJsFile() {
             return jsFile;
         }
 
-        public void setJsFile(String jsFile) {
-            this.jsFile = jsFile;
+        public void setJsFile(List<String> newFiles) {
+            if (jsFile == null) {
+                jsFile = new ArrayList<>();
+            }
+            storeListItems(jsFile, newFiles);
         }
-        String jsFile;
+
+        private void storeListItems(ArrayList<String> jsFile, List<String> newFiles) {
+            jsFile.clear();
+            for (int i = 0; i < newFiles.size() && i < MAX_COMBO_ITEMS; i++) {
+                jsFile.add(newFiles.get(i));
+            }
+        }
+
     }
 
     public static class ConfServer {
