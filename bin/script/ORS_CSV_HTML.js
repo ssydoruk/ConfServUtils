@@ -133,7 +133,7 @@ function processRecord() {
           return;
         }
 
-        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:OPM Data\s+Type|REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at| LVQ Request result:|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension|IN THE TARGETING: TargetListSeleted KVPs)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS[^\{]+(?:OPM Data\s+Type|REST Request|translated Request Map is|REST Request|IVR GVP ERROR|Reporting VQ ClearTarget)|DEFAULT ROUTED to|IN THE PERCENT TARGETING.+(?:vTarget |vPctTargets )|IN THE OPM[^\{]+(?:Parameters|data to be attached)|IN THE BUSINESS RULE.+vRequest:|IN THE REST: (?:Request headers|Request data)|IN THE ROUTING:\s*(?:TRANSFER path|TREATMENTS|Genesys Callback Check Module)|IN THE ATTACH KVPs:|FetchConfigsOnDN completed|configuration found for agent|IN THE HOOP: HOOP Flags:|HOOP Rule Response|HOOP Flags|_data.data set as:|Segmentation Facts Rule Results|DEFAULT Route Block at|Call Flow Results |Web Service response|CALL FLOW STEPS: REST (?:Request|Response)|IN THE PERCENT ROUTING:[^\{]+result|IN THE AgentExtension|IN THE TARGETING: TargetListSeleted KVPs|Blind Xfr Return targets|ROUTE_TO ROUTEPOINT added target)[^\{]+)(\{.+\})[^\}\",]?/s)) != undefined) {
           // RECORD.put("mod", RECORD.get("mod") + '<br>' + m[1] + '<br>' + m[2]);
 
           updateDesc(m[1], m[2], null, ["content", "CSS_IVRParamObj", "REST_RequestMap", "REST_ResponseMap", "REST_RequestBody"]);
@@ -141,7 +141,7 @@ function processRecord() {
           return;
         }
 
-        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS|Request result =|IN THE TARGETING:TARGET BLOCK: Target selected)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
+        if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS|Request result =| LVQ Request result:|IN THE TARGETING:TARGET BLOCK: Target selected| Event =| error =)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
           updateDescObj(m[1], eval(m[2]), null, ["content", "CSS_IVRParamObj"]);
           colorInThe();
           return;
@@ -203,6 +203,13 @@ function processRecord() {
             + printJSON(JSON.stringify(JSON.parse(m[4]), undefined, 4))
             + br(m[5])
           );
+          colorInThe();
+          return;
+        }
+
+
+        if ((m = s.match(/^(.+IN THE INTERCOMMUNICATION: URS response is[^(]+)(\(\{.+\}\))(?:.+)/s)) != undefined) {
+          updateDescObj(m[1], eval(m[2]), null, null);
           colorInThe();
           return;
         }
@@ -512,15 +519,17 @@ function dequote(str) {
 
 
 function dequoteParams(obj, props) {
-  for (var i = 0; i < props.length; i++) {
-    var propName = props[i];
-    if (obj.hasOwnProperty(propName) && obj[propName] != null && obj[propName].length > 0) {
-      // RECORD.put("mod", RECORD.get("mod") +'<br>'+JSON.stringify(obj)+'<br>'+JSON.stringify(propName));
-      try {
-        obj[propName] = JSON.parse(dequote(obj[propName]));
-        // RECORD.put("mod", RECORD.get("mod") +'%%%%%%'+JSON.stringify(obj)+'-- -- '+JSON.stringify(propName));
-      } catch (error) {
-        console.log('err: ' + JSON.stringify(error));
+  if (props != null && obj != null) {
+    for (var i = 0; i < props.length; i++) {
+      var propName = props[i];
+      if (obj.hasOwnProperty(propName) && obj[propName] != null && obj[propName].length > 0) {
+        // RECORD.put("mod", RECORD.get("mod") +'<br>'+JSON.stringify(obj)+'<br>'+JSON.stringify(propName));
+        try {
+          obj[propName] = JSON.parse(dequote(obj[propName]));
+          // RECORD.put("mod", RECORD.get("mod") +'%%%%%%'+JSON.stringify(obj)+'-- -- '+JSON.stringify(propName));
+        } catch (error) {
+          console.log('err: ' + JSON.stringify(error));
+        }
       }
     }
   }
