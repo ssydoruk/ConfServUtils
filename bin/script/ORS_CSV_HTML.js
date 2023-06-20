@@ -142,10 +142,17 @@ function processRecord() {
         }
 
         if ((m = s.match(/^(.+(?:IN THE CALL FLOW STEPS|Request result =|IN THE TARGETING:TARGET BLOCK: Target selected| Event =| error =)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
-          updateDescObj(m[1], eval(m[2]), null, ["content", "CSS_IVRParamObj"]);
+          updateDescObj(m[1], eval(m[2]), null, ["content", "CSS_IVRParamObj", "udata"]);
           colorInThe();
           return;
         }
+
+        if ((m = s.match(/^(.+(?:Afiniti request parameters)[^\(]+)(\(.+\))['"]$/s)) != undefined) {
+          updateDescObj(m[1], eval(m[2]), null, ["udata"]);
+          colorInThe();
+          return;
+        }
+
 
 
         if ((m = s.match(/^(.+Rule Results :[^\{]+)(\{.+\})(.+_data.data array:[^\{]+)(\{.+\})/s)) != undefined) {

@@ -1800,8 +1800,8 @@ public class ConfigServerManager {
             if (findObjects(query, CfgApplication.class, new IKeyValueProperties() {
                 @Override
                 public KeyValueCollection getProperties(final CfgObject obj) {
-                    KeyValueCollection ret;
-                    ret = (((CfgApplication) obj).getUserProperties());
+                    KeyValueCollection ret = new KeyValueCollection();
+                    ret.addAll( (((CfgApplication) obj).getUserProperties()));
                     ret.addAll(((CfgApplication) obj).getOptions());
                     return ret;
                 }
