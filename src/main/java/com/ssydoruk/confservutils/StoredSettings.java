@@ -6,11 +6,12 @@
 package com.ssydoruk.confservutils;
 
 import Utils.swing.*;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 import javax.swing.*;
 
 /**
- *
  * @author stepan_sydoruk
  */
 class StoredSettings {
@@ -160,7 +161,7 @@ class StoredSettings {
         }
 
         public List<String> getCsvFile() {
-            return csvFile;
+            return nonNull(csvFile);
         }
 
         public void setCsvFile(List<String> list) {
@@ -171,7 +172,7 @@ class StoredSettings {
         }
 
         public List<String> getOutputFile() {
-            return outputFile;
+            return nonNull(outputFile);
         }
 
         public void setOutputFile(List<String> list) {
@@ -182,7 +183,17 @@ class StoredSettings {
         }
 
         public List<String> getCcsFile() {
-            return ccsFile;
+            return nonNull(ccsFile);
+        }
+
+        private List<String> nonNull(ArrayList<String> list) {
+            ArrayList<String> ret = new ArrayList<String>();
+            for (String f :list
+                 ) {
+                if(StringUtils.isNotEmpty(f))
+                    ret.add(f);
+            }
+            return ret;
         }
 
         public void setCcsFile(List<String> list) {
@@ -193,7 +204,7 @@ class StoredSettings {
         }
 
         public List<String> getJsFile() {
-            return jsFile;
+            return nonNull(jsFile);
         }
 
         public void setJsFile(List<String> newFiles) {
@@ -206,7 +217,9 @@ class StoredSettings {
         private void storeListItems(ArrayList<String> jsFile, List<String> newFiles) {
             jsFile.clear();
             for (int i = 0; i < newFiles.size() && i < MAX_COMBO_ITEMS; i++) {
-                jsFile.add(newFiles.get(i));
+                String newFile = newFiles.get(i);
+                if (StringUtils.isNotBlank(newFile))
+                    jsFile.add(newFile);
             }
         }
 
