@@ -47,6 +47,11 @@ public class AppByOptions extends javax.swing.JPanel implements ISearchSettings,
     }
 
     @Override
+    public boolean isAllKVPsInOutput() {
+        return false;
+    }
+
+    @Override
     public String getObjName() {
         return Utils.swing.Swing.checkBoxSelection(tfName);
     }

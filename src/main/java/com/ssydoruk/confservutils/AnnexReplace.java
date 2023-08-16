@@ -112,6 +112,11 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
         return false;
     }
 
+    @Override
+    public boolean isAllKVPsInOutput() {
+        return false;
+    }
+
     private GridEditor kvpEditor;
 
     /**

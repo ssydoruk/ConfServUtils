@@ -17,6 +17,8 @@ public interface ISearchSettings {
 
     public boolean isFullOutputSelected();
 
+    public boolean isAllKVPsInOutput();
+
     public boolean isSearchAll();
 
     public String getAllSearch();

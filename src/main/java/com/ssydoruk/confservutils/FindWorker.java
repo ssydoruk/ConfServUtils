@@ -45,6 +45,10 @@ public class FindWorker {
         return ss.isFullOutputSelected();
     }
 
+    public boolean isAllKVPOutput(){
+        return ss.isAllKVPsInOutput();
+    }
+
     private void initSearch() {
         int flags = ((ss.isRegex()) ? 0 : Pattern.LITERAL) | ((ss.isCaseSensitive()) ? 0 : Pattern.CASE_INSENSITIVE);
         String objName = ss.getObjName();
@@ -71,14 +75,14 @@ public class FindWorker {
      * @return if object matches, return non-null value. If no kvp matched, returns
      *         empty kvp. Otherwise return non-empty kvp
      */
-    public KeyValueCollection matchConfigObject(CfgObject cfgObj, IKeyValueProperties props, boolean checkNames) {
-        KeyValueCollection kv = new KeyValueCollection();
+    public MatchedKVPs matchConfigObject(CfgObject cfgObj, IKeyValueProperties props, boolean checkNames) {
 
         if (ptSection == null && ptKey == null && ptVal == null && ptName == null && ptAll == null) {
             logger.debug("** No criteria; object added");
 
-            return new KeyValueCollection(); // no search parameters means we return all objects
+            return null; // no search parameters means we return all objects
         } else {
+            MatchedKVPs kv = new MatchedKVPs();
             boolean nameMatched = false;
             boolean sectionMatched;
             boolean keyMatched = false;
@@ -214,23 +218,17 @@ public class FindWorker {
                                 || ((ptAll == null)
                                         && numTrue(nameMatched, sectionMatched, keyMatched, valMatched) >= numTrue(
                                                 ptName != null, ptSection != null, ptKey != null, ptVal != null)))) {
-                            KeyValueCollection list = kv.getList(sectionName);
-                            if (list == null) {
-                                list = new KeyValueCollection();
-                                kv.addList(sectionName, list);
-                            }
-                            list.addAll(Arrays.asList(addedValues.toArray()));
-                            // kv.addObject(el.getStringKey(), addedValues);
+                                kv.addValues(sectionName, addedValues, el);
                         }
                     }
                 }
             }
             if (ptAll != null) {
-                logger.debug(" ** all **  match " + ((nameMatched || !kv.isEmpty()) ? "" : "NOT") + " found, obj "
+                logger.debug(" ** all **  match " + ((nameMatched || !kv.getMatchedKVPs().isEmpty()) ? "" : "NOT") + " found, obj "
                         + props.getName(cfgObj));
-                return (nameMatched || !kv.isEmpty()) ? kv : null;
+                return (nameMatched || !kv.getMatchedKVPs().isEmpty()) ? kv : null;
             } else {
-                KeyValueCollection ret = (!kv.isEmpty() || (ptName != null && nameMatched
+                MatchedKVPs ret = (!kv.getMatchedKVPs().isEmpty() || (ptName != null && nameMatched
                         && numTrue(ptSection != null, ptKey != null, ptVal != null) == 0)) ? kv : null;
 
                 logger.debug(" ** match " + ((ret == null) ? "NOT" : "") + " found, obj " + props.getName(cfgObj));

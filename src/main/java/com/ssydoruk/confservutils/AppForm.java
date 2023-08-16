@@ -1024,6 +1024,11 @@ public final class AppForm extends javax.swing.JFrame {
                     }
 
                     @Override
+                    public boolean isAllKVPsInOutput() {
+                        return false;
+                    }
+
+                    @Override
                     public boolean isSearchAll() {
                         return false;
                     }
@@ -1356,6 +1361,11 @@ public final class AppForm extends javax.swing.JFrame {
 
                 @Override
                 public boolean isFullOutputSelected() {
+                    return false;
+                }
+
+                @Override
+                public boolean isAllKVPsInOutput() {
                     return false;
                 }
 
@@ -1782,6 +1792,11 @@ public final class AppForm extends javax.swing.JFrame {
 
                     @Override
                     public boolean isFullOutputSelected() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isAllKVPsInOutput() {
                         return false;
                     }
 
@@ -2592,6 +2607,11 @@ public final class AppForm extends javax.swing.JFrame {
                     }
 
                     @Override
+                    public boolean isAllKVPsInOutput() {
+                        return false;
+                    }
+
+                    @Override
                     public boolean isSearchAll() {
                         return false;
                     }
@@ -2692,6 +2712,11 @@ public final class AppForm extends javax.swing.JFrame {
 
                     @Override
                     public boolean isFullOutputSelected() {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean isAllKVPsInOutput() {
                         return false;
                     }
 

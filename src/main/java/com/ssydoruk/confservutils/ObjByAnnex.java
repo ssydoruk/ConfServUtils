@@ -121,6 +121,11 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         return rbFullOutput.isSelected();
     }
 
+    @Override
+    public boolean isAllKVPsInOutput() {
+        return cbAllKVPs.isSelected();
+    }
+
     private GEnum cfgObjType(final Object o) {
         if (o == null || o instanceof String) {
             return null;

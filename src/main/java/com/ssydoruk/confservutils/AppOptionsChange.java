@@ -100,6 +100,11 @@ public class AppOptionsChange extends javax.swing.JPanel implements ISearchSetti
         return false;
     }
 
+    @Override
+    public boolean isAllKVPsInOutput() {
+        return false;
+    }
+
     private final ArrayList<UserProperties> updateProperties = new ArrayList<>();
 
     private GEnum cfgObjType(Object o) {

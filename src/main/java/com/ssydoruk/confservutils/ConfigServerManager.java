@@ -6,6 +6,7 @@
 package com.ssydoruk.confservutils;
 
 import Utils.Pair;
+
 import static Utils.StringUtils.matching;
 import static java.util.Collections.*;
 
@@ -22,14 +23,15 @@ import com.genesyslab.platform.configuration.protocol.obj.*;
 import com.genesyslab.platform.configuration.protocol.types.*;
 import com.genesyslab.platform.configuration.protocol.utilities.*;
 import confserverbatch.*;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 
 /**
- *
  * @author stepan_sydoruk
  */
 public class ConfigServerManager {
@@ -52,6 +54,11 @@ public class ConfigServerManager {
 
         @Override
         public boolean isFullOutputSelected() {
+            return false;
+        }
+
+        @Override
+        public boolean isAllKVPsInOutput() {
             return false;
         }
 
@@ -403,7 +410,7 @@ public class ConfigServerManager {
         parentForm.requestOutput("connecting...\n", false);
 
 
-        return service=ConfigConnection.initializeConfigService(
+        return service = ConfigConnection.initializeConfigService(
                 confServ.getApp(), confServ.getHost(), confServ.getPortInt(),
                 user, string);
 
@@ -425,7 +432,7 @@ public class ConfigServerManager {
         return service;
     }
 
-    private class CfgObjComparator implements Comparator<ICfgObject>{
+    private class CfgObjComparator implements Comparator<ICfgObject> {
 
         @Override
         public int compare(ICfgObject o1, ICfgObject o2) {
@@ -435,7 +442,7 @@ public class ConfigServerManager {
 
     private final CfgObjComparator theCfgObjComparator;
 
-    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls, boolean refresh) throws ConfigException, InterruptedException {
+    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class<T> cls, boolean refresh) throws ConfigException, InterruptedException {
         Main.logger.debug("query " + q + " for object type " + cls);
         String qToString = q.toString();
         checkQueryNeedsUpdate();
@@ -453,13 +460,13 @@ public class ConfigServerManager {
         return cfgObjs;
     }
 
-    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class< T> cls) throws ConfigException, InterruptedException {
+    public <T extends CfgObject> Collection<T> getResults(CfgQuery q, final Class<T> cls) throws ConfigException, InterruptedException {
         return getResults(q, cls, false);
     }
 
     private <T extends CfgObject> void findApps(
             CfgQuery q,
-            Class< T> cls,
+            Class<T> cls,
             IKeyValueProperties props,
             ISearchSettings ss
     ) throws ConfigException, InterruptedException {
@@ -683,7 +690,7 @@ public class ConfigServerManager {
     }
 
     private boolean doCreatePlace(IConfService service,
-            String pl, ArrayList<CfgDN> cfgDNs, Integer folderDBID) throws ConfigException {
+                                  String pl, ArrayList<CfgDN> cfgDNs, Integer folderDBID) throws ConfigException {
         CfgPlace cfgPlace = new CfgPlace(service);
 
         cfgPlace.setDNs(cfgDNs);
@@ -743,6 +750,11 @@ public class ConfigServerManager {
             }
 
             @Override
+            public boolean isAllKVPsInOutput() {
+                return false;
+            }
+
+            @Override
             public boolean isSearchAll() {
                 return false;
             }
@@ -792,18 +804,18 @@ public class ConfigServerManager {
                     q,
                     CfgFolder.class,
                     new IKeyValueProperties() {
-                @Override
-                public KeyValueCollection getProperties(CfgObject obj) {
-                    return null;
-                }
+                        @Override
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return null;
+                        }
 
-                @Override
-                public Collection<String> getName(CfgObject obj) {
-                    Collection<String> ret = new ArrayList<>();
-                    ret.add(((CfgFolder) obj).getName());
-                    return ret;
-                }
-            },
+                        @Override
+                        public Collection<String> getName(CfgObject obj) {
+                            Collection<String> ret = new ArrayList<>();
+                            ret.add(((CfgFolder) obj).getName());
+                            return ret;
+                        }
+                    },
                     new FindWorker(seearchSettings), true, foundProc)) {
 
             }
@@ -1059,11 +1071,11 @@ public class ConfigServerManager {
     }
 
     private Pair<ObjectExistAction, CfgObject> doCreateDN(IConfService service,
-            String theNumber,
-            String name,
-            CfgDNType type,
-            CfgSwitch sw,
-            Integer folderDBID) throws ConfigException {
+                                                          String theNumber,
+                                                          String name,
+                                                          CfgDNType type,
+                                                          CfgSwitch sw,
+                                                          Integer folderDBID) throws ConfigException {
         CfgDN dn = new CfgDN(service);
 
         parentForm.requestOutput("Creating DN [" + name + "] switch [" + sw.getName() + "]");
@@ -1086,9 +1098,9 @@ public class ConfigServerManager {
     }
 
     private Pair<ObjectExistAction, CfgObject> doCreateLoginID(IConfService service,
-            String name,
-            CfgSwitch sw,
-            Integer folderDBID) throws ConfigException {
+                                                               String name,
+                                                               CfgSwitch sw,
+                                                               Integer folderDBID) throws ConfigException {
         CfgAgentLogin login = new CfgAgentLogin(service);
 
         parentForm.requestOutput("Creating loginID [" + name + "] switch [" + sw.getName() + "]");
@@ -1301,7 +1313,6 @@ public class ConfigServerManager {
     }
 
     /**
-     *
      * @param <T>
      * @param q
      * @param cls
@@ -1320,8 +1331,9 @@ public class ConfigServerManager {
         final Collection<T> cfgObjs = getResults(q, cls);
         if (cfgObjs != null && !cfgObjs.isEmpty()) {
             for (final CfgObject cfgObj : cfgObjs) {
-                final KeyValueCollection kv = ss.matchConfigObject(cfgObj, props, checkNames);
-                if (kv != null) {
+                MatchedKVPs matched = ss.matchConfigObject(cfgObj, props, checkNames);
+                KeyValueCollection kv;
+                if (matched != null && (kv = matched.getMatchedKVPs()) != null) {
                     cnt++;
                     if (foundProc == null) {
                         if (ss.isFullOutputSelected()) {
@@ -1348,7 +1360,11 @@ public class ConfigServerManager {
                             }
                             buf.append("\n");
                             if (!kv.isEmpty()) {
-                                buf.append("\t").append(kv.toString()).append("\n\n");
+                                if (ss.isAllKVPOutput())
+                                    buf.append("\t").append(matched.getMatchedSections().toString()).append("\n\n");
+                                else {
+                                    buf.append("\t").append(kv.toString()).append("\n\n");
+                                }
                             }
                         }
                     } else {
@@ -1801,7 +1817,7 @@ public class ConfigServerManager {
                 @Override
                 public KeyValueCollection getProperties(final CfgObject obj) {
                     KeyValueCollection ret = new KeyValueCollection();
-                    ret.addAll( (((CfgApplication) obj).getUserProperties()));
+                    ret.addAll((((CfgApplication) obj).getUserProperties()));
                     ret.addAll(((CfgApplication) obj).getOptions());
                     return ret;
                 }
@@ -2289,7 +2305,7 @@ public class ConfigServerManager {
         final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
             @Override
             public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
-                    final int total) {
+                                final int total) {
                 agentLogins.add(obj);
                 return true;
             }
@@ -2331,12 +2347,12 @@ public class ConfigServerManager {
     }
 
     private <T extends CfgObject> ArrayList<T> getAll(final CfgQuery q, final Class<T> cls) {
-        ArrayList< T> exts = new ArrayList<>();
+        ArrayList<T> exts = new ArrayList<>();
 
         final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
             @Override
             public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
-                    final int total) {
+                                final int total) {
                 exts.add((T) obj);
                 return true;
             }
@@ -2363,7 +2379,7 @@ public class ConfigServerManager {
         return exts;
     }
 
-    public ArrayList< CfgDN> getAllExtensions() {
+    public ArrayList<CfgDN> getAllExtensions() {
         final CfgDNQuery query = new CfgDNQuery();
         query.setDnType(CfgDNType.CFGExtension);
         ArrayList<CfgDN> all = getAll(query, CfgDN.class);
@@ -2406,14 +2422,14 @@ public class ConfigServerManager {
         return agent;
     }
 
-    private Collection< CfgPerson> getAllAgents() throws ConfigException, InterruptedException {
+    private Collection<CfgPerson> getAllAgents() throws ConfigException, InterruptedException {
         final CfgPersonQuery query = new CfgPersonQuery();
         query.setIsAgent(CfgFlag.CFGTrue.asInteger());
         return getResults(query, CfgPerson.class);
 
     }
 
-    public Collection< CfgPerson> getAllPersons() throws ConfigException, InterruptedException {
+    public Collection<CfgPerson> getAllPersons() throws ConfigException, InterruptedException {
         return getResults(new CfgPersonQuery(), CfgPerson.class);
 
     }
@@ -2431,13 +2447,13 @@ public class ConfigServerManager {
                     ret = connect(confServ, user, getParentForm().pfPasswordgetPassword());
 
                 } catch (ProtocolException | IllegalStateException | InterruptedException ex) {
-                    getParentForm().showException("Failed to connect to ConfigServer: "+ex.getMessage(), ex);
+                    getParentForm().showException("Failed to connect to ConfigServer: " + ex.getMessage(), ex);
                 }
 
             }
             getParentForm().connectionStatusChanged();
 
-            return ret!=null;
+            return ret != null;
         }
     }
 
@@ -2555,7 +2571,7 @@ public class ConfigServerManager {
         if (max > 0) {
             ArrayList<CfgObject> ret = new ArrayList();
             int i = 1;
-            for (Iterator it = allObjects.iterator(); it.hasNext();) {
+            for (Iterator it = allObjects.iterator(); it.hasNext(); ) {
                 CfgObject obj = (CfgObject) it.next();
                 logger.debug(obj);
                 ret.add(obj);
@@ -2576,7 +2592,7 @@ public class ConfigServerManager {
 
         logger.error(resp);
         if (resp instanceof EventObjectDeleted) {
-            parentForm.requestOutput("Deleted object DBID:\n" + ((EventObjectDeleted)resp).getDbid()+" type: "+CfgObjectType.valueOf(((EventObjectDeleted)resp).getObjectType()));
+            parentForm.requestOutput("Deleted object DBID:\n" + ((EventObjectDeleted) resp).getDbid() + " type: " + CfgObjectType.valueOf(((EventObjectDeleted) resp).getObjectType()));
             return true;
         } else if (resp instanceof EventError) {
             String err = "Error on object create: "

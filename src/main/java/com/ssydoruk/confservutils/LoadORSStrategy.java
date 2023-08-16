@@ -368,6 +368,11 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
             }
 
             @Override
+            public boolean isAllKVPsInOutput() {
+                return false;
+            }
+
+            @Override
             public boolean isSearchAll() {
                 return false;
             }
@@ -473,6 +478,11 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
             @Override
             public boolean isFullOutputSelected() {
+                return false;
+            }
+
+            @Override
+            public boolean isAllKVPsInOutput() {
                 return false;
             }
 
