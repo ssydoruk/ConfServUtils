@@ -414,6 +414,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         buf.append(" rx[").append(isRegex() ? "yes" : "no").append("]");
         buf.append(" CaSe[").append(isCaseSensitive() ? "yes" : "no").append("]");
         buf.append("; ").append(isFullOutputSelected() ? "full" : "short").append(" output");
+        buf.append("; ").append(isAllKVPsInOutput() ? "all KVPs in matched section" : "just matched KVPs/section");
 
         return buf.toString();
     }
