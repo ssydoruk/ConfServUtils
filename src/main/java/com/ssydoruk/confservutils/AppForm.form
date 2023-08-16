@@ -285,7 +285,24 @@
             </Menu>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu2">
+        <Menu class="javax.swing.JMenu" name="jmWebInterface">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="App web"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="miURS">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="URS"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="miORS">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="ORS"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jmSplunk">
           <Properties>
             <Property name="text" type="java.lang.String" value="Splunk"/>
           </Properties>

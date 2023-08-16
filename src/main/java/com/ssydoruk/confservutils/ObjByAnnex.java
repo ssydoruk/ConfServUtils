@@ -167,8 +167,11 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         cbIsRegex = new javax.swing.JCheckBox();
         cbCaseSensitive = new javax.swing.JCheckBox();
         jPanel9 = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
         rbFullOutput = new javax.swing.JRadioButton();
         rbShortOutput = new javax.swing.JRadioButton();
+        jPanel2 = new javax.swing.JPanel();
+        cbAllKVPs = new javax.swing.JCheckBox();
 
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
 
@@ -259,20 +262,46 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         jPanel4.add(jPanel8);
 
-        jPanel9.setLayout(new javax.swing.BoxLayout(jPanel9, javax.swing.BoxLayout.PAGE_AXIS));
+        jPanel9.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel9.setLayout(new javax.swing.BoxLayout(jPanel9, javax.swing.BoxLayout.LINE_AXIS));
+
+        jPanel7.setLayout(new javax.swing.BoxLayout(jPanel7, javax.swing.BoxLayout.PAGE_AXIS));
 
         buttonGroup1.add(rbFullOutput);
         rbFullOutput.setText("Print full output");
-        jPanel9.add(rbFullOutput);
+        rbFullOutput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbFullOutputActionPerformed(evt);
+            }
+        });
+        jPanel7.add(rbFullOutput);
 
         buttonGroup1.add(rbShortOutput);
         rbShortOutput.setText("Print abbreviated output");
-        jPanel9.add(rbShortOutput);
+        rbShortOutput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbFullOutputActionPerformed(evt);
+            }
+        });
+        jPanel7.add(rbShortOutput);
+
+        jPanel9.add(jPanel7);
+
+        jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
+
+        cbAllKVPs.setText("all KVPs in Options/Annex matched");
+        jPanel2.add(cbAllKVPs);
+
+        jPanel9.add(jPanel2);
 
         jPanel4.add(jPanel9);
 
         add(jPanel4);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void rbFullOutputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbFullOutputActionPerformed
+        cbAllKVPs.setEnabled(!isFullOutputSelected());
+    }//GEN-LAST:event_rbFullOutputActionPerformed
 
     @Override
     public String getSection() {
@@ -301,6 +330,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
+    private javax.swing.JCheckBox cbAllKVPs;
     private javax.swing.JCheckBox cbCaseSensitive;
     private javax.swing.JCheckBox cbIsRegex;
     private javax.swing.JPanel jPanel1;
@@ -308,10 +338,12 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jpObjectTypes;

@@ -311,7 +311,10 @@ public final class AppForm extends javax.swing.JFrame {
         miCreateLoginIDs = new javax.swing.JMenuItem();
         miCreateAdminAccounts = new javax.swing.JMenuItem();
         miFindPersonRunScript = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        jmWebInterface = new javax.swing.JMenu();
+        miURS = new javax.swing.JMenuItem();
+        miORS = new javax.swing.JMenuItem();
+        jmSplunk = new javax.swing.JMenu();
         miCSVtoHTML = new javax.swing.JMenuItem();
         jmExit = new javax.swing.JMenu();
 
@@ -714,7 +717,17 @@ public final class AppForm extends javax.swing.JFrame {
 
         jmbMainMenuBar.add(jmUpdate);
 
-        jMenu2.setText("Splunk");
+        jmWebInterface.setText("App web");
+
+        miURS.setText("URS");
+        jmWebInterface.add(miURS);
+
+        miORS.setText("ORS");
+        jmWebInterface.add(miORS);
+
+        jmbMainMenuBar.add(jmWebInterface);
+
+        jmSplunk.setText("Splunk");
 
         miCSVtoHTML.setText("CSV to HTML");
         miCSVtoHTML.addActionListener(new java.awt.event.ActionListener() {
@@ -722,9 +735,9 @@ public final class AppForm extends javax.swing.JFrame {
                 miCSVtoHTMLActionPerformed(evt);
             }
         });
-        jMenu2.add(miCSVtoHTML);
+        jmSplunk.add(miCSVtoHTML);
 
-        jmbMainMenuBar.add(jMenu2);
+        jmbMainMenuBar.add(jmSplunk);
 
         jmExit.setText("Exit");
         jmExit.addActionListener(new java.awt.event.ActionListener() {
@@ -2088,7 +2101,6 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
@@ -2105,7 +2117,9 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenu jmExit;
     private javax.swing.JMenu jmQuery;
     private javax.swing.JMenu jmScript;
+    private javax.swing.JMenu jmSplunk;
     private javax.swing.JMenu jmUpdate;
+    private javax.swing.JMenu jmWebInterface;
     private javax.swing.JMenuBar jmbMainMenuBar;
     private javax.swing.JPanel jpConfServ;
     private javax.swing.JPanel jpOutput;
@@ -2133,11 +2147,13 @@ public final class AppForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem miImportCSV;
     private javax.swing.JMenuItem miLoadStrategy;
     private javax.swing.JMenuItem miLoginsWithoutAgent;
+    private javax.swing.JMenuItem miORS;
     private javax.swing.JMenuItem miObjByDBID;
     private javax.swing.JMenuItem miObjectByAnnex;
     private javax.swing.JMenuItem miOneORS;
     private javax.swing.JMenuItem miOpenScript;
     private javax.swing.JMenuItem miRestartService;
+    private javax.swing.JMenuItem miURS;
     private javax.swing.JPasswordField pfPassword;
     private javax.swing.JScrollPane spOutputScroll;
     private javax.swing.JTextArea taOutput;
