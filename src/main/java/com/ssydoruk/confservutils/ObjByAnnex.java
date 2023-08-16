@@ -203,6 +203,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jPanel13.add(lbSearchString);
 
         tfSearchString.setEditable(true);
+        tfSearchString.setMaximumSize(new java.awt.Dimension(32767, 22));
+        tfSearchString.setName(""); // NOI18N
         jPanel13.add(tfSearchString);
 
         jPanel12.add(jPanel13);
@@ -213,6 +215,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jPanel6.add(lbObjectName);
 
         tfObjectName.setEditable(true);
+        tfObjectName.setMaximumSize(new java.awt.Dimension(32767, 22));
+        tfObjectName.setName(""); // NOI18N
         jPanel6.add(tfObjectName);
 
         jPanel12.add(jPanel6);
@@ -223,6 +227,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jPanel3.add(lbSection);
 
         tfSection.setEditable(true);
+        tfSection.setMaximumSize(new java.awt.Dimension(32767, 22));
+        tfSection.setName(""); // NOI18N
         jPanel3.add(tfSection);
 
         jPanel12.add(jPanel3);
@@ -233,6 +239,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jPanel1.add(lbOption);
 
         tfOption.setEditable(true);
+        tfOption.setMaximumSize(new java.awt.Dimension(32767, 22));
+        tfOption.setName(""); // NOI18N
         jPanel1.add(tfOption);
 
         jPanel12.add(jPanel1);
@@ -243,6 +251,8 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
         jPanel5.add(lbOptionValue);
 
         tfOptionValue.setEditable(true);
+        tfOptionValue.setMaximumSize(new java.awt.Dimension(32767, 22));
+        tfOptionValue.setName(""); // NOI18N
         jPanel5.add(tfOptionValue);
 
         jPanel12.add(jPanel5);
@@ -294,7 +304,7 @@ public class ObjByAnnex extends javax.swing.JPanel implements ISearchSettings, I
 
         jPanel2.setLayout(new javax.swing.BoxLayout(jPanel2, javax.swing.BoxLayout.LINE_AXIS));
 
-        cbAllKVPs.setText("all KVPs in Options/Annex matched");
+        cbAllKVPs.setText("all KVPs in section matched");
         jPanel2.add(cbAllKVPs);
 
         jPanel9.add(jPanel2);
