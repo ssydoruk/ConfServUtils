@@ -142,24 +142,24 @@
         <dependency>
             <groupId>org.graalvm.sdk</groupId>
             <artifactId>graal-sdk</artifactId>
-            <version>22.3.1</version>
+            <version>21.3.7</version>
         </dependency>
         <dependency>
             <groupId>org.graalvm.tools</groupId>
             <artifactId>chromeinspector</artifactId>
-            <version>22.3.1</version>
+            <version>21.3.7</version>
         </dependency>
         <dependency>
             <groupId>org.graalvm.truffle</groupId>
             <artifactId>truffle-api</artifactId>
-            <version>21.0.0.2</version>
+            <version>21.3.7</version>
             <type>jar</type>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.graalvm.js/js -->
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js</artifactId>
-            <version>22.3.1</version>
+            <version>21.3.7</version>
         </dependency>
         <dependency>
             <groupId>com.genesyslab.platform</groupId>
