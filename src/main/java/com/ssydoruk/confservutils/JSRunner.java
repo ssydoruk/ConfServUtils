@@ -33,12 +33,7 @@ public class JSRunner {
     public static String runCSVFormatScript(String script, HTMLstage htmlStage) {
         logger.trace("runScript anonymous script [" + script + "]");
 
-        return runCSVFormatScript(new IEvalMethod() {
-            @Override
-            public void theMethod(Context cont) {
-                cont.eval("js", script);
-            }
-        }, htmlStage);
+        return runCSVFormatScript((cont) -> cont.eval("js", script), htmlStage);
 
     }
 
@@ -162,18 +157,7 @@ public class JSRunner {
 
         try {
             Source source = getSource(fileName, forceFile);
-            return runScript(new IEvalMethod() {
-                @Override
-                public void theMethod(Context cont) {
-//                    try {
-                    cont.eval(source);
-//                    }
-//                    catch (Exception e){
-//                        logger.error("Error executing ", e);
-//                    }
-                }
-
-            }, csManager, params);
+            return runScript((cont) -> cont.eval(source), csManager, params);
 
         } catch (IOException ex) {
             Logger.getLogger(JSRunner.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
@@ -215,12 +199,7 @@ public class JSRunner {
     static boolean runScript(String script, ConfigServerManager csManager, String[] params) {
         logger.trace("runScript anonymous script [" + script + "]");
 
-        return runScript(new IEvalMethod() {
-            @Override
-            public void theMethod(Context cont) {
-                cont.eval("js", script);
-            }
-        }, csManager, params);
+        return runScript((cont) -> cont.eval("js", script), csManager, params);
 
     }
 
@@ -240,12 +219,7 @@ public class JSRunner {
     static boolean runCSVFormatScript(String script, HashMap<String, String> record) {
         logger.trace("runScript anonymous script [" + script + "]");
 
-        return runCSVFormatScript(new IEvalMethod() {
-            @Override
-            public void theMethod(Context cont) {
-                cont.eval("js", script);
-            }
-        }, record);
+        return runCSVFormatScript((cont) -> cont.eval("js", script), record);
     }
 
     private static boolean runCSVFormatScript(IEvalMethod method, HashMap<String, String> record) {
@@ -287,6 +261,7 @@ public class JSRunner {
         }
     }
 
+    @FunctionalInterface
     interface IEvalMethod {
 
         void theMethod(Context cont) throws PolyglotException;

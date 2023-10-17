@@ -6,16 +6,18 @@
 package com.ssydoruk.confservutils;
 
 import com.jidesoft.dialog.*;
+
 import static com.jidesoft.dialog.StandardDialog.RESULT_CANCELLED;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import javax.swing.*;
+
 import org.apache.commons.lang3.*;
 
 /**
- *
  * @author stepan_sydoruk
  */
 final class DialogRunScript extends StandardDialog {
@@ -178,13 +180,7 @@ final class DialogRunScript extends StandardDialog {
 
         // setModal(true);
         this.fileName = scriptFile.getAbsolutePath();
-        pRunScript.setParams(scriptFile, configServerManager, new IDocUpdated() {
-            @Override
-            public void docUpdated(DOC_STATE docState) {
-                changeDocStatus(docState);
-            }
-
-        });
+        pRunScript.setParams(scriptFile, configServerManager, docState -> changeDocStatus(docState));
         pack();
         changeDocStatus(DOC_STATE.CLEAR);
 

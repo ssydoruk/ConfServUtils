@@ -8,9 +8,9 @@ package confserverbatch;
 import com.genesyslab.platform.applicationblocks.com.CfgObject;
 
 /**
- *
  * @author stepan_sydoruk
  */
+@FunctionalInterface
 public interface IObjectUpdateProc {
     public void updateProc(CfgObject obj);
 }

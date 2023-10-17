@@ -35,9 +35,11 @@ import com.genesyslab.platform.configuration.protocol.metadata.*;
 import com.genesyslab.platform.configuration.protocol.obj.*;
 import com.genesyslab.platform.configuration.protocol.types.*;
 import com.genesyslab.platform.configuration.protocol.utilities.*;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,6 +79,7 @@ public class RenameDomain {
 
         RenameDomain.logger.info("ComJavaQuickStart finished execution.");
     }
+
     ConfigServerManager configServerManager;
 
     boolean testRun = true;
@@ -84,10 +87,11 @@ public class RenameDomain {
 
     private final Pattern ptSearchDomain = Pattern.compile("(.*)host.com(.*)");
     private final String sReplaceString = "$1nobnb.biz$2";
+
     public RenameDomain() {
-        
+
         configServerManager = new ConfigServerManager();
-        
+
     }
 
     private void run() throws ProtocolException, IllegalStateException, InterruptedException, ConfigException {
@@ -117,66 +121,62 @@ public class RenameDomain {
             processConfigObjects(
                     query,
                     CfgPerson.class,
-                    new IObjectUpdateProc() {
-                @Override
-                public void updateProc(CfgObject obj) {
-                    CfgPerson p = (CfgPerson) obj;
-                    logger.debug("Checking  " + p.getObjectType() + ": " + p.getUserName());
+                    (CfgObject obj) -> {
+                        CfgPerson p = (CfgPerson) obj;
+                        logger.debug("Checking  " + p.getObjectType() + ": " + p.getUserName());
 
-                    CfgAgentInfo agentInfo = p.getAgentInfo();
+                        CfgAgentInfo agentInfo = p.getAgentInfo();
 
 //                    logger.info("agentInfo: " + agentInfo.getAgentLogins());
-                    Collection<CfgAgentLoginInfo> agentLogins = agentInfo.getAgentLogins();
-                    ArrayList<Pair<Integer, Integer>> newDBIDs = new ArrayList<>(agentLogins.size());
-                    for (CfgAgentLoginInfo agentLogin : agentLogins) {
+                        Collection<CfgAgentLoginInfo> agentLogins = agentInfo.getAgentLogins();
+                        ArrayList<Pair<Integer, Integer>> newDBIDs = new ArrayList<>(agentLogins.size());
+                        for (CfgAgentLoginInfo agentLogin : agentLogins) {
 //                        logger.info("login: " + agentLogin);
-                        Integer newID = processLogin(agentLogin, p);
-                        if (newID != null) {
-                            newDBIDs.add(new Pair(newID, agentLogin.getWrapupTime()));
-                        }
-                    }
-
-                    Matcher mEmailAddress = (StringUtils.isBlank(p.getEmailAddress())) ? null : ptSearchDomain.matcher(p.getEmailAddress());
-                    Matcher mUserName = (StringUtils.isBlank(p.getUserName())) ? null : ptSearchDomain.matcher(p.getUserName());
-
-                    if ((mEmailAddress != null && mEmailAddress.find()) || (mUserName != null && mUserName.find()) || !newDBIDs.isEmpty()) {
-                        logger.info("Updating person: " + p.getEmployeeID() + " email: " + p.getEmailAddress() + " " + p.getUserName());
-                        if (testRun) {
-                            infoTestRun("updated email: " + (mEmailAddress != null ? mEmailAddress.replaceAll(sReplaceString) : "<empty>") + " updated username: " + (mUserName != null ? mUserName.replaceAll(sReplaceString) : "<empty>")
-                                    + " updated loginDBIDs:" + (!newDBIDs.isEmpty() ? newDBIDs.toString() : "none"));
-
-                        } else {
-                            IConfService service = configServerManager.getService();
-                            CfgMetadata metaData = service.getMetaData();
-                            ConfObjectDelta d = new ConfObjectDelta(metaData, CfgObjectType.CFGPerson);
-
-                            ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue("deltaPerson");
-
-                            obj1.setPropertyValue("DBID", p.getDBID());              // - required
-                            obj1.setPropertyValue("emailAddress", (mEmailAddress != null ? mEmailAddress.replaceAll(sReplaceString) : "<empty>"));      // - to set new host name (if needed)
-                            obj1.setPropertyValue("userName", (mUserName != null ? mUserName.replaceAll(sReplaceString) : "<empty>"));      // - to set new host name (if needed)
-                            ConfStructure obj2 = (ConfStructure) obj1.getOrCreatePropertyValue("agentInfo");
-                            for (Pair<Integer, Integer> newDBID : newDBIDs) {
-                                ConfStructureCollection obj3 = (ConfStructureCollection) obj2.getOrCreatePropertyValue("agentLogins");
-                                ConfStructure cs = new ConfStructure(metaData, CfgStructureType.CFGAgentLoginInfo);
-                                cs.setPropertyValue("agentLoginDBID", newDBID.getKey());
-                                cs.setPropertyValue("wrapupTime", newDBID.getValue());
-                                obj3.add(cs);
-
+                            Integer newID = processLogin(agentLogin, p);
+                            if (newID != null) {
+                                newDBIDs.add(new Pair(newID, agentLogin.getWrapupTime()));
                             }
-
-                            RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-                            logger.info("++" + d.toString());
-                            reqUpdate.setObjectDelta(d);
-
-                            execRequest(reqUpdate, service);
-
-                            logger.info("----- updating loginids -----");
                         }
-                    }
-                }
 
-            });
+                        Matcher mEmailAddress = (StringUtils.isBlank(p.getEmailAddress())) ? null : ptSearchDomain.matcher(p.getEmailAddress());
+                        Matcher mUserName = (StringUtils.isBlank(p.getUserName())) ? null : ptSearchDomain.matcher(p.getUserName());
+
+                        if ((mEmailAddress != null && mEmailAddress.find()) || (mUserName != null && mUserName.find()) || !newDBIDs.isEmpty()) {
+                            logger.info("Updating person: " + p.getEmployeeID() + " email: " + p.getEmailAddress() + " " + p.getUserName());
+                            if (testRun) {
+                                infoTestRun("updated email: " + (mEmailAddress != null ? mEmailAddress.replaceAll(sReplaceString) : "<empty>") + " updated username: " + (mUserName != null ? mUserName.replaceAll(sReplaceString) : "<empty>")
+                                        + " updated loginDBIDs:" + (!newDBIDs.isEmpty() ? newDBIDs.toString() : "none"));
+
+                            } else {
+                                IConfService service = configServerManager.getService();
+                                CfgMetadata metaData = service.getMetaData();
+                                ConfObjectDelta d = new ConfObjectDelta(metaData, CfgObjectType.CFGPerson);
+
+                                ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue("deltaPerson");
+
+                                obj1.setPropertyValue("DBID", p.getDBID());              // - required
+                                obj1.setPropertyValue("emailAddress", (mEmailAddress != null ? mEmailAddress.replaceAll(sReplaceString) : "<empty>"));      // - to set new host name (if needed)
+                                obj1.setPropertyValue("userName", (mUserName != null ? mUserName.replaceAll(sReplaceString) : "<empty>"));      // - to set new host name (if needed)
+                                ConfStructure obj2 = (ConfStructure) obj1.getOrCreatePropertyValue("agentInfo");
+                                for (Pair<Integer, Integer> newDBID : newDBIDs) {
+                                    ConfStructureCollection obj3 = (ConfStructureCollection) obj2.getOrCreatePropertyValue("agentLogins");
+                                    ConfStructure cs = new ConfStructure(metaData, CfgStructureType.CFGAgentLoginInfo);
+                                    cs.setPropertyValue("agentLoginDBID", newDBID.getKey());
+                                    cs.setPropertyValue("wrapupTime", newDBID.getValue());
+                                    obj3.add(cs);
+
+                                }
+
+                                RequestUpdateObject reqUpdate = RequestUpdateObject.create();
+                                logger.info("++" + d.toString());
+                                reqUpdate.setObjectDelta(d);
+
+                                execRequest(reqUpdate, service);
+
+                                logger.info("----- updating loginids -----");
+                            }
+                        }
+                    });
         }
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="CfgPlace">
@@ -188,60 +188,57 @@ public class RenameDomain {
             processConfigObjects(
                     query2,
                     CfgPlace.class,
-                    new IObjectUpdateProc() {
-                @Override
-                public void updateProc(CfgObject obj) {
-                    CfgPlace p = (CfgPlace) obj;
-                    logger.debug("Checking  " + p.getObjectType() + ": " + p.getName());
+                    (CfgObject obj) -> {
+                        CfgPlace p = (CfgPlace) obj;
+                        logger.debug("Checking  " + p.getObjectType() + ": " + p.getName());
 
-                    Matcher mPlaceName = (StringUtils.isBlank(p.getName())) ? null : ptSearchDomain.matcher(p.getName());
+                        Matcher mPlaceName = (StringUtils.isBlank(p.getName())) ? null : ptSearchDomain.matcher(p.getName());
 
-                    if (mPlaceName != null && mPlaceName.find()) {
-                        logger.info("Updating place: " + p.getName());
+                        if (mPlaceName != null && mPlaceName.find()) {
+                            logger.info("Updating place: " + p.getName());
 
-                        if (testRun) {
-                            infoTestRun("updated place name: " + mPlaceName.replaceAll(sReplaceString));
-                        } else {
-                            IConfService service = configServerManager.getService();
-                            CfgMetadata metaData = service.getMetaData();
-                            CfgPlace np = new CfgPlace(configServerManager.getService());
-                            ConfObjectDelta d = new ConfObjectDelta(metaData, CfgObjectType.CFGPlace);
+                            if (testRun) {
+                                infoTestRun("updated place name: " + mPlaceName.replaceAll(sReplaceString));
+                            } else {
+                                IConfService service = configServerManager.getService();
+                                CfgMetadata metaData = service.getMetaData();
+                                CfgPlace np = new CfgPlace(configServerManager.getService());
+                                ConfObjectDelta d = new ConfObjectDelta(metaData, CfgObjectType.CFGPlace);
 
-                            ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue("deltaPlace");
-                            obj1.setPropertyValue("DBID", p.getDBID());              // - required
-                            obj1.setPropertyValue("name", mPlaceName.replaceAll(sReplaceString));      // - to set new host name (if needed)
+                                ConfObject obj1 = (ConfObject) d.getOrCreatePropertyValue("deltaPlace");
+                                obj1.setPropertyValue("DBID", p.getDBID());              // - required
+                                obj1.setPropertyValue("name", mPlaceName.replaceAll(sReplaceString));      // - to set new host name (if needed)
 
-                            RequestUpdateObject reqUpdate = RequestUpdateObject.create();
-                            reqUpdate.setObjectDelta(d);
+                                RequestUpdateObject reqUpdate = RequestUpdateObject.create();
+                                reqUpdate.setObjectDelta(d);
 
-                            try {
-                                Message resp = service.getProtocol().request(reqUpdate);
+                                try {
+                                    Message resp = service.getProtocol().request(reqUpdate);
 
-                                if (resp instanceof EventObjectUpdated) {
-                                    logger.info("!!Object updated");
-                                } else if (resp instanceof EventError) {
-                                    logger.error("Error on object update: "
-                                            + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
-                                            + "\tDescription: " + ((EventError) resp).getDescription());
+                                    if (resp instanceof EventObjectUpdated) {
+                                        logger.info("!!Object updated");
+                                    } else if (resp instanceof EventError) {
+                                        logger.error("Error on object update: "
+                                                + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
+                                                + "\tDescription: " + ((EventError) resp).getDescription());
+                                    }
+
+                                } catch (ProtocolException ex) {
+                                    java.util.logging.Logger.getLogger(RenameDomain.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (IllegalStateException ex) {
+                                    java.util.logging.Logger.getLogger(RenameDomain.class.getName()).log(Level.SEVERE, null, ex);
                                 }
-
-                            } catch (ProtocolException ex) {
-                                java.util.logging.Logger.getLogger(RenameDomain.class.getName()).log(Level.SEVERE, null, ex);
-                            } catch (IllegalStateException ex) {
-                                java.util.logging.Logger.getLogger(RenameDomain.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
-                    }
 
-                }
-            });
+                    });
         }
 //</editor-fold>
     }
 
     private <T extends CfgObject> void processConfigObjects(
             CfgQuery q,
-            Class< T> cls,
+            Class<T> cls,
             IObjectUpdateProc proc
     ) throws ConfigException, InterruptedException {
 

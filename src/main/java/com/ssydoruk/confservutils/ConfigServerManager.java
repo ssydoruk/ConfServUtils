@@ -787,13 +787,10 @@ public class ConfigServerManager {
         };
         //</editor-fold>
         ArrayList<CfgFolder> ret = new ArrayList<>();
-        ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
-            @Override
-            public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
-                ret.add((CfgFolder) obj);
-                return true;
-            }
-
+        ICfgObjectFoundProc foundProc = (CfgObject obj, KeyValueCollection kv, int current, int total)
+                -> {
+            ret.add((CfgFolder) obj);
+            return true;
         };
         try {
             CfgFolderQuery q = new CfgFolderQuery();
@@ -2302,13 +2299,10 @@ public class ConfigServerManager {
     public ArrayList<CfgObject> getAllAgentLogins() {
         ArrayList<CfgObject> agentLogins = new ArrayList<>();
 
-        final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
-            @Override
-            public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
-                                final int total) {
-                agentLogins.add(obj);
-                return true;
-            }
+        final ICfgObjectFoundProc foundProc = (final CfgObject obj, KeyValueCollection kv, final int current,
+                                               final int total) -> {
+            agentLogins.add(obj);
+            return true;
         };
         try {
             final CfgAgentLoginQuery query = new CfgAgentLoginQuery();
@@ -2349,13 +2343,10 @@ public class ConfigServerManager {
     private <T extends CfgObject> ArrayList<T> getAll(final CfgQuery q, final Class<T> cls) {
         ArrayList<T> exts = new ArrayList<>();
 
-        final ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
-            @Override
-            public boolean proc(final CfgObject obj, KeyValueCollection kv, final int current,
-                                final int total) {
-                exts.add((T) obj);
-                return true;
-            }
+        final ICfgObjectFoundProc foundProc = (final CfgObject obj, KeyValueCollection kv, final int current,
+                                               final int total) -> {
+            exts.add((T) obj);
+            return true;
         };
         try {
 

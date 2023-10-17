@@ -9,6 +9,6 @@ package com.ssydoruk.confservutils;
  *
  * @author stepan_sydoruk
  */
-public interface IOutputHook {
+@FunctionalInterface public interface IOutputHook {
     void processOut(String str);
 }

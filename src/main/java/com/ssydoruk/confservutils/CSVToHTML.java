@@ -124,7 +124,7 @@ public class CSVToHTML {
 
             Element colgroup = tab.appendElement("colgroup");
             java.util.List<String> headerNames = records.getHeaderNames();
-            HashMap<String, String> row = new HashMap();
+            HashMap<String, String> row = new HashMap<>();
             for (int i = 0; i < headerNames.size(); i++) {
                 colgroup.appendElement("col").attr("class", headerNames.get(i));
             }
@@ -133,7 +133,7 @@ public class CSVToHTML {
             Element tabRow = tabHead.appendElement("tr");
             headerNames = records.getHeaderNames();
             int timeIdx = -1;
-            row = new HashMap();
+            row = new HashMap<>();
             for (int i = 0; i < headerNames.size(); i++) {
                 if (headerNames.get(i).equals("_time")) {
                     timeIdx = i;

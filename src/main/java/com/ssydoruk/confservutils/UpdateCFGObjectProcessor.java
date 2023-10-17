@@ -698,6 +698,7 @@ public class UpdateCFGObjectProcessor {
 
     }
 
+    @FunctionalInterface
     public static interface ICustomKVP {
 
         public KeyValueCollection getCustomKVP(CfgObject obj);

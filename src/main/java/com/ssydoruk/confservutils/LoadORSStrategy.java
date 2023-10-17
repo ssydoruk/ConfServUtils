@@ -14,12 +14,14 @@ import com.genesyslab.platform.commons.collections.*;
 import com.genesyslab.platform.commons.protocol.*;
 import com.genesyslab.platform.configuration.protocol.types.*;
 import com.jidesoft.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.logging.Level;
 import javax.swing.*;
 import javax.swing.border.*;
+
 import org.apache.logging.log4j.Logger;
 
 
@@ -33,7 +35,7 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
     public LoadORSStrategy(AppForm _theForm, ConfigServerManager _configServerManager) {
         initComponents();
         theForm = _theForm;
-        configServerManager=_configServerManager;
+        configServerManager = _configServerManager;
         Border b = jpRoutingPoints.getBorder();
         sRPsTitle = (b instanceof TitledBorder) ? ((TitledBorder) b).getTitle() : null;
         b = jpORSStrategies.getBorder();
@@ -404,14 +406,10 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
         };
 //</editor-fold>
-        ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
-            @Override
-            public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
-                CfgScript o = (CfgScript) obj;
-                ret.add(new ComboItem(o.getName() + " @ " + o.getObjectPath(), o.getName()));
-                return true;
-            }
-
+        ICfgObjectFoundProc foundProc = (CfgObject obj, KeyValueCollection kv, int current, int total) -> {
+            CfgScript o = (CfgScript) obj;
+            ret.add(new ComboItem(o.getName() + " @ " + o.getObjectPath(), o.getName()));
+            return true;
         };
 
         CfgObjectType value = CfgObjectType.CFGScript;
@@ -425,18 +423,18 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
                     query,
                     CfgScript.class,
                     new IKeyValueProperties() {
-                @Override
-                public KeyValueCollection getProperties(CfgObject obj) {
-                    return ((CfgScript) obj).getUserProperties();
-                }
+                        @Override
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return ((CfgScript) obj).getUserProperties();
+                        }
 
-                @Override
-                public Collection<String> getName(CfgObject obj) {
-                    Collection<String> ret = new ArrayList<>();
-                    ret.add(((CfgScript) obj).getName());
-                    return ret;
-                }
-            },
+                        @Override
+                        public Collection<String> getName(CfgObject obj) {
+                            Collection<String> ret = new ArrayList<>();
+                            ret.add(((CfgScript) obj).getName());
+                            return ret;
+                        }
+                    },
                     new FindWorker(seearchSettings), true, foundProc)) {
 
             }
@@ -518,14 +516,11 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 
         };
 //</editor-fold>
-        ICfgObjectFoundProc foundProc = new ICfgObjectFoundProc() {
-            @Override
-            public boolean proc(CfgObject obj, KeyValueCollection kv, int current, int total) {
-                CfgDN o = (CfgDN) obj;
-                ret.add(new ComboItem(o.getName(), o));
-                return true;
-            }
-
+        ICfgObjectFoundProc foundProc = (CfgObject obj, KeyValueCollection kv, int current, int total) ->
+        {
+            CfgDN o = (CfgDN) obj;
+            ret.add(new ComboItem(o.getName(), o));
+            return true;
         };
 
         try {
@@ -538,18 +533,18 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
                     query,
                     CfgDN.class,
                     new IKeyValueProperties() {
-                @Override
-                public KeyValueCollection getProperties(CfgObject obj) {
-                    return ((CfgDN) obj).getUserProperties();
-                }
+                        @Override
+                        public KeyValueCollection getProperties(CfgObject obj) {
+                            return ((CfgDN) obj).getUserProperties();
+                        }
 
-                @Override
-                public Collection<String> getName(CfgObject obj) {
-                    Collection<String> ret = new ArrayList<>();
-                    ret.add(((CfgDN) obj).getName());
-                    return ret;
-                }
-            },
+                        @Override
+                        public Collection<String> getName(CfgObject obj) {
+                            Collection<String> ret = new ArrayList<>();
+                            ret.add(((CfgDN) obj).getName());
+                            return ret;
+                        }
+                    },
                     new FindWorker(seearchSettings), true, foundProc)) {
 
             }

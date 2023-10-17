@@ -219,10 +219,21 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.11.0</version>
                 <configuration>
                     <debug>true</debug>
+                    <compilerArgs>
+<!--                        <arg>-verbose</arg>-->
+<!--                        <arg>-Xlint:all</arg>-->
+<!--                        <arg>-Xlint:unchecked</arg>-->
+<!--                        <arg>-Xlint:deprecation</arg>-->
+                    </compilerArgs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
             </plugin>
            
         </plugins>
