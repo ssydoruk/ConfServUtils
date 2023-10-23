@@ -79,7 +79,7 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     public List<CfgObjectType> getSelectedObjectTypes() {
         return Stream.of(clb.getCheckBoxListSelectedValues())
                 .map(t -> (CfgObjectType) ((CfgObjectTypeMenu) t).getType())
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     CheckBoxList clb;

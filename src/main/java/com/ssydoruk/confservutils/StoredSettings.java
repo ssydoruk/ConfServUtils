@@ -188,7 +188,7 @@ class StoredSettings {
         }
 
         private List<String> nonNull(ArrayList<String> list) {
-            return list.stream().filter(f->StringUtils.isNotEmpty(f)).collect(Collectors.toList());
+            return list.stream().filter(f->StringUtils.isNotEmpty(f)).collect(Collectors.toCollection(ArrayList::new));
         }
 
         public void setCcsFile(List<String> list) {
