@@ -219,9 +219,7 @@ public class UpdateCFGObjectProcessor {
     }
 
     void addDeleteKey(KeyValueCollection kv) {
-        for (Object object : kv) {
-            deleteSections.add(object);
-        }
+        kv.stream().forEach(object->deleteSections.add(object));
     }
 
     private void fillUpdateKVP(IUpdateSettings us, CfgObject obj, KeyValueCollection kv) {

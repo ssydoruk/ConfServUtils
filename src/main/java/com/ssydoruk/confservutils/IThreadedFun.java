@@ -14,5 +14,5 @@ import com.genesyslab.platform.applicationblocks.com.ConfigException;
 
 @FunctionalInterface interface IThreadedFun {
 
-    public void fun() throws ConfigException, InterruptedException;
+    public void fun() throws ConfigException, InterruptedException, Exception;
 }

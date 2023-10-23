@@ -9,6 +9,7 @@ import Utils.swing.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.swing.*;
 
 /**
@@ -187,13 +188,7 @@ class StoredSettings {
         }
 
         private List<String> nonNull(ArrayList<String> list) {
-            ArrayList<String> ret = new ArrayList<String>();
-            for (String f :list
-                 ) {
-                if(StringUtils.isNotEmpty(f))
-                    ret.add(f);
-            }
-            return ret;
+            return list.stream().filter(f->StringUtils.isNotEmpty(f)).collect(Collectors.toList());
         }
 
         public void setCcsFile(List<String> list) {

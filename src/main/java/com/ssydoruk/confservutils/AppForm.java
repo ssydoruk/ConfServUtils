@@ -45,6 +45,7 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
+import java.util.stream.Stream;
 
 /**
  * @author stepan_sydoruk
@@ -105,15 +106,10 @@ public final class AppForm extends javax.swing.JFrame {
 
     private void loadConfigServers() {
         // <editor-fold defaultstate="collapsed" desc="load configservers">
-        final ActionListener[] actionListeners = cbConfigServer.getActionListeners();
-        for (final ActionListener actionListener : actionListeners) {
-            cbConfigServer.removeActionListener(actionListener);
-        }
+        Stream.of(cbConfigServer.getActionListeners()).forEach(actionListener -> cbConfigServer.removeActionListener(actionListener));
         cbConfigServer.removeAllItems();
         final DefaultComboBoxModel mod = (DefaultComboBoxModel) cbConfigServer.getModel();
-        for (final StoredSettings.ConfServer cs : ds.getConfigServers()) {
-            mod.addElement(cs);
-        }
+        ds.getConfigServers().stream().forEach(cs -> mod.addElement(cs));
         if (mod.getSize() > 0) {
             cbConfigServer.setSelectedIndex(0);
         }
@@ -795,14 +791,17 @@ public final class AppForm extends javax.swing.JFrame {
         ArrayList<String> lastFiles = ds.getLastFiles();
         if (!lastFiles.isEmpty()) {
             jmScript.add(jspStart);
-            for (String lastFile : lastFiles) {
-                jmScript.add(new JMenuItem(new AbstractAction(lastFile) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        scriptSelected(new File(lastFile));
+            lastFiles.stream()
+                    .forEach(lastFile
+                            -> {
+                        jmScript.add(new JMenuItem(new AbstractAction(lastFile) {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                scriptSelected(new File(lastFile));
+                            }
+                        }));
                     }
-                }));
-            }
+                    );
             jmScript.add(jspEnd);
             jmScript.add(miClearRecent);
         }
@@ -941,9 +940,7 @@ public final class AppForm extends javax.swing.JFrame {
         if (enable != componentsEnabled) {
             logger.info("enableComponents: " + enable);
             if (savedEnabled != null) {
-                for (final Map.Entry<Component, Boolean> entry : savedEnabled.entrySet()) {
-                    entry.getKey().setVisible(entry.getValue());
-                }
+                savedEnabled.entrySet().stream().forEach(entry -> entry.getKey().setVisible(entry.getValue()));
                 savedEnabled = null;
             } else {
                 savedEnabled = new HashMap<>();
@@ -1200,7 +1197,7 @@ public final class AppForm extends javax.swing.JFrame {
                 ICfgObjectFoundProc foundProc;
                 if (pn.isActionUpdateKVP()) {
                     foundProc = (obj, kv, current,
-                                 total) -> {
+                            total) -> {
                         String s = "";
                         try {
                             s = Utils.StringUtils.toJson(obj);
@@ -1224,8 +1221,8 @@ public final class AppForm extends javax.swing.JFrame {
                                 final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
                                 switch (showYesNoPanel(pn.getSearchSummaryHTML(),
                                         "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -1257,7 +1254,7 @@ public final class AppForm extends javax.swing.JFrame {
                     };
                 } else { // delete object
                     foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                                 final int total) -> {
+                            final int total) -> {
                         requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
                                 + kv.toString());
                         // int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
@@ -1274,8 +1271,8 @@ public final class AppForm extends javax.swing.JFrame {
                                 final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
                                 switch (showYesNoPanel(pn.getSearchSummaryHTML(),
                                         "Object " + current + " of matched " + total + "\n-->\n" + obj.toString()
-                                                + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
-                                                + estimateUpdateObj)) {
+                                        + "\n\t kv: " + kv.toString() + "\ntoUpdate: \n----------------------\n"
+                                        + estimateUpdateObj)) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -1476,8 +1473,8 @@ public final class AppForm extends javax.swing.JFrame {
 
             final AUpdateSettings us = new AUpdateSettings();
 
-            final ICfgObjectFoundProc foundProc =
-                    (final CfgObject obj, KeyValueCollection kv, final int current, final int total) -> {
+            final ICfgObjectFoundProc foundProc
+                    = (final CfgObject obj, KeyValueCollection kv, final int current, final int total) -> {
                         // kv = getAllValuesInSection(obj, seearchSettings);
                         kv = new KeyValueCollection();
                         kv.addList(seearchSettings.getSection(),
@@ -1498,8 +1495,8 @@ public final class AppForm extends javax.swing.JFrame {
                                 final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv);
                                 switch (showYesNoPanel(seearchSettings.toString(),
                                         "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
-                                                + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
+                                        + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -1599,7 +1596,7 @@ public final class AppForm extends javax.swing.JFrame {
             if (connectToConfigServer()) {
 
                 final ICfgObjectFoundProc foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                                                       final int total) -> {
+                        final int total) -> {
                     // kv = getAllValuesInSection(obj, seearchSettings);
                     // kv = new KeyValueCollection();
                     // kv.addList(seearchSettings.getSection(), ((CfgScript)
@@ -1623,8 +1620,8 @@ public final class AppForm extends javax.swing.JFrame {
                             {
                                 switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(),
                                         "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -1940,7 +1937,7 @@ public final class AppForm extends javax.swing.JFrame {
                 // logger.debug((new Gson()).toJson(app));
                 // upd.setPropKeys("changedOptions", "deletedOptions", "options");
                 final ICfgObjectFoundProc foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                                                       final int total) -> {
+                        final int total) -> {
                     // kv = getAllValuesInSection(obj, seearchSettings);
                     // kv = new KeyValueCollection();
                     // kv.addList(seearchSettings.getSection(), ((CfgScript)
@@ -1962,8 +1959,8 @@ public final class AppForm extends javax.swing.JFrame {
                             {
                                 switch (showYesNoPanel(panelRestartServices.getSearchSummaryHTML(),
                                         "Object " + current + " of matched " + total
-                                                + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                                + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                        + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                        + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                     case YES_TO_ALL:
                                         if (JOptionPane.showConfirmDialog(theForm,
                                                 "Are you sure you want to modify this and all following found objects?",
@@ -2539,7 +2536,7 @@ public final class AppForm extends javax.swing.JFrame {
 
     /**
      * @param turnOn - turn on buffering; if true, means add cache parameters,
-     *               remove them
+     * remove them
      */
     private void strategyBuffering(final boolean turnOn, final ActionEvent evt) {
         upd = null;
@@ -2770,7 +2767,7 @@ public final class AppForm extends javax.swing.JFrame {
             }
 
             final ICfgObjectFoundProc foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
-                                                   final int total) -> {
+                    final int total) -> {
                 // kv = getAllValuesInSection(obj, seearchSettings);
                 // kv = new KeyValueCollection();
                 // kv.addList(seearchSettings.getSection(), ((CfgScript)
@@ -2791,8 +2788,8 @@ public final class AppForm extends javax.swing.JFrame {
                         {
                             switch (showYesNoPanel(searchSettings.toString(),
                                     "Object " + current + " of matched " + total
-                                            + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-                                            + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+                                    + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
+                                    + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
                                 case YES_TO_ALL:
                                     if (JOptionPane.showConfirmDialog(theForm,
                                             "Are you sure you want to modify this and all following found objects?",
@@ -3088,13 +3085,14 @@ public final class AppForm extends javax.swing.JFrame {
                     .shouldImportCSV(loginIDs, false)) {
                 runInThread(() -> {
                     if (connectToConfigServer()) {
-
-                        for (String[] entry : loginIDs) {
-
-                            configServerManager.checkLoginID(entry[0]);
-                        }
+                        loginIDs.stream().forEach(entry -> {
+                            try {
+                                configServerManager.checkLoginID(entry[0]);
+                            } catch (ConfigException | InterruptedException ex) {
+                                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        });
                     }
-
 
                 }, () -> configServerManager.clearCache());
             }
@@ -3112,11 +3110,13 @@ public final class AppForm extends javax.swing.JFrame {
             if (CSVImportDialog.getInstance(this, configServerManager).shouldImportCSV(placeDN, false)) {
                 runInThread(() -> {
                     if (connectToConfigServer()) {
-
-                        for (String[] entry : placeDN) {
-
-                            configServerManager.checkPlace(entry[0], entry[1]);
-                        }
+                        placeDN.stream().forEach(entry -> {
+                            try {
+                                configServerManager.checkPlace(entry[0], entry[1]);
+                            } catch (ConfigException | InterruptedException ex) {
+                                java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        });
                     }
 
                 }, () -> configServerManager.clearCache());
@@ -3139,9 +3139,14 @@ public final class AppForm extends javax.swing.JFrame {
                         final ArrayList<SwitchObjectLocation> switches = new ArrayList<>();
                         ArrayList<CfgFolder> lastSelectedDNFolders = instance.lastSelectedDNFolders();
                         if (lastSelectedDNFolders != null && !lastSelectedDNFolders.isEmpty()) {
-                            for (CfgFolder lastSelectedDNFolder : lastSelectedDNFolders) {
-                                switches.add(new SwitchObjectLocation(configServerManager.getService(), lastSelectedDNFolder));
-                            }
+                            lastSelectedDNFolders.forEach(lastSelectedDNFolder -> {
+                                try {
+                                    switches.add(new SwitchObjectLocation(configServerManager.getService(), lastSelectedDNFolder));
+                                } catch (ConfigException ex) {
+                                    java.util.logging.Logger.getLogger(AppForm.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            });
+
                         } else {
                             switches.add(new SwitchObjectLocation(configServerManager.getService(), "esv1_sipa1"));
                             switches.add(new SwitchObjectLocation(configServerManager.getService(), "edn1_sipa1"));
@@ -3204,13 +3209,8 @@ public final class AppForm extends javax.swing.JFrame {
                         eod.init(ObjectExistAction.UNKNOWN, theForm);
                         for (String[] entry : loginIDs) {
                             final HashMap<SwitchObjectLocation, String> newLoginIDs = new HashMap<>();
-                            for (final SwitchObjectLocation switche : switches) {
-                                newLoginIDs.put(switche, (String) null);
-
-                            }
-                            for (final SwitchObjectLocation switchLookup : newLoginIDs.keySet()) {
-                                newLoginIDs.put(switchLookup, entry[0]);
-                            }
+                            switches.forEach(switche -> newLoginIDs.put(switche, (String) null));
+                            newLoginIDs.keySet().forEach(switchLookup -> newLoginIDs.put(switchLookup, entry[0]));
                             if (!configServerManager.createLoginIDs(newLoginIDs, eod)) // stop creating
                             {
                                 requestOutput("****** Import aborted *******");
@@ -3234,13 +3234,13 @@ public final class AppForm extends javax.swing.JFrame {
             if (instance.shouldProceed(userNames)
                     && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 runInThread(() -> {
-                            if (connectToConfigServer()) {
-                                requestOutput("Searching for userNames");
-                                ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
-                                eod.init(ObjectExistAction.UNKNOWN, theForm);
-                                for (String[] user : userNames) {
-                                    JSRunner.runScript(instance.getScript(), configServerManager, user);
-                                /*
+                    if (connectToConfigServer()) {
+                        requestOutput("Searching for userNames");
+                        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+                        eod.init(ObjectExistAction.UNKNOWN, theForm);
+                        for (String[] user : userNames) {
+                            JSRunner.runScript(instance.getScript(), configServerManager, user);
+                            /*
                             requestOutput("Searching for userNames");
                             Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
                             for (String[] user : userNames) {
@@ -3263,10 +3263,10 @@ public final class AppForm extends javax.swing.JFrame {
                                 if (!userNameFound) {
                                     requestOutput(" * USER [" + user + "] not found ");
                                 }
-                                 */
-                                }
-                            }
-                        },
+                             */
+                        }
+                    }
+                },
                         () -> configServerManager.clearCache());
             }
 
@@ -3280,41 +3280,40 @@ public final class AppForm extends javax.swing.JFrame {
             ArrayList<String[]> userNames = readCSV(csvFile, 1);
 
             runInThread(() -> {
-                        if (connectToConfigServer()) {
+                if (connectToConfigServer()) {
 
-                            requestOutput("Searching for userNames");
-                            CSVCreateAgentAdmin instance = CSVCreateAgentAdmin.getInstance(theForm, configServerManager);
-                            if (instance.shouldImportCSVCreateAdmin(userNames, yesToAll)
-                                    && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                                Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
-                                for (String[] user : userNames) {
-                                    boolean userNameFound = false;
-                                    for (CfgPerson cfgPerson : allPersons) {
-                                        if (StringUtils.compareIgnoreCase(user[0], cfgPerson.getUserName()) == 0) {
-                                            requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson.getObjectPath() + "\n\t" + user + "," + cfgPerson.getExternalID());
-                                            ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
-                                            eod.init(ObjectExistAction.UNKNOWN, theForm);
+                    requestOutput("Searching for userNames");
+                    CSVCreateAgentAdmin instance = CSVCreateAgentAdmin.getInstance(theForm, configServerManager);
+                    if (instance.shouldImportCSVCreateAdmin(userNames, yesToAll)
+                            && JOptionPane.showConfirmDialog(theForm, "Do you want to continue", "Please confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                        Collection<CfgPerson> allPersons = configServerManager.getAllPersons();
+                        for (String[] user : userNames) {
+                            boolean userNameFound = false;
+                            for (CfgPerson cfgPerson : allPersons) {
+                                if (StringUtils.compareIgnoreCase(user[0], cfgPerson.getUserName()) == 0) {
+                                    requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson.getObjectPath() + "\n\t" + user + "," + cfgPerson.getExternalID());
+                                    ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+                                    eod.init(ObjectExistAction.UNKNOWN, theForm);
 
-                                            if (!configServerManager.createPersonFromAgent(cfgPerson, eod)) // stop creating
-                                            {
-                                                requestOutput("****** Import aborted *******");
-                                                break;
-                                            }
-
-                                            userNameFound = true;
-                                        }
-                                    }
-                                    if (!userNameFound) {
-                                        requestOutput(" * USER [" + user + "] not found ");
+                                    if (!configServerManager.createPersonFromAgent(cfgPerson, eod)) // stop creating
+                                    {
+                                        requestOutput("****** Import aborted *******");
+                                        break;
                                     }
 
+                                    userNameFound = true;
                                 }
+                            }
+                            if (!userNameFound) {
+                                requestOutput(" * USER [" + user + "] not found ");
                             }
 
                         }
+                    }
 
+                }
 
-                    }, () -> configServerManager.clearCache()
+            }, () -> configServerManager.clearCache()
             );
         }
 
@@ -3377,9 +3376,7 @@ public final class AppForm extends javax.swing.JFrame {
 
         public boolean shouldProceed(final ArrayList<String> ldapIDs) {
             infoTableModel.setRowCount(0);
-            for (String entry : ldapIDs) {
-                infoTableModel.addRow(new Object[]{entry});
-            }
+            ldapIDs.forEach(entry -> infoTableModel.addRow(new Object[]{entry}));
             tca.adjustColumns();
             this.setTitle("Checking agents with below LDAPs (" + ldapIDs.size() + ")");
             Utils.ScreenInfo.CenterWindow(this);
@@ -3457,10 +3454,9 @@ public final class AppForm extends javax.swing.JFrame {
                     return (compareToIgnoreCase == 0)
                             ? al1.getObjectPath().compareToIgnoreCase(al2.getObjectPath()) : compareToIgnoreCase;
                 });
-                for (CfgAgentLogin al : orphanLoginIDs) {
-                    requestOutput("Orphan loginID at " + al.getObjectPath() + ": " + al.getLoginCode() + "(DBID: " + al.getDBID() + ")");
-
-                }
+                orphanLoginIDs.forEach(al
+                        -> requestOutput("Orphan loginID at " + al.getObjectPath() + ": " + al.getLoginCode() + "(DBID: " + al.getDBID() + ")")
+                );
                 requestOutput("Found toral orphans: " + orphanLoginIDs.size());
             }
 

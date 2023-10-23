@@ -113,10 +113,7 @@ abstract class CSVImportLoginIDs extends CSVGeneralImportDialog {
     public boolean shouldImportCSV(final ArrayList<String[]> loginIDs, boolean isImport) {
 
         modelLoginID.setRowCount(0);
-
-        for ( String[] entry : loginIDs) {
-            modelLoginID.addRow(new Object[]{entry[0]});
-        }
+        loginIDs.stream().forEach(entry-> modelLoginID.addRow(new Object[]{entry[0]}));
 
         loginidFolders.setVisible(isImport);
 

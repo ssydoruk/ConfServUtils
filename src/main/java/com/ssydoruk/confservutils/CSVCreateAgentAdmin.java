@@ -114,9 +114,7 @@ abstract class CSVCreateAgentAdmin extends CSVGeneralImportDialog {
 
         modelLoginID.setRowCount(0);
 
-        for ( String[] entry : loginIDs) {
-            modelLoginID.addRow(new Object[]{entry[0]});
-        }
+        loginIDs.forEach(entry -> modelLoginID.addRow(new Object[]{entry[0]}));
 
         loginidFolders.setVisible(isImport);
 
@@ -135,15 +133,14 @@ abstract class CSVCreateAgentAdmin extends CSVGeneralImportDialog {
         return getDialogResult() == JOptionPane.OK_OPTION;
 
     }
-    
-    
+
     public boolean shouldImportCSVCreateAdmin(final ArrayList<String[]> userNames, boolean isImport) {
 
         modelLoginID.setRowCount(0);
 
-        for ( String[] entry : userNames) {
-            modelLoginID.addRow(new Object[]{entry[0]});
-        }
+        userNames.forEach(entry
+                -> modelLoginID.addRow(new Object[]{entry[0]})
+        );
 
         loginidFolders.setVisible(isImport);
 

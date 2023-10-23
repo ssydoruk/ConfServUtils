@@ -81,7 +81,6 @@ abstract class CSVGeneralImportDialog extends Utils.InfoPanel {
                         for (int selectedRow : tab.getSelectedRows()) {
                             ret.add(((FoldersModel) tab.getModel()).getFolderAt(selectedRow));
                         }
-
                     } else {
                         ret.add(((FoldersModel) tab.getModel()).getFolderAt(tab.getSelectedRow()));
                     }

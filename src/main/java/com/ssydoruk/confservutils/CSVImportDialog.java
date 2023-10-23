@@ -142,10 +142,7 @@ abstract class CSVImportDialog extends CSVGeneralImportDialog {
     public boolean shouldImportCSV(final ArrayList<String[]> placeDN, boolean isImport) {
 
         modelPlaceDN.setRowCount(0);
-
-        for (String[] entry : placeDN) {
-            modelPlaceDN.addRow(new Object[]{entry[0], entry[1]});
-        }
+        placeDN.stream().forEach(entry->modelPlaceDN.addRow(new Object[]{entry[0], entry[1]}));
 
         pPlaceFolder.setVisible(isImport);
         dnFolders.setVisible(isImport);

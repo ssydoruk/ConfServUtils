@@ -13,10 +13,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.swing.*;
 import org.apache.commons.lang3.*;
 import org.apache.logging.log4j.*;
-
 
 public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings, ISearchCommon, IUpdateSettings {
 
@@ -76,12 +77,9 @@ public class AnnexReplace extends javax.swing.JPanel implements ISearchSettings,
     }
 
     public List<CfgObjectType> getSelectedObjectTypes() {
-        ArrayList<CfgObjectType> ret = new ArrayList();
-        for (Object checkBoxListSelectedValue : clb.getCheckBoxListSelectedValues()) {
-            ret.add((CfgObjectType) ((CfgObjectTypeMenu) checkBoxListSelectedValue).getType());
-        }
-        return ret;
-
+        return Stream.of(clb.getCheckBoxListSelectedValues())
+                .map(t -> (CfgObjectType) ((CfgObjectTypeMenu) t).getType())
+                .collect(Collectors.toList());
     }
 
     CheckBoxList clb;
