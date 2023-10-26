@@ -102,8 +102,8 @@ public class FindWorker {
 					if (ptName != null) {
 						for (String string : props.getName(cfgObj)) {
 							logger
-								.trace("checking name of obj[" + cfgObj.getObjectType() + "] path["
-										+ cfgObj.getObjectPath() + "] name[" + string + "]");
+								.trace("checking name of obj[" + cfgObj.getObjectType() + "] path[" + cfgObj
+									.getObjectPath() + "] name[" + string + "]");
 							if (matching(ptName, string)) {
 								logger.debug("Name [" + string + "] matched against " + ptName);
 								nameMatched = true;
@@ -186,9 +186,8 @@ public class FindWorker {
 									}
 									if (keyMatched || valMatched) {
 										logger
-											.debug("sect[" + sectionName + "] km[" + keyMatched + "] vm[" + valMatched
-													+ "] key[" + theOpt.getStringKey() + "] val["
-													+ theOpt.getStringValue() + "]");
+											.debug("sect[" + sectionName + "] km[" + keyMatched + "] vm[" + valMatched + "] key[" + theOpt
+												.getStringKey() + "] val[" + theOpt.getStringValue() + "]");
 
 										if (ptAll != null) {
 											addedValues.addPair(theOpt);
@@ -223,8 +222,8 @@ public class FindWorker {
 			}
 			if (ptAll != null) {
 				logger
-					.debug(" ** all **  match " + ((nameMatched || !kv.getMatchedKVPs().isEmpty()) ? "" : "NOT")
-							+ " found, obj " + props.getName(cfgObj));
+					.debug(" ** all **  match " + ((nameMatched || !kv.getMatchedKVPs().isEmpty()) ? ""
+							: "NOT") + " found, obj " + props.getName(cfgObj));
 				return (nameMatched || !kv.getMatchedKVPs().isEmpty()) ? kv : null;
 			} else {
 				MatchedKVPs ret = (!kv.getMatchedKVPs().isEmpty() || (ptName != null && nameMatched

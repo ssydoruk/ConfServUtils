@@ -576,8 +576,8 @@ public class ConfigServerManager {
 										}
 									} else {
 										logger
-											.debug("value [" + value + "] is of type " + value.getClass() + " obj: "
-													+ cfgObj);
+											.debug("value [" + value + "] is of type " + value
+												.getClass() + " obj: " + cfgObj);
 										if (ptVal != null) {
 											if (matching(ptVal, value.toString())) {
 												addedValues.addPair(el);
@@ -659,9 +659,9 @@ public class ConfigServerManager {
 				objectUpdated(objType);
 			} else if (resp instanceof EventError) {
 				parentForm
-					.requestOutput("Error on object update: "
-							+ CfgUtilities.getErrorCode(((EventError) resp).getErrorCode()) + "\tDescription: "
-							+ ((EventError) resp).getDescription());
+					.requestOutput("Error on object update: " + CfgUtilities
+						.getErrorCode(((EventError) resp).getErrorCode()) + "\tDescription: " + ((EventError) resp)
+							.getDescription());
 			} else if (resp instanceof EventObjectCreated) {
 				EventObjectCreated oc = (EventObjectCreated) resp;
 				ConfObject object = oc.getObject();
@@ -840,8 +840,8 @@ public class ConfigServerManager {
 
 	private boolean placeDNsEqual(Collection<CfgDN> placeDNs, ArrayList<CfgDN> cfgDNs) {
 		logger
-			.info("placeDNsEqual: placeDNs: " + StringUtils.join(placeDNs, ",") + "; DNs: "
-					+ StringUtils.join(cfgDNs, ","));
+			.info("placeDNsEqual: placeDNs: " + StringUtils.join(placeDNs, ",") + "; DNs: " + StringUtils
+				.join(cfgDNs, ","));
 		if (placeDNs.size() > 0) {
 			if (placeDNs.size() == cfgDNs.size()) {
 				for (CfgDN placeDN : placeDNs) {
@@ -973,8 +973,8 @@ public class ConfigServerManager {
 					parentForm.requestOutput("Found DN " + dn + " no place ");
 				} else {
 					parentForm
-						.requestOutput("Found " + dn + "\n\tplace: " + objectBasicInfo(dependend) + "\n\t\tDNs: "
-								+ getDNs(((CfgPlace) dependend).getDNDBIDs(), "\n\t\t"));
+						.requestOutput("Found " + dn + "\n\tplace: " + objectBasicInfo(dependend) + "\n\t\tDNs: " + getDNs(((CfgPlace) dependend)
+							.getDNDBIDs(), "\n\t\t"));
 				}
 			}
 		} else {
@@ -983,8 +983,8 @@ public class ConfigServerManager {
 		CfgPlace cfgPlace = findPlace(service, pl, false);
 		if (cfgPlace != null) {
 			parentForm
-				.requestOutput("Found place : " + objectBasicInfo(cfgPlace) + ") DNs:\n\t"
-						+ getDNs(cfgPlace.getDNDBIDs(), "\n\t"));
+				.requestOutput("Found place : " + objectBasicInfo(cfgPlace) + ") DNs:\n\t" + getDNs(cfgPlace
+					.getDNDBIDs(), "\n\t"));
 
 		} else {
 			parentForm.requestOutput("! not found place");
@@ -1396,8 +1396,8 @@ public class ConfigServerManager {
 				}
 			} else if (cnt > 0) {
 				parentForm
-					.requestOutput("Search done, located " + cnt + " objects type " + cls.getSimpleName() + " -->\n"
-							+ buf + "<--\n");
+					.requestOutput("Search done, located " + cnt + " objects type " + cls
+						.getSimpleName() + " -->\n" + buf + "<--\n");
 			}
 		}
 		return false;
@@ -2481,8 +2481,9 @@ public class ConfigServerManager {
 		if (resp instanceof EventObjectCreated) {
 			return ((EventObjectCreated) resp).getObject();
 		} else if (resp instanceof EventError) {
-			String err = "Error on object create: " + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
-					+ "\tDescription: " + ((EventError) resp).getDescription();
+			String err = "Error on object create: " + CfgUtilities
+				.getErrorCode(((EventError) resp).getErrorCode()) + "\tDescription: " + ((EventError) resp)
+					.getDescription();
 			logger.error(err);
 			throw new Exception(err);
 
@@ -2607,12 +2608,13 @@ public class ConfigServerManager {
 		logger.error(resp);
 		if (resp instanceof EventObjectDeleted) {
 			parentForm
-				.requestOutput("Deleted object DBID:\n" + ((EventObjectDeleted) resp).getDbid() + " type: "
-						+ CfgObjectType.valueOf(((EventObjectDeleted) resp).getObjectType()));
+				.requestOutput("Deleted object DBID:\n" + ((EventObjectDeleted) resp)
+					.getDbid() + " type: " + CfgObjectType.valueOf(((EventObjectDeleted) resp).getObjectType()));
 			return true;
 		} else if (resp instanceof EventError) {
-			String err = "Error on object create: " + CfgUtilities.getErrorCode(((EventError) resp).getErrorCode())
-					+ "\tDescription: " + ((EventError) resp).getDescription();
+			String err = "Error on object create: " + CfgUtilities
+				.getErrorCode(((EventError) resp).getErrorCode()) + "\tDescription: " + ((EventError) resp)
+					.getDescription();
 			logger.error(err);
 			throw new Exception(err);
 

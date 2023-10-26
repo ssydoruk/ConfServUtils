@@ -1316,8 +1316,8 @@ public final class AppForm extends javax.swing.JFrame {
 						} catch (Exception e) {
 							logger.error("Exception while converting to json: " + e.getMessage());
 						}
-						requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
-								+ kv.toString() + "\n" + s);
+						requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: " + kv
+							.toString() + "\n" + s);
 						// int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
 						// "\n kv: " + kv.toString());
 
@@ -1330,9 +1330,9 @@ public final class AppForm extends javax.swing.JFrame {
 							} else {
 								upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
 								final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
-								switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched "
-										+ total + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-										+ "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+								switch (showYesNoPanel(pn
+									.getSearchSummaryHTML(), "Object " + current + " of matched " + total + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n" + obj
+										.toString() + "\n\t kv: " + kv.toString())) {
 								case YES_TO_ALL:
 									if (JOptionPane
 										.showConfirmDialog(theForm, "Are you sure you want to modify this and all following found objects?", "Please confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
@@ -1363,8 +1363,8 @@ public final class AppForm extends javax.swing.JFrame {
 				} else { // delete object
 					foundProc = (final CfgObject obj, final KeyValueCollection kv, final int current,
 							final int total) -> {
-						requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: "
-								+ kv.toString());
+						requestOutput("found obj #" + current + "(" + total + ") - " + obj.toString() + "\n kv: " + kv
+							.toString());
 						// int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
 						// "\n kv: " + kv.toString());
 
@@ -1377,9 +1377,10 @@ public final class AppForm extends javax.swing.JFrame {
 							} else {
 								upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
 								final String estimateUpdateObj = upd.estimateUpdateObj(pn, obj, kv);
-								switch (showYesNoPanel(pn.getSearchSummaryHTML(), "Object " + current + " of matched "
-										+ total + "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString()
-										+ "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
+								switch (showYesNoPanel(pn
+									.getSearchSummaryHTML(), "Object " + current + " of matched " + total + "\n-->\n" + obj
+										.toString() + "\n\t kv: " + kv
+											.toString() + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj)) {
 								case YES_TO_ALL:
 									if (JOptionPane
 										.showConfirmDialog(theForm, "Are you sure you want to modify this and all following found objects?", "Please confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
@@ -1436,8 +1437,8 @@ public final class AppForm extends javax.swing.JFrame {
 		upd = null;
 		yesToAll = false;
 
-		final FindObject objName = getObjName(this, CfgTransaction.class.getSimpleName() + " type "
-				+ CfgTransactionType.CFGTRTList);
+		final FindObject objName = getObjName(this, CfgTransaction.class
+			.getSimpleName() + " type " + CfgTransactionType.CFGTRTList);
 
 		if (objName == null) {
 			return;
@@ -1600,9 +1601,9 @@ public final class AppForm extends javax.swing.JFrame {
 						us.setOneActive(false);
 						upd = new UpdateCFGObjectProcessor(configServerManager, obj.getObjectType(), theForm);
 						final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv);
-						switch (showYesNoPanel(seearchSettings.toString(), "Object " + current + " of matched " + total
-								+ "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
-								+ obj.toString() + "\n\t kv: " + kv.toString())) {
+						switch (showYesNoPanel(seearchSettings
+							.toString(), "Object " + current + " of matched " + total + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n" + obj
+								.toString() + "\n\t kv: " + kv.toString())) {
 						case YES_TO_ALL:
 							if (JOptionPane
 								.showConfirmDialog(theForm, "Are you sure you want to modify this and all following found objects?", "Please confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
@@ -1708,8 +1709,8 @@ public final class AppForm extends javax.swing.JFrame {
 					// ((CfgTransaction)
 					// obj).getUserProperties().getList(seearchSettings.getSection());
 					logger
-						.info("found obj " + ConfigServerManager.getObjName(obj) + " type " + obj.getObjectType()
-								+ " DBID:" + obj.getObjectDbid() + " at " + obj.getObjectPath());
+						.info("found obj " + ConfigServerManager.getObjName(obj) + " type " + obj
+							.getObjectType() + " DBID:" + obj.getObjectDbid() + " at " + obj.getObjectPath());
 
 					// int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
 					// "\n kv: " + kv.toString());
@@ -1723,10 +1724,9 @@ public final class AppForm extends javax.swing.JFrame {
 							final String estimateUpdateObj = upd.estimateUpdateObj(panelAppOptionsChange, obj, kv);
 							if (estimateUpdateObj != null) //
 							{
-								switch (showYesNoPanel(panelAppOptionsChange.getSearchSummaryHTML(), "Object " + current
-										+ " of matched " + total + "\ntoUpdate: \n----------------------\n"
-										+ estimateUpdateObj + "\n-->\n" + obj.toString() + "\n\t kv: "
-										+ kv.toString())) {
+								switch (showYesNoPanel(panelAppOptionsChange
+									.getSearchSummaryHTML(), "Object " + current + " of matched " + total + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n" + obj
+										.toString() + "\n\t kv: " + kv.toString())) {
 								case YES_TO_ALL:
 									if (JOptionPane
 										.showConfirmDialog(theForm, "Are you sure you want to modify this and all following found objects?", "Please confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
@@ -2049,8 +2049,8 @@ public final class AppForm extends javax.swing.JFrame {
 					// ((CfgTransaction)
 					// obj).getUserProperties().getList(seearchSettings.getSection());
 					logger
-						.info("found obj " + ConfigServerManager.getObjName(obj) + " type " + obj.getObjectType()
-								+ " DBID:" + obj.getObjectDbid() + " at " + obj.getObjectPath());
+						.info("found obj " + ConfigServerManager.getObjName(obj) + " type " + obj
+							.getObjectType() + " DBID:" + obj.getObjectDbid() + " at " + obj.getObjectPath());
 
 					// int showYesNoPanel = showYesNoPanel(pn.getSearchSummary(), obj.toString() +
 					// "\n kv: " + kv.toString());
@@ -2062,10 +2062,9 @@ public final class AppForm extends javax.swing.JFrame {
 							final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv, appNew);
 							if (estimateUpdateObj != null) //
 							{
-								switch (showYesNoPanel(panelRestartServices.getSearchSummaryHTML(), "Object " + current
-										+ " of matched " + total + "\ntoUpdate: \n----------------------\n"
-										+ estimateUpdateObj + "\n-->\n" + obj.toString() + "\n\t kv: "
-										+ kv.toString())) {
+								switch (showYesNoPanel(panelRestartServices
+									.getSearchSummaryHTML(), "Object " + current + " of matched " + total + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n" + obj
+										.toString() + "\n\t kv: " + kv.toString())) {
 								case YES_TO_ALL:
 									if (JOptionPane
 										.showConfirmDialog(theForm, "Are you sure you want to modify this and all following found objects?", "Please confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
@@ -2085,8 +2084,8 @@ public final class AppForm extends javax.swing.JFrame {
 										logger.debug("object updated");
 
 										try {
-											final String remoteCmd = remoteRestartScript + " "
-													+ ((CfgApplication) obj).getName();
+											final String remoteCmd = remoteRestartScript + " " + ((CfgApplication) obj)
+												.getName();
 											requestOutput("Executing: " + remoteRestartScript);
 											final Pair<ArrayList<String>, ArrayList<String>> executeCommand = Utils.UnixProcess.ExtProcess
 												.executeCommand(remoteCmd, true, true);
@@ -2108,13 +2107,13 @@ public final class AppForm extends javax.swing.JFrame {
 										if (updateObj != null && updateObj.messageId() == EventObjectUpdated.ID) {
 											logger.debug("object restored");
 										} else {
-											showError("Failed to restore object: "
-													+ ((updateObj != null) ? updateObj : null));
+											showError("Failed to restore object: " + ((updateObj != null) ? updateObj
+													: null));
 											return false;
 										}
 									} else {
-										showError("Failed to update object: "
-												+ ((updateObj != null) ? updateObj : null));
+										showError("Failed to update object: " + ((updateObj != null) ? updateObj
+												: null));
 										return false;
 									}
 									break;
@@ -2555,8 +2554,8 @@ public final class AppForm extends javax.swing.JFrame {
 				try {
 					fun.fun();
 				} catch (Exception e) {
-					requestOutput("----Exception while in thread: " + e.getMessage() + "\n\t"
-							+ StringUtils.join(e.getStackTrace(), "\n\t") + "\n-------\n");
+					requestOutput("----Exception while in thread: " + e.getMessage() + "\n\t" + StringUtils
+						.join(e.getStackTrace(), "\n\t") + "\n-------\n");
 					ex = e;
 				}
 				return null;
@@ -2658,8 +2657,8 @@ public final class AppForm extends javax.swing.JFrame {
 		upd = null;
 		yesToAll = false;
 
-		final FindObject objName = getObjName(this, CfgScript.class.getSimpleName() + " type "
-				+ CfgScriptType.CFGEnhancedRouting);
+		final FindObject objName = getObjName(this, CfgScript.class
+			.getSimpleName() + " type " + CfgScriptType.CFGEnhancedRouting);
 
 		if (objName == null) {
 			return;
@@ -2902,9 +2901,9 @@ public final class AppForm extends javax.swing.JFrame {
 						final String estimateUpdateObj = upd.estimateUpdateObj(us, obj, kv);
 						if (estimateUpdateObj != null) //
 						{
-							switch (showYesNoPanel(searchSettings.toString(), "Object " + current + " of matched "
-									+ total + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n"
-									+ obj.toString() + "\n\t kv: " + kv.toString())) {
+							switch (showYesNoPanel(searchSettings
+								.toString(), "Object " + current + " of matched " + total + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n" + obj
+									.toString() + "\n\t kv: " + kv.toString())) {
 							case YES_TO_ALL:
 								if (JOptionPane
 									.showConfirmDialog(theForm, "Are you sure you want to modify this and all following found objects?", "Please confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
@@ -3083,9 +3082,9 @@ public final class AppForm extends javax.swing.JFrame {
 							boolean ldapFound = false;
 							for (CfgPerson cfgPerson : allPersons) {
 								if (StringUtils.compareIgnoreCase(ldapID, cfgPerson.getExternalID()) == 0) {
-									requestOutput("user:" + cfgPerson.getUserName() + " path: "
-											+ cfgPerson.getObjectPath() + "\n\t" + cfgPerson.getUserName() + ","
-											+ cfgPerson.getExternalID());
+									requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson
+										.getObjectPath() + "\n\t" + cfgPerson
+											.getUserName() + "," + cfgPerson.getExternalID());
 									ldapFound = true;
 								}
 							}
@@ -3144,9 +3143,8 @@ public final class AppForm extends javax.swing.JFrame {
 							boolean userNameFound = false;
 							for (CfgPerson cfgPerson : allPersons) {
 								if (StringUtils.compareIgnoreCase(user, cfgPerson.getUserName()) == 0) {
-									requestOutput("user:" + cfgPerson.getUserName() + " path: "
-											+ cfgPerson.getObjectPath() + "\n\t" + user + ","
-											+ cfgPerson.getExternalID());
+									requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson
+										.getObjectPath() + "\n\t" + user + "," + cfgPerson.getExternalID());
 									userNameFound = true;
 								}
 							}
@@ -3409,9 +3407,8 @@ public final class AppForm extends javax.swing.JFrame {
 							boolean userNameFound = false;
 							for (CfgPerson cfgPerson : allPersons) {
 								if (StringUtils.compareIgnoreCase(user[0], cfgPerson.getUserName()) == 0) {
-									requestOutput("user:" + cfgPerson.getUserName() + " path: "
-											+ cfgPerson.getObjectPath() + "\n\t" + user + ","
-											+ cfgPerson.getExternalID());
+									requestOutput("user:" + cfgPerson.getUserName() + " path: " + cfgPerson
+										.getObjectPath() + "\n\t" + user + "," + cfgPerson.getExternalID());
 									ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
 									eod.init(ObjectExistAction.UNKNOWN, theForm);
 
@@ -3544,8 +3541,9 @@ public final class AppForm extends javax.swing.JFrame {
 					Collections.sort(orphanDNs, (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
 					requestOutput("Found toral orphans: " + orphanDNs.size());
 					for (CfgDN dn : orphanDNs) {
-						requestOutput("Orphan extension at " + dn.getObjectPath() + " switch:"
-								+ dn.getSwitch().getName() + ": " + dn.getNumber() + "(DBID: " + dn.getDBID() + ")");
+						requestOutput("Orphan extension at " + dn.getObjectPath() + " switch:" + dn
+							.getSwitch()
+							.getName() + ": " + dn.getNumber() + "(DBID: " + dn.getDBID() + ")");
 
 					}
 				}
@@ -3575,8 +3573,8 @@ public final class AppForm extends javax.swing.JFrame {
 							: compareToIgnoreCase;
 				});
 				orphanLoginIDs
-					.forEach(al -> requestOutput("Orphan loginID at " + al.getObjectPath() + ": " + al.getLoginCode()
-							+ "(DBID: " + al.getDBID() + ")"));
+					.forEach(al -> requestOutput("Orphan loginID at " + al.getObjectPath() + ": " + al
+						.getLoginCode() + "(DBID: " + al.getDBID() + ")"));
 				requestOutput("Found toral orphans: " + orphanLoginIDs.size());
 			}
 
@@ -3604,9 +3602,9 @@ public final class AppForm extends javax.swing.JFrame {
 							: compareToIgnoreCase;
 				});
 				persons
-					.forEach(al -> requestOutput("Empty id for " + al.getObjectPath() + " agent:"
-							+ (al.getIsAgent() == CfgFlag.CFGTrue) + " emp[" + al.getEmployeeID() + "]" + " username["
-							+ al.getUserName() + "] DBID:" + al.getDBID() + ""));
+					.forEach(al -> requestOutput("Empty id for " + al
+						.getObjectPath() + " agent:" + (al.getIsAgent() == CfgFlag.CFGTrue) + " emp[" + al
+							.getEmployeeID() + "]" + " username[" + al.getUserName() + "] DBID:" + al.getDBID() + ""));
 				requestOutput("Found toral orphans: " + persons.size());
 			}
 		});

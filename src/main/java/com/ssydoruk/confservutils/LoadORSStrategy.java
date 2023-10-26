@@ -299,9 +299,9 @@ public class LoadORSStrategy extends javax.swing.JPanel implements IUpdateSettin
 //                upd = new UpdateUserProperties(configServerManager, CfgObjectType.CFGDN, theForm);
 					String estimateUpdateObj = upd.estimateUpdateObj(us, obj, null);
 					switch (theForm
-						.showYesNoPanel("Load ORS strategy on DN", "Object " + (i + 1) + " of matched "
-								+ selectedIndices.length + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj
-								+ "\n-->\n" + obj.toString() + "\n\t kv: " + kv.toString())) {
+						.showYesNoPanel("Load ORS strategy on DN", "Object " + (i
+								+ 1) + " of matched " + selectedIndices.length + "\ntoUpdate: \n----------------------\n" + estimateUpdateObj + "\n-->\n" + obj
+									.toString() + "\n\t kv: " + kv.toString())) {
 					case AppForm.YES_TO_ALL:
 						if (JOptionPane
 							.showConfirmDialog(theForm, "Are you sure you want to modify this and all following found objects?", "Please confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {

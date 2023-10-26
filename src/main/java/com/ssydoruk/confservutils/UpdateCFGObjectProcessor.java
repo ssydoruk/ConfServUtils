@@ -710,15 +710,15 @@ public class UpdateCFGObjectProcessor {
 				reqDel.setObjectType(deleteObject.getObjectType().asInteger());
 
 				theForm
-					.requestOutput("++ deleting object type:" + CfgObjectType.valueOf(reqDel.getObjectType())
-							+ " dbid: " + reqDel.getDbid());
+					.requestOutput("++ deleting object type:" + CfgObjectType
+						.valueOf(reqDel.getObjectType()) + " dbid: " + reqDel.getDbid());
 
 				Message ret = cfgManager.execRequest(reqDel, objType);
 				if (ret instanceof EventObjectDeleted) {
 					EventObjectDeleted o = (EventObjectDeleted) ret;
 					theForm
-						.requestOutput("Object type:" + CfgObjectType.valueOf(o.getObjectType()) + " dbid: "
-								+ o.getDbid() + " deleted!");
+						.requestOutput("Object type:" + CfgObjectType.valueOf(o.getObjectType()) + " dbid: " + o
+							.getDbid() + " deleted!");
 				} else if (ret != null) {
 					logger.info("++ ret: " + ret.toString());
 				} else {

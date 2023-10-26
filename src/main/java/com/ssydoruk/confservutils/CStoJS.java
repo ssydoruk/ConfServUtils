@@ -477,9 +477,8 @@ public class CStoJS {
 	 * agentInfo: {
 	 * skillLevels: {
 	 * changed: {
-	 * 103: 2,
-	 * 238: 3, }, deleted: [238], added: { 103: 2, 238: 3 }, }, agentLogins: {
-	 * changed: {}, deleted: {} }, }, }; }
+	 * 103: 2, 238: 3, }, deleted: [238], added: { 103: 2, 238: 3 }, }, agentLogins:
+	 * { changed: {}, deleted: {} }, }, }; }
 	 *
 	 * @param objectType          objectType String type of the object ("CfgPerson",
 	 *                            etc)
