@@ -11,24 +11,24 @@ package com.ssydoruk.confservutils;
  */
 public interface ISearchSettings {
 
-    public boolean isCaseSensitive();
+	public boolean isCaseSensitive();
 
-    public boolean isRegex();
+	public boolean isRegex();
 
-    public boolean isFullOutputSelected();
+	public boolean isFullOutputSelected();
 
-    public boolean isAllKVPsInOutput();
+	public boolean isAllKVPsInOutput();
 
-    public boolean isSearchAll();
+	public boolean isSearchAll();
 
-    public String getAllSearch();
+	public String getAllSearch();
 
-    public String getSection();
+	public String getSection();
 
-    public String getObjName();
+	public String getObjName();
 
-    public String getOption();
+	public String getOption();
 
-    public String getValue();
+	public String getValue();
 
 }

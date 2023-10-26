@@ -12,7 +12,8 @@ import com.genesyslab.platform.applicationblocks.com.ConfigException;
  * @author stepan_sydoruk
  */
 
-@FunctionalInterface interface IThreadedFun {
+@FunctionalInterface
+interface IThreadedFun {
 
-    public void fun() throws ConfigException, InterruptedException, Exception;
+	public void fun() throws ConfigException, InterruptedException, Exception;
 }

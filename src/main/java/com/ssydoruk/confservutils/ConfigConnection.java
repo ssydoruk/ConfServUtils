@@ -31,59 +31,44 @@ import com.genesyslab.platform.configuration.protocol.*;
 import com.genesyslab.platform.configuration.protocol.types.*;
 import org.apache.logging.log4j.*;
 
-
 public class ConfigConnection {
 
-    public static IConfService initializeConfigService(
-            final String cfgsrvEndpointName,
-            final String cfgsrvHost,
-            final int cfgsrvPort,
-            final String username,
-            final String password)
-            throws ConfigException, InterruptedException, ProtocolException {
+	public static IConfService initializeConfigService(final String cfgsrvEndpointName, final String cfgsrvHost,
+			final int cfgsrvPort, final String username, final String password)
+			throws ConfigException, InterruptedException, ProtocolException {
 
-        CfgAppType clientType = CfgAppType.CFGSCE;
-        String clientName = "default";
+		CfgAppType clientType = CfgAppType.CFGSCE;
+		String clientName = "default";
 
-        LogManager.getLogger().info("initializeConfigService ");
-        return initializeConfigService(cfgsrvEndpointName,
-                cfgsrvHost, cfgsrvPort,
-                clientType, clientName,
-                username, password);
-    }
+		LogManager.getLogger().info("initializeConfigService ");
+		return initializeConfigService(cfgsrvEndpointName, cfgsrvHost, cfgsrvPort, clientType, clientName, username, password);
+	}
 
-    public static IConfService initializeConfigService(
-            final String cfgsrvEndpointName,
-            final String cfgsrvHost,
-            final int cfgsrvPort,
-            final CfgAppType clientType,
-            final String clientName,
-            final String username,
-            final String password)
-            throws ConfigException, InterruptedException, ProtocolException {
+	public static IConfService initializeConfigService(final String cfgsrvEndpointName, final String cfgsrvHost,
+			final int cfgsrvPort, final CfgAppType clientType, final String clientName, final String username,
+			final String password) throws ConfigException, InterruptedException, ProtocolException {
 
-        KeyValueConfiguration cp = new KeyValueConfiguration(new KeyValueCollection());
+		KeyValueConfiguration cp = new KeyValueConfiguration(new KeyValueCollection());
 //        cp.setTLSEnabled(true);
 
-        PropertyConfiguration conf = new PropertyConfiguration();
-        conf.setUseAddp(true);
-        conf.setAddpClientTimeout(30);
-        conf.setAddpServerTimeout(30);
-        conf.setAddpTrace("both");
+		PropertyConfiguration conf = new PropertyConfiguration();
+		conf.setUseAddp(true);
+		conf.setAddpClientTimeout(30);
+		conf.setAddpServerTimeout(30);
+		conf.setAddpTrace("both");
 
-        Endpoint cfgServerEndpoint
-                = new Endpoint(cfgsrvEndpointName, cfgsrvHost, cfgsrvPort, conf);
+		Endpoint cfgServerEndpoint = new Endpoint(cfgsrvEndpointName, cfgsrvHost, cfgsrvPort, conf);
 
-        ConfServerProtocol protocol = new ConfServerProtocol(cfgServerEndpoint);
-        protocol.setClientName(clientName);
-        protocol.setClientApplicationType(clientType.ordinal());
-        protocol.setUserName(username);
-        protocol.setUserPassword(password);
-        protocol.setUseLocalization(false);
+		ConfServerProtocol protocol = new ConfServerProtocol(cfgServerEndpoint);
+		protocol.setClientName(clientName);
+		protocol.setClientApplicationType(clientType.ordinal());
+		protocol.setUserName(username);
+		protocol.setUserPassword(password);
+		protocol.setUseLocalization(false);
 
-        IConfService service = ConfServiceFactory.createConfService(protocol);
-        service.getProtocol().setTimeout(120000);
-        
+		IConfService service = ConfServiceFactory.createConfService(protocol);
+		service.getProtocol().setTimeout(120000);
+
 //        service.getProtocol().setMessageHandler(new MessageHandler() {
 //            @Override
 //            public void onMessage(Message msg) {
@@ -117,18 +102,17 @@ public class ConfigConnection {
 //                }
 //            }
 //        });
-        
 
-        protocol.open();
+		protocol.open();
 
-        return service;
-    }
+		return service;
+	}
 
-    public static void uninitializeConfigService(
-            final IConfService service) throws ProtocolException, IllegalStateException, InterruptedException {
-        if (service.getProtocol().getState() != ChannelState.Closed) {
-            service.getProtocol().close();
-        }
-        ConfServiceFactory.releaseConfService(service);
-    }
+	public static void uninitializeConfigService(final IConfService service)
+			throws ProtocolException, IllegalStateException, InterruptedException {
+		if (service.getProtocol().getState() != ChannelState.Closed) {
+			service.getProtocol().close();
+		}
+		ConfServiceFactory.releaseConfService(service);
+	}
 }

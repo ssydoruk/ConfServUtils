@@ -14,8 +14,8 @@ import com.oracle.truffle.api.library.ExportLibrary;
  * @author stepan_sydoruk
  */
 @ExportLibrary(InteropLibrary.class)
- final class MyLanguageException extends AbstractTruffleException {
-     MyLanguageException(String message) {
-         super(message);
-     }
- }
+final class MyLanguageException extends AbstractTruffleException {
+	MyLanguageException(String message) {
+		super(message);
+	}
+}

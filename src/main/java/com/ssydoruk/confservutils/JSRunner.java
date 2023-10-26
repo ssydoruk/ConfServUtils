@@ -24,390 +24,386 @@ import org.graalvm.polyglot.*;
  */
 public class JSRunner {
 
-    private OutReaderThread stdOutReader;
-    private String port;
-    private IOutputHook errHook = null;
-    private IOutputHook outHook = null;
+	private OutReaderThread stdOutReader;
+	private String port;
+	private IOutputHook errHook = null;
+	private IOutputHook outHook = null;
 
+	public static String runCSVFormatScript(String script, HTMLstage htmlStage) {
+		logger.trace("runScript anonymous script [" + script + "]");
 
-    public static String runCSVFormatScript(String script, HTMLstage htmlStage) {
-        logger.trace("runScript anonymous script [" + script + "]");
+		return runCSVFormatScript((cont) -> cont.eval("js", script), htmlStage);
 
-        return runCSVFormatScript((cont) -> cont.eval("js", script), htmlStage);
+	}
 
-    }
-
-    private static String runCSVFormatScript(IEvalMethod method, HTMLstage htmlStage) {
-        Context cont = getInstance().getCondContext();
-        Value bindings = cont.getBindings("js");
-        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+	private static String runCSVFormatScript(IEvalMethod method, HTMLstage htmlStage) {
+		Context cont = getInstance().getCondContext();
+		Value bindings = cont.getBindings("js");
+		ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
 //        eod.init(ObjectExistAction.FAIL, theForm);
-        bindings.putMember("RECORD", null);
-        bindings.putMember("IGNORE_RECORD", false);
-        bindings.putMember("HTML", "");
-        bindings.putMember("HTML_STAGE", htmlStage.toString());
+		bindings.putMember("RECORD", null);
+		bindings.putMember("IGNORE_RECORD", false);
+		bindings.putMember("HTML", "");
+		bindings.putMember("HTML_STAGE", htmlStage.toString());
 
-        method.theMethod(cont);
-        String ret = bindings.getMember("HTML").asString();
-        return (StringUtils.isNotEmpty(ret) ? ret : null);
-    }
+		method.theMethod(cont);
+		String ret = bindings.getMember("HTML").asString();
+		return (StringUtils.isNotEmpty(ret) ? ret : null);
+	}
 
-    public IOutputHook getErrHook() {
-        return errHook;
-    }
+	public IOutputHook getErrHook() {
+		return errHook;
+	}
 
-    public void setErrHook(IOutputHook errHook) {
-        this.errHook = errHook;
-        if (stdErrReader != null && errHook != null) {
-            stdErrReader.setReaderHook(errHook);
-        }
-    }
+	public void setErrHook(IOutputHook errHook) {
+		this.errHook = errHook;
+		if (stdErrReader != null && errHook != null) {
+			stdErrReader.setReaderHook(errHook);
+		}
+	}
 
-    public IOutputHook getOutHook() {
-        return outHook;
-    }
+	public IOutputHook getOutHook() {
+		return outHook;
+	}
 
-    public void setOutHook(IOutputHook outHook) {
-        this.outHook = outHook;
-        if (stdOutReader != null && outHook != null) {
-            stdOutReader.setReaderHook(outHook);
-        }
-    }
+	public void setOutHook(IOutputHook outHook) {
+		this.outHook = outHook;
+		if (stdOutReader != null && outHook != null) {
+			stdOutReader.setReaderHook(outHook);
+		}
+	}
 
-    private OutReaderThread getStdOutReader() {
-        return stdOutReader;
-    }
+	private OutReaderThread getStdOutReader() {
+		return stdOutReader;
+	}
 
-    public ArrayList<String> setDebugPort(String _port) {
-        if ((port == null && _port == null) || (port != null && _port != null && port.equals(_port))) {
-            return null;
-        }
-        IOutputHook _errHook = errHook;
-        IOutputHook _outHook = outHook;
-        close();
-        CountDownLatch latch = new CountDownLatch(1);
-        ArrayList<String> buf = new ArrayList();
+	public ArrayList<String> setDebugPort(String _port) {
+		if ((port == null && _port == null) || (port != null && _port != null && port.equals(_port))) {
+			return null;
+		}
+		IOutputHook _errHook = errHook;
+		IOutputHook _outHook = outHook;
+		close();
+		CountDownLatch latch = new CountDownLatch(1);
+		ArrayList<String> buf = new ArrayList();
 
-        if (_port != null) {
-            setErrHook(new IOutputHook() {
-                int linesRead = 0;
+		if (_port != null) {
+			setErrHook(new IOutputHook() {
+				int linesRead = 0;
 
-                @Override
-                public void processOut(String str) {
-                    buf.add(str);
-                    // logger.debug("l:" + linesRead);
-                    if (++linesRead > 2) { // reading 3 lines
-                        latch.countDown(); // the procedure will be called from separate thread of output/error reader
-                        // so no locking
-                    }
-                }
-            });
-        }
-        this.port = _port;
-        try {
-            init();
-            if (_port != null) {
-                latch.await(2, TimeUnit.SECONDS);
-            }
-            logger.info("done with stdout");
+				@Override
+				public void processOut(String str) {
+					buf.add(str);
+					// logger.debug("l:" + linesRead);
+					if (++linesRead > 2) { // reading 3 lines
+						latch.countDown(); // the procedure will be called from separate thread of output/error reader
+						// so no locking
+					}
+				}
+			});
+		}
+		this.port = _port;
+		try {
+			init();
+			if (_port != null) {
+				latch.await(2, TimeUnit.SECONDS);
+			}
+			logger.info("done with stdout");
 
-        } catch (IOException | InterruptedException ex) {
-            logger.error("ex ", ex);
-        } finally {
-            setErrHook(_errHook);
-            setOutHook(_outHook);
-        }
-        logger.info("buf: " + StringUtils.join(buf, '\n'));
-        return (port != null) ? buf : null;
-    }
+		} catch (IOException | InterruptedException ex) {
+			logger.error("ex ", ex);
+		} finally {
+			setErrHook(_errHook);
+			setOutHook(_outHook);
+		}
+		logger.info("buf: " + StringUtils.join(buf, '\n'));
+		return (port != null) ? buf : null;
+	}
 
-    private OutReaderThread getStdErrReader() {
-        return stdErrReader;
-    }
+	private OutReaderThread getStdErrReader() {
+		return stdErrReader;
+	}
 
-    private OutReaderThread stdErrReader;
+	private OutReaderThread stdErrReader;
 
-    static boolean runFile(String fileName, ConfigServerManager csManager, IOutputHook stdOutHook,
-                           IOutputHook stdErrHook, boolean forceFile) {
-        JSRunner inst = getInstance();
-        IOutputHook errHook = inst.getStdErrReader().getReaderHook();
-        IOutputHook outHook = inst.getStdOutReader().getReaderHook();
-        inst.getStdOutReader().setReaderHook(stdOutHook);
-        inst.getStdErrReader().setReaderHook(stdErrHook);
+	static boolean runFile(String fileName, ConfigServerManager csManager, IOutputHook stdOutHook,
+			IOutputHook stdErrHook, boolean forceFile) {
+		JSRunner inst = getInstance();
+		IOutputHook errHook = inst.getStdErrReader().getReaderHook();
+		IOutputHook outHook = inst.getStdOutReader().getReaderHook();
+		inst.getStdOutReader().setReaderHook(stdOutHook);
+		inst.getStdErrReader().setReaderHook(stdErrHook);
 
-        boolean ret = false;
-        try {
-            ret = runFile(fileName, csManager, null, forceFile);
-        } catch (Exception e) {
-            stdErrHook.processOut("Exception executing:\n" + e.getMessage() + "\n--------------\n");
-            logger.error("", e);
-        } finally {
-            inst.getStdOutReader().setReaderHook(outHook);
-            inst.getStdErrReader().setReaderHook(errHook);
-        }
+		boolean ret = false;
+		try {
+			ret = runFile(fileName, csManager, null, forceFile);
+		} catch (Exception e) {
+			stdErrHook.processOut("Exception executing:\n" + e.getMessage() + "\n--------------\n");
+			logger.error("", e);
+		} finally {
+			inst.getStdOutReader().setReaderHook(outHook);
+			inst.getStdErrReader().setReaderHook(errHook);
+		}
 
-        // inst.getStdOutReader().setReaderHook(null);
-        // inst.getStdErrReader().setReaderHook(null);
-        return ret;
+		// inst.getStdOutReader().setReaderHook(null);
+		// inst.getStdErrReader().setReaderHook(null);
+		return ret;
 
-    }
+	}
 
-    static boolean runFile(String fileName, ConfigServerManager csManager, String[] params, boolean forceFile) {
-        logger.trace("runFile [" + fileName + "]");
+	static boolean runFile(String fileName, ConfigServerManager csManager, String[] params, boolean forceFile) {
+		logger.trace("runFile [" + fileName + "]");
 
-        try {
-            Source source = getSource(fileName, forceFile);
-            return runScript((cont) -> cont.eval(source), csManager, params);
+		try {
+			Source source = getSource(fileName, forceFile);
+			return runScript((cont) -> cont.eval(source), csManager, params);
 
-        } catch (IOException ex) {
-            Logger.getLogger(JSRunner.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
+		} catch (IOException ex) {
+			Logger.getLogger(JSRunner.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    private static final HashMap<String, Source> sourceFiles = new HashMap();
+	private static final HashMap<String, Source> sourceFiles = new HashMap();
 
-    private static Source getSource(String fileName, boolean forceFile) throws IOException {
-        if (Main.isDebug()) {
-            return Source.newBuilder("js", new File(fileName)).cached(false).build();
-        } else {
+	private static Source getSource(String fileName, boolean forceFile) throws IOException {
+		if (Main.isDebug()) {
+			return Source.newBuilder("js", new File(fileName)).cached(false).build();
+		} else {
 
-            Source source = sourceFiles.get(fileName);
-            if (source != null && forceFile) {
-                sourceFiles.remove(fileName);
-                source = null;
-            }
-            if (source == null) {
-                source = Source.newBuilder("js", new File(fileName)).build();
-                try {
-                    JSRunner.getInstance().getCondContext().parse(source);
+			Source source = sourceFiles.get(fileName);
+			if (source != null && forceFile) {
+				sourceFiles.remove(fileName);
+				source = null;
+			}
+			if (source == null) {
+				source = Source.newBuilder("js", new File(fileName)).build();
+				try {
+					JSRunner.getInstance().getCondContext().parse(source);
 
-                } catch (PolyglotException e) {
-                    logger.error("e", e);
-                }
-                sourceFiles.put(fileName, source);
-            }
-            return source;
-        }
-    }
+				} catch (PolyglotException e) {
+					logger.error("e", e);
+				}
+				sourceFiles.put(fileName, source);
+			}
+			return source;
+		}
+	}
 
-    public String getPort() {
-        return port;
-    }
+	public String getPort() {
+		return port;
+	}
 
-    static boolean runScript(String script, ConfigServerManager csManager, String[] params) {
-        logger.trace("runScript anonymous script [" + script + "]");
+	static boolean runScript(String script, ConfigServerManager csManager, String[] params) {
+		logger.trace("runScript anonymous script [" + script + "]");
 
-        return runScript((cont) -> cont.eval("js", script), csManager, params);
+		return runScript((cont) -> cont.eval("js", script), csManager, params);
 
-    }
+	}
 
-    private static boolean runScript(IEvalMethod method, ConfigServerManager csManager, String[] params) {
-        Context cont = getInstance().getCondContext();
-        Value bindings = cont.getBindings("js");
-        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+	private static boolean runScript(IEvalMethod method, ConfigServerManager csManager, String[] params) {
+		Context cont = getInstance().getCondContext();
+		Value bindings = cont.getBindings("js");
+		ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
 //        eod.init(ObjectExistAction.FAIL, theForm);
-        bindings.putMember("CS", CStoJS.getInstance(csManager));
-        bindings.putMember("PARAMS", params);
-        bindings.putMember("TERMINATE", false);
+		bindings.putMember("CS", CStoJS.getInstance(csManager));
+		bindings.putMember("PARAMS", params);
+		bindings.putMember("TERMINATE", false);
 
-        method.theMethod(cont);
-        return bindings.getMember("TERMINATE").asBoolean();
-    }
+		method.theMethod(cont);
+		return bindings.getMember("TERMINATE").asBoolean();
+	}
 
-    static boolean runCSVFormatScript(String script, HashMap<String, String> record) {
-        logger.trace("runScript anonymous script [" + script + "]");
+	static boolean runCSVFormatScript(String script, HashMap<String, String> record) {
+		logger.trace("runScript anonymous script [" + script + "]");
 
-        return runCSVFormatScript((cont) -> cont.eval("js", script), record);
-    }
+		return runCSVFormatScript((cont) -> cont.eval("js", script), record);
+	}
 
-    private static boolean runCSVFormatScript(IEvalMethod method, HashMap<String, String> record) {
-        Context cont = getInstance().getCondContext();
-        Value bindings = cont.getBindings("js");
-        ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
+	private static boolean runCSVFormatScript(IEvalMethod method, HashMap<String, String> record) {
+		Context cont = getInstance().getCondContext();
+		Value bindings = cont.getBindings("js");
+		ExistingObjectDecider eod = ExistingObjectDecider.getInstance();
 //        eod.init(ObjectExistAction.FAIL, theForm);
-        bindings.putMember("RECORD", record);
-        bindings.putMember("IGNORE_RECORD", false);
-        bindings.putMember("HTML_STAGE", HTMLstage.ROW);
+		bindings.putMember("RECORD", record);
+		bindings.putMember("IGNORE_RECORD", false);
+		bindings.putMember("HTML_STAGE", HTMLstage.ROW);
 
+		method.theMethod(cont);
+		return bindings.getMember("IGNORE_RECORD").asBoolean();
+	}
 
-        method.theMethod(cont);
-        return bindings.getMember("IGNORE_RECORD").asBoolean();
-    }
+	private void resetContext() {
+		condContext.close(true);
+		stdErrReader.interrupt();
+		stdOutReader.interrupt();
+		try {
+			init();
+		} catch (IOException ex) {
+			Logger.getLogger(JSRunner.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		}
+	}
 
-    private void resetContext() {
-        condContext.close(true);
-        stdErrReader.interrupt();
-        stdOutReader.interrupt();
-        try {
-            init();
-        } catch (IOException ex) {
-            Logger.getLogger(JSRunner.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-    }
+	private void close() {
+		if (condContext != null) {
+			condContext.close(true);
+		}
+		if (stdErrReader != null) {
+			stdErrReader.interrupt();
+			stdErrReader = null;
+		}
+		if (stdOutReader != null) {
+			stdOutReader.interrupt();
+			stdOutReader = null;
+		}
+	}
 
-    private void close() {
-        if (condContext != null) {
-            condContext.close(true);
-        }
-        if (stdErrReader != null) {
-            stdErrReader.interrupt();
-            stdErrReader = null;
-        }
-        if (stdOutReader != null) {
-            stdOutReader.interrupt();
-            stdOutReader = null;
-        }
-    }
+	@FunctionalInterface
+	interface IEvalMethod {
 
-    @FunctionalInterface
-    interface IEvalMethod {
+		void theMethod(Context cont) throws PolyglotException;
+	}
 
-        void theMethod(Context cont) throws PolyglotException;
-    }
+	private JSRunner() {
+		try {
+			init();
+		} catch (IOException ex) {
+			logger.error("exception in JSRunner: " + ex);
+		}
+	}
 
-    private JSRunner() {
-        try {
-            init();
-        } catch (IOException ex) {
-            logger.error("exception in JSRunner: " + ex);
-        }
-    }
+	private void init() throws IOException {
+		PipedInputStream pipedStdOutReader = new PipedInputStream();
+		PipedInputStream pipedStdErrReader = new PipedInputStream();
 
-    private void init() throws IOException {
-        PipedInputStream pipedStdOutReader = new PipedInputStream();
-        PipedInputStream pipedStdErrReader = new PipedInputStream();
+		stdOutReader = new OutReaderThread(pipedStdOutReader, Level.DEBUG);
+		stdOutReader.setReaderHook(outHook);
 
-        stdOutReader = new OutReaderThread(pipedStdOutReader, Level.DEBUG);
-        stdOutReader.setReaderHook(outHook);
+		stdErrReader = new OutReaderThread(pipedStdErrReader, Level.ERROR);
+		stdErrReader.setReaderHook(errHook);
+		PipedOutputStream stdOut = new PipedOutputStream(pipedStdOutReader);
+		PipedOutputStream stdErr = new PipedOutputStream(pipedStdErrReader);
 
-        stdErrReader = new OutReaderThread(pipedStdErrReader, Level.ERROR);
-        stdErrReader.setReaderHook(errHook);
-        PipedOutputStream stdOut = new PipedOutputStream(pipedStdOutReader);
-        PipedOutputStream stdErr = new PipedOutputStream(pipedStdErrReader);
+		Handler logHandler = new Handler() {
+			@Override
+			public void publish(LogRecord record) {
 
-        Handler logHandler = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
+				logger.debug("-- publish: " + record.getMessage());
+			}
 
-                logger.debug("-- publish: " + record.getMessage());
-            }
+			@Override
+			public void flush() {
+				System.out.println("--flush");
+			}
 
-            @Override
-            public void flush() {
-                System.out.println("--flush");
-            }
+			@Override
+			public void close() throws SecurityException {
+				logger.debug("--close");
+			}
+		};
 
-            @Override
-            public void close() throws SecurityException {
-                logger.debug("--close");
-            }
-        };
+		logHandler.setLevel(java.util.logging.Level.FINEST);
 
-        logHandler.setLevel(java.util.logging.Level.FINEST);
-
-        Context.Builder builder = Context.newBuilder().allowAllAccess(true).err(stdErr).out(stdOut);
-        if (port != null) {
-            builder.option("inspect", port);
-            String path = java.util.UUID.randomUUID().toString();
-            builder.option("inspect.Path", path);
-            String url = String.format(
-                    "chrome-devtools://devtools/bundled/js_app.html?ws=%s:%s/%s",
-                    "127.0.0.1", port, path);
+		Context.Builder builder = Context.newBuilder().allowAllAccess(true).err(stdErr).out(stdOut);
+		if (port != null) {
+			builder.option("inspect", port);
+			String path = java.util.UUID.randomUUID().toString();
+			builder.option("inspect.Path", path);
+			String url = String
+				.format("chrome-devtools://devtools/bundled/js_app.html?ws=%s:%s/%s", "127.0.0.1", port, path);
 //            Runtime rt = Runtime.getRuntime();
 //            Process chrome = rt.exec("cmd /C start microsoft-edge:http://google.com");
-        }
-        condContext = builder.build();
+		}
+		condContext = builder.build();
 
-        stdOutReader.start();
-        stdErrReader.start();
+		stdOutReader.start();
+		stdErrReader.start();
 
-    }
+	}
 
-    public Context getCondContext() {
-        return condContext;
-    }
+	public Context getCondContext() {
+		return condContext;
+	}
 
-    public static JSRunner getInstance() {
-        return JSRunnerHolder.INSTANCE;
-    }
+	public static JSRunner getInstance() {
+		return JSRunnerHolder.INSTANCE;
+	}
 
-    private static class JSRunnerHolder {
+	private static class JSRunnerHolder {
 
-        private static final JSRunner INSTANCE = new JSRunner();
-    }
+		private static final JSRunner INSTANCE = new JSRunner();
+	}
 
-    private Context condContext = null;
+	private Context condContext = null;
 
-    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();
+	private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger();
 
+	/*
+	 * public static boolean evalFields(String script, ILogRecord rec,
+	 * HashMap<String, Object> scriptFields) { Context cont =
+	 * getInstance().getCondContext(); Value bindings = cont.getBindings("js");
+	 * bindings.putMember("RECORD", rec); bindings.putMember("FIELDS",
+	 * scriptFields); bindings.putMember("IGNORE_RECORD", false); cont.eval("js",
+	 * script); boolean ret = bindings.getMember("IGNORE_RECORD").asBoolean();
+	 * logger.trace("evalFields [" + scriptFields + "], ignored:[" + ret +
+	 * "] - result of [" + script + "]"); return ret; }
+	 *
+	 * public static String execString(String script, ILogRecord rec) { Context cont
+	 * = getInstance().getCondContext(); cont.getBindings("js").putMember("RECORD",
+	 * rec); Value eval = cont.eval("js", script); logger.trace("eval [" + eval +
+	 * "] - result of [" + script + "]"); return eval.asString();
+	 *
+	 * }
+	 *
+	 * public static boolean execBoolean(String script, ILogRecord rec) { Context
+	 * cont = getInstance().getCondContext();
+	 * cont.getBindings("js").putMember("RECORD", rec); Value eval = cont.eval("js",
+	 * script); logger.trace("eval [" + eval + "] - result of [" + script + "]");
+	 * return eval.asBoolean();
+	 *
+	 * }
+	 */
+	class OutReaderThread extends Thread {
 
-    /*
-     * public static boolean evalFields(String script, ILogRecord rec,
-     * HashMap<String, Object> scriptFields) { Context cont =
-     * getInstance().getCondContext(); Value bindings = cont.getBindings("js");
-     * bindings.putMember("RECORD", rec); bindings.putMember("FIELDS",
-     * scriptFields); bindings.putMember("IGNORE_RECORD", false); cont.eval("js",
-     * script); boolean ret = bindings.getMember("IGNORE_RECORD").asBoolean();
-     * logger.trace("evalFields [" + scriptFields + "], ignored:[" + ret +
-     * "] - result of [" + script + "]"); return ret; }
-     *
-     * public static String execString(String script, ILogRecord rec) { Context cont
-     * = getInstance().getCondContext(); cont.getBindings("js").putMember("RECORD",
-     * rec); Value eval = cont.eval("js", script); logger.trace("eval [" + eval +
-     * "] - result of [" + script + "]"); return eval.asString();
-     *
-     * }
-     *
-     * public static boolean execBoolean(String script, ILogRecord rec) { Context
-     * cont = getInstance().getCondContext();
-     * cont.getBindings("js").putMember("RECORD", rec); Value eval = cont.eval("js",
-     * script); logger.trace("eval [" + eval + "] - result of [" + script + "]");
-     * return eval.asBoolean();
-     *
-     * }
-     */
-    class OutReaderThread extends Thread {
+		private final PipedInputStream pipedIn;
+		private final Level logLevel;
+		private IOutputHook readerHook = null;
 
-        private final PipedInputStream pipedIn;
-        private final Level logLevel;
-        private IOutputHook readerHook = null;
+		synchronized public IOutputHook getReaderHook() {
+			return readerHook;
+		}
 
-        synchronized public IOutputHook getReaderHook() {
-            return readerHook;
-        }
-
-        synchronized public void setReaderHook(IOutputHook readerHook) {
+		synchronized public void setReaderHook(IOutputHook readerHook) {
 //            System.out.println("setReaderHook " + (readerHook != null));
-            this.readerHook = readerHook;
-        }
+			this.readerHook = readerHook;
+		}
 
-        private OutReaderThread(PipedInputStream pipedStdIn, Level level) {
-            pipedIn = pipedStdIn;
-            logLevel = level;
-        }
+		private OutReaderThread(PipedInputStream pipedStdIn, Level level) {
+			pipedIn = pipedStdIn;
+			logLevel = level;
+		}
 
-        @Override
-        public void run() {
-            logger.debug("started JSreader for log level " + logLevel);
-            try {
-                String s;
-                BufferedReader br = new BufferedReader(new InputStreamReader(pipedIn));
-                while ((s = br.readLine()) != null) {
-                    logger.log(logLevel, "<js> " + s);
-                    IOutputHook h = getReaderHook();
-                    if (h != null) {
-                        h.processOut(s);
-                        logger.log(logLevel, "<js> " + "h != null");
-                    }
-                }
-            } catch (IOException ex) {
-                logger.error("Exception while reading js output", ex);
-            }
-            logger.debug("JSreader thread done");
-        }
+		@Override
+		public void run() {
+			logger.debug("started JSreader for log level " + logLevel);
+			try {
+				String s;
+				BufferedReader br = new BufferedReader(new InputStreamReader(pipedIn));
+				while ((s = br.readLine()) != null) {
+					logger.log(logLevel, "<js> " + s);
+					IOutputHook h = getReaderHook();
+					if (h != null) {
+						h.processOut(s);
+						logger.log(logLevel, "<js> " + "h != null");
+					}
+				}
+			} catch (IOException ex) {
+				logger.error("Exception while reading js output", ex);
+			}
+			logger.debug("JSreader thread done");
+		}
 
-    }
+	}
 
 }

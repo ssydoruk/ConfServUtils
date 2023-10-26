@@ -13,32 +13,26 @@ import java.util.Collection;
  */
 public interface IUpdateSettings {
 
-    public String getReplaceKey(String stringKey);
+	public String getReplaceKey(String stringKey);
 
-    public enum KVPUpdateAction {
-        ADD_SECTION,
-        REMOVE,
-        REPLACE_WITH,
-        RESTORE_FROM_BACKUP,
-        ADD_OPTION_FORCE,
-        RENAME_SECTION,
-    }
+	public enum KVPUpdateAction {
+		ADD_SECTION, REMOVE, REPLACE_WITH, RESTORE_FROM_BACKUP, ADD_OPTION_FORCE, RENAME_SECTION,
+	}
 
-    public enum ObjectUpdateAction {
-        KVP_CHANGE,
-        OBJECT_DELETE,
-    }
+	public enum ObjectUpdateAction {
+		KVP_CHANGE, OBJECT_DELETE,
+	}
 
-    public Collection<UserProperties> getAddedKVP();
+	public Collection<UserProperties> getAddedKVP();
 
-    public boolean isMakeBackup();
+	public boolean isMakeBackup();
 
-    public KVPUpdateAction getKVPUpdateAction();
+	public KVPUpdateAction getKVPUpdateAction();
 
-    public ObjectUpdateAction getObjectUpdateAction();
-    
-    public boolean isDeleteDependendObjects();
+	public ObjectUpdateAction getObjectUpdateAction();
 
-    public String KVPreplaceWith(String currentValue);
+	public boolean isDeleteDependendObjects();
+
+	public String KVPreplaceWith(String currentValue);
 
 }

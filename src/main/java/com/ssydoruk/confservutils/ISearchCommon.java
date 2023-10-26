@@ -13,10 +13,10 @@ import java.util.Collection;
  */
 public interface ISearchCommon {
 
-    public String getSearchSummary();
+	public String getSearchSummary();
 
-    public void setChoices(Collection<String> choices);
+	public void setChoices(Collection<String> choices);
 
-    public Collection<String> getChoices();
+	public Collection<String> getChoices();
 
 }

@@ -15,20 +15,20 @@ import javax.swing.*;
  */
 public class DebugInfoDialog extends InfoPanel {
 
-    JTextArea annText;
+	JTextArea annText;
 
-    public DebugInfoDialog(Window parent) {
-        super(parent, JOptionPane.DEFAULT_OPTION);
-        annText = new JTextArea();
-        annText.setEditable(false);
-        JScrollPane jp = new JScrollPane(annText);
-        super.setMainPanel(jp);
-    }
+	public DebugInfoDialog(Window parent) {
+		super(parent, JOptionPane.DEFAULT_OPTION);
+		annText = new JTextArea();
+		annText.setEditable(false);
+		JScrollPane jp = new JScrollPane(annText);
+		super.setMainPanel(jp);
+	}
 
-    public void showAnn( String title, String txt) {
-        annText.setText(txt);
-        setTitle(title);
-        showModal();
-    }
+	public void showAnn(String title, String txt) {
+		annText.setText(txt);
+		setTitle(title);
+		showModal();
+	}
 
 }

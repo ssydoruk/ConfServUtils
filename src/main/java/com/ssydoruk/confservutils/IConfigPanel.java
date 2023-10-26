@@ -9,7 +9,8 @@ package com.ssydoruk.confservutils;
  *
  * @author stepan_sydoruk
  */
-@FunctionalInterface  public interface IConfigPanel {
+@FunctionalInterface
+public interface IConfigPanel {
 
-    public void showProc();
+	public void showProc();
 }

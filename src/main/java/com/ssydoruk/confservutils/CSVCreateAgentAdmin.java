@@ -30,134 +30,135 @@ import javax.swing.table.TableModel;
  */
 abstract class CSVCreateAgentAdmin extends CSVGeneralImportDialog {
 
-    private static CSVCreateAgentAdmin instance = null;
+	private static CSVCreateAgentAdmin instance = null;
 
-    public static CSVCreateAgentAdmin getInstance(Window parent, ConfigServerManager cfg) {
-        if (instance == null) {
-            instance = new CSVCreateAgentAdmin(parent, cfg) {
-            };
-        }
-        return instance;
-    }
+	public static CSVCreateAgentAdmin getInstance(Window parent, ConfigServerManager cfg) {
+		if (instance == null) {
+			instance = new CSVCreateAgentAdmin(parent, cfg) {
+			};
+		}
+		return instance;
+	}
 
-    DefaultTableModel modelLoginID;
-    JTable tabLoginID;
-    JTable tabLoginIDsFolders;
+	DefaultTableModel modelLoginID;
+	JTable tabLoginID;
+	JTable tabLoginIDsFolders;
 
-    Utils.swing.TableColumnAdjuster tcaLoginID;
-    JPanel loginidFolders;
-    JPanel topPan;
-    private final ConfigServerManager cfg;
+	Utils.swing.TableColumnAdjuster tcaLoginID;
+	JPanel loginidFolders;
+	JPanel topPan;
+	private final ConfigServerManager cfg;
 
-    public CSVCreateAgentAdmin(Window parent, ConfigServerManager _cfg) throws HeadlessException {
-        super(parent, _cfg);
-        cfg = _cfg;
+	public CSVCreateAgentAdmin(Window parent, ConfigServerManager _cfg) throws HeadlessException {
+		super(parent, _cfg);
+		cfg = _cfg;
 
-        modelLoginID = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // To change body of generated methods, choose Tools | Templates.
-            }
-        };
+		modelLoginID = new DefaultTableModel() {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false; // To change body of generated methods, choose Tools | Templates.
+			}
+		};
 
-        modelLoginID.addColumn("LoginID");
+		modelLoginID.addColumn("LoginID");
 
-        tabLoginID = new JTable(modelLoginID);
-        tabLoginID.getTableHeader().setVisible(true);
+		tabLoginID = new JTable(modelLoginID);
+		tabLoginID.getTableHeader().setVisible(true);
 
-        JScrollPane jp = new JScrollPane(tabLoginID);
-        // jp.add(tab);
+		JScrollPane jp = new JScrollPane(tabLoginID);
+		// jp.add(tab);
 
-        Dimension preferredSize = new Dimension(600, 400);
-        jp.setPreferredSize(preferredSize);
-        jp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        topPan = new JPanel();
+		Dimension preferredSize = new Dimension(600, 400);
+		jp.setPreferredSize(preferredSize);
+		jp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		topPan = new JPanel();
 
-        topPan.setLayout(new BoxLayout(topPan, BoxLayout.PAGE_AXIS));
-        topPan.add(jp);
+		topPan.setLayout(new BoxLayout(topPan, BoxLayout.PAGE_AXIS));
+		topPan.add(jp);
 
-        loginidFolders = new JPanel();
-        loginidFolders.setLayout(new BoxLayout(loginidFolders, BoxLayout.PAGE_AXIS));
-        loginidFolders.setBorder(new TitledBorder("LoginID folders"));
-        tabLoginIDsFolders = new JTable();
-        tabLoginIDsFolders.getTableHeader().setVisible(false);
-        //        tabDNFolders.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        loginidFolders.add(tabLoginIDsFolders);
-        JButton btSelectDNFolder = new JButton(new AbstractAction("Select") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ArrayList<CfgFolder> findFolders = findFolders(CfgObjectType.CFGAgentLogin, theDialog, true);
-                if (findFolders != null) {
-                    tabLoginIDsFolders.setModel(new FoldersModel(findFolders));
-                }
-            }
-        });
-        loginidFolders.add(btSelectDNFolder);
-        topPan.add(loginidFolders);
+		loginidFolders = new JPanel();
+		loginidFolders.setLayout(new BoxLayout(loginidFolders, BoxLayout.PAGE_AXIS));
+		loginidFolders.setBorder(new TitledBorder("LoginID folders"));
+		tabLoginIDsFolders = new JTable();
+		tabLoginIDsFolders.getTableHeader().setVisible(false);
+		// tabDNFolders.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		loginidFolders.add(tabLoginIDsFolders);
+		JButton btSelectDNFolder = new JButton(new AbstractAction("Select") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ArrayList<CfgFolder> findFolders = findFolders(CfgObjectType.CFGAgentLogin, theDialog, true);
+				if (findFolders != null) {
+					tabLoginIDsFolders.setModel(new FoldersModel(findFolders));
+				}
+			}
+		});
+		loginidFolders.add(btSelectDNFolder);
+		topPan.add(loginidFolders);
 
-    }
+	}
 
-    private ArrayList<CfgFolder> lastSelectedFolders(JTable tab) {
-        TableModel model = tab.getModel();
-        if (model instanceof FoldersModel) {
-            return ((FoldersModel) model).getAllFolders();
-        }
-        return null;
-    }
+	private ArrayList<CfgFolder> lastSelectedFolders(JTable tab) {
+		TableModel model = tab.getModel();
+		if (model instanceof FoldersModel) {
+			return ((FoldersModel) model).getAllFolders();
+		}
+		return null;
+	}
 
-    public ArrayList<CfgFolder> lastSelectedLoginidFolders() {
-        return lastSelectedFolders(tabLoginIDsFolders);
+	public ArrayList<CfgFolder> lastSelectedLoginidFolders() {
+		return lastSelectedFolders(tabLoginIDsFolders);
 
-    }
+	}
 
-    public boolean shouldImportCSV(final ArrayList<String[]> loginIDs, boolean isImport) {
+	public boolean shouldImportCSV(final ArrayList<String[]> loginIDs, boolean isImport) {
 
-        modelLoginID.setRowCount(0);
+		modelLoginID.setRowCount(0);
 
-        loginIDs.forEach(entry -> modelLoginID.addRow(new Object[]{entry[0]}));
+		loginIDs.forEach(entry -> modelLoginID.addRow(new Object[] { entry[0] }));
 
-        loginidFolders.setVisible(isImport);
+		loginidFolders.setVisible(isImport);
 
-        topPan.invalidate();
+		topPan.invalidate();
 
-        StringBuilder title = new StringBuilder();
-        if (isImport) {
-            title.append("Do you want to check existense of agent login (total ").append(loginIDs.size()).append(")");
-        } else {
-            title.append("Do you want to import following agent login (total ").append(loginIDs.size()).append(")");
-        }
+		StringBuilder title = new StringBuilder();
+		if (isImport) {
+			title.append("Do you want to check existense of agent login (total ").append(loginIDs.size()).append(")");
+		} else {
+			title.append("Do you want to import following agent login (total ").append(loginIDs.size()).append(")");
+		}
 
-        Utils.ScreenInfo.CenterWindow(this);
-        showModal(topPan, title.toString());
+		Utils.ScreenInfo.CenterWindow(this);
+		showModal(topPan, title.toString());
 
-        return getDialogResult() == JOptionPane.OK_OPTION;
+		return getDialogResult() == JOptionPane.OK_OPTION;
 
-    }
+	}
 
-    public boolean shouldImportCSVCreateAdmin(final ArrayList<String[]> userNames, boolean isImport) {
+	public boolean shouldImportCSVCreateAdmin(final ArrayList<String[]> userNames, boolean isImport) {
 
-        modelLoginID.setRowCount(0);
+		modelLoginID.setRowCount(0);
 
-        userNames.forEach(entry
-                -> modelLoginID.addRow(new Object[]{entry[0]})
-        );
+		userNames.forEach(entry -> modelLoginID.addRow(new Object[] { entry[0] }));
 
-        loginidFolders.setVisible(isImport);
+		loginidFolders.setVisible(isImport);
 
-        topPan.invalidate();
+		topPan.invalidate();
 
-        StringBuilder title = new StringBuilder();
-        if (isImport) {
-            title.append("Do you want to check existense of usernames (total ").append(userNames.size()).append(")");
-        } else {
-            title.append("Do you want to create admin accounts based on agent accounts (total ").append(userNames.size()).append(")");
-        }
+		StringBuilder title = new StringBuilder();
+		if (isImport) {
+			title.append("Do you want to check existense of usernames (total ").append(userNames.size()).append(")");
+		} else {
+			title
+				.append("Do you want to create admin accounts based on agent accounts (total ")
+				.append(userNames.size())
+				.append(")");
+		}
 
-        Utils.ScreenInfo.CenterWindow(this);
-        showModal(topPan, title.toString());
+		Utils.ScreenInfo.CenterWindow(this);
+		showModal(topPan, title.toString());
 
-        return getDialogResult() == JOptionPane.OK_OPTION;
+		return getDialogResult() == JOptionPane.OK_OPTION;
 
-    }
+	}
 
 }

@@ -13,9 +13,9 @@ import com.genesyslab.platform.applicationblocks.com.CfgObject;
  */
 public interface ISearchNamedProperties {
 
-    String[] getNamedProperties(CfgObject obj);
+	String[] getNamedProperties(CfgObject obj);
 
-    String getName(CfgObject obj);
+	String getName(CfgObject obj);
 
-    String getShortPrint(CfgObject obj);
+	String getShortPrint(CfgObject obj);
 }

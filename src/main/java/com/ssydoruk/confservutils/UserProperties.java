@@ -11,37 +11,37 @@ package com.ssydoruk.confservutils;
  */
 class UserProperties {
 
-    public static String kvpToString(String _section, String _key, String _value) {
-        return "[" + _section + "]/\"" + _key + "\"=\'" + _value + "\'";
+	public static String kvpToString(String _section, String _key, String _value) {
+		return "[" + _section + "]/\"" + _key + "\"=\'" + _value + "\'";
 
-    }
+	}
 
-    private final String key;
-    private final String section;
-    private final String value;
+	private final String key;
+	private final String section;
+	private final String value;
 
-    public UserProperties(String _section, String _key, String _value) {
-        section = _section;
-        key = _key;
-        value = _value;
+	public UserProperties(String _section, String _key, String _value) {
+		section = _section;
+		key = _key;
+		value = _value;
 
-    }
+	}
 
-    @Override
-    public String toString() {
-        return kvpToString(section, key, value);
-    }
+	@Override
+	public String toString() {
+		return kvpToString(section, key, value);
+	}
 
-    public String getKey() {
-        return key;
-    }
+	public String getKey() {
+		return key;
+	}
 
-    public String getSection() {
-        return section;
-    }
+	public String getSection() {
+		return section;
+	}
 
-    public String getValue() {
-        return value;
-    }
+	public String getValue() {
+		return value;
+	}
 
 }

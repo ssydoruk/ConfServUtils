@@ -28,119 +28,121 @@ import javax.swing.table.AbstractTableModel;
  */
 abstract class CSVGeneralImportDialog extends Utils.InfoPanel {
 
-    protected final JDialog theDialog;
+	protected final JDialog theDialog;
 
-    private final ConfigServerManager cfg;
+	private final ConfigServerManager cfg;
 
-    protected ArrayList<CfgFolder> findFolders(CfgObjectType type, Window theParent, boolean multipleSelect) {
+	protected ArrayList<CfgFolder> findFolders(CfgObjectType type, Window theParent, boolean multipleSelect) {
 
-        FindObject objName;
+		FindObject objName;
 
-        objName = getObjName(theParent, CfgFolder.class.getSimpleName());
+		objName = getObjName(theParent, CfgFolder.class.getSimpleName());
 
-        if (objName == null) {
-            return null;
-        }
-        AbstractCollection<CfgFolder> findFolders = cfg.findFolders(objName, type);
-        if (findFolders != null) {
-            JTable tab = new JTable();
+		if (objName == null) {
+			return null;
+		}
+		AbstractCollection<CfgFolder> findFolders = cfg.findFolders(objName, type);
+		if (findFolders != null) {
+			JTable tab = new JTable();
 //            DefaultTableModel infoTableModel = new DefaultTableModel();
 //            infoTableModel.addColumn("Folders");
-            int grandTotal = 0;
-            int selectedRowIdx = -1;
-            InfoPanel p = null;
+			int grandTotal = 0;
+			int selectedRowIdx = -1;
+			InfoPanel p = null;
 
 //            for (CfgFolder findFolder : findFolders) {
 //                infoTableModel.addRow(new Object[]{findFolder});
 //                grandTotal++;
 //            }
 //        infoTableModel.addRow(new Object[]{"TOTAL(" + grandTotal + ")"});
-            tab.setModel(new FoldersModel(findFolders));
-            if (selectedRowIdx >= 0) {
-                ListSelectionModel selectionModel1 = tab.getSelectionModel();
-                selectionModel1.setSelectionInterval(selectedRowIdx, selectedRowIdx);
-            }
+			tab.setModel(new FoldersModel(findFolders));
+			if (selectedRowIdx >= 0) {
+				ListSelectionModel selectionModel1 = tab.getSelectionModel();
+				selectionModel1.setSelectionInterval(selectedRowIdx, selectedRowIdx);
+			}
 
-            String theTitle = "Select a folder (total " + findFolders.size() + ")";
+			String theTitle = "Select a folder (total " + findFolders.size() + ")";
 
-            JScrollPane jScrollPane = new JScrollPane(tab);
-            tab.getTableHeader().setVisible(false);
-            tab.setSelectionMode((multipleSelect) ? ListSelectionModel.MULTIPLE_INTERVAL_SELECTION : ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+			JScrollPane jScrollPane = new JScrollPane(tab);
+			tab.getTableHeader().setVisible(false);
+			tab
+				.setSelectionMode((multipleSelect) ? ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
+						: ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 
-            JPanel listPane = new JPanel(new BorderLayout(10, 20));
+			JPanel listPane = new JPanel(new BorderLayout(10, 20));
 
-            listPane.add(new JPanel(new BorderLayout()).add(jScrollPane));
+			listPane.add(new JPanel(new BorderLayout()).add(jScrollPane));
 
-            p = new InfoPanel(theParent, theTitle, listPane, JOptionPane.OK_CANCEL_OPTION);
+			p = new InfoPanel(theParent, theTitle, listPane, JOptionPane.OK_CANCEL_OPTION);
 
-            p.showModal();
-            if (p.getDialogResult() == JOptionPane.OK_OPTION) {
-                ArrayList<CfgFolder> ret = new ArrayList<>();
-                if (tab.getSelectedRowCount() > 0) {
-                    if (multipleSelect) {
-                        for (int selectedRow : tab.getSelectedRows()) {
-                            ret.add(((FoldersModel) tab.getModel()).getFolderAt(selectedRow));
-                        }
-                    } else {
-                        ret.add(((FoldersModel) tab.getModel()).getFolderAt(tab.getSelectedRow()));
-                    }
-                }
+			p.showModal();
+			if (p.getDialogResult() == JOptionPane.OK_OPTION) {
+				ArrayList<CfgFolder> ret = new ArrayList<>();
+				if (tab.getSelectedRowCount() > 0) {
+					if (multipleSelect) {
+						for (int selectedRow : tab.getSelectedRows()) {
+							ret.add(((FoldersModel) tab.getModel()).getFolderAt(selectedRow));
+						}
+					} else {
+						ret.add(((FoldersModel) tab.getModel()).getFolderAt(tab.getSelectedRow()));
+					}
+				}
 //apply filter
-                return ret;
-            }
+				return ret;
+			}
 
-        }
-        return null;
-    }
+		}
+		return null;
+	}
 
-    public CSVGeneralImportDialog(Window parent, ConfigServerManager _cfg) throws HeadlessException {
-        super(parent, JOptionPane.OK_CANCEL_OPTION);
-        cfg = _cfg;
-        this.theDialog = this;
-    }
+	public CSVGeneralImportDialog(Window parent, ConfigServerManager _cfg) throws HeadlessException {
+		super(parent, JOptionPane.OK_CANCEL_OPTION);
+		cfg = _cfg;
+		this.theDialog = this;
+	}
 
-    protected class FoldersModel extends AbstractTableModel {
+	protected class FoldersModel extends AbstractTableModel {
 
-        private final ArrayList<CfgFolder> folders;
+		private final ArrayList<CfgFolder> folders;
 
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return false; //To change body of generated methods, choose Tools | Templates.
-        }
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			return false; // To change body of generated methods, choose Tools | Templates.
+		}
 
-        public FoldersModel(AbstractCollection<CfgFolder> findFolders) {
-            this.folders = new ArrayList(findFolders);
-        }
+		public FoldersModel(AbstractCollection<CfgFolder> findFolders) {
+			this.folders = new ArrayList(findFolders);
+		}
 
-        @Override
-        public String getColumnName(int column) {
-            return "Folders"; //To change body of generated methods, choose Tools | Templates.
-        }
+		@Override
+		public String getColumnName(int column) {
+			return "Folders"; // To change body of generated methods, choose Tools | Templates.
+		}
 
-        @Override
-        public int getRowCount() {
-            return folders.size();
-        }
+		@Override
+		public int getRowCount() {
+			return folders.size();
+		}
 
-        @Override
-        public int getColumnCount() {
-            return 1;
-        }
+		@Override
+		public int getColumnCount() {
+			return 1;
+		}
 
-        @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            CfgFolder fld = folders.get(rowIndex);
-            return ConfigServerManager.getFolderFullName(fld);
-        }
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			CfgFolder fld = folders.get(rowIndex);
+			return ConfigServerManager.getFolderFullName(fld);
+		}
 
-        private CfgFolder getFolderAt(int selectedRow) {
-            return folders.get(selectedRow);
-        }
+		private CfgFolder getFolderAt(int selectedRow) {
+			return folders.get(selectedRow);
+		}
 
-        public ArrayList<CfgFolder> getAllFolders() {
-            return folders;
-        }
+		public ArrayList<CfgFolder> getAllFolders() {
+			return folders;
+		}
 
-    }
+	}
 
 }
