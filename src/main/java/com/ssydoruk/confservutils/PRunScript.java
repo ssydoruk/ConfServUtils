@@ -5,19 +5,23 @@
  */
 package com.ssydoruk.confservutils;
 
-import Utils.FileWatcher;
-import com.ssydoruk.confservutils.DialogRunScript.IDocUpdated;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import org.apache.logging.log4j.LogManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+
+import com.ssydoruk.confservutils.DialogRunScript.IDocUpdated;
+
+import Utils.FileWatcher;
 
 /**
  *

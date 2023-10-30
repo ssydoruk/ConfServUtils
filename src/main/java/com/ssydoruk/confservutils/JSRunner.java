@@ -5,19 +5,29 @@
  */
 package com.ssydoruk.confservutils;
 
-import java.awt.*;
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.graalvm.polyglot.*;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.Source;
+import org.graalvm.polyglot.Value;
+
+import lombok.Synchronized;
 
 /**
  * @author stepan_sydoruk
@@ -370,11 +380,13 @@ public class JSRunner {
 		private final Level logLevel;
 		private IOutputHook readerHook = null;
 
-		synchronized public IOutputHook getReaderHook() {
+		@Synchronized
+		public IOutputHook getReaderHook() {
 			return readerHook;
 		}
 
-		synchronized public void setReaderHook(IOutputHook readerHook) {
+		@Synchronized
+		public void setReaderHook(IOutputHook readerHook) {
 //            System.out.println("setReaderHook " + (readerHook != null));
 			this.readerHook = readerHook;
 		}
