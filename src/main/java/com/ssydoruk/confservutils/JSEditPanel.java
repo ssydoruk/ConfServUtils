@@ -29,7 +29,7 @@ public class JSEditPanel extends javax.swing.JPanel {
 		loadFile(new File("/Users/stepan_sydoruk/src/ConfServUtils/jsTest.js"));
 	}
 
-	static private JFileChooser chooser = null;
+	private ICSVFileChooser chooser = CICSVFileChooser.of();
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -117,15 +117,10 @@ public class JSEditPanel extends javax.swing.JPanel {
 	// End of variables declaration//GEN-END:variables
 
 	private JFileChooser getFileChooser() {
-		if (chooser == null) {
-			chooser = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("JS files", "js");
-//            chooser.setCurrentDirectory(new File("."));
-			chooser.setFileFilter(filter);
-			chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-			chooser.setMultiSelectionEnabled(false);
+		chooser.dlg().setFileFilter(new FileNameExtensionFilter("JS files", "js"));
+		chooser.dlg().setDialogType(JFileChooser.OPEN_DIALOG);
+		chooser.dlg().setMultiSelectionEnabled(false);
 
-		}
-		return chooser;
+		return chooser.dlg();
 	}
 }

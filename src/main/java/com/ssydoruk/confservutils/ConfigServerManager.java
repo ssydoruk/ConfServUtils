@@ -448,7 +448,7 @@ public class ConfigServerManager {
 
 		Collection<T> cfgObjs;
 		if (!refresh && (prevQueries.containsKey(qToString) && prevQueries.get(qToString) != null)) {
-			cfgObjs = prevQueries.get(qToString);
+			cfgObjs = (Collection<T>) prevQueries.get(qToString);
 		} else {
 			Main.logger.debug("executing the request " + q);
 			cfgObjs = service.retrieveMultipleObjects(cls, q);

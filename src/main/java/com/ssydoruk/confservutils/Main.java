@@ -40,11 +40,20 @@ import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFact
 import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.RootLoggerComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
+import org.immutables.value.Value;
 
 /**
  * @author stepan_sydoruk
  */
 public class Main {
+
+	@Value.Style(
+			typeAbstract = {"Abstract*"}, // 'Abstract' prefix will be detected and trimmed
+			typeImmutable = "C*", // No prefix or suffix for generated immutable type
+			visibility = Value.Style.ImplementationVisibility.PUBLIC, // Generated class will be always public
+			defaults = @Value.Immutable(copy = false, builder = false, singleton = true)) // Disable copy methods by default
+	public @interface MySingleton {}
+
 
 	private static Options options;
 	private static Option optConfigProfile;
