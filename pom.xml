@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>com.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
-			<version>5.7.1</version>
+			<version>5.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -104,10 +104,11 @@
 			<artifactId>dnsjava</artifactId>
 			<version>3.5.2</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.jidesoft</groupId>
+			<groupId>com.formdev</groupId>
 			<artifactId>jide-oss</artifactId>
-			<version>3.6.18</version>
+			<version>3.7.14</version>
 		</dependency>
 		<dependency>
 			<groupId>com.genesyslab.platform</groupId>
