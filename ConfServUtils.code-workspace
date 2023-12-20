@@ -11,13 +11,13 @@
 				"type": "java",
 				"name": "Attach to Remote Program",
 				"request": "attach",
-				"hostName": "localhost",
+				"hostName": "192.168.206.1",
 				"port": "8000"
 			}
 
 		]
 	},
 	"settings": {
-		"java.configuration.updateBuildConfiguration": "interactive"
+		"java.configuration.updateBuildConfiguration": "automatic"
 	}
 }
