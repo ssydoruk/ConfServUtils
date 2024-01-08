@@ -16,6 +16,24 @@ function getFolderTypes(type) {
   return ret;
 }
 
+function hasOwnPropertyCaseInsensitive(obj, property) {
+  var props = [];
+  for (var i in obj) if (obj.hasOwnProperty(i)) props.push(i);
+  var prop;
+  while (prop = props.pop()) if (prop.toLowerCase() === property.toLowerCase()) return true;
+  return false;
+}
+
+
+function getOwnPropertyCaseInsensitive(obj, property) {
+  var props = [];
+  for (var i in obj) if (obj.hasOwnProperty(i)) props.push(i);
+  var prop;
+  while (prop = props.pop()) if (prop.toLowerCase() === property.toLowerCase()) return obj[prop];
+  return null;
+}
+
+
 /**
  * Checks if DN dnDBID is linked on any place
  * @param {int} dnDBID 
