@@ -10,6 +10,7 @@ try {
     var objs = objectDBID_props("CfgApplication");
     var hosts = objectDBID_props("CfgHost");
 
+    console.log('host,application,logpath')
     for (const dbid in objs) {
         var obj = JSON.parse(CS.objToJson(objs[dbid]));
         var hostDBID = getAppHostDBID(obj);
@@ -18,15 +19,18 @@ try {
             //console.log(JSON.stringify(obj)+'\n'+JSON.stringify(hostObj)+'--->');
             // next conditions checks for non-windows host
             if (hostObj['attributes']['OSinfo'].OStype != null &&
-            hostObj['attributes'].state != 2  // not disabled
-            && !hostObj['attributes']['OSinfo'].OStype.toLowerCase().includes('windows') // not Windows host
+                hostObj['attributes'].state != 2  // not disabled
+                && !hostObj['attributes']['OSinfo'].OStype.toLowerCase().includes('windows') // not Windows host
             ) {
-                console.log(hostObj['attributes']['name'] + ',' + obj['attributes']['name']);
-                if( obj['attributes'].hasOwnProperty('options') ) {
-                    var v = getOwnPropertyCaseInsensitive(obj['attributes']['options'], 'log');
-                    if( v )
-                       console.log('\t'+ JSON.stringify(v));
+                var all = undefined;
+                var v = undefined;
+                if (obj['attributes'].hasOwnProperty('options')) {
+                    v = getOwnPropertyCaseInsensitive(obj['attributes']['options'], 'log');
+                    all = getOwnPropertyCaseInsensitive(v, 'all');
                 }
+                console.log('\"' + hostObj['attributes']['name'] + '\"' + ',' + '\"' + obj['attributes']['name'] + '\"' + ((all) ? ',\"' + all + '\"' : ',\"\"'));
+                // if (v)
+                //     console.log('\t' + JSON.stringify(v));
             }
         }
 
