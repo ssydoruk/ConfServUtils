@@ -172,28 +172,53 @@
 			<artifactId>jaxb-api</artifactId>
 		</dependency>
 
+
+
 		<dependency>
 			<groupId>org.graalvm.sdk</groupId>
 			<artifactId>graal-sdk</artifactId>
-			<version>22.3.4</version>
+			<version>23.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.graalvm.tools</groupId>
 			<artifactId>chromeinspector</artifactId>
-			<version>23.0.2</version>
+			<version>23.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.graalvm.truffle</groupId>
 			<artifactId>truffle-api</artifactId>
-			<version>22.3.4</version>
+			<version>23.1.2</version>
 			<type>jar</type>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.graalvm.js/js -->
 		<dependency>
 			<groupId>org.graalvm.js</groupId>
 			<artifactId>js</artifactId>
-			<version>22.3.4</version>
+			<version>23.0.3</version>
+		</dependency>		
+
+
+		<!-- <dependency>
+			<groupId>org.graalvm.sdk</groupId>
+			<artifactId>graal-sdk</artifactId>
+			<version>22.3.5</version>
 		</dependency>
+		<dependency>
+			<groupId>org.graalvm.tools</groupId>
+			<artifactId>chromeinspector</artifactId>
+			<version>22.3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.truffle</groupId>
+			<artifactId>truffle-api</artifactId>
+			<version>22.3.5</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<version>22.3.5</version>
+		</dependency> -->
+
 		<dependency>
 			<groupId>com.genesyslab.platform</groupId>
 			<artifactId>jackson2-module</artifactId>
@@ -256,6 +281,9 @@
 				<configuration>
 					<debug>true</debug>
 					<compilerArgs>
+						<!-- <arg>-XX:+UnlockExperimentalVMOptions</arg>
+						<arg>-XX:+EnableJVMCI</arg>
+						<arg>-XX:+UseJVMCICompiler</arg> -->
 						<!--                        <arg>-verbose</arg>-->
 						<!--                        <arg>-Xlint:all</arg>-->
 						<!--                        <arg>-Xlint:unchecked</arg>-->

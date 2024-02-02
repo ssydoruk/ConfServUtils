@@ -10,7 +10,7 @@ try {
     var objs = objectDBID_props("CfgApplication");
     var hosts = objectDBID_props("CfgHost");
 
-    console.log('host,application,logpath')
+    console.log('host,application,logpath,apptype')
     for (const dbid in objs) {
         var obj = JSON.parse(CS.objToJson(objs[dbid]));
         var hostDBID = getAppHostDBID(obj);
@@ -28,9 +28,12 @@ try {
                     v = getOwnPropertyCaseInsensitive(obj['attributes']['options'], 'log');
                     all = getOwnPropertyCaseInsensitive(v, 'all');
                 }
-                console.log('\"' + hostObj['attributes']['name'] + '\"' + ',' + '\"' + obj['attributes']['name'] + '\"' + ((all) ? ',\"' + all + '\"' : ',\"\"'));
-                // if (v)
-                //     console.log('\t' + JSON.stringify(v));
+                if (all) {
+                    console.log('\"' + hostObj['attributes']['name'] + '\"' + ',' 
+                    + '\"' + obj['attributes']['name'] + '\",' 
+                    + ((all) ? '\"' + all + '\"' : '\"\"')+','
+                    +CS.enumToString("CfgAppType", obj.attributes.type));
+                }
             }
         }
 

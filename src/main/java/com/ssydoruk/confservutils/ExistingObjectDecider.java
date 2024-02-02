@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -195,7 +196,7 @@ public class ExistingObjectDecider {
 //        ScreenInfo.CenterWindow(allFiles);
 			setModal(true);
 			setSize(850, 700);
-			ScreenInfo.setVisible(getParent(), this, true);
+			ScreenInfo.setVisible(SwingUtilities.getWindowAncestor(getParent()), this, true);
 		}
 
 		public void showModal(String existingDesc, String dependentDesc) {
