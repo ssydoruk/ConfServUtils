@@ -19,7 +19,7 @@
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-bom</artifactId>
-				<version>2.3.1</version>
+				<version>4.0.5</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -37,24 +37,24 @@
 		<dependency>
 			<groupId>org.immutables</groupId>
 			<artifactId>value</artifactId>
-			<version>2.10.0</version>
+			<version>2.10.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.immutables</groupId>
 			<artifactId>builder</artifactId>
-			<version>2.10.0</version>
+			<version>2.10.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.22.0</version>
+			<version>2.23.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.22.0</version>
+			<version>2.23.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencsv</groupId>
@@ -137,22 +137,22 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-transport</artifactId>
-			<version>4.1.104.Final</version>
+			<version>4.1.107.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler-proxy</artifactId>
-			<version>4.1.104.Final</version>
+			<version>4.1.107.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-tcnative-boringssl-static</artifactId>
-			<version>2.0.62.Final</version>
+			<version>2.0.65.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-tcnative</artifactId>
-			<version>2.0.62.Final</version>
+			<version>2.0.65.Final</version>
 			<classifier>osx-x86_64</classifier>
 		</dependency>
 		<dependency>
@@ -165,11 +165,13 @@
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
+                        <version>4.0.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
+                        <version>2.3.1</version>
 		</dependency>
 
 
@@ -228,13 +230,13 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.16.0</version>
+			<version>2.17.0</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>com.fifesoft</groupId>
 			<artifactId>rsyntaxtextarea</artifactId>
-			<version>3.3.4</version>
+			<version>3.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -244,7 +246,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.17.1</version>
+			<version>1.17.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.netbeans.external</groupId>
@@ -277,7 +279,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
+				<version>3.12.1</version>
 				<configuration>
 					<debug>true</debug>
 					<compilerArgs>
