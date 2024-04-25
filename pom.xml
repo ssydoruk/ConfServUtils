@@ -261,7 +261,7 @@
 				<configuration>
 					<showConsoleWindow>true</showConsoleWindow>
 					<assembleDirectory>${installdir}</assembleDirectory>
-					<useWildcardClassPath>true</useWildcardClassPath>
+					<useWildcardClassPath>false</useWildcardClassPath>
 					<repositoryLayout>flat</repositoryLayout>
 					<repositoryName>lib</repositoryName>
 					<tempDirectory>tmp</tempDirectory>
