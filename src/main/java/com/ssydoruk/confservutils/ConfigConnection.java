@@ -67,7 +67,7 @@ public class ConfigConnection {
 		protocol.setUseLocalization(false);
 
 		IConfService service = ConfServiceFactory.createConfService(protocol);
-		service.getProtocol().setTimeout(120000);
+		service.getProtocol().setTimeout(3600000);
 
 //        service.getProtocol().setMessageHandler(new MessageHandler() {
 //            @Override

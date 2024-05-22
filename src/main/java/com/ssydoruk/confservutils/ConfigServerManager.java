@@ -451,6 +451,7 @@ public class ConfigServerManager {
 			cfgObjs = (Collection<T>) prevQueries.get(qToString);
 		} else {
 			Main.logger.debug("executing the request " + q);
+			service.getProtocol().setTimeout(3600000);
 			cfgObjs = service.retrieveMultipleObjects(cls, q);
 			Main.logger.debug("retrieved " + ((cfgObjs == null) ? 0 : cfgObjs.size()) + " objects");
 //            Collections.sort(cfgObjs);
