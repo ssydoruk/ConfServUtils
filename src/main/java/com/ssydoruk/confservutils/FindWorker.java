@@ -201,7 +201,7 @@ public class FindWorker {
 									}
 								}
 							} else {
-								logger.info("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
+								logger.debug("value [" + value + "] is of type " + value.getClass() + " obj: " + cfgObj);
 								// if (ptVal != null) {
 								// if (matching(ptVal, value.toString())) {
 								// valMatched = true; // !!!!!
