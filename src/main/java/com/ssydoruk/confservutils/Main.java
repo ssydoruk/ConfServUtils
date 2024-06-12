@@ -21,6 +21,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -47,13 +49,13 @@ import org.immutables.value.Value;
  */
 public class Main {
 
-	@Value.Style(
-			typeAbstract = {"Abstract*"}, // 'Abstract' prefix will be detected and trimmed
+	@Value.Style(typeAbstract = { "Abstract*" }, // 'Abstract' prefix will be detected and trimmed
 			typeImmutable = "C*", // No prefix or suffix for generated immutable type
 			visibility = Value.Style.ImplementationVisibility.PUBLIC, // Generated class will be always public
-			defaults = @Value.Immutable(copy = false, builder = false, singleton = true)) // Disable copy methods by default
-	public @interface MySingleton {}
-
+			defaults = @Value.Immutable(copy = false, builder = false, singleton = true)) // Disable copy methods by
+																							// default
+	public @interface MySingleton {
+	}
 
 	private static Options options;
 	private static Option optConfigProfile;
@@ -76,24 +78,24 @@ public class Main {
 		options = new Options();
 
 		optConfigProfile = Option
-			.builder("f")
-			.hasArg(true)
-			.required(false)
-			.desc("Path to GUI configured storage (JSON)." + "If specified, GUI configurator will be called")
-			.longOpt("gui-profile")
-			.build();
+				.builder("f")
+				.hasArg(true)
+				.required(false)
+				.desc("Path to GUI configured storage (JSON)." + "If specified, GUI configurator will be called")
+				.longOpt("gui-profile")
+				.build();
 		options.addOption(optConfigProfile);
 
 		optHelp = Option.builder("h").hasArg(false).required(false).desc("Show help and exit").longOpt("help").build();
 		options.addOption(optHelp);
 
 		optLoaderLog = Option
-			.builder()
-			.hasArg(true)
-			.required(false)
-			.desc("Path to utility log directory and/or file")
-			.longOpt("log-file")
-			.build();
+				.builder()
+				.hasArg(true)
+				.required(false)
+				.desc("Path to utility log directory and/or file")
+				.longOpt("log-file")
+				.build();
 		options.addOption(optLoaderLog);
 
 		CommandLineParser parser = new DefaultParser();
@@ -117,6 +119,14 @@ public class Main {
 
 		if (sGUIProfile != null && !sGUIProfile.isEmpty()) {
 			try {
+				try {
+					UIManager.setLookAndFeel(
+							UIManager.getSystemLookAndFeelClassName());
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+						| UnsupportedLookAndFeelException ex) {
+					logger.fatal("Cannot load look and feel", ex);
+				}
+
 				AppForm frm = new AppForm();
 				frm.setProfile(sGUIProfile);
 				if (Main.isDebug()) {
@@ -156,15 +166,15 @@ public class Main {
 	}
 
 	private static void initLogger(String sLoaderLog1) {
-//        if (sLoaderLog1 == null || sLoaderLog1.isEmpty()) {
-//            sLoaderLog1 = "./applog";
-//        }
-//        System.setProperty("logPath", sLoaderLog1);
+		// if (sLoaderLog1 == null || sLoaderLog1.isEmpty()) {
+		// sLoaderLog1 = "./applog";
+		// }
+		// System.setProperty("logPath", sLoaderLog1);
 
 		System.setProperty("log4j2.saveDirectory", "true");
 		String s = System.getProperty("log4j.configurationFile");
 		if (s != null && !s.isEmpty()) {
-//            s = System.getProperty("program.name") + ".xml";
+			// s = System.getProperty("program.name") + ".xml";
 			logger = LogManager.getLogger();
 		} else {
 
@@ -175,21 +185,21 @@ public class Main {
 			AppenderComponentBuilder console = builder.newAppender("stdout", "Console");
 
 			ComponentBuilder triggeringPolicies = builder
-				.newComponent("Policies")
-				.addComponent(builder.newComponent("OnStartupTriggeringPolicy"))
-				.addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "20M"));
+					.newComponent("Policies")
+					.addComponent(builder.newComponent("OnStartupTriggeringPolicy"))
+					.addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "20M"));
 
 			AppenderComponentBuilder rollingFile = builder.newAppender("rolling", "RollingFile");
 			rollingFile.addAttribute("fileName", "${LogFileName}.log");
 			rollingFile.addAttribute("filePattern", "${LogFileName}-%d{yyyyMMdd-HHmmss_SSS}.log");
 			rollingFile.addComponent(triggeringPolicies);
 
-//        FilterComponentBuilder flow = builder.newFilter(
-//                "MarkerFilter",
-//                Filter.Result.ACCEPT,
-//                Filter.Result.DENY);
-//        flow.addAttribute("marker", "FLOW");
-//        console.add(flow);
+			// FilterComponentBuilder flow = builder.newFilter(
+			// "MarkerFilter",
+			// Filter.Result.ACCEPT,
+			// Filter.Result.DENY);
+			// flow.addAttribute("marker", "FLOW");
+			// console.add(flow);
 			LayoutComponentBuilder standard = builder.newLayout("PatternLayout");
 			standard.addAttribute("pattern", "%d %5.5p %30.30C [%t] %m%n");
 
@@ -198,9 +208,10 @@ public class Main {
 
 			builder.add(console);
 			builder.add(rollingFile);
-//        Appender appe = MyCustomAppenderImpl.createAppender("appe1", null, null, null);
-//        AppenderComponentBuilder newAppender = builder.newAppender("appe", "appe1");
-//        builder.add(appe);
+			// Appender appe = MyCustomAppenderImpl.createAppender("appe1", null, null,
+			// null);
+			// AppenderComponentBuilder newAppender = builder.newAppender("appe", "appe1");
+			// builder.add(appe);
 
 			RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.DEBUG);
 			rootLogger.add(builder.newAppenderRef("stdout"));
@@ -208,7 +219,7 @@ public class Main {
 			builder.add(rootLogger);
 
 			Configurator.initialize(builder.build());
-//            System.out.println(builder.toXmlConfiguration());
+			// System.out.println(builder.toXmlConfiguration());
 			logger = LogManager.getLogger();
 		}
 		logger.info("log initialized");
@@ -268,7 +279,7 @@ public class Main {
 			SearchableUtils.installSearchable(list);
 			model.insertElementAt(CheckBoxList.ALL_ENTRY, 0);
 
-//            list.setSelectedIndex(0);
+			// list.setSelectedIndex(0);
 			list.setEnabled(true);
 		}
 
