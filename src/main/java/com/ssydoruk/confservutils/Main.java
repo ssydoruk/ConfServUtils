@@ -104,7 +104,7 @@ public class Main {
 		try {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
-			logger.error(e);
+			System.out.println("Exception: "+ e.getMessage());
 			showHelpExit(e.getMessage(), options);
 		}
 
@@ -153,7 +153,10 @@ public class Main {
 
 	private static void showHelpExit(String msg, Options options) {
 		if (msg != null && !msg.isEmpty()) {
-			logger.error(msg);
+                        if(logger!=null)
+                            logger.error(msg);
+                        else
+                            System.out.println(msg);
 		}
 		showHelpExit(options);
 	}
