@@ -14,6 +14,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/jasypt/jasypt/1.9.3/jasypt-1.9.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-lang3/3.14.0/commons-lang3-3.14.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-cli/commons-cli/1.6.0/commons-cli-1.6.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/genesyslab/platform/comappblock/900.10.6/comappblock-900.10.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/genesyslab/platform/system/900.10.6/system-900.10.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/genesyslab/platform/protocol/900.10.6/protocol-900.10.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/genesyslab/platform/kvlists/900.10.6/kvlists-900.10.6.jar" enabled="true" runInBatchMode="false"/>
@@ -23,6 +24,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/dnsjava/dnsjava/3.6.1/dnsjava-3.6.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/genesyslab/platform/commons/900.10.6/commons-900.10.6.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/genesyslab/platform/commonsappblock/900.10.6/commonsappblock-900.10.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/netty/netty-transport/4.1.104.Final/netty-transport-4.1.104.Final.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/netty/netty-common/4.1.104.Final/netty-common-4.1.104.Final.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/netty/netty-buffer/4.1.104.Final/netty-buffer-4.1.104.Final.jar" enabled="true" runInBatchMode="false"/>
@@ -41,6 +43,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/io/netty/netty-tcnative-boringssl-static/2.0.62.Final/netty-tcnative-boringssl-static-2.0.62.Final-osx-aarch_64.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/netty/netty-tcnative-boringssl-static/2.0.62.Final/netty-tcnative-boringssl-static-2.0.62.Final-windows-x86_64.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/netty/netty-tcnative/2.0.62.Final/netty-tcnative-2.0.62.Final-osx-x86_64.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/mycompany/Utils/1.0/Utils-1.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-compress/1.26.1/commons-compress-1.26.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-codec/commons-codec/1.16.1/commons-codec-1.16.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/sshd/sshd-core/2.12.1/sshd-core-2.12.1.jar" enabled="true" runInBatchMode="false"/>

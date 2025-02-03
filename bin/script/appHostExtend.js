@@ -12,27 +12,34 @@ try {
 
     console.log('host,application,logpath,apptype')
     for (const dbid in objs) {
+        if (objs[dbid] == undefined)
+            continue;
         var obj = JSON.parse(CS.objToJson(objs[dbid]));
         var hostDBID = getAppHostDBID(obj);
-        if (hostDBID != null) {
+        if (hostDBID != null && hostDBID != undefined) {
             var hostObj = JSON.parse(CS.objToJson(hosts[hostDBID]));
-            //console.log(JSON.stringify(obj)+'\n'+JSON.stringify(hostObj)+'--->');
-            // next conditions checks for non-windows host
-            if (hostObj['attributes']['OSinfo'].OStype != null &&
-                hostObj['attributes'].state != 2  // not disabled
-                && !hostObj['attributes']['OSinfo'].OStype.toLowerCase().includes('windows') // not Windows host
-            ) {
-                var all = undefined;
-                var v = undefined;
-                if (obj['attributes'].hasOwnProperty('options')) {
-                    v = getOwnPropertyCaseInsensitive(obj['attributes']['options'], 'log');
-                    all = getOwnPropertyCaseInsensitive(v, 'all');
-                }
-                if (all) {
-                    console.log('\"' + hostObj['attributes']['name'] + '\"' + ',' 
-                    + '\"' + obj['attributes']['name'] + '\",' 
-                    + ((all) ? '\"' + all + '\"' : '\"\"')+','
-                    +CS.enumToString("CfgAppType", obj.attributes.type));
+            if (hostObj != null && hostObj != undefined && !isEmpty(hostObj)) {
+                // console.log('!!! DEBUG !!!' + JSON.stringify(obj) + '!!!' + JSON.stringify(hostObj) + '--->');
+                // next conditions checks for non-windows host
+                if (hostObj['attributes']['OSinfo'].OStype != null
+                    &&
+                    hostObj['attributes'].state != 2  // not disabled
+                    && !hostObj['attributes']['OSinfo'].OStype.toLowerCase().includes('windows') // not Windows host
+                ) {
+                    var all = undefined;
+                    var v = undefined;
+                    if (obj['attributes'].hasOwnProperty('options')) {
+                        v = getOwnPropertyCaseInsensitive(obj['attributes']['options'], 'log');
+                        all = getOwnPropertyCaseInsensitive(v, 'all');
+                    }
+                    if (all
+                        //  && obj['attributes']['name'].search(/_AC_.+GRE_/) >= 0
+                    ) {
+                        console.log('\"' + hostObj['attributes']['name'] + '\"' + ','
+                            + '\"' + obj['attributes']['name'] + '\",'
+                            + ((all) ? '\"' + all + '\"' : '\"\"') + ','
+                            + CS.enumToString("CfgAppType", obj.attributes.type));
+                    }
                 }
             }
         }

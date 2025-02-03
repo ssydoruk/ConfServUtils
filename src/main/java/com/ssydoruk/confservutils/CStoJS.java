@@ -595,6 +595,9 @@ public class CStoJS {
 	}
 
 	private JsonObject cfgObjectToJson(CfgObject person) throws ClassNotFoundException {
+                if( person == null ){
+                    return new JsonObject();
+                }
 		CfgDescriptionClass metaData = person.getMetaData();
 		ConfObjectBase rawObjectData = person.getRawObjectData();
 
