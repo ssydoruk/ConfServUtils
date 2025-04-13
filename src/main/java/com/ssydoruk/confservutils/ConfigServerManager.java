@@ -409,8 +409,10 @@ public class ConfigServerManager {
 		}
 		parentForm.requestOutput("connecting...\n", false);
 
-		return service = ConfigConnection
+		service = ConfigConnection
 			.initializeConfigService(confServ.getApp(), confServ.getHost(), confServ.getPortInt(), user, string);
+                service.getProtocol().setTimeout(3600000000l);
+                return service;
 
 	}
 
@@ -451,8 +453,8 @@ public class ConfigServerManager {
 			cfgObjs = (Collection<T>) prevQueries.get(qToString);
 		} else {
 			Main.logger.debug("executing the request " + q);
-			service.getProtocol().setTimeout(Channel.INFINITE_TIMEOUT);
-			cfgObjs = service.retrieveMultipleObjects(cls, q);
+//			service.getProtocol().setTimeout(360000000l);
+			cfgObjs = service.retrieveMultipleObjects(cls, q, 360000000l);
 			Main.logger.debug("retrieved " + ((cfgObjs == null) ? 0 : cfgObjs.size()) + " objects");
 //            Collections.sort(cfgObjs);
 			prevQueries.put(qToString, cfgObjs);

@@ -53,8 +53,8 @@ public class ConfigConnection {
 
 		PropertyConfiguration conf = new PropertyConfiguration();
 		conf.setUseAddp(true);
-		conf.setAddpClientTimeout(30);
-		conf.setAddpServerTimeout(30);
+		conf.setAddpClientTimeout(3600);
+		conf.setAddpServerTimeout(3600);
 		conf.setAddpTrace("both");
 
 		Endpoint cfgServerEndpoint = new Endpoint(cfgsrvEndpointName, cfgsrvHost, cfgsrvPort, conf);
@@ -65,9 +65,10 @@ public class ConfigConnection {
 		protocol.setUserName(username);
 		protocol.setUserPassword(password);
 		protocol.setUseLocalization(false);
+                protocol.setTimeout(3600000000l);
 
 		IConfService service = ConfServiceFactory.createConfService(protocol);
-		service.getProtocol().setTimeout(Channel.INFINITE_TIMEOUT);
+//		service.getProtocol().setTimeout(3600000000l);
 
 //        service.getProtocol().setMessageHandler(new MessageHandler() {
 //            @Override
