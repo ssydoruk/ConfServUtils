@@ -49,12 +49,12 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.23.1</version>
+			<version>2.24.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.23.1</version>
+			<version>2.24.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.opencsv</groupId>
@@ -121,7 +121,7 @@
 		<dependency>
 			<groupId>dnsjava</groupId>
 			<artifactId>dnsjava</artifactId>
-			<version>3.5.3</version>
+            <version>3.6.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.genesyslab.platform</groupId>
